@@ -10,14 +10,16 @@ route to HTML at build time; Pages serves the files.
 ## Commands
 
 ```bash
-npm run dev      # vite dev server
-npm run build    # -> .output/public (prerendered HTML + hashed assets)
-npm run preview  # serve the build locally on 127.0.0.1
-npm test         # build, then static and browser interaction checks
-npm run parity   # build, then pixel-diff against a baseline
-npm run shots    # Playwright screenshots -> dist/shots/
-npm run content  # fixtures -> src/generated (runs as part of build)
-npm run convert  # one-time import from the old yeet seed dump
+npm run dev        # vite dev server
+npm run build      # -> .output/public (prerendered HTML + hashed assets)
+npm run serve      # preview the built site at 127.0.0.1:4321, as Pages serves it
+npm test           # build, then static + interaction + guard self-tests
+npm run typecheck  # tsc --noEmit (also runs inside build)
+npm run classes    # class guard alone (also runs inside build)
+npm run parity     # build, then pixel-diff against a baseline
+npm run shots      # Playwright screenshots -> dist/shots/
+npm run content    # fixtures -> src/generated (runs as part of build)
+npm run convert    # one-time import from the old yeet seed dump
 ```
 
 ## URLs
@@ -61,6 +63,33 @@ similar. Each component names its source at the top.
 | `lib/seo.ts` | `platform/L1/seo.ts` |
 | the recipe JSON-LD | `features/recipes/components/recipe-json-ld.tsx` |
 
+### Only classes the original site used exist
+
+There is **no Tailwind compiler in this project**. `global.css` is a finished
+build, so a utility the original site never used does not exist in it — and
+using one fails silently. Nothing errors; the element is simply unstyled.
+
+This has shipped twice. `lg:flex lg:gap-10` on the search results row left it a
+plain block, so the filter sidebar stacked *above* the results on desktop
+instead of beside them. `mt-14` on a browse section was dead from the day it was
+written. Neither produced a warning.
+
+`npm run classes` (and every `npm run build`) fails on any class the stylesheet
+does not define. Before reaching for a utility, check it exists:
+
+```bash
+node scripts/has-class.mjs 'lg:flex' 'mt-12' 'w-[260px]'
+#   MISSING  lg:flex
+#   PRESENT  mt-12
+#   PRESENT  w-[260px]
+```
+
+If a class is missing, the fix is to use one the original used — not to
+hand-write CSS, which is how a design drifts. `test/check-classes.test.mjs`
+covers the guard itself, because an earlier version of it passed clean while
+`lg:flex` sat in a one-line constant: a guard that silently passes is worse
+than none.
+
 `format.ts`'s `humanizeMinutes` and `formatYield` are exact ports of the
 original `formatTime` / `formatYield`; keep them byte-compatible or card and
 header text will drift. `formatTime` keeps minutes alongside days
@@ -80,8 +109,8 @@ cd /tmp/oldengine && npm install && npm run build:web && node test/shots.mjs --w
 
 Two departures from the original, both deliberate:
 
-- **Three of twelve recipes have no photo** — american-buttercream,
-  vanilla-cupcakes, classic-baked-mac-and-cheese.
+- **Two of twelve recipes have no photo** — american-buttercream and
+  classic-baked-mac-and-cheese.
   Their images died with the S3 bucket, so those cards render the original's
   `UtensilsCrossed` fallback, which is what the real site showed for an
   imageless recipe. They also emit no JSON-LD `image` and so will not qualify
@@ -101,7 +130,7 @@ split two ways on purpose:
   eleven.
 
 Every route is then prerendered by `scripts/prerender.mjs`, using the explicit
-path list in `src/lib/paths.ts`. TanStack Start's built-in prerender path starts
+path list in `site.config.mjs`. TanStack Start's built-in prerender path starts
 a Vite/Nitro preview server and waits on Nitro's random-port probe; that probe
 can fail in restricted loopback environments even when the generated server is
 healthy. The local script keeps the route list obvious, binds the server to
@@ -118,10 +147,10 @@ src/lib/categories.ts   browse categories (first 8 mirror the original home grid
 src/lib/model.ts        facets, filtering, search
 src/lib/format.ts       times, yields, labels
 src/lib/seo.ts          head metadata
-src/lib/paths.ts        the prerender list and canonical origin
 src/components/         icons, layout, home, recipe, search, palette
 src/routes/             file-based routes
 src/styles/global.css   the original production Tailwind build
+site.config.mjs         the canonical origin and the prerender path list
 ```
 
 ### Adjacent JSX expressions split text nodes
@@ -147,32 +176,78 @@ schema text drift.
 
 ## Deploying
 
-Cloudflare Pages, project `eatyeet`, which also hosts the domain's DNS.
+Cloudflare Pages, project `eatyeet`, which also serves the domain's DNS.
+This section is the only deployment runbook — there is no second copy to drift.
+
+### Verify, then ship
 
 ```bash
-npm run build
-doppler run -p yeet -c dev -- npx wrangler pages deploy .output/public --project-name eatyeet
+npm test     # build + 46 static + 37 interaction + 13 guard self-tests
+npm run serve   # preview the exact bytes Pages will serve, at :4321
+doppler run -p yeet -c dev -- \
+  npx wrangler pages deploy .output/public --project-name eatyeet
 ```
 
+`npm test` runs `npm run build` first, so a passing test run means the artifact
+in `.output/public` is the one that was tested. Deploy that directory; never a
+directory built by some other command.
+
+### What the build does
+
+`npm run build` runs five steps, in order, and any one of them failing stops it:
+
+| Step | Why it can fail the build |
+|---|---|
+| `scripts/build-content.mjs` | fixtures → `src/generated` (index + per-recipe chunks) |
+| `scripts/check-classes.mjs` | a class not in the compiled stylesheet — see below |
+| `tsc --noEmit` | type errors |
+| `vite build` | bundling |
+| `scripts/prerender.mjs` | renders every path in `site.config.mjs` to HTML |
+| `scripts/build-seo.mjs` | writes `sitemap.xml`, `robots.txt`, `_headers` |
+
+Routes and the canonical origin live in **`site.config.mjs`** only. Adding a
+route means editing that file; the prerenderer, the sitemap, and the app all
+read it.
+
+### Credentials
+
 `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` live in Doppler, project
-`yeet`, config `dev`.
+`yeet`, config `dev`. The token holds **Pages: Edit**, **Zone: DNS: Edit**, and
+**Zone: Zone: Read**, scoped to `eatyeet.com`.
 
-`scripts/build-seo.mjs` writes `_headers` into the output: `/build/*` is
-fingerprinted by Vite so it is served `immutable` for a year, images and fonts
-keep plain names and get a day plus revalidation, and HTML is left to
-Cloudflare Pages' default revalidation behavior.
+It deliberately does **not** hold **Cache Purge**, and that has already cost a
+debugging session — see the cache note below. Add that permission if you want
+purges to be scriptable.
 
-Cloudflare Pages applies every matching `_headers` rule and merges headers.
-Do not put a catch-all `Cache-Control` under `/*`; it can combine with
-`/build/*`, poison an asset URL as immutable HTML, and require either a cache
-purge token or a fresh asset path to recover. The hashed asset directory is
-`/build` rather than `/assets` because an earlier bad edge-cache entry under
-the old path outlived its deploy.
+### Cache headers, and a trap worth knowing
 
-Cloudflare creates the apex/www DNS records when the Pages custom domain is
-attached. Do not copy registrar parking A/AAAA records into Cloudflare; those
-point at the registrar's placeholder site, not this Pages project. The old
-single-file/iCloud build target was intentionally dropped after Pages went live.
+`scripts/build-seo.mjs` writes `_headers`: `/build/*` is fingerprinted by Vite
+so it is `immutable` for a year; `/images/*` and `/fonts/*` keep plain names and
+get a day plus revalidation; HTML is left to Pages' own revalidation.
+
+**Pages applies every matching rule and merges the results.** A `Cache-Control`
+under `/*` does not act as a default — it combines with `/build/*` and produced
+`max-age=14400, immutable, must-revalidate`. That merge had teeth: during one
+deploy a chunk briefly 404'd, Pages answered with HTML, and the bogus header let
+the edge cache that HTML *under the chunk's URL*. Browsers then got `text/html`
+for a module script and the page stopped hydrating, while `curl` hit a different
+cached variant and looked fine. Keep `/*` to security headers only.
+
+The hashed asset directory is `/build`, not Vite's default `/assets`, because
+retiring the poisoned path was the only way to recover without a purge token.
+
+### DNS
+
+Cloudflare creates the apex and `www` records when the Pages custom domain is
+attached. Do not hand-copy registrar parking `A`/`AAAA` records into Cloudflare
+— those point at the registrar's placeholder page, not at this project.
+
+### Rolling back
+
+Every deploy gets its own immutable `*.pages.dev` URL. To roll back, promote a
+previous deployment in the Pages dashboard, or rebuild from the previous commit
+and deploy again. Assets are content-hashed, so an older deploy references its
+own asset URLs and does not depend on the current ones.
 
 ## Adding a recipe
 
