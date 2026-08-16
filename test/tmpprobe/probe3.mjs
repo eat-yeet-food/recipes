@@ -1,0 +1,31 @@
+import { chromium } from 'playwright'
+import { startStatic } from '../static-server.mjs'
+const server = await startStatic('/Users/phoganuci/src/recipes/.output/public')
+const BASE = server.url.replace(/\/$/,'')
+const b = await chromium.launch()
+const p = await b.newPage({viewport:{width:390,height:844}})
+const errs=[]; p.on('pageerror',e=>errs.push(e.message)); p.on('console',m=>m.type()==='error'&&errs.push(m.text()))
+await p.goto(BASE+'/',{waitUntil:'networkidle'})
+await p.waitForTimeout(400)
+console.log('menu hidden initially:', await p.locator('#mobile-nav-menu').isHidden())
+await p.locator('[aria-label="Open menu"]').click()
+await p.waitForTimeout(300)
+console.log('menu visible after click:', await p.locator('#mobile-nav-menu').isVisible())
+console.log('menu links:', await p.locator('#mobile-nav-menu a').count())
+// nav overlap check: is the menu behind/over the hero?
+console.log('menu box:', await p.locator('#mobile-nav-menu').boundingBox())
+// palette on mobile
+await p.locator('#mobile-nav-menu button').click()
+await p.waitForTimeout(400)
+console.log('palette visible:', await p.locator('[data-slot="dialog-content"]').isVisible())
+console.log('body overflow:', await p.evaluate(()=>document.body.style.overflow))
+console.log('nav inert:', await p.evaluate(()=>document.querySelector('nav').inert))
+await p.keyboard.press('Escape'); await p.waitForTimeout(300)
+console.log('after esc body overflow:', JSON.stringify(await p.evaluate(()=>document.body.style.overflow)), 'nav inert:', await p.evaluate(()=>document.querySelector('nav').inert))
+console.log('focus after close:', await p.evaluate(()=>document.activeElement?.outerHTML?.slice(0,80)))
+// desktop nav check for Browse link
+const dp = await b.newPage({viewport:{width:1440,height:900}})
+await dp.goto(BASE+'/',{waitUntil:'networkidle'})
+console.log('desktop nav links:', await dp.evaluate(()=>Array.from(document.querySelectorAll('nav a')).map(a=>a.getAttribute('href')+':'+a.textContent.trim())))
+console.log('errors:',errs)
+await b.close(); await server.close()

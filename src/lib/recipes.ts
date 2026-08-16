@@ -31,6 +31,7 @@ export interface RecipeSummary {
   yieldAmount: number | string | null
   yieldUnit: string
   image: string
+  imageHash: string
   created: string
   searchText: string
 }
@@ -56,9 +57,16 @@ export async function loadRecipe(slug: string): Promise<Recipe | null> {
 
 export const bySlug = (slug: string) => INDEX.find((r) => r.slug === slug)
 
-/** The public URL for a recipe's photo, or '' when it has none. */
-export const imageUrl = (recipe: { image: string }) =>
-  recipe.image ? `/images/${recipe.image}` : ''
+/**
+ * The public URL for a recipe's photo, or '' when it has none.
+ *
+ * `?v=` is the file's content hash. Photo filenames are stable, so without it
+ * replacing a photo leaves its URL unchanged and the edge keeps serving the old
+ * bytes — which it did, for hours, after two photos were swapped. Query strings
+ * are part of the cache key, so this retires the old bytes on deploy.
+ */
+export const imageUrl = (recipe: { image: string; imageHash?: string }) =>
+  recipe.image ? `/images/${recipe.image}${recipe.imageHash ? `?v=${recipe.imageHash}` : ''}` : ''
 
 /** Newest first, matching the fixture load order. */
 export const latest = (count: number) => INDEX.slice(0, count)
