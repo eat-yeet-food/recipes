@@ -34,7 +34,12 @@ function suppressModuleDirectiveWarnings(): import('vite').Plugin {
  * silently drop a recipe out of the build.
  */
 export default defineConfig({
-  build: { sourcemap: false },
+  // Assets live under /build, not Vite's default /assets. A poisoned edge-cache
+  // entry under the old path (see scripts/build-seo.mjs on the _headers merge
+  // bug) outlived its deploy, and moving the directory retires every one of
+  // them at once. Content hashing is unchanged, so cross-deploy caching still
+  // works normally.
+  build: { sourcemap: false, assetsDir: 'build' },
   plugins: [
     suppressModuleDirectiveWarnings(),
     tanstackStart({

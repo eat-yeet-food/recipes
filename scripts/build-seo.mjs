@@ -56,12 +56,20 @@ Sitemap: ${SITE_URL}/sitemap.xml
 `
 
 /**
- * Vite fingerprints everything under /assets, so those can be cached forever.
- * The HTML must revalidate or a deploy would never be seen. Images and fonts
- * keep their plain names, so they get a day plus revalidation rather than a
- * year that no redeploy could clear.
+ * Vite fingerprints everything under /build, so those can be cached forever.
+ * Images and fonts keep their plain names, so they get a day plus revalidation
+ * rather than a year that no redeploy could clear.
+ *
+ * Pages applies *every* matching rule and merges the result, so `/*` carries
+ * only the security headers. Adding a Cache-Control there produced the
+ * self-contradicting `max-age=14400, immutable, must-revalidate` on hashed
+ * assets. HTML is left to Pages' own default, which already revalidates.
  */
-const headers = `/assets/*
+const headers = `/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+
+/build/*
   Cache-Control: public, max-age=31536000, immutable
 
 /fonts/*
@@ -69,11 +77,6 @@ const headers = `/assets/*
 
 /images/*
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-
-/*
-  Cache-Control: public, max-age=0, must-revalidate
-  X-Content-Type-Options: nosniff
-  Referrer-Policy: strict-origin-when-cross-origin
 `
 
 writeFileSync(join(OUT, 'sitemap.xml'), sitemap)
