@@ -152,8 +152,11 @@ export function SearchPage({
         </h1>
       </div>
 
-      <div className="lg:flex lg:gap-10">
-        <aside className="mb-8 w-full space-y-1 lg:mb-0 lg:w-[260px] lg:shrink-0">
+      {/* search-container.tsx:202 — a plain flex row, and a sidebar that is
+          hidden below lg. `lg:flex`/`lg:w-[260px]` are not in the compiled
+          stylesheet, so they style nothing and the sidebar stacks on top. */}
+      <div className="flex gap-10">
+        <aside className="space-y-1 hidden w-[260px] shrink-0 lg:block">
           {category && (
             <div className="pb-3">
               <h3 className="pb-2 font-body text-xs font-semibold uppercase tracking-[2px] text-charcoal/70">

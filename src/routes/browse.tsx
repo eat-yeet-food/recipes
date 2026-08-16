@@ -68,7 +68,7 @@ function BrowsePage() {
         if (cards.length === 0) return null
 
         return (
-          <section key={facet.key} className="mt-14">
+          <section key={facet.key} className="mt-12">
             <h2 className="mb-5 font-body text-xs font-semibold uppercase tracking-[2px] text-charcoal/70">
               By {facet.label}
             </h2>
