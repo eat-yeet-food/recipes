@@ -201,6 +201,17 @@ if (!web) {
 
   check('entry point is index.html', target.endsWith('index.html'))
   check('stylesheet is a real file', !!sheet, 'no <link rel=stylesheet>')
+  // The hash pins this to the original site's donut-icon.svg byte-for-byte, so
+  // swapping the file for a lookalike fails here rather than shipping quietly.
+  check(
+    'favicon is the original donut icon',
+    html.includes('<link rel="icon" href="/assets/img/donut-icon.d1d43258.svg" type="image/svg+xml">'),
+  )
+  check(
+    'critical fonts preloaded',
+    (html.match(/rel="preload"[^>]+as="font"/g) ?? []).length === 3,
+    `${(html.match(/rel="preload"/g) ?? []).length} preloads`,
+  )
   check('every reference resolves on disk', missing.length === 0, missing.slice(0, 5).join(', '))
   check('assets are content-hashed', unhashed.length === 0, unhashed.slice(0, 5).join(', '))
   check('no data: URIs remain', !/data:(?:image|font)\//.test(html) && !/data:font\//.test(cssText))

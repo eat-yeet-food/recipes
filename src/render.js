@@ -118,7 +118,7 @@ function browseCardsFor(categories, images) {
 export function inlineTarget() {
   return {
     images: imageMap(),
-    styleHtml: `<style>\n${stylesheet()}\n</style>`,
+    headHtml: `<style>\n${stylesheet()}\n</style>`,
     scriptHtml: (data, bundle) => `<script>\n${data}\n</script>\n<script>\n${bundle}\n</script>`,
   }
 }
@@ -147,7 +147,7 @@ window.__INITIAL_ROUTE__ = ${safeJson(route.name)};`
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${pageTitle(recipes, categories, route)}</title>
 <meta name="description" content="A curated collection of artisan recipes. No life stories, no SEO filler — just tested, refined recipes.">
-${target.styleHtml}
+${target.headHtml}
 </head>
 <body>
 <div id="app">${renderShell(recipes, categories, route, images, browseCards)}</div>

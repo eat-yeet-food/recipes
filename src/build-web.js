@@ -43,10 +43,23 @@ function webTarget() {
   const cssUrl = `/assets/global.${hash8(cssBody)}.css`
   writes.push({ url: cssUrl, body: cssBody })
 
+  // Both restored from the original __root.tsx head: the same donut favicon
+  // (byte-identical to the original asset), and preloads for the three fonts
+  // that would otherwise flash invisible text behind the render-blocking sheet.
+  // Preloads go before the stylesheet so they are discovered immediately.
+  const fontUrl = (name) => sheet.writes.find((w) => w.url.includes(`/${name}.`)).url
+  const preloads = ['dm-sans-latin', 'montserrat-latin', 'bowlby-one-sc-latin']
+    .map((f) => `<link rel="preload" href="${fontUrl(f)}" as="font" type="font/woff2" crossorigin="anonymous">`)
+    .join('\n')
+
   return {
     images: urls,
     writes,
-    styleHtml: `<link rel="stylesheet" href="${cssUrl}">`,
+    headHtml: [
+      `<link rel="icon" href="${urls['/donut-icon.svg']}" type="image/svg+xml">`,
+      preloads,
+      `<link rel="stylesheet" href="${cssUrl}">`,
+    ].join('\n'),
     // The recipe payload is split out too, so index.html carries only markup
     // and both scripts cache independently of it.
     scriptHtml(data, bundle) {
