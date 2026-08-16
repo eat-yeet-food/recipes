@@ -10,7 +10,7 @@
  * index. The markup and classes are the same.
  */
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import { Icon } from './icons'
 import { RecipeGrid } from './layout'
@@ -125,18 +125,6 @@ export function SearchPage({
   state: SearchState
   onChange: (next: SearchState) => void
 }) {
-  const [draft, setDraft] = useState(state.q)
-
-  // The field owns its own text so typing stays responsive, but a filter click
-  // or a back/forward navigation has to be able to overwrite it.
-  useEffect(() => setDraft(state.q), [state.q])
-
-  useEffect(() => {
-    if (draft === state.q) return
-    const timer = setTimeout(() => onChange({ ...state, q: draft }), 180)
-    return () => clearTimeout(timer)
-  }, [draft, onChange, state])
-
   const results = searchRecipes(INDEX, state)
   const facets = facetIndex(INDEX)
   const category = facets.find((f) => f.key === 'category')
@@ -162,17 +150,6 @@ export function SearchPage({
         <h1 className="font-display text-[clamp(28px,4vw,40px)] font-extrabold text-charcoal">
           Recipes
         </h1>
-        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
-          <input
-            id="search-input"
-            type="search"
-            autoComplete="off"
-            placeholder="Search by name, ingredient, or technique&hellip;"
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            className="sm:flex-1 min-h-[44px] rounded-full border border-charcoal/12 bg-white px-5 py-2.5 font-body text-base text-charcoal shadow-sm outline-none transition-colors placeholder:text-charcoal/40 focus:border-pink"
-          />
-        </div>
       </div>
 
       <div className="lg:flex lg:gap-10">
