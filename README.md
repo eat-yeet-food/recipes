@@ -1,20 +1,35 @@
 # Recipes
 
-A recipe archive built from markdown fixtures into **one self-contained HTML file**.
+A recipe archive built from markdown fixtures, into either **one self-contained
+HTML file** or **a static site**.
 
-No database, no API, no build framework. `npm run build` produces
-`dist/recipes.html` — a single ~6.8 MB file with the stylesheet, fonts, images,
-recipe data, and client code all inlined. Drop it in iCloud Drive and open it by
-double-clicking, on a Mac or an iPhone.
+No database, no API, no build framework. Two build targets share one renderer:
+
+| | `npm run build` | `npm run build:web` |
+|---|---|---|
+| Output | `dist/recipes.html` | `dist/index.html` + `dist/assets/` |
+| Assets | inlined as data URIs | separate, content-hashed files |
+| Size | ~6.8 MB, always | 37 KB entry, 2.3 MB first load, ~0 after |
+| For | iCloud Drive, opened by double-clicking | Cloudflare Pages |
+
+The single file exists because `file://` cannot fetch anything, so everything
+has to already be in the document. That same encoding is wrong over HTTP, where
+it would cost every visitor the whole payload on every visit and cache nothing
+separately. Both targets render identical markup — the screenshots come out
+byte-for-byte identical — and differ only in how assets are referenced.
 
 ## Commands
 
 ```bash
-npm run dev      # dev server on :4321, re-reads fixtures on every request
-npm run build    # -> dist/recipes.html
-npm test         # builds, then runs 37 static + 17 browser interaction checks
-npm run shots    # Playwright screenshots of the built file -> dist/shots/
-npm run convert  # one-time import from the old yeet seed dump
+npm run dev        # dev server on :4321, re-reads fixtures on every request
+npm run build      # -> dist/recipes.html          (the iCloud deliverable)
+npm run build:web  # -> dist/index.html + assets   (the deployed site)
+npm test           # both targets: 37 + 38 static, 17 browser checks each
+npm run test:file  # single-file target only
+npm run test:web   # web target only, driven over real HTTP
+npm run shots      # Playwright screenshots -> dist/shots/file/
+npm run shots:web  # ... and -> dist/shots/web/
+npm run convert    # one-time import from the old yeet seed dump
 ```
 
 ## Visual parity with the original site
@@ -60,6 +75,13 @@ The whole thing is one function: `render(recipes)` returns a complete HTML
 document. `serve.js` calls it per request; `build.js` calls it once and writes
 to disk. There is no separate dev and prod path.
 
+`render()` takes an optional **target** that decides only how the document
+reaches its assets — a map of public path to URL, plus how the stylesheet and
+scripts are referenced. The default inlines everything; `build-web.js` passes
+one that points at hashed files and collects the writes those URLs imply.
+Markup, shell, and bundle are produced by the same code either way, so the two
+targets cannot drift.
+
 Templates are plain string functions with no DOM access, so the same code runs
 in Node at build time and in the browser on hash navigation. `render.js`
 concatenates the shared modules into one classic script — `file://` refuses to
@@ -78,7 +100,10 @@ src/routes.js           hash routing vocabulary
 src/templates/          layout, home, search, category, recipe, palette
 src/page.js             route -> page HTML, nav state, document shell
 src/router.js           browser runtime
-src/render.js           recipes -> the single file
+src/render.js           recipes -> HTML, given a target
+src/assets.js           asset resolution for both targets
+src/build.js            the single-file target
+src/build-web.js        the web target
 ```
 
 ### Bundling caveat
@@ -91,7 +116,7 @@ duplicate top-level names.
 
 ## Constraints worth knowing
 
-The output is opened over `file://`, which is stricter than it looks:
+The single file is opened over `file://`, which is stricter than it looks:
 
 - **No ES modules.** `type="module"` is blocked by CORS on the file origin.
 - **No `fetch()`.** Recipe data is inlined as a JS literal, never loaded.
@@ -99,10 +124,57 @@ The output is opened over `file://`, which is stricter than it looks:
   (`#/r/charred-crust-pizza`).
 - **No external assets.** Fonts and images are base64 data URIs.
 
-`npm test` asserts all of these against the built file, then drives the real
-page in headless Chromium over `file://` — opening the palette, typing,
-navigating with the keyboard, and toggling filters. If you add a feature that
-reaches for the network, or wire a control to nothing, the tests will catch it.
+These bind the single-file target only, and `npm run test:file` asserts every
+one of them. `test:web` **skips** those eight assertions rather than deleting
+them — the web target exists precisely to violate the last two — and asserts its
+own inverse in their place: no data URIs survive, every reference resolves to a
+file on disk, every asset name carries a content hash, and the first load stays
+under budget. Keep the hash-routing constraint in both: it is why the site needs
+no SPA fallback and why `/` is the only URL a server ever sees.
+
+Both targets are then driven in headless Chromium — the single file over
+`file://`, the web build over real HTTP from a throwaway static server — through
+the same 17 interaction checks: opening the palette, typing, navigating with the
+keyboard, toggling filters. Static assertions cannot catch a control wired to
+nothing; that is what these are for, and the facet chips have silently died this
+way before.
+
+## Deploying
+
+The site is served by **Cloudflare Pages** at `eatyeet.com`, which also hosts the
+domain's DNS. Project settings:
+
+| Setting | Value |
+|---|---|
+| Build command | `npm ci --omit=dev && npm run build:web` |
+| Output directory | `dist` |
+| Node version | `.nvmrc` (22) |
+
+`--omit=dev` skips Playwright, which is a ~100 MB browser download the build
+does not need — only `gray-matter` and `marked` are used at build time.
+
+`dist/_headers` is generated by the build and tells Pages to serve `/assets/*`
+`immutable` for a year, and `/` with `must-revalidate`. That split is safe only
+because asset filenames carry a content hash, so changed bytes always mean a
+changed URL. If you ever emit an unhashed asset, fix the header rule too — a
+stale year-long cache is not something a redeploy can clear.
+
+No `_redirects` and no SPA fallback: routing is hash-based, so `/` is the only
+path ever requested.
+
+To deploy, push to `main`. To preview the exact bytes Pages will serve:
+
+```bash
+npm run build:web
+npx serve dist          # or any static server
+```
+
+The single-file build is unaffected by any of this and is still shipped by hand:
+
+```bash
+npm run build
+cp dist/recipes.html ~/Library/Mobile\ Documents/com~apple~CloudDocs/Recipes/
+```
 
 ## Adding a recipe
 

@@ -1,17 +1,24 @@
 /**
- * Screenshots the built file over file:// so the rendering can be eyeballed
- * and compared against the original design.
+ * Screenshots the built site so the rendering can be eyeballed and compared
+ * against the original design. `--web` shoots dist/ over HTTP instead of the
+ * single file over file://, which is how the two targets get compared.
  *
- * Usage: node test/shots.mjs [outDir]
+ * Usage: node test/shots.mjs [outDir] [--web]
  */
 import { chromium } from 'playwright'
 import { mkdirSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { startStatic } from './static-server.mjs'
+
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
-const FILE = `file://${join(ROOT, 'dist', 'recipes.html')}`
-const OUT = process.argv[2] ?? join(ROOT, 'dist', 'shots')
+const web = process.argv.includes('--web')
+const server = web ? await startStatic(join(ROOT, 'dist')) : null
+const FILE = server ? server.url : `file://${join(ROOT, 'dist', 'recipes.html')}`
+const OUT =
+  process.argv.slice(2).find((a) => !a.startsWith('--')) ??
+  join(ROOT, 'dist', 'shots', web ? 'web' : 'file')
 
 const SHOTS = [
   { name: 'home', hash: '#/', full: true },
@@ -45,6 +52,7 @@ for (const shot of SHOTS) {
 }
 
 await browser.close()
+await server?.close()
 
 if (errors.length) {
   console.log('\nPage errors:')

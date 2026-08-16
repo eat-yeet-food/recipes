@@ -1,14 +1,32 @@
 /**
- * Runs the shipped browser bundle from dist/recipes.html in a stubbed DOM and
- * exercises routing + rendering the way a browser would.
+ * Runs the shipped browser bundle in a stubbed DOM and exercises routing +
+ * rendering the way a browser would.
+ *
+ * Defaults to the single-file build; `--web` checks dist/index.html instead.
+ * Everything about routing and rendering is asserted for both, since both come
+ * out of the same render(). Only the asset-embedding rules differ.
  */
-import { readFileSync } from 'node:fs'
+import { readFileSync, existsSync, statSync } from 'node:fs'
+import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import vm from 'node:vm'
 
-const target = process.argv[2] ?? fileURLToPath(new URL('../dist/recipes.html', import.meta.url))
+const args = process.argv.slice(2)
+const web = args.includes('--web')
+const DIST = fileURLToPath(new URL('../dist', import.meta.url))
+const target = args.find((a) => !a.startsWith('--')) ?? join(DIST, web ? 'index.html' : 'recipes.html')
 const html = readFileSync(target, 'utf8')
-const [dataScript, bundle] = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((m) => m[1])
+
+/** The data payload and bundle, however this target references them. */
+function scriptSources() {
+  const inline = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((m) => m[1])
+  if (inline.length >= 2) return inline
+  return [...html.matchAll(/<script src="([^"]+)"><\/script>/g)].map((m) =>
+    readFileSync(join(DIST, m[1].slice(1)), 'utf8'),
+  )
+}
+
+const [dataScript, bundle] = scriptSources()
 
 let appHtml = ''
 const listeners = {}
@@ -71,6 +89,7 @@ vm.runInContext(bundle, ctx)
 const results = []
 const check = (name, cond, detail = '') =>
   results.push({ name, ok: !!cond, detail: cond ? '' : detail })
+const skip = (name, why) => results.push({ name, ok: true, skipped: true, detail: why })
 
 // --- routing ------------------------------------------------------------
 const parse = (h) => ctx.parseHash(h)
@@ -131,24 +150,76 @@ check(
   ctx.pageTitle(recipes, cats, { name: 'recipe', slug: 'donut-glaze' }).startsWith('Donut Glaze'),
 )
 
-// --- file:// safety -----------------------------------------------------
-// The output is opened by double-clicking, so anything the browser would have
-// to go fetch is a silent failure. Everything must already be in the document.
-const markup = html.slice(html.indexOf('<div id="app">'), html.indexOf('<script>'))
-const refs = [...markup.matchAll(/(?:src|href)\s*=\s*"([^"]+)"/g)].map((m) => m[1])
-const external = refs.filter((r) => !r.startsWith('#') && !r.startsWith('data:'))
+// --- asset embedding ----------------------------------------------------
+// The single-file build is opened by double-clicking, so anything the browser
+// would have to go fetch is a silent failure: it must all already be in the
+// document. The web build is the exact inverse. These assertions still gate
+// dist/recipes.html on every run, so they are skipped here, never dropped.
+const FILE_ONLY = [
+  'no type="module"',
+  'no fetch()',
+  'no dynamic import / XHR',
+  'no external <link>',
+  'no external <script src>',
+  'markup refs are hash-only',
+  'fonts embedded as data URIs',
+  'under 8 MB',
+]
 
-check('no type="module"', !/type=["']module["']/.test(html))
-check('no fetch()', !/\bfetch\s*\(/.test(html))
-check('no dynamic import / XHR', !/XMLHttpRequest|importScripts|\bimport\s*\(/.test(html))
-check('no external <link>', !/<link[^>]+href/i.test(html))
-check('no external <script src>', !/<script[^>]+src=/i.test(html))
-check('markup refs are hash-only', external.length === 0, external.slice(0, 5).join(', '))
-check('fonts embedded as data URIs', (html.match(/url\(data:font/g) || []).length === 5)
-check('under 8 MB', Buffer.byteLength(html) < 8 * 1024 * 1024, `${(Buffer.byteLength(html) / 1024).toFixed(0)} KB`)
+if (!web) {
+  const markup = html.slice(html.indexOf('<div id="app">'), html.indexOf('<script>'))
+  const refs = [...markup.matchAll(/(?:src|href)\s*=\s*"([^"]+)"/g)].map((m) => m[1])
+  const external = refs.filter((r) => !r.startsWith('#') && !r.startsWith('data:'))
+
+  check('no type="module"', !/type=["']module["']/.test(html))
+  check('no fetch()', !/\bfetch\s*\(/.test(html))
+  check('no dynamic import / XHR', !/XMLHttpRequest|importScripts|\bimport\s*\(/.test(html))
+  check('no external <link>', !/<link[^>]+href/i.test(html))
+  check('no external <script src>', !/<script[^>]+src=/i.test(html))
+  check('markup refs are hash-only', external.length === 0, external.slice(0, 5).join(', '))
+  check('fonts embedded as data URIs', (html.match(/url\(data:font/g) || []).length === 5)
+  check('under 8 MB', Buffer.byteLength(html) < 8 * 1024 * 1024, `${(Buffer.byteLength(html) / 1024).toFixed(0)} KB`)
+} else {
+  for (const name of FILE_ONLY) skip(name, 'single-file target')
+
+  // Everything the home route pulls: markup images (including the CSS
+  // background-image the mobile hero uses), the stylesheet, both scripts, and
+  // the fonts the stylesheet itself asks for.
+  const docRefs = [
+    ...[...html.matchAll(/(?:src|href)\s*=\s*"(\/[^"]+)"/g)].map((m) => m[1]),
+    ...[...html.matchAll(/url\('(\/[^']+)'\)/g)].map((m) => m[1]),
+  ]
+  const sheet = html.match(/<link rel="stylesheet" href="([^"]+)">/)?.[1]
+  const cssText = sheet ? readFileSync(join(DIST, sheet.slice(1)), 'utf8') : ''
+  const cssRefs = [...cssText.matchAll(/url\((\/[^)]+)\)/g)].map((m) => m[1])
+  const all = [...new Set([...docRefs, ...cssRefs])]
+
+  const missing = all.filter((r) => !existsSync(join(DIST, r.slice(1))))
+  const unhashed = all.filter((r) => !/\.[0-9a-f]{8}\.[a-z0-9]+$/.test(r))
+  const bytes = all.reduce((n, r) => n + statSync(join(DIST, r.slice(1))).size, Buffer.byteLength(html))
+  const headers = join(DIST, '_headers')
+
+  check('entry point is index.html', target.endsWith('index.html'))
+  check('stylesheet is a real file', !!sheet, 'no <link rel=stylesheet>')
+  check('every reference resolves on disk', missing.length === 0, missing.slice(0, 5).join(', '))
+  check('assets are content-hashed', unhashed.length === 0, unhashed.slice(0, 5).join(', '))
+  check('no data: URIs remain', !/data:(?:image|font)\//.test(html) && !/data:font\//.test(cssText))
+  check('fonts are separate files', cssRefs.length === 5, `${cssRefs.length} font refs`)
+  check('index.html under 100 KB', Buffer.byteLength(html) < 100 * 1024, `${(Buffer.byteLength(html) / 1024).toFixed(0)} KB`)
+  check('home first load under 3 MB', bytes < 3 * 1024 * 1024, `${(bytes / 1024 / 1024).toFixed(2)} MB`)
+  check('_headers caches assets immutably', existsSync(headers) && readFileSync(headers, 'utf8').includes('immutable'))
+  console.log(`\n  home first load: ${(bytes / 1024 / 1024).toFixed(2)} MB across ${all.length + 1} requests\n`)
+}
 
 // --- report -------------------------------------------------------------
 const failed = results.filter((r) => !r.ok)
-for (const r of results) console.log(`${r.ok ? 'ok  ' : 'FAIL'}  ${r.name}${r.detail ? ' :: ' + r.detail : ''}`)
-console.log(`\n${results.length - failed.length}/${results.length} passed`)
+const skipped = results.filter((r) => r.skipped)
+for (const r of results) {
+  const status = r.skipped ? 'skip' : r.ok ? 'ok  ' : 'FAIL'
+  console.log(`${status}  ${r.name}${r.detail ? ' :: ' + r.detail : ''}`)
+}
+console.log(
+  `\n${results.length - failed.length - skipped.length}/${results.length - skipped.length} passed` +
+    (skipped.length ? ` (${skipped.length} skipped)` : ''),
+)
 process.exit(failed.length ? 1 : 0)

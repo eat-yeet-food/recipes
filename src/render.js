@@ -1,10 +1,14 @@
 /**
- * render(recipes) -> one complete, self-contained HTML document.
+ * render(recipes) -> one complete HTML document.
  *
  * The stylesheet is the original site's production Tailwind build, so the
  * transcribed class names resolve to exactly the rules the real site used.
- * Fonts and images become data URIs because the output is opened over
- * `file://`, where external requests, `fetch()`, and ES modules all fail.
+ *
+ * A *target* decides only how the document reaches its assets. The default
+ * inlines everything as data URIs, because the single-file output is opened
+ * over `file://`, where external requests, `fetch()`, and ES modules all fail.
+ * The web build passes a target that points at real files instead. Markup,
+ * shell, and bundle are identical either way — there is one render path.
  */
 
 import { readFileSync } from 'node:fs'
@@ -107,8 +111,20 @@ function browseCardsFor(categories, images) {
     }))
 }
 
-export function render(rawRecipes, categories = CATEGORIES) {
-  const images = imageMap()
+/**
+ * Everything in the document that is not markup: the asset URLs the templates
+ * interpolate, and how the stylesheet and scripts are referenced.
+ */
+export function inlineTarget() {
+  return {
+    images: imageMap(),
+    styleHtml: `<style>\n${stylesheet()}\n</style>`,
+    scriptHtml: (data, bundle) => `<script>\n${data}\n</script>\n<script>\n${bundle}\n</script>`,
+  }
+}
+
+export function render(rawRecipes, categories = CATEGORIES, target = inlineTarget()) {
+  const images = target.images
   const recipes = withImages(rawRecipes, images)
   const browseCards = browseCardsFor(categories, images)
   const route = { name: 'home' }
@@ -118,6 +134,12 @@ export function render(rawRecipes, categories = CATEGORIES) {
     '/images/hero-donuts.jpg': images['/images/hero-donuts.jpg'],
   }
 
+  const data = `window.__RECIPES__ = ${safeJson(recipes)};
+window.__CATEGORIES__ = ${safeJson(categories)};
+window.__ASSETS__ = ${safeJson(navAssets)};
+window.__BROWSE_CARDS__ = ${safeJson(browseCards)};
+window.__INITIAL_ROUTE__ = ${safeJson(route.name)};`
+
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -125,23 +147,11 @@ export function render(rawRecipes, categories = CATEGORIES) {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${pageTitle(recipes, categories, route)}</title>
 <meta name="description" content="A curated collection of artisan recipes. No life stories, no SEO filler — just tested, refined recipes.">
-<style>
-:root { --nav-h: 4rem; --header-offset: calc(var(--nav-h) + var(--impersonation-h, 0px)); }
-${stylesheet()}
-</style>
+${target.styleHtml}
 </head>
 <body>
 <div id="app">${renderShell(recipes, categories, route, images, browseCards)}</div>
-<script>
-window.__RECIPES__ = ${safeJson(recipes)};
-window.__CATEGORIES__ = ${safeJson(categories)};
-window.__ASSETS__ = ${safeJson(navAssets)};
-window.__BROWSE_CARDS__ = ${safeJson(browseCards)};
-window.__INITIAL_ROUTE__ = ${safeJson(route.name)};
-</script>
-<script>
-${bundleScript()}
-</script>
+${target.scriptHtml(data, bundleScript())}
 </body>
 </html>
 `

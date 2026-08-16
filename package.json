@@ -3,12 +3,16 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "A recipe archive rendered from markdown fixtures into a single self-contained HTML file.",
+  "description": "A recipe archive rendered from markdown fixtures into a single self-contained HTML file, or a static site.",
   "scripts": {
     "dev": "node src/serve.js",
     "build": "node src/build.js",
-    "test": "node src/build.js && node test/verify.mjs && node test/interact.mjs",
+    "build:web": "node src/build-web.js",
+    "test": "npm run test:file && npm run test:web",
+    "test:file": "node src/build.js && node test/verify.mjs && node test/interact.mjs",
+    "test:web": "node src/build-web.js && node test/verify.mjs --web && node test/interact.mjs --web",
     "shots": "node src/build.js && node test/shots.mjs",
+    "shots:web": "node src/build-web.js && node test/shots.mjs --web",
     "convert": "node scripts/convert-fixtures.mjs"
   },
   "dependencies": {

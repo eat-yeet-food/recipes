@@ -1,16 +1,24 @@
 /**
- * Drives the built file over file:// the way a person would: opens the search
- * palette, types, navigates with the keyboard, and toggles filter checkboxes.
- * Catches the wiring bugs that static assertions can't.
+ * Drives the built site the way a person would: opens the search palette,
+ * types, navigates with the keyboard, and toggles filter checkboxes. Catches
+ * the wiring bugs that static assertions can't.
+ *
+ * Defaults to the single file over file://; `--web` serves dist/ over HTTP and
+ * runs the identical checks, which is also what proves the split assets
+ * actually load.
  */
 import { chromium } from 'playwright'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { mkdirSync } from 'node:fs'
 
+import { startStatic } from './static-server.mjs'
+
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
-const FILE = `file://${join(ROOT, 'dist', 'recipes.html')}`
-const SHOTS = join(ROOT, 'dist', 'shots')
+const web = process.argv.includes('--web')
+const server = web ? await startStatic(join(ROOT, 'dist')) : null
+const FILE = server ? server.url : `file://${join(ROOT, 'dist', 'recipes.html')}`
+const SHOTS = join(ROOT, 'dist', 'shots', web ? 'web' : 'file')
 mkdirSync(SHOTS, { recursive: true })
 
 const results = []
@@ -91,6 +99,7 @@ check('clear all resets', !page.url().includes('methods='), page.url())
 check('no sign-in button', (await page.locator('text=Sign in').count()) === 0)
 
 await browser.close()
+await server?.close()
 
 for (const r of results) console.log(`${r.ok ? 'ok  ' : 'FAIL'}  ${r.name}${r.detail ? ' :: ' + r.detail : ''}`)
 if (errors.length) {
