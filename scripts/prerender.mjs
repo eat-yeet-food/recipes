@@ -8,6 +8,8 @@
  */
 
 import { createServer } from 'node:net'
+
+import { allPaths } from '../site.config.mjs'
 import { mkdirSync, writeFileSync, readFileSync, existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { spawn } from 'node:child_process'
@@ -24,7 +26,7 @@ if (!existsSync(SERVER)) {
 }
 
 const index = JSON.parse(readFileSync(join(ROOT, 'src', 'generated', 'index.json'), 'utf8'))
-const paths = ['/', '/recipes', '/browse', '/search', ...index.map((r) => `/recipes/${r.slug}`)]
+const paths = allPaths(index)
 
 function reservePort() {
   return new Promise((resolve, reject) => {

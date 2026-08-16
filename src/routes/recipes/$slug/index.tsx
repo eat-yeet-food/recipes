@@ -2,7 +2,7 @@ import { createFileRoute, notFound } from '@tanstack/react-router'
 
 import { RecipeDetail } from '../../../components/recipe'
 import { isoDuration, formatYield, labelize, stripTags } from '../../../lib/format'
-import { SITE_URL } from '../../../lib/paths'
+import { SITE_URL } from '../../../../site.config.mjs'
 import { loadRecipe, imageUrl, type Recipe } from '../../../lib/recipes'
 import { buildSeoMeta } from '../../../lib/seo'
 

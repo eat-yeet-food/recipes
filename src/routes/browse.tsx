@@ -1,18 +1,21 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 
 import { Icon } from '../components/icons'
-import { BrowseCard, SectionHeading } from '../components/layout'
 import { categorySearch } from '../components/home'
 import { CATEGORIES, type Category } from '../lib/categories'
-import { FACETS } from '../lib/model'
+import { recipesInCategory, type FacetKey } from '../lib/model'
 import { INDEX } from '../lib/recipes'
-import { recipesInCategory } from '../lib/model'
 import { buildSeoMeta } from '../lib/seo'
 
 /**
- * browse.tsx + browse-container.tsx. The original grouped every facet into
- * sections; the featured eight keep their photo cards and the rest render as
- * the plain-text variant, which is the same split the original made.
+ * browse.tsx + browse-container.tsx.
+ *
+ * The original grouped every facet into four titled sections of plain text
+ * cards — the photo cards belong to the home page's compact subset, not here.
+ *
+ * It listed every facet value the platform knew about, including ones no recipe
+ * carried. This archive is twelve recipes and closed, so a value with nothing
+ * behind it is a permanent dead end; sections list only what has recipes.
  */
 export const Route = createFileRoute('/browse')({
   head: () =>
@@ -25,6 +28,14 @@ export const Route = createFileRoute('/browse')({
     }),
   component: BrowsePage,
 })
+
+/** browse.ts:63-127 — the section titles and eyebrows, in the original order. */
+const SECTIONS: Array<{ facet: FacetKey; title: string; eyebrow: string }> = [
+  { facet: 'courses', title: 'By Course', eyebrow: 'What are you making?' },
+  { facet: 'cuisines', title: 'By Cuisine', eyebrow: 'Explore flavors' },
+  { facet: 'methods', title: 'By Method', eyebrow: 'How do you cook?' },
+  { facet: 'restrictions', title: 'By Diet', eyebrow: 'Dietary needs' },
+]
 
 /** browse-card.tsx — the plain, imageless branch. */
 function TextBrowseCard({ category }: { category: Category }) {
@@ -44,42 +55,39 @@ function TextBrowseCard({ category }: { category: Category }) {
 }
 
 function BrowsePage() {
-  const featured = CATEGORIES.filter((c) => c.featured)
-
   return (
-    <div className="mx-auto max-w-[var(--max-width)] px-8 pt-8 pb-20">
-      <SectionHeading eyebrow="Top Eats" title="Browse Recipes" />
+    <div className="mx-auto max-w-[var(--max-width)] px-8 py-16 max-sm:px-4">
+      <h1 className="text-center font-display text-4xl font-extrabold text-charcoal max-sm:text-3xl">
+        Browse Recipes
+      </h1>
+      <p className="mx-auto mt-3 max-w-lg text-center text-sm leading-relaxed text-charcoal/65">
+        Explore our collection by course, cuisine, cooking method, or dietary preference.
+      </p>
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        {featured.map((category) => (
-          <BrowseCard
-            key={category.slug}
-            label={category.label}
-            imageUrl={category.image!}
-            search={categorySearch(category)}
-          />
-        ))}
+      <div className="mt-12 space-y-14">
+        {SECTIONS.map((section) => {
+          const cards = CATEGORIES.filter(
+            (c) => c.facet === section.facet && recipesInCategory(INDEX, c).length > 0,
+          )
+          if (cards.length === 0) return null
+
+          return (
+            <section key={section.title} aria-label={section.title}>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[3px] text-sage-dark">
+                {section.eyebrow}
+              </p>
+              <h2 className="mb-6 font-display text-2xl font-extrabold text-charcoal">
+                {section.title}
+              </h2>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                {cards.map((category) => (
+                  <TextBrowseCard key={category.slug} category={category} />
+                ))}
+              </div>
+            </section>
+          )
+        })}
       </div>
-
-      {FACETS.filter((facet) => facet.key !== 'category').map((facet) => {
-        const cards = CATEGORIES.filter(
-          (c) => c.facet === facet.key && recipesInCategory(INDEX, c).length > 0,
-        )
-        if (cards.length === 0) return null
-
-        return (
-          <section key={facet.key} className="mt-12">
-            <h2 className="mb-5 font-body text-xs font-semibold uppercase tracking-[2px] text-charcoal/70">
-              By {facet.label}
-            </h2>
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-              {cards.map((category) => (
-                <TextBrowseCard key={category.slug} category={category} />
-              ))}
-            </div>
-          </section>
-        )
-      })}
     </div>
   )
 }

@@ -162,6 +162,7 @@ export function SearchPalette({ open, onClose }: { open: boolean; onClose: () =>
             role="combobox"
             aria-expanded={hits.length > 0}
             aria-controls="search-results-listbox"
+            aria-activedescendant={hits[active] ? `search-result-${hits[active].slug}` : undefined}
             aria-autocomplete="list"
             autoComplete="off"
             placeholder="Search recipes..."

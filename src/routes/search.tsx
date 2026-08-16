@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 
 import { SearchPage } from '../components/search'
@@ -68,9 +69,24 @@ function SearchRoute() {
   const search = Route.useSearch()
   const navigate = useNavigate({ from: '/search' })
 
+  /**
+   * Only one /search document is prerendered, and Cloudflare Pages serves it
+   * for every query string — files are not selected by query. So a cold load of
+   * `/search?courses=mains` gets HTML rendered with no filters, and rendering
+   * the filtered results on the first client pass is a hydration mismatch
+   * (React error #418), which throws away the server markup and re-renders the
+   * whole page.
+   *
+   * Matching the server on pass one and applying the params right after keeps
+   * the markup intact. Every home and browse category card links to such a URL,
+   * so this is the common path, not an edge case.
+   */
+  const [hydrated, setHydrated] = useState(false)
+  useEffect(() => setHydrated(true), [])
+
   return (
     <SearchPage
-      state={toState(search)}
+      state={hydrated ? toState(search) : emptySearch()}
       onChange={(next) => navigate({ search: toUrl(next), replace: true })}
     />
   )

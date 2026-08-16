@@ -37,21 +37,14 @@ export const Route = createRootRoute({
       { rel: 'preload', href: '/fonts/dm-sans-latin.woff2', as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' },
       { rel: 'preload', href: '/fonts/montserrat-latin.woff2', as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' },
       { rel: 'preload', href: '/fonts/bowlby-one-sc-latin.woff2', as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' },
+      // --font-nav is Nunito, and every nav link uses it; without this the nav
+      // text FOITs behind the render-blocking stylesheet.
+      { rel: 'preload', href: '/fonts/nunito-latin.woff2', as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' },
     ],
   }),
   component: RootLayout,
   shellComponent: RootDocument,
 })
-
-/**
- * nav.tsx's routeHasHero / routeHasDarkHero, at their unscrolled state. Home
- * has a light hero (dark text); recipe pages have a dark image hero.
- */
-function navStateFor(pathname: string) {
-  if (pathname === '/') return { onHeroPage: true, heroVisible: false }
-  if (pathname.startsWith('/recipes/')) return { onHeroPage: true, heroVisible: true }
-  return { onHeroPage: false, heroVisible: false }
-}
 
 function RootLayout() {
   const { location } = useRouterState()
@@ -73,7 +66,15 @@ function RootLayout() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Nav {...navStateFor(location.pathname)} onOpenPalette={() => setPaletteOpen(true)} />
+      {/* __root.tsx:108-113 — the target existed without this, so keyboard
+          users had no way to skip the nav. */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-charcoal focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-white focus:shadow-lg"
+      >
+        Skip to content
+      </a>
+      <Nav pathname={location.pathname} onOpenPalette={() => setPaletteOpen(true)} />
       <main id="main-content" className="flex-1 pt-[var(--header-offset)]">
         <Outlet />
       </main>

@@ -89,7 +89,7 @@ function FacetGroup({
         <span>{facet.label}</span>
         <Icon
           name="chevron-down"
-          className={`size-4 transition-transform duration-200${open ? '' : ' rotate-180'}`}
+          className={`size-4 transition-transform duration-200${open ? ' rotate-180' : ''}`}
         />
       </button>
       <div data-facet-body hidden={!open}>
@@ -118,6 +118,69 @@ function FacetGroup({
   )
 }
 
+/**
+ * filter-sidebar.tsx's contents, shared by the desktop rail and the mobile
+ * disclosure so the two cannot drift apart.
+ */
+function Filters({
+  state,
+  onToggle,
+  onCategory,
+}: {
+  state: SearchState
+  onToggle: (key: FacetKey, value: string) => void
+  onCategory: (value: string) => void
+}) {
+  const facets = facetIndex(INDEX)
+  const category = facets.find((f) => f.key === 'category')
+  const groups = facets.filter((f) => f.key !== 'category')
+
+  return (
+    <>
+      {category && (
+        <div className="pb-3">
+          <h3 className="pb-2 font-body text-xs font-semibold uppercase tracking-[2px] text-charcoal/70">
+            Category
+          </h3>
+          <div className="flex gap-2" role="radiogroup" aria-label="Category filter">
+            {[
+              { value: '', label: 'All' },
+              ...category.values.map((o) => ({ value: o.value, label: labelize(o.value) })),
+            ].map((option) => {
+              const on = option.value
+                ? (state.category ?? []).includes(option.value)
+                : (state.category ?? []).length === 0
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={on}
+                  data-category={option.value}
+                  onClick={() => onCategory(option.value)}
+                  className={`${TOGGLE_BASE} ${on ? TOGGLE_ON : TOGGLE_OFF}`}
+                >
+                  {option.label}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
+      <div className="space-y-0 divide-y divide-charcoal/8">
+        {groups.map((facet) => (
+          <FacetGroup
+            key={facet.key}
+            facet={facet}
+            selected={state[facet.key as FacetKey] ?? []}
+            onToggle={(value) => onToggle(facet.key as FacetKey, value)}
+          />
+        ))}
+      </div>
+    </>
+  )
+}
+
 export function SearchPage({
   state,
   onChange,
@@ -125,10 +188,8 @@ export function SearchPage({
   state: SearchState
   onChange: (next: SearchState) => void
 }) {
+  const [mobileOpen, setMobileOpen] = useState(false)
   const results = searchRecipes(INDEX, state)
-  const facets = facetIndex(INDEX)
-  const category = facets.find((f) => f.key === 'category')
-  const groups = facets.filter((f) => f.key !== 'category')
   const active = (state.q ? 1 : 0) + FACET_KEYS.reduce((n, k) => n + (state[k]?.length ?? 0), 0)
 
   const toggle = (key: FacetKey, value: string) => {
@@ -155,47 +216,40 @@ export function SearchPage({
       {/* search-container.tsx:202 — a plain flex row, and a sidebar that is
           hidden below lg. `lg:flex`/`lg:w-[260px]` are not in the compiled
           stylesheet, so they style nothing and the sidebar stacks on top. */}
+      {/* search-container.tsx:163-174 kept the filters reachable below lg via
+          MobileFilterSheet. That Radix sheet is not ported, so this is the same
+          filter content behind a disclosure — without it the sidebar's `hidden`
+          leaves phones with no way to filter at all. */}
+      <div className="mb-6 lg:hidden">
+        <button
+          type="button"
+          data-mobile-filters
+          aria-expanded={mobileOpen}
+          aria-controls="mobile-filters"
+          onClick={() => setMobileOpen((open) => !open)}
+          className={`${TOGGLE_BASE} ${TOGGLE_OFF} inline-flex min-h-[44px] items-center gap-2`}
+        >
+          Filters
+          {active > 0 && <span className="text-charcoal/40">{active}</span>}
+          <Icon
+            name="chevron-down"
+            className={`size-4 transition-transform duration-200${mobileOpen ? ' rotate-180' : ''}`}
+          />
+        </button>
+        {/* Mounted only while open. Rendering it alongside the desktop rail
+            would put two copies of every checkbox and category radio in the
+            document at all times — duplicated controls for assistive tech, and
+            duplicated markup in every prerendered page. */}
+        {mobileOpen && (
+          <div id="mobile-filters" className="mt-4 space-y-1">
+            <Filters state={state} onToggle={toggle} onCategory={setCategory} />
+          </div>
+        )}
+      </div>
+
       <div className="flex gap-10">
         <aside className="space-y-1 hidden w-[260px] shrink-0 lg:block">
-          {category && (
-            <div className="pb-3">
-              <h3 className="pb-2 font-body text-xs font-semibold uppercase tracking-[2px] text-charcoal/70">
-                Category
-              </h3>
-              <div className="flex gap-2" role="radiogroup" aria-label="Category filter">
-                {[{ value: '', label: 'All' }, ...category.values.map((o) => ({ value: o.value, label: labelize(o.value) }))].map(
-                  (option) => {
-                    const on = option.value
-                      ? (state.category ?? []).includes(option.value)
-                      : (state.category ?? []).length === 0
-                    return (
-                      <button
-                        key={option.value}
-                        type="button"
-                        role="radio"
-                        aria-checked={on}
-                        data-category={option.value}
-                        onClick={() => setCategory(option.value)}
-                        className={`${TOGGLE_BASE} ${on ? TOGGLE_ON : TOGGLE_OFF}`}
-                      >
-                        {option.label}
-                      </button>
-                    )
-                  },
-                )}
-              </div>
-            </div>
-          )}
-          <div className="space-y-0 divide-y divide-charcoal/8">
-            {groups.map((facet) => (
-              <FacetGroup
-                key={facet.key}
-                facet={facet}
-                selected={state[facet.key as FacetKey] ?? []}
-                onToggle={(value) => toggle(facet.key as FacetKey, value)}
-              />
-            ))}
-          </div>
+          <Filters state={state} onToggle={toggle} onCategory={setCategory} />
         </aside>
 
         <div className="min-w-0 flex-1">

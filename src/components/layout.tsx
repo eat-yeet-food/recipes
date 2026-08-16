@@ -12,7 +12,7 @@
  * `cn()` merges are resolved here by hand into their final class strings.
  */
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 
 import { Icon } from './icons'
@@ -58,21 +58,46 @@ function GhostButton({
   )
 }
 
-export interface NavState {
-  onHeroPage?: boolean
-  heroVisible?: boolean
+/** nav.tsx:30-38 — routes with a hero, where the nav starts transparent. */
+function routeHasHero(pathname: string): boolean {
+  return pathname === '/' || pathname.startsWith('/recipes/')
+}
+
+/** nav.tsx:39-45 — a *dark* hero, which additionally flips nav text to white. */
+function routeHasDarkHero(pathname: string): boolean {
+  return pathname !== '/' && pathname.startsWith('/recipes/')
 }
 
 /**
- * nav.tsx. `onHeroPage` is the unscrolled state over a hero; `heroVisible`
- * additionally means that hero is dark, which flips the text to white.
+ * nav.tsx. Transparent over a hero until the page scrolls, then opaque white.
+ *
+ * The original ANDs in a `heroReady` flag that starts false, because its hero
+ * depended on client-fetched data and a transparent nav would otherwise flash
+ * over an empty page. Here every hero is in the prerendered HTML, so the flag
+ * would only introduce the flash it exists to prevent, and is omitted.
  */
-export function Nav({
-  onHeroPage = false,
-  heroVisible = false,
-  onOpenPalette,
-}: NavState & { onOpenPalette: () => void }) {
+export function Nav({ pathname, onOpenPalette }: { pathname: string; onOpenPalette: () => void }) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+
+  // nav.tsx:93-107 — rAF-throttled and passive, so scrolling stays smooth.
+  useEffect(() => {
+    let ticking = false
+    function onScroll() {
+      if (ticking) return
+      ticking = true
+      requestAnimationFrame(() => {
+        setScrolled(window.scrollY > 50)
+        ticking = false
+      })
+    }
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  const onHeroPage = routeHasHero(pathname) && !scrolled
+  const heroVisible = routeHasDarkHero(pathname) && !scrolled
   const navBg = onHeroPage
     ? 'bg-transparent'
     : 'bg-white/92 backdrop-blur-[16px] shadow-[0_1px_0_rgba(45,45,45,0.08)]'

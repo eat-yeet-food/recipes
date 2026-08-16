@@ -14,7 +14,7 @@ cookMinutes: 7
 totalMinutes: 6037
 yieldAmount: 2
 yieldUnit: 16-inch pizza
-image: pizza.jpg
+image: charred-crust-pizza.jpg
 created: 2025-01-15
 ---
 

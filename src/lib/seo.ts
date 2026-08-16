@@ -4,7 +4,7 @@
  * crawlers and link unfurlers exactly as the original did.
  */
 
-import { SITE_URL } from './paths'
+import { SITE_URL } from '../../site.config.mjs'
 
 interface SeoMeta {
   title: string

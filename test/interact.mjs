@@ -74,26 +74,26 @@ await page.keyboard.press('Escape')
 // --- filter sidebar -----------------------------------------------------
 await page.goto(BASE + '/search', { waitUntil: 'networkidle' })
 await page.waitForTimeout(300)
-const boxes = await page.locator('[data-facet][data-value]').count()
+const boxes = await page.locator('main aside [data-facet][data-value]').count()
 check('sidebar renders checkboxes', boxes > 0, `boxes=${boxes}`)
-check('category toggle renders', (await page.locator('[data-category]').count()) > 0)
+check('category toggle renders', (await page.locator('main aside [data-category]').count()) > 0)
 
 const before = await page.locator('text=/^\\d+ recipes?$/').first().textContent()
-await page.locator('[data-facet="methods"][data-value="grilling"]').click()
+await page.locator('main aside [data-facet="methods"][data-value="grilling"]').click()
 await page.waitForTimeout(300)
 const after = await page.locator('text=/^\\d+ recipes?$/').first().textContent()
 check('checkbox filters results', before !== after, `${before} -> ${after}`)
 check(
   'checkbox reflects checked state',
   await page.evaluate(
-    () => !!document.querySelector('[data-facet="methods"][data-value="grilling"] [data-state="checked"]'),
+    () => !!document.querySelector('main aside [data-facet="methods"][data-value="grilling"] [data-state="checked"]'),
   ),
 )
 check('filter is in the URL', page.url().includes('methods=grilling'), page.url())
 await page.screenshot({ path: join(SHOTS, 'search-filtered.png') })
 
 // --- category single-select --------------------------------------------
-await page.locator('[data-category="savory"]').click()
+await page.locator('main aside [data-category="savory"]').click()
 await page.waitForTimeout(300)
 check('category toggle filters', page.url().includes('category=savory'), page.url())
 
@@ -110,6 +110,90 @@ check('browse links use plain params', /\/search\?\w+=[\w,-]+$/.test(href ?? '')
 
 // --- no sign in button --------------------------------------------------
 check('no sign-in button', (await page.locator('text=Sign in').count()) === 0)
+
+// --- browse lists each category once ------------------------------------
+// It once rendered the eight featured categories in a photo grid *and* again
+// in their facet sections.
+const browseLabels = await page.evaluate(() =>
+  Array.from(document.querySelectorAll('main a[href*="/search?"]'), (a) => a.textContent.trim()),
+)
+check(
+  'browse lists each category once',
+  new Set(browseLabels).size === browseLabels.length,
+  browseLabels.join(', '),
+)
+
+// --- every page has exactly one h1 --------------------------------------
+for (const [path, want] of [
+  ['/browse', 'Browse Recipes'],
+  ['/recipes', 'All Recipes'],
+  ['/search', 'Recipes'],
+]) {
+  await page.goto(BASE + path, { waitUntil: 'networkidle' })
+  const h1s = await page.evaluate(() =>
+    Array.from(document.querySelectorAll('h1'), (h) => h.textContent.trim()),
+  )
+  check(`${path} has one h1`, h1s.length === 1 && h1s[0] === want, JSON.stringify(h1s))
+}
+
+// --- "View all categories" goes to /browse ------------------------------
+await page.goto(BASE + '/', { waitUntil: 'networkidle' })
+const catsHref = await page.evaluate(
+  () =>
+    Array.from(document.querySelectorAll('a'))
+      .find((a) => a.textContent.includes('View all categories'))
+      ?.getAttribute('href'),
+)
+check('View all categories -> /browse', catsHref === '/browse', String(catsHref))
+
+// --- the nav leaves its hero state on scroll ----------------------------
+// Without a scroll listener the recipe nav stays transparent with white text,
+// which lands white-on-white over the content card.
+await page.goto(BASE + '/recipes/charred-crust-pizza', { waitUntil: 'networkidle' })
+await page.waitForTimeout(300)
+const navTop = await page.evaluate(() => getComputedStyle(document.querySelector('nav')).backgroundColor)
+await page.evaluate(() => window.scrollTo(0, 1400))
+await page.waitForTimeout(500)
+const navDown = await page.evaluate(() => ({
+  bg: getComputedStyle(document.querySelector('nav')).backgroundColor,
+  link: getComputedStyle(document.querySelector('nav a[href="/search"]')).color,
+}))
+check('nav transparent over the hero', navTop === 'rgba(0, 0, 0, 0)', navTop)
+check('nav becomes opaque on scroll', navDown.bg !== 'rgba(0, 0, 0, 0)', navDown.bg)
+check('nav text darkens on scroll', navDown.link !== 'rgb(255, 255, 255)', navDown.link)
+
+// --- cold loads throw nothing -------------------------------------------
+// Only one /search document is prerendered and Pages serves it for every query
+// string, so `/search?courses=mains` hydrated against markup rendered with no
+// filters and threw React #418, discarding the server HTML. Every browse card
+// links to exactly such a URL. Reaching that state by clicking never
+// reproduced it — each of these has to be a fresh navigation.
+for (const path of ['/', '/browse', '/recipes', '/search', '/search?courses=mains', '/search?q=pizza']) {
+  const cold = await browser.newPage({ viewport: { width: 1440, height: 900 } })
+  const thrown = []
+  cold.on('pageerror', (e) => thrown.push(e.message.split('\n')[0]))
+  cold.on('console', (m) => m.type() === 'error' && thrown.push(m.text()))
+  await cold.goto(BASE + path, { waitUntil: 'networkidle' })
+  await cold.waitForTimeout(600)
+  check(`cold load is clean: ${path}`, thrown.length === 0, thrown[0]?.slice(0, 90) ?? '')
+  await cold.close()
+}
+
+// --- filters are reachable on a phone -----------------------------------
+// The sidebar is `hidden` below lg, matching the original, which paired it
+// with a mobile sheet. Without a mobile affordance there is no way to filter.
+const phone = await browser.newPage({ viewport: { width: 390, height: 844 } })
+await phone.goto(BASE + '/search', { waitUntil: 'networkidle' })
+await phone.waitForTimeout(300)
+check('desktop sidebar hidden on phone', await phone.locator('main aside').isHidden())
+check('mobile filter trigger visible', await phone.locator('[data-mobile-filters]').isVisible())
+await phone.locator('[data-mobile-filters]').click()
+await phone.waitForTimeout(300)
+check(
+  'mobile filters expand',
+  (await phone.locator('#mobile-filters [data-facet][data-value]').count()) > 0,
+)
+await phone.close()
 
 await browser.close()
 await server.close()

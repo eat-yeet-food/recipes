@@ -90,12 +90,17 @@ function HomeHero() {
   )
 }
 
-/** The "View all …" link that closes each home section. */
-export function ViewAll({ label }: { label: string }) {
+/**
+ * The "View all …" link that closes each home section.
+ *
+ * home-container.tsx uses different targets and different top margins for the
+ * two: recipes go to /search under `mt-10`, categories to /browse under `mt-8`.
+ */
+export function ViewAll({ to, label, className }: { to: string; label: string; className: string }) {
   return (
-    <div className="mt-10 text-center">
+    <div className={`${className} text-center`}>
       <Link
-        to="/search"
+        to={to}
         className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[2px] text-pink transition-colors hover:text-pink-dark"
       >
         {label}
@@ -126,7 +131,7 @@ export function HomePage() {
             <RecipeCard key={recipe.slug} recipe={recipe} />
           ))}
         </div>
-        <ViewAll label="View all recipes" />
+        <ViewAll to="/search" label="View all recipes" className="mt-10" />
       </section>
 
       <section
@@ -144,7 +149,7 @@ export function HomePage() {
             />
           ))}
         </div>
-        <ViewAll label="View all categories" />
+        <ViewAll to="/browse" label="View all categories" className="mt-8" />
       </section>
     </>
   )

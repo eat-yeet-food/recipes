@@ -9,9 +9,11 @@ import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { SITE_URL } from '../site.config.mjs'
+
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const OUT = join(ROOT, '.output', 'public')
-const SITE_URL = 'https://eatyeet.com'
+
 
 if (!existsSync(OUT)) {
   console.error('No build output at .output/public — run vite build first.')
