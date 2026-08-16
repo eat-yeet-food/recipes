@@ -4,7 +4,7 @@
  *   node scripts/fetch-image.mjs <recipe-slug> <image-url>
  *
  * Downloads the image, resizes it to 1100px on the long edge (the recipe hero
- * renders at most ~1440 CSS px, and every byte lands in the single-file build),
+ * renders at most ~1440 CSS px, and every byte is served on first paint),
  * writes it to assets/img/<slug>.jpg, and adds the `image:` line to the
  * recipe's frontmatter if it isn't already there.
  */
@@ -37,7 +37,7 @@ if (!res.ok) {
 }
 writeFileSync(target, Buffer.from(await res.arrayBuffer()))
 
-// sips ships with macOS; keeps the single-file build from ballooning.
+// sips ships with macOS; keeps the served payload from ballooning.
 execFileSync('sips', ['-s', 'format', 'jpeg', '-s', 'formatOptions', '62', '-Z', '1100', target, '--out', target], {
   stdio: 'ignore',
 })

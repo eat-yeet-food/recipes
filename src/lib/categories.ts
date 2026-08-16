@@ -7,10 +7,23 @@
  * collection; it appeared on the original home page regardless, so it stays.
  *
  * Categories cut across facets by design: `Italian` is a cuisine, `Desserts` a
- * course, `Baking` a method, `Vegetarian` a restriction.
+ * course, `Baking` a method, `Vegetarian` a restriction. Each resolves to the
+ * search it stands for — the original's cards linked into /search too, and
+ * never to standalone category pages.
  */
 
-export const CATEGORIES = [
+import type { FacetKey } from './model'
+
+export interface Category {
+  slug: string
+  label: string
+  facet: FacetKey
+  value: string
+  image?: string
+  featured?: boolean
+}
+
+export const CATEGORIES: Category[] = [
   { slug: 'mains', label: 'Mains', facet: 'courses', value: 'mains', image: '/images/categories/mains.webp', featured: true },
   { slug: 'desserts', label: 'Desserts', facet: 'courses', value: 'desserts', image: '/images/categories/desserts.webp', featured: true },
   { slug: 'breakfast', label: 'Breakfast & Brunch', facet: 'courses', value: 'breakfast_and_brunch', image: '/images/categories/breakfast.webp', featured: true },

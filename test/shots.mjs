@@ -1,9 +1,8 @@
 /**
- * Screenshots the built site so the rendering can be eyeballed and compared
- * against the original design. `--web` shoots dist/ over HTTP instead of the
- * single file over file://, which is how the two targets get compared.
+ * Screenshots the prerendered site over HTTP so the rendering can be compared
+ * against the previous engine's output.
  *
- * Usage: node test/shots.mjs [outDir] [--web]
+ * Usage: node test/shots.mjs [outDir]
  */
 import { chromium } from 'playwright'
 import { mkdirSync } from 'node:fs'
@@ -13,50 +12,55 @@ import { fileURLToPath } from 'node:url'
 import { startStatic } from './static-server.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
-const web = process.argv.includes('--web')
-const server = web ? await startStatic(join(ROOT, 'dist')) : null
-const FILE = server ? server.url : `file://${join(ROOT, 'dist', 'recipes.html')}`
-const OUT =
-  process.argv.slice(2).find((a) => !a.startsWith('--')) ??
-  join(ROOT, 'dist', 'shots', web ? 'web' : 'file')
+const OUT = process.argv.slice(2).find((a) => !a.startsWith('--')) ?? join(ROOT, 'dist', 'shots')
 
-const SHOTS = [
-  { name: 'home', hash: '#/', full: true },
-  { name: 'home-fold', hash: '#/', full: false },
-  { name: 'recipe', hash: '#/r/charred-crust-pizza', full: true },
-  { name: 'search', hash: '#/search', full: false },
-  { name: 'category', hash: '#/c/baking', full: false },
-  { name: 'home-mobile', hash: '#/', full: false, viewport: { width: 390, height: 844 } },
+/**
+ * Named to match the baseline captured from the previous engine. `category` is
+ * absent by design — those pages were never on the original site and are gone.
+ */
+export const SHOTS = [
+  { name: 'home', path: '/', full: true },
+  { name: 'home-fold', path: '/', full: false },
+  { name: 'recipe', path: '/recipes/charred-crust-pizza', full: true },
+  { name: 'search', path: '/search', full: false },
+  { name: 'home-mobile', path: '/', full: false, viewport: { width: 390, height: 844 } },
 ]
 
-mkdirSync(OUT, { recursive: true })
+export async function capture(outDir) {
+  mkdirSync(outDir, { recursive: true })
+  const server = await startStatic(join(ROOT, '.output', 'public'))
+  const browser = await chromium.launch()
+  const errors = []
 
-const browser = await chromium.launch()
-const errors = []
+  for (const shot of SHOTS) {
+    const page = await browser.newPage({
+      viewport: shot.viewport ?? { width: 1440, height: 900 },
+      deviceScaleFactor: 2,
+    })
+    page.on('pageerror', (e) => errors.push(`${shot.name}: ${e.message}`))
+    page.on('console', (m) => {
+      if (m.type() === 'error') errors.push(`${shot.name} console: ${m.text()}`)
+    })
 
-for (const shot of SHOTS) {
-  const page = await browser.newPage({
-    viewport: shot.viewport ?? { width: 1440, height: 900 },
-    deviceScaleFactor: 2,
-  })
-  page.on('pageerror', (e) => errors.push(`${shot.name}: ${e.message}`))
-  page.on('console', (m) => {
-    if (m.type() === 'error') errors.push(`${shot.name} console: ${m.text()}`)
-  })
+    await page.goto(server.url.replace(/\/$/, '') + shot.path, { waitUntil: 'networkidle' })
+    // Hydration settles layout; fonts and lazy images need a beat to land.
+    await page.waitForTimeout(800)
+    await page.screenshot({ path: join(outDir, `${shot.name}.png`), fullPage: shot.full })
+    await page.close()
+  }
 
-  await page.goto(FILE + shot.hash, { waitUntil: 'load' })
-  await page.waitForTimeout(600)
-  await page.screenshot({ path: join(OUT, `${shot.name}.png`), fullPage: shot.full })
-  console.log(`  ${shot.name}.png`)
-  await page.close()
+  await browser.close()
+  await server.close()
+  return errors
 }
 
-await browser.close()
-await server?.close()
-
-if (errors.length) {
-  console.log('\nPage errors:')
-  for (const e of errors) console.log('  ' + e)
-  process.exit(1)
+if (import.meta.url === `file://${process.argv[1]}`) {
+  const errors = await capture(OUT)
+  for (const shot of SHOTS) console.log(`  ${shot.name}.png`)
+  if (errors.length) {
+    console.log('\nPage errors:')
+    for (const e of errors) console.log('  ' + e)
+    process.exit(1)
+  }
+  console.log('\nNo page errors.')
 }
-console.log('\nNo page errors.')

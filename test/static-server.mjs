@@ -1,7 +1,7 @@
 /**
  * Minimal static server for exercising the web build over real HTTP, where
  * absolute asset paths and separate requests behave as they will in production.
- * The single-file build is driven over file:// instead and needs none of this.
+ * Resolves clean URLs to their prerendered index.html the way Pages does.
  */
 
 import { createServer } from 'node:http'
@@ -28,7 +28,15 @@ export function startStatic(dir) {
     }
     // normalize() collapses any ../ before it can escape the served directory.
     const file = join(dir, normalize(path).replace(/^(\.\.[/\\])+/, ''))
-    const target = path.endsWith('/') ? join(file, 'index.html') : file
+
+    // Clean URLs resolve to a directory's index.html, which is what Cloudflare
+    // Pages does for prerendered routes like /recipes/<slug>.
+    let target = file
+    try {
+      if (path.endsWith('/') || statSync(file).isDirectory()) target = join(file, 'index.html')
+    } catch {
+      target = file
+    }
 
     try {
       if (!statSync(target).isFile()) throw new Error('not a file')

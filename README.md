@@ -1,185 +1,150 @@
 # Recipes
 
-A recipe archive built from markdown fixtures, into either **one self-contained
-HTML file** or **a static site**.
+The Eat / Yeet recipe archive: twelve recipes as markdown fixtures, rendered by
+**TanStack Start** into a fully prerendered static site and served from
+Cloudflare Pages at [eatyeet.com](https://eatyeet.com).
 
-No database, no API, no build framework. Two build targets share one renderer:
-
-| | `npm run build` | `npm run build:web` |
-|---|---|---|
-| Output | `dist/recipes.html` | `dist/index.html` + `dist/assets/` |
-| Assets | inlined as data URIs | separate, content-hashed files |
-| Size | ~6.8 MB, always | 37 KB entry, 2.3 MB first load, ~0 after |
-| For | iCloud Drive, opened by double-clicking | Cloudflare Pages |
-
-The single file exists because `file://` cannot fetch anything, so everything
-has to already be in the document. That same encoding is wrong over HTTP, where
-it would cost every visitor the whole payload on every visit and cache nothing
-separately. Both targets render identical markup — the screenshots come out
-byte-for-byte identical — and differ only in how assets are referenced.
+No database, no API, no server at runtime. `npm run build` prerenders every
+route to HTML at build time; Pages serves the files.
 
 ## Commands
 
 ```bash
-npm run dev        # dev server on :4321, re-reads fixtures on every request
-npm run build      # -> dist/recipes.html          (the iCloud deliverable)
-npm run build:web  # -> dist/index.html + assets   (the deployed site)
-npm test           # both targets: 37 + 38 static, 17 browser checks each
-npm run test:file  # single-file target only
-npm run test:web   # web target only, driven over real HTTP
-npm run shots      # Playwright screenshots -> dist/shots/file/
-npm run shots:web  # ... and -> dist/shots/web/
-npm run convert    # one-time import from the old yeet seed dump
+npm run dev      # vite dev server
+npm run build    # -> .output/public (prerendered HTML + hashed assets)
+npm run preview  # serve the build locally
+npm test         # build, then 20 browser interaction checks
+npm run parity   # build, then pixel-diff against a baseline
+npm run shots    # Playwright screenshots -> dist/shots/
+npm run content  # fixtures -> src/generated (runs as part of build)
+npm run convert  # one-time import from the old yeet seed dump
 ```
+
+## URLs
+
+The shape matches the original site exactly, so old inbound links still resolve.
+
+| Route | |
+|---|---|
+| `/` | home — hero, latest six, browse grid |
+| `/recipes` | full listing |
+| `/recipes/<slug>` | recipe detail ×12 — the pages that carry the SEO weight |
+| `/browse` | browse by course, cuisine, method, diet |
+| `/search` | interactive; filters live in query params |
+| `/sitemap.xml`, `/robots.txt` | generated after the build |
+
+`/search` is `Disallow`ed in robots.txt and absent from the sitemap. It is one
+page whose filters are query params, and pointing a crawler at every facet
+permutation only competes with the recipe pages those permutations link to.
+
+There are no category pages. The original never had them — its browse cards
+linked into `/search` with a facet applied, which is what `lib/categories.ts`
+encodes.
 
 ## Visual parity with the original site
 
 This is not a reinterpretation of the Eat / Yeet design — it reuses it directly.
 
-`assets/css/global.css` is the **production Tailwind build** lifted from the old
-site's `.output/public/assets/global-*.css`, and the templates are transcribed
-class-for-class from the original React components. Matching class names against
-the original compiled CSS is what makes the rendering identical rather than
-merely similar. Each template names its source component at the top:
+`src/styles/global.css` is the **production Tailwind build** lifted from the old
+site's `.output/public/assets/global-*.css`, and the components are transcribed
+class-for-class from the original React ones. Matching class names against the
+original compiled CSS is what makes the rendering identical rather than merely
+similar. Each component names its source at the top.
 
-| Template | Ported from |
+| Component | Ported from |
 |---|---|
-| `templates/layout.js` | `platform/L3/layout/{nav,footer}.tsx`, `components/{recipe-card,browse-card}.tsx` |
-| `templates/home.js` | `components/hero.tsx`, `containers/home-container.tsx` |
-| `templates/recipe.js` | `containers/recipe-detail-container.tsx` and its section components |
-| `templates/search.js` | `containers/search-container.tsx`, `components/{filter-sidebar,faceted-filter-group,category-toggle}.tsx` |
-| `templates/palette.js` | `components/search-command-palette.tsx`, `packages/ui/.../dialog.tsx` |
+| `components/layout.tsx` | `platform/L3/layout/{nav,footer}.tsx`, `components/{recipe-card,browse-card}.tsx` |
+| `components/home.tsx` | `components/hero.tsx`, `containers/home-container.tsx` |
+| `components/recipe.tsx` | `containers/recipe-detail-container.tsx` and its section components |
+| `components/search.tsx` | `containers/search-container.tsx`, `components/{filter-sidebar,faceted-filter-group,category-toggle}.tsx` |
+| `components/palette.tsx` | `components/search-command-palette.tsx`, `packages/ui/.../dialog.tsx` |
+| `lib/seo.ts` | `platform/L1/seo.ts` |
+| the recipe JSON-LD | `features/recipes/components/recipe-json-ld.tsx` |
 
-`format.js`'s `humanizeMinutes` and `formatYield` are exact ports of the
+`format.ts`'s `humanizeMinutes` and `formatYield` are exact ports of the
 original `formatTime` / `formatYield`; keep them byte-compatible or card and
-header text will drift.
+header text will drift. `formatTime` keeps minutes alongside days
+("4 days 4 hr 37 min") and `formatYield` does **not** pluralize
+("2 16-inch pizza").
 
-The search page's `FilterSidebar`, its Radix checkboxes, the category pill
-toggle, and the global search palette (`search-command-palette.tsx`) are all
-ported markup too — the palette opens from the nav search button or Cmd/Ctrl-K
-and filters the inlined recipe array instead of calling Typesense.
+`npm run parity` diffs screenshots against a baseline and fails on any real
+change. The rewrite from the previous string-template renderer landed at **zero
+differing pixels across all five views**. To regenerate a baseline from that
+engine:
 
-Two departures:
+```bash
+git worktree add /tmp/oldengine 3e8082a
+cd /tmp/oldengine && npm install && npm run build:web && node test/shots.mjs --web
+# baseline lands in dist/shots/web
+```
+
+Two departures from the original, both deliberate:
 
 - **Four of twelve recipes have no photo** — american-buttercream,
   vanilla-cupcakes, chocolate-chip-banana-bread, classic-baked-mac-and-cheese.
   Their images died with the S3 bucket, so those cards render the original's
   `UtensilsCrossed` fallback, which is what the real site showed for an
-  imageless recipe. The other eight were recovered (see Provenance).
-- **No sign-in.** The original nav had a Sign in button; there is no auth in an
-  offline archive, so it is removed rather than rendered as a dead control.
+  imageless recipe. They also emit no JSON-LD `image` and so will not qualify
+  for a rich result — the honest outcome rather than a substituted photo.
+- **No sign-in.** The original nav had a Sign in button; there is no auth here,
+  so it is removed rather than rendered as a dead control.
 
 ## How it works
 
-The whole thing is one function: `render(recipes)` returns a complete HTML
-document. `serve.js` calls it per request; `build.js` calls it once and writes
-to disk. There is no separate dev and prod path.
+`scripts/build-content.mjs` parses the markdown fixtures into `src/generated`,
+split two ways on purpose:
 
-`render()` takes an optional **target** that decides only how the document
-reaches its assets — a map of public path to URL, plus how the stylesheet and
-scripts are referenced. The default inlines everything; `build-web.js` passes
-one that points at hashed files and collects the writes those URLs imply.
-Markup, shell, and bundle are produced by the same code either way, so the two
-targets cannot drift.
+- `index.json` — every recipe minus its body. Cards, facets, and the search
+  palette run off this, and it ships once.
+- `recipes/<slug>.json` — one body per recipe, loaded through `import.meta.glob`
+  so Vite emits a chunk per recipe. Reading one recipe never pulls the other
+  eleven.
 
-Templates are plain string functions with no DOM access, so the same code runs
-in Node at build time and in the browser on hash navigation. `render.js`
-concatenates the shared modules into one classic script — `file://` refuses to
-load `type="module"`, so a module graph isn't an option in the output.
+Every route is then prerendered. `vite.config.ts` lists the paths explicitly
+rather than crawling: crawling follows browse links and generates a page per
+facet permutation.
 
 ```
 fixtures/recipes/*.md   content
-fixtures/categories.js  browse categories (first 8 mirror the original home grid)
-assets/css/global.css   the original production Tailwind build
-assets/{fonts,img}/     inlined as data URIs at build time
-src/parse.js            markdown -> recipe objects (Node only)
-src/model.js            facets, filtering, search
-src/format.js           times, yields, labels
-src/icons.js            lucide SVGs, transcribed from the production bundle
-src/routes.js           hash routing vocabulary
-src/templates/          layout, home, search, category, recipe, palette
-src/page.js             route -> page HTML, nav state, document shell
-src/router.js           browser runtime
-src/render.js           recipes -> HTML, given a target
-src/assets.js           asset resolution for both targets
-src/build.js            the single-file target
-src/build-web.js        the web target
+src/generated/          built from fixtures; not checked in
+src/lib/categories.ts   browse categories (first 8 mirror the original home grid)
+src/lib/model.ts        facets, filtering, search
+src/lib/format.ts       times, yields, labels
+src/lib/seo.ts          head metadata
+src/lib/paths.ts        the prerender list and canonical origin
+src/components/         icons, layout, home, recipe, search, palette
+src/routes/             file-based routes
+src/styles/global.css   the original production Tailwind build
 ```
 
-### Bundling caveat
+### Adjacent JSX expressions split text nodes
 
-Concatenation puts every top-level binding in one scope, so a name declared in
-two files silently resolves to whichever came last. That shipped a real bug once
-— `renderHero` existed in both `home.js` and `recipe.js`, and the recipe version
-won on the home page, blanking the hero. `render.js` now fails the build on
-duplicate top-level names.
-
-## Constraints worth knowing
-
-The single file is opened over `file://`, which is stricter than it looks:
-
-- **No ES modules.** `type="module"` is blocked by CORS on the file origin.
-- **No `fetch()`.** Recipe data is inlined as a JS literal, never loaded.
-- **No clean URLs.** Directory indexes don't resolve, so routing is hash-based
-  (`#/r/charred-crust-pizza`).
-- **No external assets.** Fonts and images are base64 data URIs.
-
-These bind the single-file target only, and `npm run test:file` asserts every
-one of them. `test:web` **skips** those eight assertions rather than deleting
-them — the web target exists precisely to violate the last two — and asserts its
-own inverse in their place: no data URIs survive, every reference resolves to a
-file on disk, every asset name carries a content hash, and the first load stays
-under budget. Keep the hash-routing constraint in both: it is why the site needs
-no SPA fallback and why `/` is the only URL a server ever sees.
-
-Both targets are then driven in headless Chromium — the single file over
-`file://`, the web build over real HTTP from a throwaway static server — through
-the same 17 interaction checks: opening the palette, typing, navigating with the
-keyboard, toggling filters. Static assertions cannot catch a control wired to
-nothing; that is what these are for, and the facet chips have silently died this
-way before.
+`{count} {noun}` renders as three text nodes, and the browser shapes each run
+separately — which moved glyphs by a subpixel and showed up as a real pixel
+diff. Interpolate once (`` {`${count} ${noun}`} ``) anywhere the result sits in
+one visual run.
 
 ## Deploying
 
-The site is served by **Cloudflare Pages** at `eatyeet.com`, which also hosts the
-domain's DNS. Project settings:
-
-| Setting | Value |
-|---|---|
-| Build command | `npm ci --omit=dev && npm run build:web` |
-| Output directory | `dist` |
-| Node version | `.nvmrc` (22) |
-
-`--omit=dev` skips Playwright, which is a ~100 MB browser download the build
-does not need — only `gray-matter` and `marked` are used at build time.
-
-`dist/_headers` is generated by the build and tells Pages to serve `/assets/*`
-`immutable` for a year, and `/` with `must-revalidate`. That split is safe only
-because asset filenames carry a content hash, so changed bytes always mean a
-changed URL. If you ever emit an unhashed asset, fix the header rule too — a
-stale year-long cache is not something a redeploy can clear.
-
-No `_redirects` and no SPA fallback: routing is hash-based, so `/` is the only
-path ever requested.
-
-To deploy, push to `main`. To preview the exact bytes Pages will serve:
-
-```bash
-npm run build:web
-npx serve dist          # or any static server
-```
-
-The single-file build is unaffected by any of this and is still shipped by hand:
+Cloudflare Pages, project `eatyeet`, which also hosts the domain's DNS.
 
 ```bash
 npm run build
-cp dist/recipes.html ~/Library/Mobile\ Documents/com~apple~CloudDocs/Recipes/
+doppler run -p yeet -c dev -- npx wrangler pages deploy .output/public --project-name eatyeet
 ```
+
+`CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` live in Doppler, project
+`yeet`, config `dev`.
+
+`scripts/build-seo.mjs` writes `_headers` into the output: `/assets/*` is
+fingerprinted by Vite so it is served `immutable` for a year, images and fonts
+keep plain names and get a day plus revalidation, and HTML must revalidate or a
+deploy would never be seen.
 
 ## Adding a recipe
 
-Drop a markdown file in `fixtures/recipes/`. Frontmatter carries the scalars
-and taxonomy; the body uses `##` for the block and `###` for named sections:
+Drop a markdown file in `fixtures/recipes/`. Frontmatter carries the scalars and
+taxonomy; the body uses `##` for the block and `###` for named sections:
 
 ```markdown
 ---
@@ -197,7 +162,7 @@ cookMinutes: 40
 totalMinutes: 60
 yieldAmount: 4
 yieldUnit: serving
-image: my-recipe.jpg      # optional; file goes in assets/img/
+image: my-recipe.jpg      # optional; file goes in public/images/
 created: 2026-08-15
 ---
 
@@ -217,8 +182,8 @@ created: 2026-08-15
 - Something worth doing.
 ```
 
-Categories appear once a recipe carries the matching facet value; empty ones are
-hidden, except the eight featured on the home grid.
+Recipes sort newest-first by `created`. Categories appear once a recipe carries
+the matching facet value.
 
 ## Provenance
 
@@ -251,5 +216,5 @@ image files in git history across every branch, Chrome's HTTP and image caches
 `~/Pictures`, `~/Documents`. The originals were S3 objects
 (`seed/vanilla-cupcakes-hero.webp` and friends) in the deleted
 `yeet-production-images` bucket, and both domains' Route53 zones are gone, so
-there is nothing left to fetch. To restore one, drop the file in `assets/img/`
-and add an `image:` line to its frontmatter.
+there is nothing left to fetch. To restore one, drop the file in
+`public/images/` and add an `image:` line to its frontmatter.

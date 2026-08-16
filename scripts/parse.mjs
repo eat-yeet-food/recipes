@@ -91,6 +91,21 @@ function searchTextFor(data) {
 const list = (value) => (Array.isArray(value) ? value : [])
 const num = (value) => (typeof value === 'number' ? value : null)
 
+/**
+ * YAML parses an unquoted `2026-01-14` into a Date, and `String(date)` gives
+ * "Tue Jan 14 2026 …" — sliced to ten characters that was "Tue Jan 14", which
+ * sorted recipes by weekday name and produced an invalid schema.org
+ * datePublished. Always emit ISO YYYY-MM-DD.
+ */
+function isoDate(value) {
+  if (!value) return ''
+  if (value instanceof Date) return value.toISOString().slice(0, 10)
+  const text = String(value).trim()
+  if (/^\d{4}-\d{2}-\d{2}/.test(text)) return text.slice(0, 10)
+  const parsed = new Date(text)
+  return Number.isNaN(parsed.getTime()) ? '' : parsed.toISOString().slice(0, 10)
+}
+
 function parseRecipe(source, fallbackSlug) {
   const { data: fm, content } = matter(source)
   const body = parseBody(content)
@@ -112,7 +127,7 @@ function parseRecipe(source, fallbackSlug) {
     yieldAmount: num(fm.yieldAmount),
     yieldUnit: fm.yieldUnit ?? '',
     image: fm.image ?? '',
-    created: fm.created ? String(fm.created).slice(0, 10) : '',
+    created: isoDate(fm.created),
     ...body,
   }
 
