@@ -14,6 +14,7 @@ cookMinutes: 70
 totalMinutes: 105
 yieldAmount: 1
 yieldUnit: standard loaf
+image: chocolate-chip-banana-bread.jpg
 created: 2026-06-21
 ---
 

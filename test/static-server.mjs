@@ -19,7 +19,7 @@ const TYPES = {
 }
 
 /** Serves `dir` on an ephemeral port. Resolves to { url, close }. */
-export function startStatic(dir) {
+export function startStatic(dir, port = 0) {
   const server = createServer((req, res) => {
     const path = decodeURIComponent(new URL(req.url, 'http://localhost').pathname)
     if (path === '/favicon.ico') {
@@ -48,8 +48,10 @@ export function startStatic(dir) {
     }
   })
 
+  // Port 0 lets the OS pick a free one, which is what the tests want; the local
+  // preview server passes a fixed port so the URL is stable across restarts.
   return new Promise((resolve) => {
-    server.listen(0, '127.0.0.1', () => {
+    server.listen(port, '127.0.0.1', () => {
       resolve({
         url: `http://127.0.0.1:${server.address().port}/`,
         close: () => new Promise((done) => server.close(done)),

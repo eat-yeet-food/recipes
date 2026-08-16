@@ -13,7 +13,8 @@
     "shots": "npm run build && node test/shots.mjs",
     "parity": "npm run build && node test/parity.mjs",
     "convert": "node scripts/convert-fixtures.mjs",
-    "classes": "node scripts/check-classes.mjs"
+    "classes": "node scripts/check-classes.mjs",
+    "serve": "node scripts/serve.mjs"
   },
   "dependencies": {
     "@tanstack/react-router": "^1.163.3",

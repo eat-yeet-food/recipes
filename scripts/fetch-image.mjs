@@ -15,10 +15,10 @@ import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
-const [slug, url] = process.argv.slice(2)
+const [slug, source] = process.argv.slice(2)
 
-if (!slug || !url) {
-  console.error('usage: node scripts/fetch-image.mjs <recipe-slug> <image-url>')
+if (!slug || !source) {
+  console.error('usage: node scripts/fetch-image.mjs <recipe-slug> <image-url-or-path>')
   process.exit(1)
 }
 
@@ -32,12 +32,21 @@ const imageDir = join(ROOT, 'public', 'images')
 mkdirSync(imageDir, { recursive: true })
 const target = join(imageDir, `${slug}.jpg`)
 
-const res = await fetch(url)
-if (!res.ok) {
-  console.error(`Download failed: ${res.status} ${res.statusText}`)
-  process.exit(1)
+// A URL for candidates from the image finder; a path for one you already have.
+if (/^https?:\/\//i.test(source)) {
+  const res = await fetch(source)
+  if (!res.ok) {
+    console.error(`Download failed: ${res.status} ${res.statusText}`)
+    process.exit(1)
+  }
+  writeFileSync(target, Buffer.from(await res.arrayBuffer()))
+} else {
+  if (!existsSync(source)) {
+    console.error(`No such file: ${source}`)
+    process.exit(1)
+  }
+  writeFileSync(target, readFileSync(source))
 }
-writeFileSync(target, Buffer.from(await res.arrayBuffer()))
 
 // sips ships with macOS; keeps the served payload from ballooning.
 execFileSync('sips', ['-s', 'format', 'jpeg', '-s', 'formatOptions', '62', '-Z', '1100', target, '--out', target], {
