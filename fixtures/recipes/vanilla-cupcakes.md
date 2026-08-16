@@ -14,6 +14,7 @@ cookMinutes: 20
 totalMinutes: 72
 yieldAmount: 12
 yieldUnit: cupcakes
+image: vanilla-cupcakes.jpg
 created: 2026-05-01
 ---
 
