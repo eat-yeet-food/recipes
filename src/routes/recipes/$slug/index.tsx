@@ -65,12 +65,9 @@ function RecipeJsonLd({ recipe }: { recipe: Recipe }) {
   if (recipe.courses.length > 0) jsonLd.recipeCategory = recipe.courses.map(labelize)
   if (recipe.cuisines.length > 0) jsonLd.recipeCuisine = recipe.cuisines.map(labelize)
 
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-    />
-  )
+  const json = JSON.stringify(jsonLd).replace(/</g, '\\u003c')
+
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: json }} />
 }
 
 function RecipeRoute() {

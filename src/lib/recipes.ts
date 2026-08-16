@@ -28,7 +28,7 @@ export interface RecipeSummary {
   prepMinutes: number | null
   cookMinutes: number | null
   totalMinutes: number | null
-  yieldAmount: number | null
+  yieldAmount: number | string | null
   yieldUnit: string
   image: string
   created: string

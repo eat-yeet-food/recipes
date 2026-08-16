@@ -32,7 +32,7 @@ export function humanizeMinutes(minutes: number | null | undefined): string {
 }
 
 /** Port of formatYield(). Deliberately does not pluralize the unit. */
-export function formatYield(amount: number | null | undefined, unit: string): string {
+export function formatYield(amount: number | string | null | undefined, unit: string): string {
   const a = String(amount ?? '').trim()
   const u = String(unit ?? '').trim()
   if (!a && !u) return ''
@@ -49,5 +49,19 @@ export function isoDuration(minutes: number | null | undefined): string | undefi
   return `PT${hrs > 0 ? `${hrs}H` : ''}${mins > 0 ? `${mins}M` : ''}`
 }
 
+const decodeEntities = (text: string) =>
+  text.replace(/&(#\d+|#x[\da-f]+|amp|lt|gt|quot|apos);/gi, (entity, body: string) => {
+    const name = body.toLowerCase()
+    if (name === 'amp') return '&'
+    if (name === 'lt') return '<'
+    if (name === 'gt') return '>'
+    if (name === 'quot') return '"'
+    if (name === 'apos') return "'"
+    const code = name.startsWith('#x')
+      ? Number.parseInt(name.slice(2), 16)
+      : Number.parseInt(name.slice(1), 10)
+    return Number.isFinite(code) ? String.fromCodePoint(code) : entity
+  })
+
 /** Markdown was rendered at build time; search and JSON-LD want it plain. */
-export const stripTags = (html: string) => html.replace(/<[^>]*>/g, '')
+export const stripTags = (html: string) => decodeEntities(html.replace(/<[^>]*>/g, ''))

@@ -15,7 +15,14 @@ import { useEffect, useState } from 'react'
 import { Icon } from './icons'
 import { RecipeGrid } from './layout'
 import { labelize } from '../lib/format'
-import { FACET_KEYS, facetIndex, searchRecipes, type FacetKey, type SearchState } from '../lib/model'
+import {
+  FACET_KEYS,
+  emptySearch,
+  facetIndex,
+  searchRecipes,
+  type FacetKey,
+  type SearchState,
+} from '../lib/model'
 import { INDEX } from '../lib/recipes'
 
 const CHECKBOX =
@@ -26,21 +33,31 @@ const TOGGLE_BASE =
 const TOGGLE_ON = 'bg-charcoal text-white'
 const TOGGLE_OFF = 'bg-charcoal/5 text-charcoal/70 hover:bg-charcoal/10'
 
-/** checkbox.tsx — Radix renders a button with data-state. */
-function Checkbox({ checked, label }: { checked: boolean; label: string }) {
+/** checkbox.tsx — rendered as a native input while preserving Radix data attrs. */
+function Checkbox({
+  checked,
+  label,
+  onChange,
+}: {
+  checked: boolean
+  label: string
+  onChange: () => void
+}) {
   return (
-    <span
-      data-slot="checkbox"
-      role="checkbox"
-      aria-checked={checked}
-      aria-label={label}
-      data-state={checked ? 'checked' : 'unchecked'}
-      className={CHECKBOX}
-    >
+    <span className="relative grid size-4 shrink-0 place-content-center">
+      <input
+        data-slot="checkbox"
+        type="checkbox"
+        aria-label={label}
+        checked={checked}
+        onChange={onChange}
+        data-state={checked ? 'checked' : 'unchecked'}
+        className={`${CHECKBOX} absolute inset-0 m-0 appearance-none`}
+      />
       {checked && (
         <span
           data-slot="checkbox-indicator"
-          className="grid place-content-center text-current transition-none"
+          className="pointer-events-none absolute inset-0 grid place-content-center text-white transition-none"
         >
           <Icon name="check" className="size-3.5" />
         </span>
@@ -82,13 +99,13 @@ function FacetGroup({
               key={value}
               data-facet={facet.key}
               data-value={value}
-              onClick={(e) => {
-                e.preventDefault()
-                onToggle(value)
-              }}
               className="flex cursor-pointer items-center gap-2.5 rounded px-1 py-0.5 hover:bg-charcoal/3"
             >
-              <Checkbox checked={selected.includes(value)} label={labelize(value)} />
+              <Checkbox
+                checked={selected.includes(value)}
+                label={labelize(value)}
+                onChange={() => onToggle(value)}
+              />
               <span className="font-body text-sm text-charcoal/70">
                 {labelize(value)}
                 <span className="ml-1 text-charcoal/40">{count}</span>
@@ -118,7 +135,7 @@ export function SearchPage({
     if (draft === state.q) return
     const timer = setTimeout(() => onChange({ ...state, q: draft }), 180)
     return () => clearTimeout(timer)
-  }, [draft])
+  }, [draft, onChange, state])
 
   const results = searchRecipes(INDEX, state)
   const facets = facetIndex(INDEX)
@@ -158,8 +175,8 @@ export function SearchPage({
         </div>
       </div>
 
-      <div className="flex gap-10">
-        <aside className="space-y-1 hidden w-[260px] shrink-0 lg:block">
+      <div className="lg:flex lg:gap-10">
+        <aside className="mb-8 w-full space-y-1 lg:mb-0 lg:w-[260px] lg:shrink-0">
           {category && (
             <div className="pb-3">
               <h3 className="pb-2 font-body text-xs font-semibold uppercase tracking-[2px] text-charcoal/70">
@@ -213,7 +230,7 @@ export function SearchPage({
               <button
                 id="clear-filters"
                 type="button"
-                onClick={() => onChange({ q: '', ...Object.fromEntries(FACET_KEYS.map((k) => [k, []])) } as SearchState)}
+                onClick={() => onChange(emptySearch())}
                 className="text-xs font-semibold uppercase tracking-[1.5px] text-pink transition-colors hover:text-pink-dark"
               >
                 Clear all

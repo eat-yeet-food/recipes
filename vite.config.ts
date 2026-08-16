@@ -3,8 +3,6 @@ import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import viteReact from '@vitejs/plugin-react'
 import { nitro } from 'nitro/vite'
 
-import { ALL_PATHS } from './src/lib/paths'
-
 /**
  * Suppress "use client" directive warnings from RSC-aware libraries. These are
  * valid React conventions that Rollup doesn't understand — the original app
@@ -34,6 +32,7 @@ function suppressModuleDirectiveWarnings(): import('vite').Plugin {
  * silently drop a recipe out of the build.
  */
 export default defineConfig({
+  preview: { host: '127.0.0.1' },
   // Assets live under /build, not Vite's default /assets. A poisoned edge-cache
   // entry under the old path (see scripts/build-seo.mjs on the _headers merge
   // bug) outlived its deploy, and moving the directory retires every one of
@@ -44,11 +43,11 @@ export default defineConfig({
     suppressModuleDirectiveWarnings(),
     tanstackStart({
       srcDirectory: 'src',
-      // No crawling: it follows every browse link and prerenders a page per
-      // facet permutation. /search is one interactive page whose filters live
-      // in query params, so exactly one copy of it belongs in the build.
-      prerender: { enabled: true, crawlLinks: false },
-      pages: ALL_PATHS.map((path) => ({ path, prerender: { enabled: true } })),
+      // Prerendering is done by scripts/prerender.mjs after the server bundle is
+      // built. TanStack's internal Vite preview readiness probe is unreliable
+      // in restricted loopback environments, while the explicit script keeps the
+      // same path list and writes plain static HTML.
+      prerender: { enabled: false },
     }),
     viteReact(),
     nitro(),

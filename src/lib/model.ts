@@ -24,6 +24,7 @@ export type FacetKey = (typeof FACETS)[number]['key']
 export const FACET_KEYS = FACETS.map((f) => f.key) as FacetKey[]
 
 export type Filters = Record<FacetKey, string[]>
+export type SearchParams = Partial<Record<FacetKey | 'q', string>>
 export interface SearchState extends Filters {
   q: string
 }
@@ -36,7 +37,10 @@ function valuesOf(recipe: RecipeSummary, key: FacetKey): string[] {
 }
 
 export function emptyFilters(): Filters {
-  return Object.fromEntries(FACET_KEYS.map((key) => [key, []])) as Filters
+  return FACET_KEYS.reduce((filters, key) => {
+    filters[key] = []
+    return filters
+  }, {} as Filters)
 }
 
 export const emptySearch = (): SearchState => ({ q: '', ...emptyFilters() })
@@ -61,7 +65,7 @@ export function facetIndex(recipes: RecipeSummary[]) {
  * Text match: every whitespace-separated term must appear somewhere in the
  * recipe's search text. Twelve recipes doesn't warrant an index.
  */
-function matchesQuery(recipe: RecipeSummary, query: string): boolean {
+export function matchesQuery(recipe: RecipeSummary, query: string): boolean {
   const terms = query.toLowerCase().split(/\s+/).filter(Boolean)
   if (terms.length === 0) return true
   return terms.every((term) => recipe.searchText.includes(term))

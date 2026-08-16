@@ -12,6 +12,7 @@ import { Link } from '@tanstack/react-router'
 import { Icon } from './icons'
 import { BrowseCard, RecipeCard, SectionHeading } from './layout'
 import { CATEGORIES, type Category } from '../lib/categories'
+import type { SearchParams } from '../lib/model'
 import { latest } from '../lib/recipes'
 
 const MAX_SECTION_SIZE = 6
@@ -109,7 +110,7 @@ export function ViewAll({ label }: { label: string }) {
  * string, not an array, so the URL reads `?courses=mains` rather than the
  * router's default JSON array encoding.
  */
-export const categorySearch = (category: Category) => ({ [category.facet]: category.value })
+export const categorySearch = (category: Category): SearchParams => ({ [category.facet]: category.value })
 
 export function HomePage() {
   const featured = CATEGORIES.filter((c) => c.featured)

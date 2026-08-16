@@ -12,6 +12,7 @@ import { useNavigate } from '@tanstack/react-router'
 
 import { Icon } from './icons'
 import { humanizeMinutes, labelize } from '../lib/format'
+import { matchesQuery } from '../lib/model'
 import { INDEX, imageUrl, type RecipeSummary } from '../lib/recipes'
 
 const MIN_QUERY = 2
@@ -32,7 +33,7 @@ const KBD =
 const hitsFor = (query: string): RecipeSummary[] => {
   const q = query.trim().toLowerCase()
   if (q.length < MIN_QUERY) return []
-  return INDEX.filter((r) => r.searchText.includes(q)).slice(0, MAX_RESULTS)
+  return INDEX.filter((r) => matchesQuery(r, q)).slice(0, MAX_RESULTS)
 }
 
 /** The 40px thumbnail beside each hit. */
@@ -55,6 +56,8 @@ export function SearchPalette({ open, onClose }: { open: boolean; onClose: () =>
   const [query, setQuery] = useState('')
   const [active, setActive] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
+  const previousFocusRef = useRef<HTMLElement | null>(null)
   const navigate = useNavigate()
 
   const hits = hitsFor(query)
@@ -62,14 +65,46 @@ export function SearchPalette({ open, onClose }: { open: boolean; onClose: () =>
 
   useEffect(() => {
     if (!open) return
+    previousFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
     setQuery('')
     setActive(0)
     inputRef.current?.focus()
     document.body.style.overflow = 'hidden'
+    const inertElements = [
+      document.getElementById('main-content'),
+      document.querySelector('nav'),
+      document.querySelector('footer'),
+    ].filter((element): element is HTMLElement => element instanceof HTMLElement)
+    for (const element of inertElements) element.inert = true
     return () => {
       document.body.style.overflow = ''
+      for (const element of inertElements) element.inert = false
+      previousFocusRef.current?.focus()
+      previousFocusRef.current = null
     }
   }, [open])
+
+  const trapFocus = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== 'Tab') return
+    const focusable = Array.from(
+      contentRef.current?.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      ) ?? [],
+    ).filter((element) => element.offsetParent !== null && element.tabIndex >= 0)
+    if (focusable.length === 0) {
+      event.preventDefault()
+      return
+    }
+    const first = focusable[0]
+    const last = focusable[focusable.length - 1]
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault()
+      last.focus()
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault()
+      first.focus()
+    }
+  }
 
   const openRecipe = (slug: string) => {
     onClose()
@@ -107,12 +142,14 @@ export function SearchPalette({ open, onClose }: { open: boolean; onClose: () =>
         onClick={onClose}
       />
       <div
+        ref={contentRef}
         data-slot="dialog-content"
         data-state="open"
         role="dialog"
         aria-modal="true"
         aria-label="Search recipes"
         className={CONTENT}
+        onKeyDown={trapFocus}
       >
         <div
           data-palette-field

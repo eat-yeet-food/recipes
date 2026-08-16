@@ -12,8 +12,8 @@ route to HTML at build time; Pages serves the files.
 ```bash
 npm run dev      # vite dev server
 npm run build    # -> .output/public (prerendered HTML + hashed assets)
-npm run preview  # serve the build locally
-npm test         # build, then 20 browser interaction checks
+npm run preview  # serve the build locally on 127.0.0.1
+npm test         # build, then static and browser interaction checks
 npm run parity   # build, then pixel-diff against a baseline
 npm run shots    # Playwright screenshots -> dist/shots/
 npm run content  # fixtures -> src/generated (runs as part of build)
@@ -100,9 +100,16 @@ split two ways on purpose:
   so Vite emits a chunk per recipe. Reading one recipe never pulls the other
   eleven.
 
-Every route is then prerendered. `vite.config.ts` lists the paths explicitly
-rather than crawling: crawling follows browse links and generates a page per
-facet permutation.
+Every route is then prerendered by `scripts/prerender.mjs`, using the explicit
+path list in `src/lib/paths.ts`. TanStack Start's built-in prerender path starts
+a Vite/Nitro preview server and waits on Nitro's random-port probe; that probe
+can fail in restricted loopback environments even when the generated server is
+healthy. The local script keeps the route list obvious, binds the server to
+`127.0.0.1`, and writes the same plain HTML files into `.output/public`.
+
+Do not enable link crawling for prerendering. Crawling follows browse links into
+`/search?...` and creates one page per facet permutation. `/search` is an
+interactive page, not an SEO surface.
 
 ```
 fixtures/recipes/*.md   content
@@ -124,6 +131,20 @@ separately — which moved glyphs by a subpixel and showed up as a real pixel
 diff. Interpolate once (`` {`${count} ${noun}`} ``) anywhere the result sits in
 one visual run.
 
+### Rendered recipe HTML is generated data
+
+Markdown list items are rendered to a small allowlist of inline HTML at content
+build time. Raw HTML and unsafe link protocols are escaped before they reach
+`src/generated`, because recipe pages intentionally inject those strings with
+`dangerouslySetInnerHTML` to preserve inline links. JSON-LD must also escape
+`<` after `JSON.stringify()` so recipe text can never break out of the script
+tag.
+
+Search and JSON-LD convert that rendered HTML back to plain text with
+`stripTags()`, which also decodes common HTML entities. Keep that in sync with
+`scripts/parse.mjs`; otherwise page rendering may look right while search and
+schema text drift.
+
 ## Deploying
 
 Cloudflare Pages, project `eatyeet`, which also hosts the domain's DNS.
@@ -136,10 +157,22 @@ doppler run -p yeet -c dev -- npx wrangler pages deploy .output/public --project
 `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` live in Doppler, project
 `yeet`, config `dev`.
 
-`scripts/build-seo.mjs` writes `_headers` into the output: `/assets/*` is
+`scripts/build-seo.mjs` writes `_headers` into the output: `/build/*` is
 fingerprinted by Vite so it is served `immutable` for a year, images and fonts
-keep plain names and get a day plus revalidation, and HTML must revalidate or a
-deploy would never be seen.
+keep plain names and get a day plus revalidation, and HTML is left to
+Cloudflare Pages' default revalidation behavior.
+
+Cloudflare Pages applies every matching `_headers` rule and merges headers.
+Do not put a catch-all `Cache-Control` under `/*`; it can combine with
+`/build/*`, poison an asset URL as immutable HTML, and require either a cache
+purge token or a fresh asset path to recover. The hashed asset directory is
+`/build` rather than `/assets` because an earlier bad edge-cache entry under
+the old path outlived its deploy.
+
+Cloudflare creates the apex/www DNS records when the Pages custom domain is
+attached. Do not copy registrar parking A/AAAA records into Cloudflare; those
+point at the registrar's placeholder site, not this Pages project. The old
+single-file/iCloud build target was intentionally dropped after Pages went live.
 
 ## Adding a recipe
 

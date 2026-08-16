@@ -21,12 +21,73 @@ const BLOCKS = {
 
 const SECTIONED = new Set(['equipment', 'ingredients', 'steps'])
 
-const stripTags = (html) => html.replace(/<[^>]*>/g, '')
+const decodeEntities = (text) =>
+  text.replace(/&(#\d+|#x[\da-f]+|amp|lt|gt|quot|apos);/gi, (entity, body) => {
+    const name = body.toLowerCase()
+    if (name === 'amp') return '&'
+    if (name === 'lt') return '<'
+    if (name === 'gt') return '>'
+    if (name === 'quot') return '"'
+    if (name === 'apos') return "'"
+    const code = name.startsWith('#x')
+      ? Number.parseInt(name.slice(2), 16)
+      : Number.parseInt(name.slice(1), 10)
+    return Number.isFinite(code) ? String.fromCodePoint(code) : entity
+  })
 
-/** Render a list item's inline markdown, keeping links live. */
+const stripTags = (html) => decodeEntities(html.replace(/<[^>]*>/g, ''))
+
+const escapeHtml = (value) =>
+  String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+
+const isSafeUrl = (href) => {
+  try {
+    const url = new URL(href, 'https://eatyeet.com')
+    return ['http:', 'https:', 'mailto:'].includes(url.protocol)
+  } catch {
+    return false
+  }
+}
+
+function renderInlineTokens(tokens = []) {
+  return tokens.map((token) => {
+    switch (token.type) {
+      case 'text':
+        return token.tokens ? renderInlineTokens(token.tokens) : token.text
+      case 'escape':
+        return token.text
+      case 'codespan':
+        return escapeHtml(token.text)
+      case 'strong':
+        return `<strong>${renderInlineTokens(token.tokens)}</strong>`
+      case 'em':
+        return `<em>${renderInlineTokens(token.tokens)}</em>`
+      case 'del':
+        return `<del>${renderInlineTokens(token.tokens)}</del>`
+      case 'br':
+        return '<br>'
+      case 'link': {
+        const text = renderInlineTokens(token.tokens)
+        if (!isSafeUrl(token.href)) return text
+        return `<a href="${escapeHtml(token.href)}">${text}</a>`
+      }
+      case 'image':
+      case 'html':
+        return escapeHtml(token.raw ?? '')
+      default:
+        return escapeHtml(token.raw ?? token.text ?? '')
+    }
+  }).join('')
+}
+
+/** Render a list item's inline markdown through a small allowlist. */
 function renderItem(item) {
-  const raw = item.text ?? ''
-  return marked.parseInline(raw).trim()
+  return renderInlineTokens(item.tokens).trim()
 }
 
 /**
@@ -81,6 +142,7 @@ function searchTextFor(data) {
     data.description,
     sectionText(data.ingredients),
     sectionText(data.equipment),
+    sectionText(data.steps),
     data.notes.map(stripTags).join(' '),
     data.tips.map(stripTags).join(' '),
   ]
@@ -90,6 +152,7 @@ function searchTextFor(data) {
 
 const list = (value) => (Array.isArray(value) ? value : [])
 const num = (value) => (typeof value === 'number' ? value : null)
+const yieldAmount = (value) => (typeof value === 'number' || typeof value === 'string' ? value : null)
 
 /**
  * YAML parses an unquoted `2026-01-14` into a Date, and `String(date)` gives
@@ -124,7 +187,7 @@ function parseRecipe(source, fallbackSlug) {
     prepMinutes: num(fm.prepMinutes),
     cookMinutes: num(fm.cookMinutes),
     totalMinutes: num(fm.totalMinutes),
-    yieldAmount: num(fm.yieldAmount),
+    yieldAmount: yieldAmount(fm.yieldAmount),
     yieldUnit: fm.yieldUnit ?? '',
     image: fm.image ?? '',
     created: isoDate(fm.created),

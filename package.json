@@ -7,8 +7,8 @@
   "scripts": {
     "content": "node scripts/build-content.mjs",
     "dev": "npm run content && vite dev",
-    "build": "npm run content && vite build && node scripts/build-seo.mjs",
-    "preview": "vite preview",
+    "build": "npm run content && HOST=127.0.0.1 vite build && node scripts/prerender.mjs && node scripts/build-seo.mjs",
+    "preview": "HOST=127.0.0.1 vite preview",
     "test": "npm run build && node test/verify.mjs && node test/interact.mjs",
     "shots": "npm run build && node test/shots.mjs",
     "parity": "npm run build && node test/parity.mjs",

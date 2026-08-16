@@ -12,12 +12,13 @@
  * `cn()` merges are resolved here by hand into their final class strings.
  */
 
+import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
 
 import { Icon } from './icons'
 import { humanizeMinutes, formatYield } from '../lib/format'
 import { imageUrl, type RecipeSummary } from '../lib/recipes'
-import type { SearchState } from '../lib/model'
+import type { SearchParams } from '../lib/model'
 
 /** The "YEET" wordmark path, lifted verbatim from nav.tsx. */
 const WORDMARK_PATH =
@@ -71,6 +72,7 @@ export function Nav({
   heroVisible = false,
   onOpenPalette,
 }: NavState & { onOpenPalette: () => void }) {
+  const [menuOpen, setMenuOpen] = useState(false)
   const navBg = onHeroPage
     ? 'bg-transparent'
     : 'bg-white/92 backdrop-blur-[16px] shadow-[0_1px_0_rgba(45,45,45,0.08)]'
@@ -151,10 +153,42 @@ export function Nav({
                 .filter(Boolean)
                 .join(' ')}
               label="Open menu"
+              aria-expanded={menuOpen}
+              aria-controls="mobile-nav-menu"
+              onClick={() => setMenuOpen((open) => !open)}
             >
               <Icon name="menu" className="size-6" />
             </GhostButton>
           </div>
+        </div>
+      </div>
+      <div id="mobile-nav-menu" hidden={!menuOpen} className="border-t border-charcoal/10 bg-white px-4 py-3 md:hidden">
+        <div className="mx-auto flex max-w-[var(--max-width)] flex-col gap-1">
+          <Link
+            to="/search"
+            onClick={() => setMenuOpen(false)}
+            className="rounded px-2 py-3 font-nav text-sm font-[900] uppercase tracking-wider text-charcoal hover:bg-charcoal/5"
+          >
+            Recipes
+          </Link>
+          <Link
+            to="/browse"
+            onClick={() => setMenuOpen(false)}
+            className="rounded px-2 py-3 font-nav text-sm font-[900] uppercase tracking-wider text-charcoal hover:bg-charcoal/5"
+          >
+            Browse
+          </Link>
+          <button
+            type="button"
+            data-palette-open=""
+            onClick={() => {
+              setMenuOpen(false)
+              onOpenPalette()
+            }}
+            className="rounded px-2 py-3 text-left font-nav text-sm font-[900] uppercase tracking-wider text-charcoal hover:bg-charcoal/5"
+          >
+            Search
+          </button>
         </div>
       </div>
     </nav>
@@ -278,7 +312,7 @@ export function BrowseCard({
 }: {
   label: string
   imageUrl: string
-  search: Partial<SearchState>
+  search: SearchParams
 }) {
   return (
     <Link

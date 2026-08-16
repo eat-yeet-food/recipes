@@ -5,11 +5,11 @@
  *
  * Downloads the image, resizes it to 1100px on the long edge (the recipe hero
  * renders at most ~1440 CSS px, and every byte is served on first paint),
- * writes it to assets/img/<slug>.jpg, and adds the `image:` line to the
+ * writes it to public/images/<slug>.jpg, and adds the `image:` line to the
  * recipe's frontmatter if it isn't already there.
  */
 
-import { writeFileSync, readFileSync, existsSync } from 'node:fs'
+import { writeFileSync, readFileSync, existsSync, mkdirSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -28,7 +28,9 @@ if (!existsSync(recipePath)) {
   process.exit(1)
 }
 
-const target = join(ROOT, 'assets', 'img', `${slug}.jpg`)
+const imageDir = join(ROOT, 'public', 'images')
+mkdirSync(imageDir, { recursive: true })
+const target = join(imageDir, `${slug}.jpg`)
 
 const res = await fetch(url)
 if (!res.ok) {
@@ -52,5 +54,5 @@ if (/^image:/m.test(md)) {
 }
 
 const kb = (readFileSync(target).length / 1024).toFixed(0)
-console.log(`  assets/img/${slug}.jpg (${kb} KB)`)
+console.log(`  public/images/${slug}.jpg (${kb} KB)`)
 console.log('\nNow run: npm run build')
