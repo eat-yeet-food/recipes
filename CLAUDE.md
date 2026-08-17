@@ -26,11 +26,19 @@ beside them. `mt-14` on a browse section was dead the day it was written.
 When a class is missing, **use one the original used**. Do not hand-write CSS
 and do not add a Tailwind build — either one drifts the design.
 
-## 2. The original components are the source of truth
+## 2. Know which surfaces still follow the original
 
 `/Users/phoganuci/src/yeet/frontend/apps/web/src/` holds the React components
-this was transcribed from. **Read them before changing markup or classes.**
-Every component here names its source at the top.
+this was transcribed from. **Read them before changing markup or classes** on
+the home, browse, search, card, nav, footer, and command-palette surfaces.
+Every ported component here names its source at the top.
+
+Recipe detail pages are no longer the original layout. The canonical
+`components/recipe.tsx` wrapper renders `components/recipe-butternut-trial.tsx`,
+which contains the Butternut-inspired article card, print/pin controls, cook
+mode, local Geller/Avenir font usage, and desktop-only "Browse Recipes" sidebar.
+Do not restore the old full-bleed hero or centered recipe card unless explicitly
+asked.
 
 `~/src/yeet` is **read-only**. Never modify anything under it.
 
@@ -45,6 +53,8 @@ tell. A pixel diff cannot tell you a link points at the wrong page.
 
 ```bash
 npm test          # build + static + interaction + guard self-tests
+npm run test:recipe-pages  # focused recipe redesign coverage
+npm run storybook # local component harness at /storybook
 npm run parity    # pixel-diff against a baseline
 npm run serve     # look at it: 127.0.0.1:4321, served as Pages serves it
 ```
@@ -66,6 +76,11 @@ Interactions reached by clicking never reproduce this. Test cold navigations.
 `site.config.mjs` — the canonical origin and the prerender path list. The app,
 the prerenderer, and the sitemap all read it. They used to hold three copies
 and drifted.
+
+Internal noindex pages such as `/storybook` and the historical
+`/recipes/artisan-new-york-pizza/butternut-trial` route belong in
+`TRIAL_PATHS`. They are prerendered for local/review use, but `build-seo.mjs`
+keeps them out of the sitemap.
 
 ## 6. `_headers` rules merge
 
@@ -91,3 +106,15 @@ as YAML arrays, but each displayed string inside `equipment`, `ingredients`,
 `scripts/parse.mjs` at content-build time. Do not reintroduce frontmatter plus
 Markdown body parsing; the YAML schema exists so editors can lint the document
 shape while recipe prose still gets links and emphasis.
+
+## 9. Deploy through Doppler in non-interactive shells
+
+Cloudflare credentials live in Doppler. In Codex and other non-interactive
+shells, plain Wrangler fails because `CLOUDFLARE_API_TOKEN` is not set. Use:
+
+```bash
+doppler run -p yeet -c dev -- npx wrangler pages deploy .output/public --project-name eatyeet
+```
+
+Deploy only `.output/public` after a passing `npm test` or a known-good
+`npm run build` plus targeted test run.

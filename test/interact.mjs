@@ -146,9 +146,9 @@ const catsHref = await page.evaluate(
 )
 check('View all categories -> /browse', catsHref === '/browse', String(catsHref))
 
-// --- the nav leaves its hero state on scroll ----------------------------
-// Without a scroll listener the recipe nav stays transparent with white text,
-// which lands white-on-white over the content card.
+// --- recipe pages use normal white chrome -------------------------------
+// Recipe pages no longer have the old dark hero image under transparent nav.
+// The header should start and stay readable while scrolling.
 await page.goto(BASE + '/recipes/artisan-new-york-pizza', { waitUntil: 'networkidle' })
 await page.waitForTimeout(300)
 const navTop = await page.evaluate(() => getComputedStyle(document.querySelector('nav')).backgroundColor)
@@ -158,9 +158,9 @@ const navDown = await page.evaluate(() => ({
   bg: getComputedStyle(document.querySelector('nav')).backgroundColor,
   link: getComputedStyle(document.querySelector('nav a[href="/search"]')).color,
 }))
-check('nav transparent over the hero', navTop === 'rgba(0, 0, 0, 0)', navTop)
-check('nav becomes opaque on scroll', navDown.bg !== 'rgba(0, 0, 0, 0)', navDown.bg)
-check('nav text darkens on scroll', navDown.link !== 'rgb(255, 255, 255)', navDown.link)
+check('recipe nav starts opaque', navTop !== 'rgba(0, 0, 0, 0)', navTop)
+check('recipe nav remains opaque on scroll', navDown.bg !== 'rgba(0, 0, 0, 0)', navDown.bg)
+check('recipe nav text stays dark', navDown.link !== 'rgb(255, 255, 255)', navDown.link)
 
 // --- cold loads throw nothing -------------------------------------------
 // Only one /search document is prerendered and Pages serves it for every query

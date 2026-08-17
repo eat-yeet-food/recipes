@@ -53,6 +53,7 @@ const sitemap = [
 const robots = `User-agent: *
 Allow: /
 Disallow: /search
+Disallow: /storybook
 
 Sitemap: ${SITE_URL}/sitemap.xml
 `

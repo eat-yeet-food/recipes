@@ -14,6 +14,8 @@ npm run dev        # vite dev server
 npm run build      # -> .output/public (prerendered HTML + hashed assets)
 npm run serve      # preview the built site at 127.0.0.1:4321, as Pages serves it
 npm test           # build, then static + interaction + guard self-tests
+npm run storybook  # dev server; open /storybook for the component harness
+npm run test:recipe-pages  # build, then recipe-page redesign coverage
 npm run typecheck  # tsc --noEmit (also runs inside build)
 npm run classes    # class guard alone (also runs inside build)
 npm run parity     # build, then pixel-diff against a baseline
@@ -33,6 +35,7 @@ The shape matches the original site exactly, so old inbound links still resolve.
 | `/recipes/<slug>` | recipe detail ×12 — the pages that carry the SEO weight |
 | `/browse` | browse by course, cuisine, method, diet |
 | `/search` | interactive; filters live in query params |
+| `/storybook` | internal noindex component harness; prerendered but not in sitemap |
 | `/sitemap.xml`, `/robots.txt` | generated after the build |
 
 `/search` is `Disallow`ed in robots.txt and absent from the sitemap. It is one
@@ -43,21 +46,29 @@ There are no category pages. The original never had them — its browse cards
 linked into `/search` with a facet applied, which is what `lib/categories.ts`
 encodes.
 
-## Visual parity with the original site
+## Visual system
 
-This is not a reinterpretation of the Eat / Yeet design — it reuses it directly.
+The home, browse, search, card, nav, footer, and command-palette surfaces still
+reuse the retired Eat / Yeet production CSS and component structure. Recipe
+detail pages are the deliberate exception: they now use the Butternut-inspired
+article/card layout in `components/recipe-butternut-trial.tsx`, promoted to all
+canonical `/recipes/<slug>` routes through `components/recipe.tsx`.
 
 `src/styles/global.css` is the **production Tailwind build** lifted from the old
 site's `.output/public/assets/global-*.css`, and the components are transcribed
 class-for-class from the original React ones. Matching class names against the
-original compiled CSS is what makes the rendering identical rather than merely
-similar. Each component names its source at the top.
+original compiled CSS is what keeps the unchanged surfaces stable. New recipe
+page and chrome overrides live in `src/styles/site-overrides.css`; prefer data
+attributes plus scoped CSS there over inventing Tailwind utilities that do not
+exist in the compiled build.
 
 | Component | Ported from |
 |---|---|
 | `components/layout.tsx` | `platform/L3/layout/{nav,footer}.tsx`, `components/{recipe-card,browse-card}.tsx` |
 | `components/home.tsx` | `components/hero.tsx`, `containers/home-container.tsx` |
-| `components/recipe.tsx` | `containers/recipe-detail-container.tsx` and its section components |
+| `components/recipe.tsx` | canonical wrapper for the redesigned recipe article |
+| `components/recipe-butternut-trial.tsx` | redesigned recipe article, cook mode, print/pin controls, desktop browse sidebar |
+| `components/storybook-harness.tsx` | internal component harness rendered at `/storybook` |
 | `components/search.tsx` | `containers/search-container.tsx`, `components/{filter-sidebar,faceted-filter-group,category-toggle}.tsx` |
 | `components/palette.tsx` | `components/search-command-palette.tsx`, `packages/ui/.../dialog.tsx` |
 | `lib/seo.ts` | `platform/L1/seo.ts` |
@@ -111,6 +122,36 @@ One departure from the original is deliberate:
 
 - **No sign-in.** The original nav had a Sign in button; there is no auth here,
   so it is removed rather than rendered as a dead control.
+- **Recipe detail layout.** Recipe pages use a print-focused article card with
+  cook mode, local Geller/Avenir font assets, and a desktop-only "Browse
+  Recipes" sidebar. The sidebar is hidden on mobile, in print, and in cook mode.
+
+## Storybook harness
+
+`/storybook` is a static, noindex harness for reviewing production components
+with production data. It is intentionally lightweight rather than the external
+Storybook package: the app is already a prerendered Vite/TanStack site, and the
+repo's testing/visual workflow runs through Playwright against the same built
+HTML Cloudflare Pages serves.
+
+The harness currently covers:
+
+- section heading typography
+- recipe cards
+- browse gallery cards
+- empty and filled recipe grids
+- the canonical redesigned recipe article
+
+Use it locally with:
+
+```bash
+npm run storybook
+# open http://127.0.0.1:5173/storybook if the browser does not open itself
+```
+
+The route is listed in `site.config.mjs` under `TRIAL_PATHS`, so it is
+prerendered and testable, but `scripts/build-seo.mjs` keeps it out of the
+sitemap and disallows it in `robots.txt`.
 
 ## How it works
 
@@ -141,7 +182,7 @@ src/lib/categories.ts   browse categories (first 8 mirror the original home grid
 src/lib/model.ts        facets, filtering, search
 src/lib/format.ts       times, yields, labels
 src/lib/seo.ts          head metadata
-src/components/         icons, layout, home, recipe, search, palette
+src/components/         icons, layout, home, recipe, storybook, search, palette
 src/routes/             file-based routes
 src/styles/global.css   the original production Tailwind build
 site.config.mjs         the canonical origin and the prerender path list
@@ -176,7 +217,7 @@ This section is the only deployment runbook — there is no second copy to drift
 ### Verify, then ship
 
 ```bash
-npm test     # build + 46 static + 37 interaction + 13 guard self-tests
+npm test     # build + static + interaction + recipe-page + guard self-tests
 npm run serve   # preview the exact bytes Pages will serve, at :4321
 doppler run -p yeet -c dev -- \
   npx wrangler pages deploy .output/public --project-name eatyeet
@@ -185,6 +226,15 @@ doppler run -p yeet -c dev -- \
 `npm test` runs `npm run build` first, so a passing test run means the artifact
 in `.output/public` is the one that was tested. Deploy that directory; never a
 directory built by some other command.
+
+In Codex or any other non-interactive shell, run Wrangler through Doppler as
+shown above. A plain `npx wrangler ...` fails without
+`CLOUDFLARE_API_TOKEN`, because Wrangler cannot open an interactive login flow
+there. The successful deploy shape is:
+
+```bash
+doppler run -p yeet -c dev -- npx wrangler pages deploy .output/public --project-name eatyeet
+```
 
 ### What the build does
 
