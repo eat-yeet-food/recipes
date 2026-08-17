@@ -1,11 +1,11 @@
 /**
- * One-time conversion: seeds/fixtures.sql -> fixtures/recipes/*.md
+ * One-time conversion: seeds/fixtures.sql -> fixtures/recipes/*.yaml
  *
  * Reads the Postgres COPY blocks out of the yeet seed dump and rewrites each
- * published recipe as a markdown file with YAML frontmatter. Structured
+ * published recipe as a YAML document. Structured
  * ingredient columns (quantity/unit/brand/ingredient_id) are intentionally
  * dropped: recipe_items.description already carries the full human line,
- * including any inline markdown links.
+ * including any inline Markdown links.
  *
  * Usage: node scripts/convert-fixtures.mjs [path/to/fixtures.sql]
  */
@@ -13,6 +13,7 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import yaml from 'js-yaml'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const SQL_PATH = process.argv[2] || join(ROOT, '..', 'yeet', 'seeds', 'fixtures.sql')
@@ -101,7 +102,7 @@ function readCopyBlocks(sql) {
   return tables
 }
 
-// --- Markdown emission ---------------------------------------------------
+// --- YAML emission -------------------------------------------------------
 
 const GENERIC_TITLE = {
   ingredients: 'Ingredients',
@@ -111,87 +112,75 @@ const GENERIC_TITLE = {
 
 const bySortOrder = (a, b) => Number(a.sort_order) - Number(b.sort_order)
 
-/** YAML-quote a scalar only when it needs it. */
-function yamlScalar(value) {
-  const s = String(value)
-  return /^[\w][\w .,'/&()°-]*$/.test(s) && !/: /.test(s) ? s : JSON.stringify(s)
-}
-
-function yamlList(values) {
-  return `[${values.map(yamlScalar).join(', ')}]`
-}
-
-function frontmatter(recipe) {
-  const lines = [
-    `slug: ${yamlScalar(recipe.slug)}`,
-    `title: ${yamlScalar(recipe.title)}`,
-    `description: ${yamlScalar(recipe.description ?? '')}`,
-    `category: ${yamlScalar(recipe.category_type ?? '')}`,
-    `courses: ${yamlList(decodeArray(recipe.courses))}`,
-    `cuisines: ${yamlList(decodeArray(recipe.cuisines))}`,
-    `methods: ${yamlList(decodeArray(recipe.methods))}`,
-    `restrictions: ${yamlList(decodeArray(recipe.restrictions))}`,
-    `occasions: ${yamlList(decodeArray(recipe.occasions))}`,
-    `ingredientTypes: ${yamlList(decodeArray(recipe.ingredient_types))}`,
-  ]
+function recipeScalars(recipe) {
+  const doc = {
+    slug: recipe.slug,
+    title: recipe.title,
+    description: recipe.description ?? '',
+    category: recipe.category_type ?? '',
+    courses: decodeArray(recipe.courses),
+    cuisines: decodeArray(recipe.cuisines),
+    methods: decodeArray(recipe.methods),
+    restrictions: decodeArray(recipe.restrictions),
+    occasions: decodeArray(recipe.occasions),
+    ingredientTypes: decodeArray(recipe.ingredient_types),
+  }
   for (const [key, col] of [
     ['prepMinutes', 'prep_minutes'],
     ['cookMinutes', 'cook_minutes'],
     ['totalMinutes', 'total_minutes'],
     ['yieldAmount', 'yield_amount'],
   ]) {
-    if (recipe[col] != null && recipe[col] !== '') lines.push(`${key}: ${recipe[col]}`)
+    if (recipe[col] != null && recipe[col] !== '') doc[key] = Number(recipe[col])
   }
-  if (recipe.yield_unit) lines.push(`yieldUnit: ${yamlScalar(recipe.yield_unit)}`)
-  if (recipe.created_at) lines.push(`created: ${recipe.created_at.slice(0, 10)}`)
-  return lines.join('\n')
+  if (recipe.yield_unit) doc.yieldUnit = recipe.yield_unit
+  if (recipe.created_at) doc.created = recipe.created_at.slice(0, 10)
+  return doc
 }
 
-/** Render one `## Heading` group made of typed sections. */
-function sectionBlock(heading, sections, itemsBySection, ordered) {
-  if (sections.length === 0) return ''
-  const parts = [`## ${heading}`]
-  for (const section of sections) {
-    const items = (itemsBySection.get(section.id) ?? []).slice().sort(bySortOrder)
-    if (items.length === 0) continue
-    if (section.title && section.title !== GENERIC_TITLE[section.type]) {
-      parts.push(`### ${section.title}`)
-    }
-    parts.push(
-      items
-        .map((item, idx) => {
-          const text = (item.description ?? '').trim()
-          const comment = (item.comment ?? '').trim()
-          const line = comment ? `${text} — ${comment}` : text
-          return ordered ? `${idx + 1}. ${line}` : `- ${line}`
-        })
-        .join('\n'),
-    )
-  }
-  return parts.length > 1 ? parts.join('\n\n') : ''
+function sectionList(sections, itemsBySection) {
+  return sections
+    .map((section) => {
+      const items = (itemsBySection.get(section.id) ?? []).slice().sort(bySortOrder)
+      if (items.length === 0) return null
+      return {
+        title: section.title && section.title !== GENERIC_TITLE[section.type] ? section.title : '',
+        items: items
+          .map((item) => {
+            const text = (item.description ?? '').trim()
+            const comment = (item.comment ?? '').trim()
+            return comment ? `${text} — ${comment}` : text
+          })
+          .filter(Boolean),
+      }
+    })
+    .filter(Boolean)
 }
 
-function tipBlock(heading, tips) {
-  if (tips.length === 0) return ''
-  const body = tips
+function tipList(tips) {
+  return tips
     .slice()
     .sort(bySortOrder)
-    .map((t) => `- ${(t.description ?? '').trim()}`)
-    .join('\n')
-  return `## ${heading}\n\n${body}`
+    .map((t) => (t.description ?? '').trim())
+    .filter(Boolean)
 }
 
-function toMarkdown(recipe, sections, itemsBySection, tips) {
+function toRecipeYaml(recipe, sections, itemsBySection, tips) {
   const ofType = (type) => sections.filter((s) => s.type === type).sort(bySortOrder)
-  const blocks = [
-    sectionBlock('Equipment', ofType('equipment'), itemsBySection, false),
-    sectionBlock('Ingredients', ofType('ingredients'), itemsBySection, false),
-    sectionBlock('Steps', ofType('instructions'), itemsBySection, true),
-    tipBlock('Notes', tips.filter((t) => t.type === 'note')),
-    tipBlock('Tips', tips.filter((t) => t.type === 'tip')),
-  ].filter(Boolean)
-
-  return `---\n${frontmatter(recipe)}\n---\n\n${blocks.join('\n\n')}\n`
+  const doc = {
+    ...recipeScalars(recipe),
+    equipment: sectionList(ofType('equipment'), itemsBySection),
+    ingredients: sectionList(ofType('ingredients'), itemsBySection),
+    steps: sectionList(ofType('instructions'), itemsBySection),
+    notes: tipList(tips.filter((t) => t.type === 'note')),
+    tips: tipList(tips.filter((t) => t.type === 'tip')),
+  }
+  return yaml.dump(doc, {
+    lineWidth: -1,
+    noRefs: true,
+    sortKeys: false,
+    quotingType: '"',
+  })
 }
 
 // --- Main ----------------------------------------------------------------
@@ -215,14 +204,14 @@ mkdirSync(OUT_DIR, { recursive: true })
 
 const published = (tables.recipes ?? []).filter((r) => r.status === 'published')
 for (const recipe of published) {
-  const markdown = toMarkdown(
+  const source = toRecipeYaml(
     recipe,
     sectionsByRecipe.get(recipe.id) ?? [],
     itemsBySection,
     tipsByRecipe.get(recipe.id) ?? [],
   )
-  writeFileSync(join(OUT_DIR, `${recipe.slug}.md`), markdown)
-  console.log(`  ${recipe.slug}.md`)
+  writeFileSync(join(OUT_DIR, `${recipe.slug}.yaml`), source)
+  console.log(`  ${recipe.slug}.yaml`)
 }
 
 console.log(`\nWrote ${published.length} recipes to fixtures/recipes/`)

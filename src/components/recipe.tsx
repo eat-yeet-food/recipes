@@ -157,7 +157,7 @@ function Instructions({ sections }: { sections: Section[] }) {
                   className="flex items-baseline gap-5 border-b border-border-light pb-6 last:border-b-0 last:pb-0 print:gap-3 print:pb-2 print:border-b-0"
                 >
                   <span
-                    className="min-w-[40px] shrink-0 text-right font-display text-[28px] font-extrabold leading-none text-charcoal print:min-w-[24px] print:text-[12pt]"
+                    className="min-w-[40px] shrink-0 text-right font-display text-[28px] font-extrabold leading-none text-charcoal/75 print:min-w-[24px] print:text-[12pt]"
                     aria-hidden="true"
                   >
                     {i + 1}
@@ -218,7 +218,7 @@ function NumberedList({ items }: { items: string[] }) {
           className="flex items-baseline gap-5 border-b border-border-light mb-6 pb-6 last:border-b-0 last:mb-0 last:pb-0 print:gap-3 print:pb-2 print:mb-2 print:border-b-0"
         >
           <span
-            className="min-w-[40px] shrink-0 text-right font-display text-[28px] font-extrabold leading-none text-charcoal print:min-w-[24px] print:text-[12pt]"
+            className="min-w-[40px] shrink-0 text-right font-display text-[28px] font-extrabold leading-none text-charcoal/75 print:min-w-[24px] print:text-[12pt]"
             aria-hidden="true"
           >
             {i + 1}

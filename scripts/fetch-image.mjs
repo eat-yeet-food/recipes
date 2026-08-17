@@ -6,7 +6,7 @@
  * Downloads the image, resizes it to 1100px on the long edge (the recipe hero
  * renders at most ~1440 CSS px, and every byte is served on first paint),
  * writes it to public/images/<slug>.jpg, and adds the `image:` line to the
- * recipe's frontmatter if it isn't already there.
+ * recipe's YAML document if it isn't already there.
  */
 
 import { writeFileSync, readFileSync, existsSync, mkdirSync } from 'node:fs'
@@ -22,9 +22,9 @@ if (!slug || !source) {
   process.exit(1)
 }
 
-const recipePath = join(ROOT, 'fixtures', 'recipes', `${slug}.md`)
+const recipePath = join(ROOT, 'fixtures', 'recipes', `${slug}.yaml`)
 if (!existsSync(recipePath)) {
-  console.error(`No such recipe: fixtures/recipes/${slug}.md`)
+  console.error(`No such recipe: fixtures/recipes/${slug}.yaml`)
   process.exit(1)
 }
 
@@ -53,12 +53,12 @@ execFileSync('sips', ['-s', 'format', 'jpeg', '-s', 'formatOptions', '62', '-Z',
   stdio: 'ignore',
 })
 
-const md = readFileSync(recipePath, 'utf8')
-if (/^image:/m.test(md)) {
-  writeFileSync(recipePath, md.replace(/^image:.*$/m, `image: ${slug}.jpg`))
+const recipeSource = readFileSync(recipePath, 'utf8')
+if (/^image:/m.test(recipeSource)) {
+  writeFileSync(recipePath, recipeSource.replace(/^image:.*$/m, `image: ${slug}.jpg`))
   console.log(`Replaced image for ${slug}`)
 } else {
-  writeFileSync(recipePath, md.replace(/^created:/m, `image: ${slug}.jpg\ncreated:`))
+  writeFileSync(recipePath, recipeSource.replace(/^created:/m, `image: ${slug}.jpg\ncreated:`))
   console.log(`Added image to ${slug}`)
 }
 

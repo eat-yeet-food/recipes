@@ -1,5 +1,5 @@
 /**
- * Markdown fixtures -> generated JSON the app imports.
+ * YAML fixtures -> generated JSON the app imports.
  *
  * Split deliberately. `index.json` carries every recipe minus its body: enough
  * for cards, facet filtering, and the search palette, and small enough to ship

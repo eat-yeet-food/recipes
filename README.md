@@ -1,6 +1,6 @@
 # Recipes
 
-The Eat / Yeet recipe archive: twelve recipes as markdown fixtures, rendered by
+The Eat / Yeet recipe archive: twelve recipes as YAML fixtures, rendered by
 **TanStack Start** into a fully prerendered static site and served from
 Cloudflare Pages at [eatyeet.com](https://eatyeet.com).
 
@@ -114,7 +114,7 @@ One departure from the original is deliberate:
 
 ## How it works
 
-`scripts/build-content.mjs` parses the markdown fixtures into `src/generated`,
+`scripts/build-content.mjs` parses the YAML fixtures into `src/generated`,
 split two ways on purpose:
 
 - `index.json` — every recipe minus its body. Cards, facets, and the search
@@ -135,7 +135,7 @@ Do not enable link crawling for prerendering. Crawling follows browse links into
 interactive page, not an SEO surface.
 
 ```
-fixtures/recipes/*.md   content
+fixtures/recipes/*.yaml content
 src/generated/          built from fixtures; not checked in
 src/lib/categories.ts   browse categories (first 8 mirror the original home grid)
 src/lib/model.ts        facets, filtering, search
@@ -156,12 +156,12 @@ one visual run.
 
 ### Rendered recipe HTML is generated data
 
-Markdown list items are rendered to a small allowlist of inline HTML at content
-build time. Raw HTML and unsafe link protocols are escaped before they reach
-`src/generated`, because recipe pages intentionally inject those strings with
-`dangerouslySetInnerHTML` to preserve inline links. JSON-LD must also escape
-`<` after `JSON.stringify()` so recipe text can never break out of the script
-tag.
+Recipe body strings in YAML are rendered from inline Markdown to a small
+allowlist of inline HTML at content build time. Raw HTML and unsafe link
+protocols are escaped before they reach `src/generated`, because recipe pages
+intentionally inject those strings with `dangerouslySetInnerHTML` to preserve
+inline links. JSON-LD must also escape `<` after `JSON.stringify()` so recipe
+text can never break out of the script tag.
 
 Search and JSON-LD convert that rendered HTML back to plain text with
 `stripTags()`, which also decodes common HTML entities. Keep that in sync with
@@ -245,47 +245,52 @@ own asset URLs and does not depend on the current ones.
 
 ## Adding a recipe
 
-Drop a markdown file in `fixtures/recipes/`. Frontmatter carries the scalars and
-taxonomy; the body uses `##` for the block and `###` for named sections:
+Drop a YAML document in `fixtures/recipes/`. Scalars and taxonomy live at the
+top level. `equipment`, `ingredients`, and `steps` are arrays of titled
+sections; `notes` and `tips` are flat arrays. Every displayed string inside
+those body fields may contain inline Markdown links/emphasis, rendered by
+`scripts/parse.mjs` during `npm run content`.
 
-```markdown
----
+```yaml
 slug: my-recipe
 title: My Recipe
 description: One line.
-category: savory          # savory | sweet
-courses: [mains]
-cuisines: [italian]
-methods: [stovetop]
+category: savory
+courses:
+  - mains
+cuisines:
+  - italian
+methods:
+  - stovetop
 restrictions: []
-occasions: [everyday]
+occasions:
+  - everyday
+ingredientTypes: []
 prepMinutes: 20
 cookMinutes: 40
 totalMinutes: 60
 yieldAmount: 4
 yieldUnit: serving
-image: my-recipe.jpg      # optional; file goes in public/images/
+image: my-recipe.jpg
 created: 2026-08-15
----
-
-## Ingredients
-
-### Sauce
-- 2 tbsp olive oil
-
-## Steps
-
-1. Do the thing.
-
-## Notes
-- Something worth knowing.
-
-## Tips
-- Something worth doing.
+equipment: []
+ingredients:
+  - title: Sauce
+    items:
+      - 2 tbsp [olive oil](https://example.com/oil)
+steps:
+  - title: ''
+    items:
+      - Do the thing.
+notes:
+  - Something worth knowing.
+tips:
+  - Something worth doing.
 ```
 
 Recipes sort newest-first by `created`. Categories appear once a recipe carries
-the matching facet value.
+the matching facet value. Recipe `title` and `description` are canonical plain
+text because cards, SEO, JSON-LD, and search all consume them directly.
 
 ## Provenance
 
@@ -333,4 +338,4 @@ image files in git history across every branch, Chrome's HTTP and image caches
 (`seed/vanilla-cupcakes-hero.webp` and friends) in the deleted
 `yeet-production-images` bucket, and both domains' Route53 zones are gone, so
 there is nothing left to fetch. To replace one, drop the file in
-`public/images/` and point the recipe frontmatter at it.
+`public/images/` and point the recipe YAML `image` field at it.

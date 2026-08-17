@@ -1,23 +1,14 @@
 /**
- * Markdown fixtures -> plain recipe objects.
+ * YAML fixtures -> plain recipe objects.
  *
- * Node-only. Inline markdown is rendered to HTML here, at build time, so the
+ * Node-only. Inline Markdown is rendered to HTML here, at build time, so the
  * browser never needs a markdown parser — the shipped file carries plain data.
  */
 
 import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import matter from 'gray-matter'
 import { marked } from 'marked'
-
-/** `## Heading` -> the recipe field it fills. */
-const BLOCKS = {
-  equipment: 'equipment',
-  ingredients: 'ingredients',
-  steps: 'steps',
-  notes: 'notes',
-  tips: 'tips',
-}
+import yaml from 'js-yaml'
 
 const SECTIONED = new Set(['equipment', 'ingredients', 'steps'])
 
@@ -85,52 +76,18 @@ function renderInlineTokens(tokens = []) {
   }).join('')
 }
 
-/** Render a list item's inline markdown through a small allowlist. */
-function renderItem(item) {
-  return renderInlineTokens(item.tokens).trim()
-}
-
-/**
- * Walk lexer tokens into blocks. `##` switches block, `###` opens a named
- * section within it, and each list contributes its items to the open section.
- */
-function parseBody(markdown) {
-  const result = { equipment: [], ingredients: [], steps: [], notes: [], tips: [] }
-  const tokens = marked.lexer(markdown)
-
-  let block = null
-  let section = null
-
-  const openSection = (title) => {
-    section = { title, items: [] }
-    result[block].push(section)
-  }
-
-  for (const token of tokens) {
-    if (token.type === 'heading' && token.depth === 2) {
-      block = BLOCKS[token.text.trim().toLowerCase()] ?? null
-      section = null
-      continue
-    }
-    if (!block) continue
-
-    if (token.type === 'heading' && token.depth === 3) {
-      if (SECTIONED.has(block)) openSection(token.text.trim())
-      continue
-    }
-
-    if (token.type === 'list') {
-      const items = token.items.map(renderItem)
-      if (!SECTIONED.has(block)) {
-        result[block].push(...items)
-      } else {
-        if (!section) openSection('')
-        section.items.push(...items)
-      }
-    }
-  }
-
-  return result
+/** Render one YAML display string as inline Markdown through a small allowlist. */
+function renderMarkdown(value) {
+  const tokens = marked.lexer(String(value ?? ''))
+  return tokens
+    .map((token) => {
+      if (token.type === 'paragraph') return renderInlineTokens(token.tokens)
+      if (token.type === 'text') return token.tokens ? renderInlineTokens(token.tokens) : token.text
+      if (token.type === 'space') return ''
+      return escapeHtml(token.raw ?? token.text ?? '')
+    })
+    .join(' ')
+    .trim()
 }
 
 /** Everything a text query should be able to match. */
@@ -154,6 +111,19 @@ const list = (value) => (Array.isArray(value) ? value : [])
 const num = (value) => (typeof value === 'number' ? value : null)
 const yieldAmount = (value) => (typeof value === 'number' || typeof value === 'string' ? value : null)
 
+function normalizeSectioned(value) {
+  return list(value)
+    .map((section) => ({
+      title: renderMarkdown(section?.title),
+      items: list(section?.items).map(renderMarkdown).filter(Boolean),
+    }))
+    .filter((section) => section.title || section.items.length > 0)
+}
+
+function normalizeFlat(value) {
+  return list(value).map(renderMarkdown).filter(Boolean)
+}
+
 /**
  * YAML parses an unquoted `2026-01-14` into a Date, and `String(date)` gives
  * "Tue Jan 14 2026 …" — sliced to ten characters that was "Tue Jan 14", which
@@ -170,28 +140,32 @@ function isoDate(value) {
 }
 
 function parseRecipe(source, fallbackSlug) {
-  const { data: fm, content } = matter(source)
-  const body = parseBody(content)
+  const data = yaml.load(source) ?? {}
+  const sectioned = Object.fromEntries(
+    [...SECTIONED].map((field) => [field, normalizeSectioned(data[field])]),
+  )
 
   const recipe = {
-    slug: fm.slug ?? fallbackSlug,
-    title: fm.title ?? fallbackSlug,
-    description: fm.description ?? '',
-    category: fm.category ?? '',
-    courses: list(fm.courses),
-    cuisines: list(fm.cuisines),
-    methods: list(fm.methods),
-    restrictions: list(fm.restrictions),
-    occasions: list(fm.occasions),
-    ingredientTypes: list(fm.ingredientTypes),
-    prepMinutes: num(fm.prepMinutes),
-    cookMinutes: num(fm.cookMinutes),
-    totalMinutes: num(fm.totalMinutes),
-    yieldAmount: yieldAmount(fm.yieldAmount),
-    yieldUnit: fm.yieldUnit ?? '',
-    image: fm.image ?? '',
-    created: isoDate(fm.created),
-    ...body,
+    slug: data.slug ?? fallbackSlug,
+    title: data.title ?? fallbackSlug,
+    description: data.description ?? '',
+    category: data.category ?? '',
+    courses: list(data.courses),
+    cuisines: list(data.cuisines),
+    methods: list(data.methods),
+    restrictions: list(data.restrictions),
+    occasions: list(data.occasions),
+    ingredientTypes: list(data.ingredientTypes),
+    prepMinutes: num(data.prepMinutes),
+    cookMinutes: num(data.cookMinutes),
+    totalMinutes: num(data.totalMinutes),
+    yieldAmount: yieldAmount(data.yieldAmount),
+    yieldUnit: data.yieldUnit ?? '',
+    image: data.image ?? '',
+    created: isoDate(data.created),
+    ...sectioned,
+    notes: normalizeFlat(data.notes),
+    tips: normalizeFlat(data.tips),
   }
 
   recipe.searchText = searchTextFor(recipe)
@@ -201,7 +175,7 @@ function parseRecipe(source, fallbackSlug) {
 /** Read every fixture, newest first. */
 export function loadRecipes(dir) {
   return readdirSync(dir)
-    .filter((f) => f.endsWith('.md'))
-    .map((file) => parseRecipe(readFileSync(join(dir, file), 'utf8'), file.replace(/\.md$/, '')))
+    .filter((f) => /\.ya?ml$/.test(f))
+    .map((file) => parseRecipe(readFileSync(join(dir, file), 'utf8'), file.replace(/\.ya?ml$/, '')))
     .sort((a, b) => (b.created ?? '').localeCompare(a.created ?? '') || a.title.localeCompare(b.title))
 }

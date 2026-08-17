@@ -1,6 +1,6 @@
 # Agent guide
 
-The Eat / Yeet recipe archive: 12 markdown fixtures rendered by TanStack Start
+The Eat / Yeet recipe archive: 12 YAML fixtures rendered by TanStack Start
 into a fully prerendered static site on Cloudflare Pages at eatyeet.com.
 No database, no API, **no server at runtime**.
 
@@ -82,3 +82,12 @@ gaps and substitutions plainly.
 
 `README.md`'s "Image provenance" section records where every image came from,
 including the ones that are not photographs of these dishes. Keep it accurate.
+
+## 8. Recipe fixtures are YAML, not Markdown files
+
+Fixtures live in `fixtures/recipes/*.yaml`. Recipe body fields are structured
+as YAML arrays, but each displayed string inside `equipment`, `ingredients`,
+`steps`, `notes`, and `tips` is inline Markdown source rendered by
+`scripts/parse.mjs` at content-build time. Do not reintroduce frontmatter plus
+Markdown body parsing; the YAML schema exists so editors can lint the document
+shape while recipe prose still gets links and emphasis.
