@@ -1,7 +1,7 @@
 ---
 slug: penne-bolognese
-title: Penne Bolognese Recipe
-description: A rich and hearty Bolognese sauce paired with penne pasta, topped with Parmigiano Reggiano for a satisfying, traditional Italian dish.
+title: Bolognese
+description: A rich and hearty Bolognese sauce paired with your pasta of choice, topped with Parmigiano Reggiano for a satisfying, traditional Italian dish.
 category: savory
 courses: [mains]
 cuisines: [italian]
@@ -33,7 +33,7 @@ created: 2025-02-01
 - 2.25 lb 80/20 ground beef mince
 - 1 28 oz can of [Strianese San Marzano Tomatoes](https://www.amazon.com/Strianese-San-Marzano-Tomatoes-Pack/dp/B004ROGYDM)
 - 4 oz water
-- 1 16 oz bag of [Rummo penne rigate](https://www.wholefoodsmarket.com/product/rummo-pasta-penne-rigate-1-pound-b007mnyz2m)
+- 16 oz dried pasta of choice, such as rigatoni, tagliatelle, pappardelle, or penne
 - 16 oz finely grated [Parmigiano Reggiano](https://www.wholefoodsmarket.com/product/mitica-parmigiano-reggiano-24-month-raw-b07fz74rrn)
 
 ## Steps
@@ -50,7 +50,7 @@ created: 2025-02-01
 10. Add mashed tomatoes to the mixture, rinsing the can with 4 oz of water and adding to the mixture. Stir until the mixture starts to bubble and reduce heat to the lightest simmer setting.
 11. Allow to simmer uncovered for 3.5-4 hours until all water has evaporated, stirring every 20-30 minutes. The only remaining liquid should be fat.
 12. If the mixture becomes prematurely dehydrated, add 4 ounces of water. Be sure to allow all excess water to evaporate before serving.
-13. Boil penne in heavily salted water for 11 minutes. Strain penne. Reserve 1 cup of pasta water.
+13. Boil pasta in heavily salted water according to its package timing until al dente. Strain pasta. Reserve 1 cup of pasta water.
 14. Add 1 cup of pasta water back to the large pot that you used to boil the pasta in and reduce on high heat to ¼ cup. Once reduced add the pasta and bolognese and cook on high for one minute.
 15. Serve 4 portions and top each with 1/4 of the grated Parmigiano Reggiano.
 

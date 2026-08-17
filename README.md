@@ -302,9 +302,10 @@ Recipes" section above the browse grid.
 Four recipe photos survived in `frontend/apps/web/public/images/`. The rest have
 mixed origins and should be treated as replacements unless noted otherwise:
 
-- **bolognese** — restored from git history
-  (`apps/eat-yeet/public/images/bolognese.jpg`), so the filename confirms the
-  assignment.
+- **bolognese** — was restored from git history, but has since been replaced
+  with the owner-supplied Unsplash photo
+  `sorin-popa-XAxvKp0tdwU-unsplash.jpg`. The recovered original is still in git
+  history at the commit before it was swapped.
 - **sourdough** — was also recovered from git history, but has since been
   **replaced by a generated image** the owner supplied. It is not a photograph
   of this loaf. The recovered original is still in git history at the commit

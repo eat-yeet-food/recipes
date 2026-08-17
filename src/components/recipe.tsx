@@ -157,7 +157,7 @@ function Instructions({ sections }: { sections: Section[] }) {
                   className="flex items-baseline gap-5 border-b border-border-light pb-6 last:border-b-0 last:pb-0 print:gap-3 print:pb-2 print:border-b-0"
                 >
                   <span
-                    className="min-w-[40px] shrink-0 text-right font-display text-[28px] font-extrabold leading-none text-gradient-cta opacity-60 print:text-charcoal print:[background:none] print:[-webkit-text-fill-color:unset] print:opacity-100 print:min-w-[24px] print:text-[12pt]"
+                    className="min-w-[40px] shrink-0 text-right font-display text-[28px] font-extrabold leading-none text-charcoal print:min-w-[24px] print:text-[12pt]"
                     aria-hidden="true"
                   >
                     {i + 1}
@@ -218,7 +218,7 @@ function NumberedList({ items }: { items: string[] }) {
           className="flex items-baseline gap-5 border-b border-border-light mb-6 pb-6 last:border-b-0 last:mb-0 last:pb-0 print:gap-3 print:pb-2 print:mb-2 print:border-b-0"
         >
           <span
-            className="min-w-[40px] shrink-0 text-right font-display text-[28px] font-extrabold leading-none text-gradient-cta opacity-60 print:min-w-[24px] print:text-[12pt]"
+            className="min-w-[40px] shrink-0 text-right font-display text-[28px] font-extrabold leading-none text-charcoal print:min-w-[24px] print:text-[12pt]"
             aria-hidden="true"
           >
             {i + 1}
@@ -259,7 +259,7 @@ export function RecipeDetail({ recipe }: { recipe: Recipe }) {
   return (
     <>
       <RecipeHero recipe={recipe} />
-      <div>
+      <div className="recipe-rich">
         <div className="-mt-12 relative z-10 mx-auto rounded-t-[var(--radius-xl)] bg-white px-8 py-10 shadow-lg max-w-[var(--max-width-narrow)] max-sm:mx-4 max-sm:px-6 max-sm:py-8 print:mt-0 print:px-0 print:py-4 print:rounded-none print:shadow-none print:border-b print:border-b-charcoal/30">
           <div className="mb-4 flex items-center justify-between">
             <nav

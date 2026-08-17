@@ -1,6 +1,6 @@
 ---
 slug: donut-glaze
-title: Donut Glaze Recipe
+title: Donut Glaze
 description: A smooth and customizable glaze perfect for any donut, offering a balance of sweetness and consistency.
 category: sweet
 courses: [breakfast_and_brunch]
