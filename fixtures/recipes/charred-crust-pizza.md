@@ -1,7 +1,7 @@
 ---
 slug: charred-crust-pizza
-title: Charred Crust Pizza
-description: Pizza with detailed technique, high gluten dough, and a hot launch that chars the crust for a crisp yet airy bite, using a pizza oven and stone.
+title: Artisan New York Pizza
+description: A high-hydration New York-style pizza dough mixed cold, fermented for 2-3 days, and baked hot with tomato sauce, frozen provolone, pecorino romano, and oregano.
 category: savory
 courses: [mains]
 cuisines: [north_american]
@@ -9,105 +9,101 @@ methods: [baking]
 restrictions: []
 occasions: [entertaining]
 ingredientTypes: [cheese]
-prepMinutes: 6030
-cookMinutes: 7
-totalMinutes: 6037
-yieldAmount: 2
-yieldUnit: 16-inch pizza
+prepMinutes: 4590
+cookMinutes: 6
+totalMinutes: 4596
+yieldAmount: 3
+yieldUnit: 16-inch pizzas
 image: charred-crust-pizza.jpg
 created: 2025-01-15
 ---
 
 ## Equipment
 
-- Kitchen scale
-- Bench dough scraper
-- Food processor
-- 9" proofing tins
-- Infrared thermometer
-- Immersion blender
-- Pastry basting brush
-- Wood peel for launching
-- Metal peels
-- Pizza oven
-- Wire rack
-- Pizza cutter
+- [Kitchen scale](https://www.amazon.com/OXO-Grips-Everyday-Glass-Scale/dp/B0BNSP4C3F?source=ps-sl-shoppingads-lpcontext&ref_=fplfs&smid=A1TWYVWG4QDVKK&gQT=1&th=1)
+- [Bench dough scraper](https://www.amazon.com/Bread-Dough-Bench-Bowl-Scraper/dp/B0894HTQVZ/ref=sr_1_1_pp?crid=CCB3H9YKD884&dib=eyJ2IjoiMSJ9.ew7o8SO4igvrGqNITDghgc4NWbBVdhPgD2XPknFBeYSvXq9KvghJ2j0By9zPXlMbXmysOoBiRcAS2Uu8UcezaaxMwD7MwjCm0vKZUP--1E1G_H8iA9Ll6GdWNFq_cOagA4PYerMabUFPzFRP5_8wD0doyyVbyrjlzcgjhVLY2cBeKGgy15kepzCsWx2yeoA4kp_b9SV8zspePMG96GkzhrGSSZzDVTxWuesBijC3BQEiBvTy07GuRQvWU7uzrkLoN6qe29nHQG94r6dBzYDJzKuqLBZ_70rWXnKUhOjfR74.RFm3ozlmnuGxPakJxqzy2X7DH0ZLD_DdEQ081PY5lqI&dib_tag=se&keywords=bench+scraper&qid=1750794298&s=home-garden&sprefix=bench,garden,127&sr=1-1)
+- [Ooni Halo Pro Spiral Mixer](https://ooni.com/products/ooni-halo-pro-spiral-mixer)
+- [9" proofing tins](https://www.webstaurantstore.com/choice-9-round-stacking-dough-pan/176DPAN96.html?utm_source=google&utm_medium=cpc&gbraid=0AAAAAD_Dx-vt77gLbs6NDGMeygXq7xhDG&gclid=CjwKCAjwmenCBhA4EiwAtVjzmub9VXbmLlgC8kWhNQiwyqNvkpYM91N5H8DVzu6SEmAjkSe94Fs2rxoCoHsQAvD_BwE) ([lids](https://www.webstaurantstore.com/choice-9-dough-pan-lid/176DPAN96C.html))
+- [Infrared thermometer](https://www.amazon.com/Etekcity-Lasergrip-1080-Non-Contact-Thermometer/dp/B00DMI632G/ref=asc_df_B00DMI632G?mcid=2d419244ec1b319e80908e4723b0afae&tag=hyprod-20&linkCode=df0&hvadid=693585715857&hvpos&hvnetw=g&hvrand=17294660038293995409&hvpone&hvptwo&hvqmt&hvdev=c&hvdvcmdl&hvlocint&hvlocphy=9009731&hvtargid=pla-309607628772&psc=1&hvocijid=17294660038293995409-B00DMI632G-&hvexpln=0)
+- [Wood peel for launching](https://www.amazon.com/New-Star-Foodservice-50295-Wooden/dp/B009LPDNPO/ref=sr_1_1_sspa?crid=ANHW3CPI395V&dib=eyJ2IjoiMSJ9.psTdMyM9heuHSClTVwRVkUaiY4K_-LReNLPlmb6HFlKhOCZ0klinBLFRDOvG3Zq19VeFztljGiR3TsxRRLRM5d6D-pz7rD7zmlIYr1c3tDUWdESVxAzwp0Vu3yxaroOIBHmKyu0QCUv7Sbbo8X4VT4OK9wBGUStLp5lp5ASPOqZbZS-UJiVX4cgjzBqGvTV4xB_0jTajqF2i3TfKSEbHwLx_WVK3pQOfua5dvIYOD8Hh47SUVpKyDOYXG6seJL7WX-X4UhphUnV6-FhxKSgBu3IAWUkI_CFE6ncRoFo7n_w.9VcdOwughDOP6Z8uAWrTMhhNb2nXEMUuXI1NNKzLhjo&dib_tag=se&keywords=wood+peel&qid=1750794477&s=home-garden&sprefix=wood+peel,garden,121&sr=1-1-spons&sp_csd=d2lkZ2V0TmFtZT1zcF9hdGY&psc=1)
+- [Metal peels](https://www.amazon.com/dp/B0D2XZ5YDJ?ref_=ppx_hzod_title_dt_b_fed_asin_title_1_0&th=1)
+- [Pizza oven](https://halocooks.com/products/versa-16-outdoor-pizza-oven)
+- 16" parchment circles
+- 16" pizza screen
+- [Wire rack](https://www.amazon.com/Hiware-2-Pack-Cooling-Racks-Baking/dp/B0829T38F7/ref=sr_1_1_pp?crid=7OEVUQM44P93&dib=eyJ2IjoiMSJ9.oHx30FUv-EawXqmpviVzTfGRuQUqGA1T-OEeyjfxXHQl_1os2gBzXgqkVF5XKmz3k5nT0TRjvIYdq8GHhnIxSvY3Q85bckgJk8roTqaCDZI-kRFxpGmjfSZDz7b7PnBkh--FwhVvZexYkVZPbCLEjWl06bj-YvIM_DzUKD6J7RIRNece-ixFxUiZUa3ImayNPRPdAS7cR95l96zrgoHvxz7v2oGfh1oExJ7DxCr3HM-REo4ApwLulNibJ87RybfwDOoKUX_dblF1l28r68-P_7GCijhsOrDHjCxHU55rbo.hE6GA35AZOr8oi5BvAnUKmCEh5eYDwWfTWVXkHLT6t0&dib_tag=se&keywords=wire+rack&qid=1750798097&sprefix=wire+rack,aps,143&sr=8-1)
+- [Pizza cutter](https://www.amazon.com/KitchenAid-KE113OHOBA-Classic-Pizza-Wheel/dp/B07YP2VL68/ref=sr_1_1_sspa?crid=2IKLMIVCOJQZN&dib=eyJ2IjoiMSJ9.b0kowESHJwwYKjeG-7rL96GNnkYDTZnw5grcIa1vFJUMDuaNm2PsJ7huBcb5XWHQBys1YXxtNww7vj2zXAFvQmSSsq0BsLA7t9IsAUE2t6oIQInaXuX-VCmSw40-7ZdkjKLx6XYYQZoTqcZsqukKyJGiN1fAvc8Ce3o8b5pIttoNTA17hChhtNcj9Mnsq5JLxDvsHn1zfXhn4yLKjFTXMSS6kOmLF8LjfYm93SI6xR6pERWVEIL0BYGXsgpMjTbxZ6Ioi-xYlcotdFdIFD9HArbCZrsh2YvgGhNoA75sJLY.SfjFpgSbXTlRaFw7YKTgYa68XKnoteM8fd4rl94ONgI&dib_tag=se&keywords=pizza+cutter&qid=1750798113&sprefix=pizza+,aps,132&sr=8-1-spons&sp_csd=d2lkZ2V0TmFtZT1zcF9hdGY&psc=1)
+
+### Nice to haves
+
+- [Large rotary cheese grater](https://www.amazon.com/Rotary-Cheese-Grater-Vegetable-Chopper/dp/B07VPZRWM5/ref=asc_df_B07VPZRWM5?mcid=741a8ff4834336dc8dad3cca408592c1&tag=hyprod-20&linkCode=df0&hvadid=693711673837&hvpos&hvnetw=g&hvrand=15500585928110911450&hvpone&hvptwo&hvqmt&hvdev=c&hvdvcmdl&hvlocint=&hvlocphy=9009731&hvtargid=pla-817676965110&hvocijid=15500585928110911450-B07VPZRWM5-&hvexpln=0&th=1)
+- [Fine rotary cheese grater](https://www.amazon.com/Cheese-Grater-Handheld-Vegetables-Chocolate/dp/B0B84HVRBK/ref=asc_df_B0B84HVRBK?mcid=49669e766c143f4b845f8f0eb6fd5c94&tag=hyprod-20&linkCode=df0&hvadid=693769995782&hvpos&hvnetw=g&hvrand=1564222352010975378&hvpone&hvptwo&hvqmt&hvdev=c&hvdvcmdl=&hvlocint=&hvlocphy=9009731&hvtargid=pla-1950528473268&psc=1&hvocijid=1564222352010975378-B0B84HVRBK-&hvexpln=0)
 
 ## Ingredients
 
 ### Dough
 
-- 470g [high gluten flour](https://www.amazon.com/King-Arthur-Flour-High-Gluten-lb/dp/B00DUF23IY/)
-- 320g ice cold water
-- ½ tsp [SAF red instant yeast](https://www.amazon.com/LeSaffre-LEAVENING_AGENT/dp/B0CFDPMWWC)
-- 10g [Diamond Crystal Baking Salt](https://www.amazon.com/Diamond-Crystal-Baking-Kosher-8-5oz/dp/B0CHVLXM7R/) or fine sea salt
+- 847g Costco all-purpose flour, which is Central Milling bread flour, with 576g cold water for 68% hydration
+- 837g [King Arthur high gluten flour](https://www.amazon.com/King-Arthur-Flour-High-Gluten-lb/dp/B00DUF23IY/) with 586g cold water for 70% hydration
+- ¾ tsp [SAF red instant yeast](https://www.amazon.com/LeSaffre-LEAVENING_AGENT/dp/B0CFDPMWWC)
+- 16g [Diamond Crystal Baking Salt](https://www.amazon.com/Diamond-Crystal-Baking-Kosher-8-5oz/dp/B0CHVLXM7R/) or fine sea salt
 
 ### Pizza Sauce
 
-- 7 oz Bianco DiNapoli crushed tomatoes
+- 1 can Bianco di Napoli whole peeled tomatoes, ¼ cup of water drained off, hand crushed or milled to smooth consistency to make easy to spread
 
 ### Pizza
 
-- 7 oz Bianco DiNapoli crushed tomatoes
-- 6 oz shredded Trader Joe's whole milk low-moisture mozzarella, frozen
-- 1 oz fresh grated pecorino romano
-- [Olive oil](https://www.amazon.com/Graza-Sizzle-Extra-Virgin-Olive-Oil-Cooking-High-Polyphenol/dp/B09WV8DBPV/ref=asc_df_B09WV8DBPV?mcid=70ed972e0350313daddca3d5ee42bc1a&tag=hyprod-20&linkCode=df0&hvadid=693367302614&hvpos=&hvnetw=g&hvrand=17371064147806287911&hvpone=&hvptwo=&hvqmt=&hvdev=c&hvdvcmdl=&hvlocint=&hvlocphy=9009731&hvtargid=pla-2006470262336&psc=1&hvocijid=17371064147806287911-B09WV8DBPV-&hvexpln=0)
-- 50g [Semolina flour](https://shop.kingarthurbaking.com/items/semolina-flour?utm_source=google&utm_medium=cpc&utm_term=&utm_content=adtaxi&gad_source=1&gad_campaignid=22480904075&gbraid=0AAAAADiGhPK4w0ymJ2ZHxouS0qcChO-7Y&gclid=CjwKCAjwmenCBhA4EiwAtVjzmibHOPT_R4uMvXe44GRfVd6KqCijZEJnd1ENYHCiJnd1_Hctc8QaOBoC_80QAvD_BwE) + 50g [all purpose flour](https://www.wholefoodsmarket.com/product/365-by-whole-foods-market-all-purpose-flour-80-oz-b074jd6hhh) for dusting
+- 6 oz pizza sauce
+- 6 oz shredded [mild provolone cheese](https://www.instacart.com/products/379755-belgioioso-provolone-cheese-mild-half-moon-wedge-8-oz?retailer_id=264&product_id=379755&region_id=9250594479&utm_medium=sem_shopping&utm_source=instacart_google&utm_campaign=ad_demand_shopping_lia_food_all-non-ca_evergreen&utm_content=accountid-8145171519_campaignid-19906608628_adgroupid-147863115739_device-c&utm_term=targetid-aud-1930465835203:pla-849568637689_locationid-9009731_adtype-pla_productchannel-local_merchantid-178347373_storecode-9250594479_productid-379755&gad_source=4&gad_campaignid=19906608628&gbraid=0AAAAADO98hacyUWxP7Sr6fRNqs-3bZG4k&gclid=CjwKCAjwmenCBhA4EiwAtVjzmtlNEoXkllue7BmUZWpFqtxW9C6dbkrOQP2dDQ86WH7LaS3vaeAu6BoCZMEQAvD_BwE), frozen
+- 20g pecorino romano
+- [Olive oil](https://www.amazon.com/Graza-Sizzle-Extra-Virgin-Olive-Oil-Cooking-High-Polyphenol/dp/B09WV8DBPV/ref=asc_df_B09WV8DBPV?mcid=70ed972e0350313daddca3d5ee42bc1a&tag=hyprod-20&linkCode=df0&hvadid=693367302614&hvpos&hvnetw=g&hvrand=17371064147806287911&hvpone&hvptwo&hvqmt&hvdev=c&hvdvcmdl&hvlocint&hvlocphy=9009731&hvtargid=pla-2006470262336&psc=1&hvocijid=17371064147806287911-B09WV8DBPV-&hvexpln=0)
+- 50g [Semolina flour](https://shop.kingarthurbaking.com/items/semolina-flour?utm_source=google&utm_medium=cpc&utm_term&utm_content=adtaxi&gad_source=1&gad_campaignid=22480904075&gbraid=0AAAAADiGhPK4w0ymJ2ZHxouS0qcChO-7Y&gclid=CjwKCAjwmenCBhA4EiwAtVjzmibHOPT_R4uMvXe44GRfVd6KqCijZEJnd1ENYHCiJnd1_Hctc8QaOBoC_80QAvD_BwE) + 50g [all purpose flour](https://www.wholefoodsmarket.com/product/365-by-whole-foods-market-all-purpose-flour-80-oz-b074jd6hhh) for dusting
 - ⅛ tsp dried oregano
 
 ## Steps
 
 ### Dough
 
-1. Add ice cold water to the food processor.
-2. Mix the flour, salt, and yeast in a separate bowl. Add the dry ingredients to the food processor.
-3. Process for 15 seconds, remove dough and attachment and make sure all dough is scraped off of the sides with bench scraper and reintegrated into the dough. Process for 15 more seconds, measure temperature with your IR thermometer. Repeat in 15 second intervals until the dough reads 72 - 74°F. Do not go higher than 76°F to avoid damaging gluten.
-4. Transfer the dough to your bench. Knead shortly, a few times to bring the dough into the form of a ball, cover with saran wrap, and let it rest at room temperature for 30 minutes.
-5. Divide the dough into 400g portions. Fold each portion in half, then fold in half again in the perpendicular direction to build tension. Place seam-side down and rotate while dragging it against the unfloured bench exactly 8 times — no more, no less — to build a smooth, taut skin. Pinch any bottom seam that remains. Circular dough balls make circular pizzas ([video](https://www.youtube.com/watch?v=Vo5OW8Xkah4&t=9s)).
-6. Grease your proofing container with canola oil — it won't impart an olive oil flavor over the long proof. Transfer the dough to the container with your bench scraper. After placing in a proofing container, lightly oil your hands with canola oil and gently rub the top of the dough to make it less sticky and retain moisture. Cover and place in the refrigerator for 3 - 4 days.
+1. Fill a pitcher with water and ice and let it chill down. Weigh out the water only — keep the ice out of the mixer bowl.
+2. Add the water, flour, salt, and yeast to the spiral mixer all at once.
+3. Mix at 40% speed until the dough reads 72°F on your IR thermometer. Scrape the bowl and hook down with your bench scraper if dough climbs.
+4. Transfer the dough to your bench. Knead shortly, guide dough with bench scraper into the form of a ball, place in a bowl, cover with saran wrap, and allow it to rest at room temperature for 1.5h.
+5. Divide and shape dough into 3 balls, shooting for about 480g each. Both flour formulas land around 1,440g total dough after salt and yeast. Pull eight times in gentle circles on your unfloured bench until smooth on the top. Pinch any bottom seam that remains. Circular dough balls make circular pizzas 🙂 ([video](https://www.youtube.com/watch?v=Vo5OW8Xkah4&t=9s)).
+6. Grease your proofing container with canola oil. Transfer the dough to the container with your bench scraper. After placing in a proofing container, lightly oil your hands and gently rub the top of the dough to make it less sticky and retain moisture. Cover and place in the refrigerator for 2-3 days.
 
 ### Pre-Assembly
 
-1. Optionally hand blend the crushed tomatoes in a small bowl until smooth, keeping the blender immersed to avoid oxidation. Cover with saran wrap. It's ok to freeze / refrigerate for a bit, but always bring to room temperature immediately before use to avoid gummy pizza.
-2. Grate the mozzarella cheese in the rotary blender, place in a large sandwich bag and freeze at least 1 hour prior to baking. Grate 1oz of pecorino romano with a fine rotary grater and place in another small bowl.
-3. Mix 50/50 semolina + all purpose flour in a small bowl and set aside.
+1. Pizza sauce: Place sauce in a small bowl. Cover with saran wrap. It's ok to freeze / refrigerate for a bit, but always bring to room temperature immediately before use to avoid gummy pizza.
+2. Cheese: Grate provolone cheese in the rotary blender, place in a large sandwich bag and freeze at least 1 hour prior to baking. Grate romano cheese with a fine rotary grater and place in another small bowl.
+3. Bench flour: Mix 50/50 semolina + all purpose flour in a small bowl and set aside.
 
 ### Pizza Assembly
 
-1. Approximately 1 hour prior to baking, preheat your oven on high to bring the stone up to temperature evenly.
-2. Approximately 2 hours prior to baking, remove dough from the refrigerator, carefully remove the dough from the proofing container with your bench scraper and place in a large greased plastic tupperware and allow the dough to come to 60-65°F at room temperature.
-3. Dust your wooden peel with a bench flour to keep pizza from sticking.
+1. The day you plan to bake, remove dough from the refrigerator and allow the dough to rest for 2 hours.
+2. Preheat your oven on low for 30 minutes with rotation activated, then begin prepping the pizza.
+3. Place a parchment circle on your wooden peel.
 4. Remove dough with your bench scraper and cover liberally with bench flour.
 5. Stretch dough to 16" ([video](https://www.youtube.com/watch?v=Entzcl8q7H4)).
-6. Place the dough on your wooden peel with the rough bottom side facing up.
-7. Spread the tomato sauce over the pizza in a circular motion with a large spoon all the way to the raised portion that will become your crust.
-8. Keep the flame on low from here on — you'll be launching in 3-5 minutes. You want the stone to read about 625°F at launch, with the ambient temperature near the flame running hotter, around 700°F, to brown the cheese without burning the bottom.
-9. Shake ⅛ tsp of dried oregano evenly over the sauce.
-10. Spread the 1 oz of fresh grated pecorino romano evenly over the sauce and oregano.
-11. Spread the mozzarella evenly over the entire pizza, covering as much of the sauce and pecorino as possible. Again, avoid large concentrations in any one area to avoid soggy spots.
-12. Squirt about 2 tsp of olive oil over the cheese in a circular motion just before launching.
+6. Place the dough on the parchment with the rough bottom side facing up.
+7. Apply sauce to the pizza in a circular motion with a large spoon all the way to the raised portion that will become your crust.
+8. Pinch dried oregano in your fingers to oxidize and spread over the top of the sauce.
+9. Spread Romano cheese evenly over the entire pizza, covering as much of the sauce as possible.
+10. Scatter the frozen shredded provolone evenly over the top, straight from the freezer.
 
 ### Launch / Bake
 
-1. Launch the pizza once the stone reads about 625°F, keeping the flame fairly low. Top heat at the flame source should run around 700°F — hot enough to brown the cheese before it separates.
-2. Bake for about 5 minutes, rotating the pizza every 30 seconds or so for even color. Watch the cheese and don't let it separate too much.
-3. After 5 minutes, slide a screen under the pizza to protect the crust and bake 1-2 minutes more to crisp it up further. You can turn off the top heat here and just rotate occasionally.
-4. Remove the pizza from the oven with your large metal peel and place on a wire rack. Brush the crust with olive oil.
-5. Transfer the pizza to a cutting board, slice, and return to the wire rack to keep crispy. Serve hot.
+1. Once the pizza is built, turn the oven off. Wait until the center of the stone reads 630°F on your IR thermometer.
+2. Turn the oven back on to medium with rotation off and launch the pizza, still on the parchment, in the center of the stone. Turn rotation back off.
+3. After 1 minute, slide your metal peel under the edge of the pizza and pull the parchment out.
+4. Bake for 4-5 minutes more, rotating frequently. If the bottom is running ahead of the top, slide the pizza onto a screen just before the bottom reaches the doneness you want and finish the bake on the screen.
+5. Remove the pizza from the oven with your large metal peel and place on a wire rack.
+6. Transfer the pizza to a cutting board, slice, and return to the wire rack to keep crispy.
+7. Serve hot.
 
 ## Notes
 
-- Instant yeast, like SAF Red, is easier and just as effective as active dry yeast (ADY) without needing to bloom in warm water. It's best stored in your freezer, where it stays robust and active for long-term use.
-- To achieve optimal cheese melting and prevent oil separation in high-temperature ovens, use frozen freshly shredded whole milk low-moisture mozzarella instead of pre-shredded varieties.
-- A food processor with a dough attachment is preferred for best dough texture, though even inexpensive models will work.
-- Using a wooden peel, as recommended in the pizza assembly step, makes a successful pizza launch more likely because dough is less likely to stick compared to metal peels.
-- Metal peels should be used specifically for rotating the pizza during baking and retrieving it from the oven.
-- While the dough is easiest to work with after 3 days of rest, the best texture and flavor typically develop by day 4. However, dough resting this long is more prone to tearing during stretching.
-- When bringing dough to temperature before stretching, aim for 60-65°F. If the dough is colder than 60°F it will bake gummy and not crisp properly; if warmer than 65°F it may tear easily and bubble excessively.
-- When applying sauce, aim for an even distribution across the pizza. Avoid pooling sauce, especially in the center, to prevent sogginess or tearing during baking.
-- Olive oil and sugar have been withheld as dough ingredients due to high temperatures of the pizza oven to prevent burning. These are often employed in lower temperature ovens to improve browning.
-
-## Tips
-
-- Don't over-process the dough. Stop once you reach 74°F to avoid gluten breakdown.
-- Use an infrared thermometer for quick and accurate temperature checks.
+- Olive oil and sugar have been withheld from this recipe due to high temperatures of the pizza oven to prevent burning. These are often employed in lower temperature ovens to improve browning.
+- Great [article](https://www.richardeaglespoon.com/articles/how-to-pizza) with a lot info.
+- Good [video](https://www.youtube.com/watch?v=TQYApZ_-P24) with more info, not always reliable but pretty informative.
+- Lots of info in [r/Pizza](https://www.reddit.com/r/Pizza/) from the community.
+- I recommend making a couple more balls than you plan to eat to start. It will take 5 bakes to settle in and making more each time will shorten the learning curve.
