@@ -21,9 +21,8 @@ export const Route = createFileRoute('/recipes/$slug/')({
         recipe?.description || `View the recipe for ${params.slug.replace(/-/g, ' ')}.`,
       canonicalPath: `/recipes/${params.slug}`,
       ogType: 'article',
-      // Deliberately left unset for the four recipes whose photos died with the
-      // S3 bucket — buildSeoMeta falls back to the site image rather than
-      // implying a dish photo that does not exist.
+      // If a future fixture has no photo, buildSeoMeta falls back to the site
+      // image rather than implying a dish photo that does not exist.
       ogImage: photo || undefined,
     })
   },
@@ -32,8 +31,8 @@ export const Route = createFileRoute('/recipes/$slug/')({
 
 /**
  * schema.org Recipe, ported from the original's recipe-json-ld.tsx. This is
- * what earns a rich result in search; the four photo-less recipes emit no
- * `image` and simply will not qualify, which is the honest outcome.
+ * what earns a rich result in search. A recipe with no photo emits no `image`
+ * and simply will not qualify, which is the honest outcome.
  */
 function RecipeJsonLd({ recipe }: { recipe: Recipe }) {
   const photo = imageUrl(recipe)

@@ -28,6 +28,7 @@ page.on('pageerror', (e) => errors.push(e.message))
 page.on('console', (m) => m.type() === 'error' && errors.push(m.text()))
 
 const dialog = () => page.locator('[data-slot="dialog-content"]')
+const navPaletteTrigger = () => page.locator('nav [data-palette-open]:visible').first()
 
 await page.goto(BASE + '/', { waitUntil: 'networkidle' })
 
@@ -37,7 +38,7 @@ check('home prerenders its hero', await page.locator('text=Eat the best. Yeet th
 // --- palette opens from the nav button ---------------------------------
 check('palette starts hidden', await dialog().isHidden())
 
-await page.locator('[data-palette-open]').first().click()
+await navPaletteTrigger().click()
 await page.waitForTimeout(200)
 check('palette opens on nav click', await dialog().isVisible())
 check('palette input focused', await page.evaluate(() => document.activeElement?.id === 'palette-input'))
@@ -65,7 +66,7 @@ await page.waitForTimeout(200)
 check('escape closes palette', await dialog().isHidden())
 
 // --- no results state ---------------------------------------------------
-await page.locator('[data-palette-open]').first().click()
+await navPaletteTrigger().click()
 await page.keyboard.type('zzzznope')
 await page.waitForTimeout(250)
 check('no-results message', await page.locator('text=No recipes found for').isVisible())

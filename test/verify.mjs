@@ -46,6 +46,13 @@ check('sitemap omits search', !sitemap.includes('https://eatyeet.com/search'))
 check('robots disallows search', robots.includes('Disallow: /search'))
 check('hashed build assets are immutable', headers.includes('/build/*') && headers.includes('immutable'))
 check('home contains app root content', home.includes('Eat the best. Yeet the rest.'))
+check(
+  'footer links point to real pages',
+  !/<a[^>]*>(About|Privacy|Terms)<\/a>/.test(home) &&
+    /<a[^>]+href="\/"[^>]*>Home<\/a>/.test(home) &&
+    /<a[^>]+href="\/search"[^>]*>Recipes<\/a>/.test(home) &&
+    /<a[^>]+href="\/browse"[^>]*>Browse<\/a>/.test(home),
+)
 
 const scripts = [...home.matchAll(/<script[^>]+src="([^"]+)"/g)].map((match) => match[1])
 for (const src of scripts.filter((value) => value.startsWith('/'))) {

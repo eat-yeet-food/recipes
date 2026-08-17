@@ -230,6 +230,11 @@ export function Nav({ pathname, onOpenPalette }: { pathname: string; onOpenPalet
 export function Footer() {
   const linkClass =
     'text-[13px] font-medium uppercase tracking-[1.5px] text-charcoal/40 transition-colors hover:text-pink'
+  const [year, setYear] = useState('2026')
+
+  useEffect(() => {
+    setYear(String(new Date().getFullYear()))
+  }, [])
 
   return (
     <footer data-site-footer="" className="bg-white px-8 text-center print:hidden">
@@ -239,17 +244,17 @@ export function Footer() {
         </p>
         <nav data-site-footer-links="" className="mt-4 flex justify-center gap-6" aria-label="Footer">
           <Link to="/" className={linkClass}>
-            About
+            Home
           </Link>
-          <Link to="/" className={linkClass}>
-            Privacy
+          <Link to="/search" className={linkClass}>
+            Recipes
           </Link>
-          <Link to="/" className={linkClass}>
-            Terms
+          <Link to="/browse" className={linkClass}>
+            Browse
           </Link>
         </nav>
         <p className="mt-4 text-[11px] tracking-[1px] text-charcoal/25">
-          &copy; {new Date().getFullYear()} Eat / Yeet. All rights reserved.
+          &copy; {year} Eat / Yeet. All rights reserved.
         </p>
       </div>
     </footer>

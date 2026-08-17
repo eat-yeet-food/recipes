@@ -3,6 +3,10 @@ import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import viteReact from '@vitejs/plugin-react'
 import { nitro } from 'nitro/vite'
 
+function suppressModuleDirectiveWarning(warning: { code?: string }): boolean {
+  return warning.code === 'MODULE_LEVEL_DIRECTIVE'
+}
+
 /**
  * Suppress "use client" directive warnings from RSC-aware libraries. These are
  * valid React conventions that Rollup doesn't understand — the original app
@@ -17,7 +21,7 @@ function suppressModuleDirectiveWarnings(): import('vite').Plugin {
       const original = config.build.rollupOptions?.onwarn
       config.build.rollupOptions ??= {}
       config.build.rollupOptions.onwarn = (warning, handler) => {
-        if (warning.code === 'MODULE_LEVEL_DIRECTIVE') return
+        if (suppressModuleDirectiveWarning(warning)) return
         if (typeof original === 'function') original(warning, handler)
         else handler(warning)
       }
@@ -50,6 +54,17 @@ export default defineConfig({
       prerender: { enabled: false },
     }),
     viteReact(),
-    nitro(),
+    nitro({
+      hooks: {
+        'rollup:before'(_nitro, rollupConfig) {
+          const original = rollupConfig.onwarn
+          rollupConfig.onwarn = (warning, handler) => {
+            if (suppressModuleDirectiveWarning(warning)) return
+            if (typeof original === 'function') original(warning, handler)
+            else handler(warning)
+          }
+        },
+      },
+    }),
   ],
 })

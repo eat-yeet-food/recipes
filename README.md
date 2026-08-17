@@ -17,7 +17,7 @@ npm test           # build, then static + interaction + guard self-tests
 npm run storybook  # Storybook dev server at 127.0.0.1:6006
 npm run build-storybook  # static Storybook build -> storybook-static/
 npm run test:recipe-pages  # build, then recipe-page redesign coverage
-npm run typecheck  # tsc --noEmit (also runs inside build)
+npm run typecheck  # generate content/routes, then tsc --noEmit
 npm run classes    # class guard alone (also runs inside build)
 npm run parity     # build, then pixel-diff against a baseline
 npm run shots      # Playwright screenshots -> dist/shots/
@@ -249,8 +249,8 @@ doppler run -p yeet -c dev -- npx wrangler pages deploy .output/public --project
 |---|---|
 | `scripts/build-content.mjs` | fixtures → `src/generated` (index + per-recipe chunks) |
 | `scripts/check-classes.mjs` | a class not in the compiled stylesheet — see below |
-| `tsc --noEmit` | type errors |
 | `vite build` | bundling |
+| `tsc --noEmit` | type errors |
 | `scripts/prerender.mjs` | renders every path in `site.config.mjs` to HTML |
 | `scripts/build-seo.mjs` | writes `sitemap.xml`, `robots.txt`, `_headers` |
 
@@ -359,8 +359,10 @@ Recipes" section above the browse grid.
 
 ### Image provenance
 
-Four recipe photos survived in `frontend/apps/web/public/images/`. The rest have
-mixed origins and should be treated as replacements unless noted otherwise:
+Four recipe photos survived in `frontend/apps/web/public/images/`: artisan New
+York pizza (`charred-crust-pizza.jpg`, renamed from the imported `pizza.jpg`),
+brown butter chocolate chunk cookies, French crullers, and pollo asado. The rest
+have mixed origins and should be treated as replacements unless noted otherwise:
 
 - **bolognese** — was restored from git history, but has since been replaced
   with the owner-supplied Unsplash photo
@@ -384,6 +386,11 @@ mixed origins and should be treated as replacements unless noted otherwise:
 - **classic baked mac and cheese** — no original image survived; replaced with
   the owner-supplied Unsplash photo
   `alexandra-tran-aeLcUBr7kmM-unsplash.jpg`.
+
+- **american buttercream, vanilla cupcakes** — no original image survived. The
+  files were added later as replacements, but their source is not recorded in
+  this repository history; keep treating them as unverified replacements until
+  their provenance is confirmed.
 
 All twelve recipes now have images.
 Searched and came up empty: the working tree, the Next.js image cache, all 53
