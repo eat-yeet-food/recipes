@@ -42,8 +42,8 @@ created: 2025-01-15
 
 ### Dough
 
-- 847g Costco all-purpose flour, which is Central Milling bread flour, with 576g cold water for 68% hydration
-- 837g [King Arthur high gluten flour](https://www.amazon.com/King-Arthur-Flour-High-Gluten-lb/dp/B00DUF23IY/) with 586g cold water for 70% hydration
+- 847g Costco all-purpose flour from [Central Milling](https://centralmilling.com/product/beehive-organic-all-purpose-flour/)
+- 576g cold water
 - ¾ tsp [SAF red instant yeast](https://www.amazon.com/LeSaffre-LEAVENING_AGENT/dp/B0CFDPMWWC)
 - 16g [Diamond Crystal Baking Salt](https://www.amazon.com/Diamond-Crystal-Baking-Kosher-8-5oz/dp/B0CHVLXM7R/) or fine sea salt
 
@@ -102,6 +102,7 @@ created: 2025-01-15
 
 ## Notes
 
+- The default dough formula uses the Central Milling flour at 68% hydration. For the [King Arthur high gluten flour](https://www.amazon.com/King-Arthur-Flour-High-Gluten-lb/dp/B00DUF23IY/) version, use 837g flour and 586g cold water for 70% hydration. With the same salt and yeast, either version lands around 1,441g total dough, or about 480g per dough ball.
 - Olive oil and sugar have been withheld from this recipe due to high temperatures of the pizza oven to prevent burning. These are often employed in lower temperature ovens to improve browning.
 - Great [article](https://www.richardeaglespoon.com/articles/how-to-pizza) with a lot info.
 - Good [video](https://www.youtube.com/watch?v=TQYApZ_-P24) with more info, not always reliable but pretty informative.
