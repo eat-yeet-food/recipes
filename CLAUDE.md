@@ -7,6 +7,12 @@ No database, no API, **no server at runtime**.
 Read `README.md` for the full picture. This file is the short list of things
 that have already gone wrong here.
 
+`CLAUDE.md` is the source of truth for centralized agent and repo-skill
+guidance. Repo-specific adapters such as `AGENTS.md`, and any future local
+skills, should point here instead of copying workflow rules. If deployment
+changes, update this file and the README deploy runbook together so Claude,
+Codex, and subagents inherit the same command.
+
 ## 1. Only classes the original site used exist
 
 `src/styles/global.css` is the original site's **compiled production Tailwind
@@ -123,3 +129,6 @@ doppler run -p yeet -c dev -- npx wrangler pages deploy .output/public --project
 
 Deploy only `.output/public` after a passing `npm test` or a known-good
 `npm run build` plus targeted test run.
+
+Centralized skills and adapter docs should refer to this section and the README
+runbook. Do not encode a separate Wrangler deploy command anywhere else.
