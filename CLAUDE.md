@@ -54,12 +54,16 @@ tell. A pixel diff cannot tell you a link points at the wrong page.
 ```bash
 npm test          # build + static + interaction + guard self-tests
 npm run test:recipe-pages  # focused recipe redesign coverage
-npm run storybook # local component harness at /storybook
+npm run storybook # real Storybook at 127.0.0.1:6006
+npm run build-storybook # static Storybook build; also covered by npm test
 npm run parity    # pixel-diff against a baseline
 npm run serve     # look at it: 127.0.0.1:4321, served as Pages serves it
 ```
 
-Take screenshots and **actually look at them** when changing layout.
+Take screenshots and **actually look at them** when changing layout. Reusable
+visual decisions should also be represented in real Storybook stories under
+`src/stories/`, including type, color, button, link, form, card, grid, and
+recipe-page patterns.
 
 ## 4. Query strings do not select files
 
@@ -77,10 +81,11 @@ Interactions reached by clicking never reproduce this. Test cold navigations.
 the prerenderer, and the sitemap all read it. They used to hold three copies
 and drifted.
 
-Internal noindex pages such as `/storybook` and the historical
+Internal noindex app pages such as the historical
 `/recipes/artisan-new-york-pizza/butternut-trial` route belong in
 `TRIAL_PATHS`. They are prerendered for local/review use, but `build-seo.mjs`
-keeps them out of the sitemap.
+keeps them out of the sitemap. Storybook is not an app route; it lives in
+`.storybook/` and `src/stories/`.
 
 ## 6. `_headers` rules merge
 

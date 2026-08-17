@@ -89,13 +89,6 @@ check(
 )
 await phone.close()
 
-const storybook = await newPage()
-await storybook.goto(`${BASE}/storybook`, { waitUntil: 'networkidle' })
-check('storybook route renders harness', await storybook.locator('[data-storybook]').isVisible())
-check('storybook route renders recipe story', await storybook.locator('[data-storybook-recipe-frame] .bb-trial').isVisible())
-check('storybook route has multiple sections', (await storybook.locator('[data-storybook-section]').count()) >= 5)
-await storybook.close()
-
 await browser.close()
 await server.close()
 

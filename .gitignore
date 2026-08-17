@@ -5,3 +5,4 @@ dist/
 .tanstack/
 src/generated/
 src/routeTree.gen.ts
+storybook-static/

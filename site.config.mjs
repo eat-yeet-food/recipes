@@ -13,7 +13,7 @@ export const SITE_URL = 'https://eatyeet.com'
 export const STATIC_PATHS = ['/', '/recipes', '/browse', '/search']
 
 /** Non-indexed static experiment pages that should still open directly. */
-export const TRIAL_PATHS = ['/recipes/artisan-new-york-pizza/butternut-trial', '/storybook']
+export const TRIAL_PATHS = ['/recipes/artisan-new-york-pizza/butternut-trial']
 
 /**
  * Every path to prerender, given the generated recipe index.

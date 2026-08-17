@@ -14,7 +14,8 @@ npm run dev        # vite dev server
 npm run build      # -> .output/public (prerendered HTML + hashed assets)
 npm run serve      # preview the built site at 127.0.0.1:4321, as Pages serves it
 npm test           # build, then static + interaction + guard self-tests
-npm run storybook  # dev server; open /storybook for the component harness
+npm run storybook  # Storybook dev server at 127.0.0.1:6006
+npm run build-storybook  # static Storybook build -> storybook-static/
 npm run test:recipe-pages  # build, then recipe-page redesign coverage
 npm run typecheck  # tsc --noEmit (also runs inside build)
 npm run classes    # class guard alone (also runs inside build)
@@ -35,7 +36,6 @@ The shape matches the original site exactly, so old inbound links still resolve.
 | `/recipes/<slug>` | recipe detail ×12 — the pages that carry the SEO weight |
 | `/browse` | browse by course, cuisine, method, diet |
 | `/search` | interactive; filters live in query params |
-| `/storybook` | internal noindex component harness; prerendered but not in sitemap |
 | `/sitemap.xml`, `/robots.txt` | generated after the build |
 
 `/search` is `Disallow`ed in robots.txt and absent from the sitemap. It is one
@@ -68,9 +68,9 @@ exist in the compiled build.
 | `components/home.tsx` | `components/hero.tsx`, `containers/home-container.tsx` |
 | `components/recipe.tsx` | canonical wrapper for the redesigned recipe article |
 | `components/recipe-butternut-trial.tsx` | redesigned recipe article, cook mode, print/pin controls, desktop browse sidebar |
-| `components/storybook-harness.tsx` | internal component harness rendered at `/storybook` |
 | `components/search.tsx` | `containers/search-container.tsx`, `components/{filter-sidebar,faceted-filter-group,category-toggle}.tsx` |
 | `components/palette.tsx` | `components/search-command-palette.tsx`, `packages/ui/.../dialog.tsx` |
+| `stories/design-system.stories.tsx` | real Storybook CSF stories for design-system and component review |
 | `lib/seo.ts` | `platform/L1/seo.ts` |
 | the recipe JSON-LD | `features/recipes/components/recipe-json-ld.tsx` |
 
@@ -126,16 +126,18 @@ One departure from the original is deliberate:
   cook mode, local Geller/Avenir font assets, and a desktop-only "Browse
   Recipes" sidebar. The sidebar is hidden on mobile, in print, and in cook mode.
 
-## Storybook harness
+## Storybook
 
-`/storybook` is a static, noindex harness for reviewing production components
-with production data. It is intentionally lightweight rather than the external
-Storybook package: the app is already a prerendered Vite/TanStack site, and the
-repo's testing/visual workflow runs through Playwright against the same built
-HTML Cloudflare Pages serves.
+This repo uses real Storybook with the React/Vite framework. Stories live in
+`src/stories/*.stories.tsx`, Storybook config lives in `.storybook/`, and the
+static build writes to `storybook-static/` (ignored by git).
 
-The harness currently covers:
+The Storybook suite currently covers:
 
+- design-system typography scale
+- color tokens
+- button and recipe link treatments
+- form controls and filter chip states
 - section heading typography
 - recipe cards
 - browse gallery cards
@@ -146,12 +148,14 @@ Use it locally with:
 
 ```bash
 npm run storybook
-# open http://127.0.0.1:5173/storybook if the browser does not open itself
+# open http://127.0.0.1:6006
+npm run build-storybook
 ```
 
-The route is listed in `site.config.mjs` under `TRIAL_PATHS`, so it is
-prerendered and testable, but `scripts/build-seo.mjs` keeps it out of the
-sitemap and disallows it in `robots.txt`.
+Storybook imports production CSS plus `src/styles/storybook.css` for story-only
+layout chrome. Components that use TanStack Router links are isolated with
+`src/storybook/router-mock.tsx` through `.storybook/main.ts`; do not add a
+production `/storybook` route.
 
 ## How it works
 
@@ -182,7 +186,8 @@ src/lib/categories.ts   browse categories (first 8 mirror the original home grid
 src/lib/model.ts        facets, filtering, search
 src/lib/format.ts       times, yields, labels
 src/lib/seo.ts          head metadata
-src/components/         icons, layout, home, recipe, storybook, search, palette
+src/components/         icons, layout, home, recipe, search, palette
+src/stories/            Storybook stories for design-system and component review
 src/routes/             file-based routes
 src/styles/global.css   the original production Tailwind build
 site.config.mjs         the canonical origin and the prerender path list
