@@ -60,12 +60,13 @@ function GhostButton({
 
 /** nav.tsx:30-38 — routes with a hero, where the nav starts transparent. */
 function routeHasHero(pathname: string): boolean {
-  return pathname === '/' || pathname.startsWith('/recipes/')
+  const path = pathname.replace(/\/$/, '')
+  return path === '/'
 }
 
 /** nav.tsx:39-45 — a *dark* hero, which additionally flips nav text to white. */
 function routeHasDarkHero(pathname: string): boolean {
-  return pathname !== '/' && pathname.startsWith('/recipes/')
+  return false
 }
 
 /**
@@ -124,13 +125,18 @@ export function Nav({ pathname, onOpenPalette }: { pathname: string; onOpenPalet
 
   return (
     <nav
+      data-site-nav=""
       className={`fixed top-[var(--impersonation-h,0px)] left-0 z-50 w-full transition-nav ${navBg}`}
     >
-      <div className="mx-auto flex h-16 max-w-[var(--max-width)] items-center justify-between px-4 md:px-6">
+      <div
+        data-site-nav-inner=""
+        className="mx-auto flex h-16 max-w-[var(--max-width)] items-center justify-between px-4 md:px-6"
+      >
         <div className="flex items-center gap-2">
-          <Link to="/" className="flex items-center gap-2" aria-label="YEET home">
+          <Link to="/" data-site-brand="" className="flex items-center gap-2" aria-label="YEET home">
             <img src="/donut-icon.svg" alt="" className={`transition-nav-icon ${iconClass}`} />
             <svg
+              data-site-wordmark=""
               viewBox="0 -43 152 44"
               fill="currentColor"
               className={`transition-nav-icon ${wordmarkClass}`}
@@ -226,12 +232,12 @@ export function Footer() {
     'text-[13px] font-medium uppercase tracking-[1.5px] text-charcoal/40 transition-colors hover:text-pink'
 
   return (
-    <footer className="bg-white px-8 text-center print:hidden">
+    <footer data-site-footer="" className="bg-white px-8 text-center print:hidden">
       <div className="mx-auto max-w-[var(--max-width)] py-9">
-        <p className="font-display text-[20px] font-extrabold uppercase tracking-tight text-charcoal">
+        <p data-site-footer-brand="" className="font-display text-[20px] font-extrabold uppercase tracking-tight text-charcoal">
           Eat <span className="font-normal text-pink">/</span> Yeet
         </p>
-        <nav className="mt-4 flex justify-center gap-6" aria-label="Footer">
+        <nav data-site-footer-links="" className="mt-4 flex justify-center gap-6" aria-label="Footer">
           <Link to="/" className={linkClass}>
             About
           </Link>

@@ -25,7 +25,7 @@ const port = Number(process.env.PORT ?? 4321)
 const server = await startStatic(OUT, port)
 
 console.log(`\n  Recipes  ->  ${server.url}\n`)
-for (const path of ['', 'recipes', 'search', 'browse', 'recipes/charred-crust-pizza']) {
+for (const path of ['', 'recipes', 'search', 'browse', 'recipes/artisan-new-york-pizza']) {
   console.log(`    ${server.url}${path}`)
 }
 console.log('\n  Ctrl-C to stop.\n')

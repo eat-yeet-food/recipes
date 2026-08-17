@@ -21,7 +21,7 @@ const OUT = process.argv.slice(2).find((a) => !a.startsWith('--')) ?? join(ROOT,
 export const SHOTS = [
   { name: 'home', path: '/', full: true },
   { name: 'home-fold', path: '/', full: false },
-  { name: 'recipe', path: '/recipes/charred-crust-pizza', full: true },
+  { name: 'recipe', path: '/recipes/artisan-new-york-pizza', full: true },
   { name: 'search', path: '/search', full: false },
   { name: 'home-mobile', path: '/', full: false, viewport: { width: 390, height: 844 } },
 ]

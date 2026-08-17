@@ -1,0 +1,325 @@
+@font-face {
+  font-family: "geller-headline";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/geller/gellertest-headlinelight.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "geller-headline";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/geller/typekit-geller-headline-regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "geller-headline";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/geller/gellertest-headlinemedium.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "geller-headline";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/geller/gellertest-headlinesemibold.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "geller-headline";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/geller/typekit-geller-headline-bold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "geller-headline";
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url("/fonts/geller/gellertest-headlineblack.otf") format("opentype");
+}
+
+@font-face {
+  font-family: Avenir;
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/avenir/avenirnextltpro-medium-webfont.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Avenir Bold";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src:
+    local("Avenir Bold"),
+    url("/fonts/avenir/AvenirNextLTPro-Bold.woff2") format("woff2");
+}
+
+:root {
+  --font-body: Avenir, Avenir, Georgia, sans-serif;
+  --font-display: "geller-headline", Georgia, serif;
+  --font-nav: inherit;
+}
+
+body {
+  font-family: var(--font-body);
+}
+
+.font-display {
+  font-family: var(--font-display);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+[data-site-nav] {
+  font-family: var(--font-body);
+}
+
+[data-site-nav]:not(.bg-transparent) {
+  border-bottom: 1px solid rgba(55, 62, 64, 0.1);
+  box-shadow: none;
+}
+
+[data-site-nav-inner] {
+  max-width: 1180px;
+}
+
+[data-site-nav] .font-nav {
+  font-family: "Avenir Bold", Avenir, Georgia, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+[data-site-nav]:not(.bg-transparent) [data-site-wordmark] {
+  color: #373e40;
+}
+
+[data-site-footer] {
+  border-top: 1px solid rgba(55, 62, 64, 0.12);
+  font-family: var(--font-body);
+}
+
+[data-site-footer-brand] {
+  font-family: "geller-headline", Georgia, serif !important;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+[data-site-footer-links] a {
+  color: #373e40;
+  font-family: "Avenir Bold", Avenir, Georgia, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1.95px;
+}
+
+[data-site-footer-links] a:hover {
+  color: rgba(55, 62, 64, 0.72);
+}
+
+body:has(.bb-trial) {
+  font-family: var(--font-body);
+}
+
+body:has(.bb-trial) nav {
+  font-family: inherit;
+}
+
+.bb-trial {
+  --bb-sans: var(--font-body);
+  --bb-serif: "geller-headline", Georgia, serif;
+  font-family: var(--bb-sans) !important;
+}
+
+.bb-trial h1,
+.bb-trial h2,
+.bb-trial h3 {
+  font-family: var(--bb-serif) !important;
+  letter-spacing: 0;
+}
+
+.bb-trial h1,
+.bb-trial h2,
+.bb-trial h3 {
+  font-weight: 700;
+}
+
+.bb-trial .bb-trial-hero {
+  display: block;
+  max-width: 1120px;
+}
+
+.bb-trial .bb-trial-hero-copy {
+  max-width: 690px;
+}
+
+.bb-trial h1 {
+  max-width: 690px;
+  font-size: 34px;
+  line-height: 1.25;
+  letter-spacing: 1.2px;
+}
+
+.bb-trial .bb-trial-dek {
+  max-width: 690px;
+  font-size: 16px;
+  line-height: 1.625;
+}
+
+.bb-trial .bb-trial-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 760px) 300px;
+  align-items: start;
+  gap: 56px;
+  max-width: 1120px;
+}
+
+.bb-trial .bb-trial-card {
+  max-width: 760px;
+}
+
+[data-bb-trial-browse] {
+  position: sticky;
+  top: 96px;
+  display: block;
+}
+
+[data-bb-trial-browse-heading] {
+  margin-bottom: 22px;
+  color: var(--bb-gray);
+  font-family: "geller-headline", Georgia, serif;
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  line-height: 1.05;
+  text-align: center;
+}
+
+[data-bb-trial-browse-heading] span {
+  display: inline;
+}
+
+[data-bb-trial-browse-heading] strong {
+  display: inline;
+  font-family: inherit;
+  font-weight: 700;
+}
+
+[data-bb-trial-browse-grid] {
+  display: grid;
+  gap: 26px;
+}
+
+.bb-trial [data-bb-trial-browse] a {
+  color: inherit;
+  box-shadow: none;
+  text-decoration: none;
+}
+
+.bb-trial [data-bb-trial-browse] a:hover {
+  color: inherit;
+  box-shadow: none;
+}
+
+.bb-trial [data-bb-trial-browse] h3 {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  font-size: 24px;
+  line-height: 1.08;
+  text-align: center;
+}
+
+.bb-trial [data-bb-trial-browse] p,
+.bb-trial [data-bb-trial-browse] svg,
+.bb-trial [data-bb-trial-browse] a > div:last-child > div:last-child {
+  display: none;
+}
+
+.bb-trial .bb-trial-crumbs,
+.bb-trial .bb-trial-byline,
+.bb-trial .bb-trial-kicker,
+.bb-trial h4,
+.bb-trial-meta-grid dt {
+  font-family: "Avenir Bold", Avenir, Georgia, sans-serif;
+  font-weight: 700;
+  letter-spacing: 1.95px;
+}
+
+.bb-trial-actions a,
+.bb-trial-actions button,
+.bb-trial-card-actions a,
+.bb-trial-card-actions button,
+.bb-trial-social a,
+.bb-trial-social button {
+  font-family: "Avenir Bold", Avenir, Georgia, sans-serif !important;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1.95px;
+}
+
+.bb-trial-card li a {
+  color: var(--bb-gray);
+  font-weight: 800;
+  text-decoration: underline;
+  text-decoration-color: rgba(55, 62, 64, 0.35);
+  text-underline-offset: 2px;
+  box-shadow: none;
+}
+
+.bb-trial-card li a:hover {
+  color: var(--bb-gray);
+  text-decoration-color: var(--bb-gray);
+  box-shadow: none;
+}
+
+.bb-trial-social {
+  top: 106px;
+  right: auto;
+  left: -104px;
+}
+
+.bb-trial-social a,
+.bb-trial-social button {
+  width: 92px;
+  padding-inline: 10px;
+}
+
+.bb-trial-cook [data-bb-trial-browse] {
+  display: none;
+}
+
+@media (max-width: 1180px) {
+  .bb-trial-social {
+    left: -90px;
+  }
+}
+
+@media (max-width: 1080px) {
+  .bb-trial .bb-trial-shell {
+    display: block;
+    max-width: 760px;
+  }
+
+  [data-bb-trial-browse] {
+    display: none;
+  }
+
+  .bb-trial-social {
+    right: calc(100% + 28px);
+    left: auto;
+  }
+}

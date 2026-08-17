@@ -149,7 +149,7 @@ check('View all categories -> /browse', catsHref === '/browse', String(catsHref)
 // --- the nav leaves its hero state on scroll ----------------------------
 // Without a scroll listener the recipe nav stays transparent with white text,
 // which lands white-on-white over the content card.
-await page.goto(BASE + '/recipes/charred-crust-pizza', { waitUntil: 'networkidle' })
+await page.goto(BASE + '/recipes/artisan-new-york-pizza', { waitUntil: 'networkidle' })
 await page.waitForTimeout(300)
 const navTop = await page.evaluate(() => getComputedStyle(document.querySelector('nav')).backgroundColor)
 await page.evaluate(() => window.scrollTo(0, 1400))

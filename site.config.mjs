@@ -12,6 +12,9 @@ export const SITE_URL = 'https://eatyeet.com'
 /** Routes with no dynamic segment, in the order they should be crawled. */
 export const STATIC_PATHS = ['/', '/recipes', '/browse', '/search']
 
+/** Non-indexed static experiment pages that should still open directly. */
+export const TRIAL_PATHS = ['/recipes/artisan-new-york-pizza/butternut-trial']
+
 /**
  * Every path to prerender, given the generated recipe index.
  *
@@ -21,5 +24,5 @@ export const STATIC_PATHS = ['/', '/recipes', '/browse', '/search']
  * pass. See the note in src/routes/search.tsx.
  */
 export function allPaths(index) {
-  return [...STATIC_PATHS, ...index.map((recipe) => `/recipes/${recipe.slug}`)]
+  return [...STATIC_PATHS, ...index.map((recipe) => `/recipes/${recipe.slug}`), ...TRIAL_PATHS]
 }

@@ -11,12 +11,12 @@ import { useCallback, useEffect, useState } from 'react'
 import { Footer, Nav } from '../components/layout'
 import { SearchPalette } from '../components/palette'
 import globalCss from '../styles/global.css?url'
+import siteOverridesCss from '../styles/site-overrides.css?url'
 
 /**
- * Head defaults, from the original __root.tsx: the same donut favicon and the
- * same three preloaded fonts, which exist to avoid a flash of invisible text
- * behind the render-blocking stylesheet. Per-route titles, descriptions,
- * canonical links, and OG tags come from buildSeoMeta().
+ * Head defaults, from the original __root.tsx: favicon, global styles, and the
+ * display fonts that need to arrive before first paint. Per-route titles,
+ * descriptions, canonical links, and OG tags come from buildSeoMeta().
  */
 export const Route = createRootRoute({
   head: () => ({
@@ -34,12 +34,10 @@ export const Route = createRootRoute({
     links: [
       { rel: 'icon', href: '/donut-icon.svg', type: 'image/svg+xml' },
       { rel: 'stylesheet', href: globalCss },
-      { rel: 'preload', href: '/fonts/dm-sans-latin.woff2', as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' },
-      { rel: 'preload', href: '/fonts/montserrat-latin.woff2', as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' },
+      { rel: 'stylesheet', href: siteOverridesCss },
       { rel: 'preload', href: '/fonts/bowlby-one-sc-latin.woff2', as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' },
-      // --font-nav is Nunito, and every nav link uses it; without this the nav
-      // text FOITs behind the render-blocking stylesheet.
-      { rel: 'preload', href: '/fonts/nunito-latin.woff2', as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' },
+      { rel: 'preload', href: '/fonts/geller/gellertest-headlineregular.otf', as: 'font', type: 'font/otf', crossOrigin: 'anonymous' },
+      { rel: 'preload', href: '/fonts/geller/gellertest-headlinebold.otf', as: 'font', type: 'font/otf', crossOrigin: 'anonymous' },
     ],
   }),
   component: RootLayout,
