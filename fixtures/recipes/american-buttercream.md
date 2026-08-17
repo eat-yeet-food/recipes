@@ -14,6 +14,7 @@ cookMinutes: 0
 totalMinutes: 10
 yieldAmount: 1
 yieldUnit: batch
+image: american-buttercream.jpg
 created: 2026-05-01
 ---
 
