@@ -14,6 +14,7 @@ cookMinutes: 12
 totalMinutes: 40
 yieldAmount: 4
 yieldUnit: servings
+image: classic-baked-mac-and-cheese.jpg
 created: 2026-06-22
 ---
 

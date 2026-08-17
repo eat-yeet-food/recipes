@@ -107,14 +107,8 @@ cd /tmp/oldengine && npm install && npm run build:web && node test/shots.mjs --w
 # baseline lands in dist/shots/web
 ```
 
-Two departures from the original, both deliberate:
+One departure from the original is deliberate:
 
-- **Two of twelve recipes have no photo** — american-buttercream and
-  classic-baked-mac-and-cheese.
-  Their images died with the S3 bucket, so those cards render the original's
-  `UtensilsCrossed` fallback, which is what the real site showed for an
-  imageless recipe. They also emit no JSON-LD `image` and so will not qualify
-  for a rich result — the honest outcome rather than a substituted photo.
 - **No sign-in.** The original nav had a Sign in button; there is no auth here,
   so it is removed rather than rendered as a dead control.
 
@@ -306,7 +300,7 @@ Recipes" section above the browse grid.
 ### Image provenance
 
 Four recipe photos survived in `frontend/apps/web/public/images/`. The rest have
-mixed origins, and two did not come from the old platform at all:
+mixed origins and should be treated as replacements unless noted otherwise:
 
 - **bolognese** — restored from git history
   (`apps/eat-yeet/public/images/bolognese.jpg`), so the filename confirms the
@@ -315,21 +309,27 @@ mixed origins, and two did not come from the old platform at all:
   **replaced by a generated image** the owner supplied. It is not a photograph
   of this loaf. The recovered original is still in git history at the commit
   before it was swapped.
-- **raised donuts, donut glaze** — carved out of a leftover Next.js image cache
+- **raised donuts** — carved out of a leftover Next.js image cache
   at `apps/eat-yeet/.next/cache/images/`. That cache stores no filenames, so
-  these two were matched **by eye**; either could belong to the other recipe.
-  Swap the `image:` lines in their frontmatter if they look wrong.
+  the match was made **by eye**.
 
 - **banana bread** — no image survived; the owner supplied one directly, so it
   is not from the old platform.
 
-Three recipes still have no image: american-buttercream, vanilla-cupcakes,
-classic-baked-mac-and-cheese.
+- **donut glaze** — no original image survived; replaced with the
+  owner-supplied Unsplash photo
+  `melanie-boers-urrWQ8bYwcw-unsplash.jpg`.
+
+- **classic baked mac and cheese** — no original image survived; replaced with
+  the owner-supplied Unsplash photo
+  `alexandra-tran-aeLcUBr7kmM-unsplash.jpg`.
+
+All twelve recipes now have images.
 Searched and came up empty: the working tree, the Next.js image cache, all 53
 image files in git history across every branch, Chrome's HTTP and image caches
 (which hold only the 160x160 mascot icon), and `~/Downloads`, `~/Desktop`,
 `~/Pictures`, `~/Documents`. The originals were S3 objects
 (`seed/vanilla-cupcakes-hero.webp` and friends) in the deleted
 `yeet-production-images` bucket, and both domains' Route53 zones are gone, so
-there is nothing left to fetch. To restore one, drop the file in
-`public/images/` and add an `image:` line to its frontmatter.
+there is nothing left to fetch. To replace one, drop the file in
+`public/images/` and point the recipe frontmatter at it.

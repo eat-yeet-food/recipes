@@ -74,12 +74,11 @@ does not act as a default; it combines with `/build/*`. That merge once let the
 edge cache an HTML 404 body under a JS chunk's URL as `immutable`, and the site
 stopped hydrating. Keep `/*` to security headers only.
 
-## 7. Don't fabricate content
+## 7. Don't fabricate provenance
 
-Two of twelve recipes have no photo. They render the original's
-`UtensilsCrossed` fallback and emit no JSON-LD `image`, so they will not earn a
-rich result. That is the honest outcome — do not substitute a stock photo to
-make a page look finished. State gaps plainly.
+All twelve recipes currently have photos, but not every photo is original to the
+old platform. Do not silently treat replacements as recovered originals. State
+gaps and substitutions plainly.
 
 `README.md`'s "Image provenance" section records where every image came from,
 including the ones that are not photographs of these dishes. Keep it accurate.
