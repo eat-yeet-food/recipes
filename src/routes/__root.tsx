@@ -8,6 +8,7 @@ import {
 } from '@tanstack/react-router'
 import { useCallback, useEffect, useState } from 'react'
 
+import { ErrorState, NotFound } from '../components/error-states'
 import { Footer, Nav } from '../components/layout'
 import { SearchPalette } from '../components/palette'
 import globalCss from '../styles/global.css?url'
@@ -43,6 +44,8 @@ export const Route = createRootRoute({
     ],
   }),
   component: RootLayout,
+  errorComponent: ErrorState,
+  notFoundComponent: NotFound,
   shellComponent: RootDocument,
 })
 

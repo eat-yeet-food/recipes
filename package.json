@@ -20,6 +20,8 @@
     "classes": "node scripts/check-classes.mjs",
     "routes": "node scripts/generate-routes.mjs",
     "serve": "node scripts/serve.mjs",
+    "deploy": "node scripts/deploy.mjs",
+    "verify:prod": "node test/verify-prod.mjs",
     "typecheck": "npm run content && npm run routes && tsc --noEmit"
   },
   "dependencies": {

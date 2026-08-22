@@ -39,13 +39,25 @@ this was transcribed from. **Read them before changing markup or classes** on
 the home, browse, search, card, nav, footer, and command-palette surfaces.
 Every ported component here names its source at the top.
 
-`/browse` no longer uses the original's plain text cards. Its four facet
+Three surfaces have deliberately left the original. Do not "restore" any of
+them without being asked:
+
+**`/browse`** no longer uses the original's plain text cards. Its four facet
 sections render the home grid's photo card, so "View all categories" leads to a
 page that looks like the grid it came from. Categories without a curated image
-borrow a recipe photo; see the note in `src/routes/browse.tsx`. Do not restore
-the text cards unless explicitly asked.
+borrow a recipe photo; see the note in `src/routes/browse.tsx`.
 
-Recipe detail pages are no longer the original layout. The canonical
+**Not-found and error states** are ours; the original had none worth porting.
+`components/error-states.tsx` owns all three — a bad URL, a route that threw,
+and a stale-build chunk failure — and they share one frame on purpose, so a
+visitor cannot tell which subsystem failed. They are wired at
+`router.tsx` (`defaultErrorComponent`, `defaultNotFoundComponent`) and at
+`__root.tsx`, and are covered by the `DeadEnds` Storybook story. The stale-build
+variant is not decoration: a failed dynamic import means the browser is holding
+a build that no longer exists, and a reload is the actual fix, so it says so
+instead of offering a retry that re-runs the same broken module graph.
+
+**Recipe detail pages** are no longer the original layout. The canonical
 `components/recipe.tsx` wrapper renders `components/recipe-butternut-trial.tsx`,
 which contains the Butternut-inspired article card, print/pin controls, cook
 mode, local Geller/Avenir font usage, and desktop-only "Browse Recipes" sidebar.
@@ -70,7 +82,12 @@ npm run storybook # real Storybook at 127.0.0.1:6006
 npm run build-storybook # static Storybook build; also covered by npm test
 npm run parity    # pixel-diff against a baseline
 npm run serve     # look at it: 127.0.0.1:4321, served as Pages serves it
+npm run verify:prod [origin]  # cold-load the deployed site in Chrome
 ```
+
+`verify:prod` is the only check that sees what a visitor sees. Everything above
+it tests the artifact; that one tests the artifact *plus* the edge in front of
+it, and those can disagree — see section 6.
 
 Take screenshots and **actually look at them** when changing layout. Reusable
 visual decisions should also be represented in real Storybook stories under
@@ -99,12 +116,60 @@ Internal noindex app pages such as the historical
 keeps them out of the sitemap. Storybook is not an app route; it lives in
 `.storybook/` and `src/stories/`.
 
-## 6. `_headers` rules merge
+## 6. A missing asset must 404, or the edge pins HTML under its URL
 
-Cloudflare Pages applies *every* matching rule. A `Cache-Control` under `/*`
-does not act as a default; it combines with `/build/*`. That merge once let the
-edge cache an HTML 404 body under a JS chunk's URL as `immutable`, and the site
-stopped hydrating. Keep `/*` to security headers only.
+Cloudflare Pages applies *every* matching `_headers` rule. A `Cache-Control`
+under `/*` does not act as a default; it combines with `/build/*`. Keep `/*` to
+security headers only.
+
+The deeper trap, which has now bitten twice. Three facts that are each fine
+alone and lethal together:
+
+1. **Pages answers an unknown path with the app shell under a 200** unless a
+   `404.html` exists.
+2. **Propagation is not atomic.** Uploading is — Wrangler uploads every file and
+   only then flips the manifest, so "assets first, HTML last" is already handled
+   and cannot be reordered. But for a window after the flip, an edge PoP can
+   answer a *present* asset URL with that fallback body.
+3. **`immutable` means never revalidate.** Anything cached in that window, at
+   the edge or in a browser, stays for a year.
+
+Result: a JS URL that the edge believes is a document. Chrome refuses the module
+on MIME grounds and the site does not hydrate.
+
+The second occurrence was self-inflicted: a post-deploy `curl` sweep of all 23
+`/build/*` URLs, seconds after the flip, cached the fallback body under every
+one of them. **A sweep of asset URLs during propagation is not a verification,
+it is a cache-poisoning tool.** Do not write one.
+
+Five guards, none of which should be removed:
+
+- `scripts/prerender.mjs` writes `404.html` and **fails the build** if an
+  unmatched path does not return 404. Pages then answers a miss with a real 404
+  under `no-store`, so there is no longer a cacheable wrong answer at all.
+  `test/verify.mjs` checks the file ships.
+- `scripts/build-seo.mjs` omits `immutable` from `/build/*`, so a bad response
+  self-heals on the next ordinary reload instead of lasting a year.
+- `scripts/build-seo.mjs` caps every HTML page at `max-age=300`. Documents name
+  the hashed assets, so a stale one pins a visitor to a superseded build; five
+  minutes bounds that. The rules are generated from `site.config.mjs` and are
+  per-path because a `Cache-Control` under `/*` would merge onto `/build/*`.
+- `npm run deploy` waits until the domain actually serves the new build, purges,
+  and only then verifies.
+- `test/verify-prod.mjs` cold-loads the live domain in Chrome.
+
+If one gets through anyway, `components/error-states.tsx` catches the fallout:
+a failed chunk import renders "Reload to Continue" in the site's own type rather
+than TanStack's bare panel. That is a cushion, not a fix — see section 2.
+
+And two properties that make it deceptive:
+
+- **`curl` is not a check.** It gets a different cache key than the browser and
+  returned correct JavaScript for the very URL Chrome was being served HTML for.
+  A green curl means nothing. Use the browser.
+- **A poisoned client is unreachable.** Purging the edge does not touch it. With
+  `immutable` gone an ordinary reload fixes it; while it was set, only a hard
+  reload did, and there was no way to tell visitors.
 
 ## 7. Don't fabricate provenance
 
@@ -130,11 +195,22 @@ Cloudflare credentials live in Doppler. In Codex and other non-interactive
 shells, plain Wrangler fails because `CLOUDFLARE_API_TOKEN` is not set. Use:
 
 ```bash
-doppler run -p yeet -c dev -- npx wrangler pages deploy .output/public --project-name eatyeet
+doppler run -p yeet -c dev -- npm run deploy
 ```
 
 Deploy only `.output/public` after a passing `npm test` or a known-good
 `npm run build` plus targeted test run.
+
+`npm run deploy` is wrangler **plus** an edge purge **plus** a browser check of
+the live domain, in that order. Do not hand-run the wrangler line instead: a
+deploy is not atomic at the custom domain, and skipping the purge or the
+verification is how section 6 happened. The token needs Pages:Edit, Zone:Read,
+and Cache Purge.
+
+`npm run verify:prod [origin]` runs the browser check alone. Point it at a
+`*.pages.dev` deployment URL to judge the artifact, or at eatyeet.com to judge
+what visitors actually get — they can disagree, and only the second one is the
+site.
 
 Centralized skills and adapter docs should refer to this section and the README
 runbook. Do not encode a separate Wrangler deploy command anywhere else.

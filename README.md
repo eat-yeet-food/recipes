@@ -21,6 +21,8 @@ npm run typecheck  # generate content/routes, then tsc --noEmit
 npm run classes    # class guard alone (also runs inside build)
 npm run parity     # build, then pixel-diff against a baseline
 npm run shots      # Playwright screenshots -> dist/shots/
+npm run deploy     # deploy + purge + verify the live site (run via Doppler)
+npm run verify:prod [origin]  # cold-load the deployed site in Chrome
 npm run content    # fixtures -> src/generated (runs as part of build)
 npm run convert    # one-time import from the old yeet seed dump
 ```
@@ -143,6 +145,7 @@ The Storybook suite currently covers:
 - browse gallery cards
 - empty and filled recipe grids
 - the canonical redesigned recipe article
+- not-found and error-boundary states (`DeadEnds`)
 
 Use it locally with:
 
@@ -175,9 +178,28 @@ can fail in restricted loopback environments even when the generated server is
 healthy. The local script keeps the route list obvious, binds the server to
 `127.0.0.1`, and writes the same plain HTML files into `.output/public`.
 
+It also writes `404.html`, and **fails the build** if an unmatched path does not
+answer 404. Pages serves that file for anything it cannot match, which is what
+keeps a missing asset from coming back as HTML under a 200. See the cache trap
+under Deploying.
+
 Do not enable link crawling for prerendering. Crawling follows browse links into
 `/search?...` and creates one page per facet permutation. `/search` is an
 interactive page, not an SEO surface.
+
+### Dead ends look like one thing
+
+`src/components/error-states.tsx` owns every way a visitor can hit a wall: a URL
+that matches nothing, a route that threw, and a chunk that would not load. They
+share a frame, so which subsystem failed is not the visitor's problem. Wired
+through `router.tsx` (`defaultErrorComponent`, `defaultNotFoundComponent`) and
+`__root.tsx`, prerendered into `404.html`, and reviewable as the `DeadEnds`
+Storybook story.
+
+The stale-build case is special. A failed dynamic import means this browser is
+holding a build that no longer exists, so it offers a reload — the actual fix —
+rather than a retry, which would re-run the same broken module graph and fail
+the same way.
 
 ```
 fixtures/recipes/*.yaml content
@@ -187,6 +209,7 @@ src/lib/model.ts        facets, filtering, search
 src/lib/format.ts       times, yields, labels
 src/lib/seo.ts          head metadata
 src/components/         icons, layout, home, recipe, search, palette
+src/components/error-states.tsx  not-found and error boundaries (see below)
 src/stories/            Storybook stories for design-system and component review
 src/routes/             file-based routes
 src/styles/global.css   the original production Tailwind build
@@ -222,24 +245,32 @@ This section is the only deployment runbook — there is no second copy to drift
 ### Verify, then ship
 
 ```bash
-npm test     # build + static + interaction + recipe-page + guard self-tests
+npm test        # build + static + interaction + recipe-page + guard self-tests
 npm run serve   # preview the exact bytes Pages will serve, at :4321
-doppler run -p yeet -c dev -- \
-  npx wrangler pages deploy .output/public --project-name eatyeet
+doppler run -p yeet -c dev -- npm run deploy
 ```
 
 `npm test` runs `npm run build` first, so a passing test run means the artifact
 in `.output/public` is the one that was tested. Deploy that directory; never a
 directory built by some other command.
 
-In Codex or any other non-interactive shell, run Wrangler through Doppler as
-shown above. A plain `npx wrangler ...` fails without
-`CLOUDFLARE_API_TOKEN`, because Wrangler cannot open an interactive login flow
-there. The successful deploy shape is:
+`npm run deploy` is three steps that belong together, and running only the first
+is how the cache trap below happened:
 
-```bash
-doppler run -p yeet -c dev -- npx wrangler pages deploy .output/public --project-name eatyeet
-```
+| Step | Why it is in the command |
+|---|---|
+| `wrangler pages deploy` | ships `.output/public` |
+| wait, then purge the zone | propagation is not atomic; this clears anything the wait itself cached during the window |
+| `node test/verify-prod.mjs` | cold-loads the live domain in Chrome and fails on console errors, non-200s, assets served as HTML, and a dead router |
+
+Do not hand-run the wrangler line instead. If you only want the last step,
+`npm run verify:prod [origin]` runs it alone — point it at a `*.pages.dev` URL
+to judge the artifact, or at eatyeet.com to judge what visitors get. Those two
+can disagree, and only the second one is the site.
+
+In Codex or any other non-interactive shell, run through Doppler as shown above.
+A plain `npm run deploy` fails without `CLOUDFLARE_API_TOKEN`, because Wrangler
+cannot open an interactive login flow there.
 
 ### What the build does
 
@@ -251,7 +282,7 @@ doppler run -p yeet -c dev -- npx wrangler pages deploy .output/public --project
 | `scripts/check-classes.mjs` | a class not in the compiled stylesheet — see below |
 | `vite build` | bundling |
 | `tsc --noEmit` | type errors |
-| `scripts/prerender.mjs` | renders every path in `site.config.mjs` to HTML |
+| `scripts/prerender.mjs` | renders every path in `site.config.mjs` to HTML, plus `404.html`; fails if an unmatched path does not return 404 |
 | `scripts/build-seo.mjs` | writes `sitemap.xml`, `robots.txt`, `_headers` |
 
 Routes and the canonical origin live in **`site.config.mjs`** only. Adding a
@@ -261,29 +292,79 @@ read it.
 ### Credentials
 
 `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` live in Doppler, project
-`yeet`, config `dev`. The token holds **Pages: Edit**, **Zone: DNS: Edit**, and
-**Zone: Zone: Read**, scoped to `eatyeet.com`.
+`yeet`, config `dev`. The token holds **Pages: Edit**, **Zone: DNS: Edit**,
+**Zone: Zone: Read**, and **Zone: Cache Purge**, scoped to `eatyeet.com`.
 
-It deliberately does **not** hold **Cache Purge**, and that has already cost a
-debugging session — see the cache note below. Add that permission if you want
-purges to be scriptable.
+Cache Purge was added after the second occurrence of the trap below; `npm run
+deploy` needs it, and without it a poisoned edge can only be cleared from the
+dashboard.
 
 ### Cache headers, and a trap worth knowing
 
-`scripts/build-seo.mjs` writes `_headers`: `/build/*` is fingerprinted by Vite
-so it is `immutable` for a year; `/images/*` and `/fonts/*` keep plain names and
-get a day plus revalidation; HTML is left to Pages' own revalidation.
+`scripts/build-seo.mjs` writes `_headers`:
+
+| Path | Cache-Control | Why |
+|---|---|---|
+| `/*` | *(none)* | security headers only — a Cache-Control here merges onto every other rule |
+| `/build/*` | `max-age=31536000` | fingerprinted by Vite, so the URL changes with the content. Deliberately **not** `immutable` — see below |
+| `/images/*`, `/fonts/*` | `max-age=86400` + SWR | plain names, so a day plus revalidation rather than a year no redeploy could clear |
+| each page | `max-age=300, must-revalidate` | HTML names the hashed assets, so a stale document pins a visitor to a superseded build. Generated per-path from `site.config.mjs` |
+
+A miss under any of these is a real 404 with `no-store`, because `404.html`
+exists — see the trap below for why that one file matters so much.
 
 **Pages applies every matching rule and merges the results.** A `Cache-Control`
 under `/*` does not act as a default — it combines with `/build/*` and produced
-`max-age=14400, immutable, must-revalidate`. That merge had teeth: during one
-deploy a chunk briefly 404'd, Pages answered with HTML, and the bogus header let
-the edge cache that HTML *under the chunk's URL*. Browsers then got `text/html`
-for a module script and the page stopped hydrating, while `curl` hit a different
-cached variant and looked fine. Keep `/*` to security headers only.
+`max-age=14400, immutable, must-revalidate`. Keep `/*` to security headers only.
 
-The hashed asset directory is `/build`, not Vite's default `/assets`, because
-retiring the poisoned path was the only way to recover without a purge token.
+That merge was only half of it. The other half brought the site down a second
+time with `/*` already clean. Three facts, each fine alone:
+
+1. **Pages answers an unknown path with the app shell under a 200** unless a
+   `404.html` exists.
+2. **Propagation is not atomic.** Uploading *is*: Wrangler uploads every file
+   and only then flips the deployment manifest, so "assets first, HTML last" is
+   already guaranteed and cannot be reordered. But for a window after the flip,
+   an edge PoP can answer a *present* asset URL with that fallback body.
+3. **`immutable` means never revalidate**, so anything cached in that window —
+   at the edge or in a visitor's browser — stays for a year.
+
+Together: the edge decides a JS URL is a document, Chrome refuses the module on
+MIME grounds, and the page never hydrates.
+
+The second occurrence was self-inflicted. A post-deploy `curl` sweep of all 23
+`/build/*` URLs, run seconds after the flip to "verify the deploy", cached the
+fallback body under every one of them. The file it broke first had not even
+changed in that release. **Sweeping asset URLs during propagation is not a
+verification, it is a cache-poisoning tool.**
+
+Five guards now, none of which should be removed:
+
+- `scripts/prerender.mjs` writes `404.html` and **fails the build** if an
+  unmatched path does not return 404. Pages then answers a miss with a real 404
+  under `no-store` — verified against a preview deployment, not assumed — so
+  there is no longer a cacheable wrong answer to pin.
+- `scripts/build-seo.mjs` omits `immutable` from `/build/*`. The usual advice
+  adds it for fingerprinted files, but the filename already changes with the
+  content, so it prevented no revalidation that mattered — it only made a bad
+  response permanent. Without it, one ordinary reload heals a poisoned client.
+- `scripts/build-seo.mjs` caps every HTML page at `max-age=300`, bounding how
+  long a visitor can be pinned to a superseded build.
+- `npm run deploy` waits until the domain is actually serving the new build
+  before generating load, then purges, then verifies.
+- `test/verify-prod.mjs` cold-loads the live domain in Chrome.
+
+Two properties make it deceptive, and both cost real time:
+
+- **`curl` is not a check.** It gets a different cache key than the browser and
+  returned correct JavaScript for the same URL Chrome was being served HTML for.
+  A green curl means nothing; use the browser.
+- **A poisoned client is unreachable.** Purging the edge does not touch it, and
+  you cannot tell visitors to hard-reload. Prevention is the whole game.
+
+The hashed asset directory is `/build`, not Vite's default `/assets`, because on
+the first occurrence retiring the poisoned path was the only way to recover
+without a purge token. The token has one now.
 
 ### DNS
 
@@ -293,7 +374,7 @@ attached. Do not hand-copy registrar parking `A`/`AAAA` records into Cloudflare
 
 ### Rolling back
 
-Every deploy gets its own immutable `*.pages.dev` URL. To roll back, promote a
+Every deploy gets its own permanent `*.pages.dev` URL. To roll back, promote a
 previous deployment in the Pages dashboard, or rebuild from the previous commit
 and deploy again. Assets are content-hashed, so an older deploy references its
 own asset URLs and does not depend on the current ones.

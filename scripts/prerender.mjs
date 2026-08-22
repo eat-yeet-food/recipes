@@ -79,7 +79,21 @@ try {
     writeFileSync(file, await res.text())
   }
 
-  console.log(`prerender: ${paths.length} routes -> .output/public`)
+  // Cloudflare Pages serves /404.html, with a real 404 status, for any path it
+  // cannot match. Without this file it answers an unknown path with an HTML
+  // body under a *200*, and the /build/* immutable rule in _headers then lets
+  // the edge pin that body under a missing asset's URL for a year. A deploy
+  // only has to lose one race for the site to stop hydrating. CLAUDE.md #6.
+  const missing = await fetch(`${baseUrl}/__prerender-unmatched__`)
+  if (missing.status !== 404) {
+    throw new Error(
+      `expected HTTP 404 for an unmatched path, got ${missing.status} — ` +
+        'without a 404 the edge can cache an HTML body under an asset URL',
+    )
+  }
+  writeFileSync(join(OUT, '404.html'), await missing.text())
+
+  console.log(`prerender: ${paths.length} routes + 404.html -> .output/public`)
 } finally {
   child.kill('SIGTERM')
 }

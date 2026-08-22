@@ -1,5 +1,6 @@
 import { createRouter as createTanStackRouter } from '@tanstack/react-router'
 
+import { ErrorState, NotFound } from './components/error-states'
 import { routeTree } from './routeTree.gen'
 
 export function getRouter() {
@@ -7,6 +8,10 @@ export function getRouter() {
     routeTree,
     defaultPreload: 'intent',
     scrollRestoration: true,
+    // Route-level defaults, so a route that forgets to declare these still
+    // fails inside the site's own look rather than TanStack's bare panel.
+    defaultErrorComponent: ErrorState,
+    defaultNotFoundComponent: NotFound,
   })
 }
 

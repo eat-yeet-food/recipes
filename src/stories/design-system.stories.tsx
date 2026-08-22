@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 
+import { ErrorState, NotFound } from '../components/error-states'
 import { BrowseCard, RecipeCard, RecipeGrid, SectionHeading } from '../components/layout'
 import { ButternutRecipeTrial } from '../components/recipe-butternut-trial'
 import { Icon } from '../components/icons'
@@ -161,6 +162,23 @@ function BrowseGallery() {
   )
 }
 
+/**
+ * The three dead ends, together, because the point of them is that they look
+ * like one thing. A visitor hitting any of these should not be able to tell
+ * which subsystem failed.
+ */
+function DeadEndStates() {
+  return (
+    <div data-storybook-surface="">
+      <NotFound />
+      <ErrorState error={new Error('Something threw while rendering')} reset={() => {}} />
+      <ErrorState
+        error={new Error('Failed to fetch dynamically imported module: /build/index-abc123.js')}
+      />
+    </div>
+  )
+}
+
 const meta = {
   title: 'Design System/Eat Yeet',
   parameters: {
@@ -194,6 +212,9 @@ export const Overview: Story = {
       </StorySection>
       <StorySection eyebrow="Design System" title="Forms and Filter States">
         <FormStates />
+      </StorySection>
+      <StorySection eyebrow="States" title="Not Found and Error Boundaries">
+        <DeadEndStates />
       </StorySection>
       <StorySection eyebrow="Typography" title="Section Heading">
         <div data-storybook-surface="">
@@ -302,6 +323,16 @@ export const RecipeGridStates: Story = {
           <RecipeGrid recipes={[]} />
           <RecipeGrid recipes={featuredRecipes} />
         </div>
+      </StorySection>
+    </StoryCanvas>
+  ),
+}
+
+export const DeadEnds: Story = {
+  render: () => (
+    <StoryCanvas>
+      <StorySection eyebrow="States" title="Not Found and Error Boundaries">
+        <DeadEndStates />
       </StorySection>
     </StoryCanvas>
   ),
