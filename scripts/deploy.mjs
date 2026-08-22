@@ -13,8 +13,9 @@
  * sweep of 23 asset URLs seconds after a deploy is not a verification, it is a
  * cache-poisoning tool, and that is how this site went down.
  *
- * So: confirm the domain is serving this build *before* generating any load,
- * purge whatever the wait populated, and only then verify.
+ * So: confirm the domain is serving this build — HTML *and* reachable assets —
+ * before turning a browser loose on it, purge whatever the wait populated, and
+ * only then verify.
  *
  * Requires CLOUDFLARE_API_TOKEN with Pages:Edit, Zone:Read and Cache Purge.
  * Run through Doppler; see CLAUDE.md section 9.
@@ -69,19 +70,33 @@ execFileSync('npx', ['wrangler', 'pages', 'deploy', OUT, '--project-name', PROJE
   stdio: 'inherit',
 })
 
-// One cheap request per attempt, against the HTML only. HTML is not cached
-// long, so polling it cannot pin anything the way sweeping asset URLs can.
+// Two conditions, both required: the domain returns HTML naming this build's
+// assets, and those assets are actually fetchable. Checking only the first is
+// not enough — the manifest flips before every PoP can serve every file, and a
+// browser opened in that gap gets a 404 for a chunk that plainly exists.
+//
+// Probing the asset URLs directly used to be the dangerous act that caused all
+// this. It is safe now, and only now: a miss returns 404 under `no-store`
+// (because 404.html exists), so a probe that arrives early caches nothing.
 step(`wait for ${ZONE} to serve this build`)
 let live = false
-for (let attempt = 1; attempt <= 30 && !live; attempt += 1) {
+for (let attempt = 1; attempt <= 45 && !live; attempt += 1) {
   await sleep(2000)
   try {
     const html = await (await fetch(`${SITE_URL}/?deploy-probe=${Date.now()}`)).text()
-    live = expected.every((asset) => html.includes(asset))
-  } catch {
-    live = false
+    if (!expected.every((asset) => html.includes(asset))) {
+      process.stdout.write(`  attempt ${attempt}: HTML is still the previous build\n`)
+      continue
+    }
+    const codes = await Promise.all(
+      expected.map(async (asset) => (await fetch(SITE_URL + asset, { method: 'GET' })).status),
+    )
+    const missing = codes.filter((code) => code !== 200).length
+    live = missing === 0
+    if (!live) process.stdout.write(`  attempt ${attempt}: ${missing} asset(s) not propagated\n`)
+  } catch (error) {
+    process.stdout.write(`  attempt ${attempt}: ${error.message}\n`)
   }
-  if (!live) process.stdout.write(`  attempt ${attempt}: not yet\n`)
 }
 if (!live) {
   console.error(`${ZONE} is still not serving this build's assets. Not purging; investigate.`)
