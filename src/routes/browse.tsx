@@ -1,21 +1,28 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 
-import { Icon } from '../components/icons'
+import { BrowseCard } from '../components/layout'
 import { categorySearch } from '../components/home'
 import { CATEGORIES, type Category } from '../lib/categories'
 import { recipesInCategory, type FacetKey } from '../lib/model'
-import { INDEX } from '../lib/recipes'
+import { imageUrl, INDEX } from '../lib/recipes'
 import { buildSeoMeta } from '../lib/seo'
 
 /**
  * browse.tsx + browse-container.tsx.
  *
- * The original grouped every facet into four titled sections of plain text
- * cards — the photo cards belong to the home page's compact subset, not here.
+ * Two deliberate departures from the original.
  *
- * It listed every facet value the platform knew about, including ones no recipe
- * carried. This archive is twelve recipes and closed, so a value with nothing
- * behind it is a permanent dead end; sections list only what has recipes.
+ * The original grouped every facet into four titled sections of plain text
+ * cards, and kept photo cards to the home page's compact subset. Here the
+ * sections render that same photo card: "View all categories" leads here from
+ * the home grid, and landing on a list of bordered text rows read as a
+ * different site. The sections, their titles, and their order are unchanged —
+ * only the card is.
+ *
+ * The original also listed every facet value the platform knew about, including
+ * ones no recipe carried. This archive is twelve recipes and closed, so a value
+ * with nothing behind it is a permanent dead end; sections list only what has
+ * recipes.
  */
 export const Route = createFileRoute('/browse')({
   head: () =>
@@ -37,22 +44,37 @@ const SECTIONS: Array<{ facet: FacetKey; title: string; eyebrow: string }> = [
   { facet: 'restrictions', title: 'By Diet', eyebrow: 'Dietary needs' },
 ]
 
-/** browse-card.tsx — the plain, imageless branch. */
-function TextBrowseCard({ category }: { category: Category }) {
-  return (
-    <Link
-      to="/search"
-      search={categorySearch(category)}
-      className="group flex min-h-[44px] items-center justify-between gap-3 rounded-lg border border-charcoal/10 bg-white px-5 py-4 transition-colors hover:border-charcoal/20 hover:bg-peach/50"
-    >
-      <span className="text-sm font-medium text-charcoal">{category.label}</span>
-      <Icon
-        name="arrow-right"
-        className="size-4 shrink-0 text-charcoal/30 transition-colors group-hover:text-pink"
-      />
-    </Link>
-  )
+interface BrowseCardData {
+  category: Category
+  image: string
 }
+
+/**
+ * Every card on the page, resolved once at import — the collection is static.
+ *
+ * Only the eight home-grid categories carry a curated image. The rest borrow a
+ * photo from a recipe filed under them, preferring one no earlier card took.
+ * Twelve recipes across fourteen categories means some photos still repeat
+ * (Sides and European have only sourdough between them), but a category with a
+ * second recipe to offer uses it.
+ */
+const BROWSE_SECTIONS = (() => {
+  const used = new Set<string>()
+
+  const resolve = (category: Category): BrowseCardData[] => {
+    const recipes = recipesInCategory(INDEX, category)
+    if (recipes.length === 0) return []
+    if (category.image) return [{ category, image: category.image }]
+    const recipe = recipes.find((r) => !used.has(r.image)) ?? recipes[0]
+    used.add(recipe.image)
+    return [{ category, image: imageUrl(recipe) }]
+  }
+
+  return SECTIONS.map((section) => ({
+    ...section,
+    cards: CATEGORIES.filter((c) => c.facet === section.facet).flatMap(resolve),
+  })).filter((section) => section.cards.length > 0)
+})()
 
 function BrowsePage() {
   return (
@@ -65,28 +87,26 @@ function BrowsePage() {
       </p>
 
       <div className="mt-12 space-y-14">
-        {SECTIONS.map((section) => {
-          const cards = CATEGORIES.filter(
-            (c) => c.facet === section.facet && recipesInCategory(INDEX, c).length > 0,
-          )
-          if (cards.length === 0) return null
-
-          return (
-            <section key={section.title} aria-label={section.title}>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-[3px] text-sage-dark">
-                {section.eyebrow}
-              </p>
-              <h2 className="mb-6 font-display text-2xl font-extrabold text-charcoal">
-                {section.title}
-              </h2>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                {cards.map((category) => (
-                  <TextBrowseCard key={category.slug} category={category} />
-                ))}
-              </div>
-            </section>
-          )
-        })}
+        {BROWSE_SECTIONS.map((section) => (
+          <section key={section.title} aria-label={section.title}>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-[3px] text-sage-dark">
+              {section.eyebrow}
+            </p>
+            <h2 className="mb-6 font-display text-2xl font-extrabold text-charcoal">
+              {section.title}
+            </h2>
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              {section.cards.map(({ category, image }) => (
+                <BrowseCard
+                  key={category.slug}
+                  label={category.label}
+                  imageUrl={image}
+                  search={categorySearch(category)}
+                />
+              ))}
+            </div>
+          </section>
+        ))}
       </div>
     </div>
   )

@@ -39,6 +39,12 @@ this was transcribed from. **Read them before changing markup or classes** on
 the home, browse, search, card, nav, footer, and command-palette surfaces.
 Every ported component here names its source at the top.
 
+`/browse` no longer uses the original's plain text cards. Its four facet
+sections render the home grid's photo card, so "View all categories" leads to a
+page that looks like the grid it came from. Categories without a curated image
+borrow a recipe photo; see the note in `src/routes/browse.tsx`. Do not restore
+the text cards unless explicitly asked.
+
 Recipe detail pages are no longer the original layout. The canonical
 `components/recipe.tsx` wrapper renders `components/recipe-butternut-trial.tsx`,
 which contains the Butternut-inspired article card, print/pin controls, cook
