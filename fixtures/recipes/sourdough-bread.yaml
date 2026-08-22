@@ -3,10 +3,10 @@ title: Sourdough Bread
 description: 'Traditional sourdough bread, featuring a long fermentation process for complex flavor and perfect texture.'
 category: savory
 prepMinutes: 60
-cookMinutes: 1380
-totalMinutes: 1440
-yieldAmount: 1
-yieldUnit: loaf
+cookMinutes: 40
+totalMinutes: 1870
+yieldAmount: 2
+yieldUnit: loaves
 image: sourdough-bread.jpg
 courses:
   - sides
@@ -23,6 +23,7 @@ equipment:
   - title: ''
     items:
       - Kitchen scale
+      - Spiral mixer
       - Large mixing bowl
       - Bench scraper
       - Proofing basket (banneton)
@@ -32,49 +33,52 @@ equipment:
       - Wire cooling rack
       - Bread knife
 ingredients:
+  - title: Starter
+    items:
+      - 6g starter
+      - 15g whole wheat flour
+      - 15g bread flour
+      - 23g water
   - title: Levain
     items:
-      - 20g starter
-      - 20g bread flour
-      - 20g whole wheat flour
-      - 40g water
+      - 50g starter
+      - 50g whole wheat flour
+      - 50g bread flour
+      - 77g water
   - title: Bread
     items:
-      - '330g [strong bread flour](https://www.walmart.com/ip/King-Arthur-Unbleached-Flour-5-lbs/10535108?wmlspartner=wlpa&selectedSellerId=0&wmlspartner=wlpa&cn=FY26-ENTP-PMAX_CVP_cnv_dps_dsn_dis_ad_entp_e_n&gclsrc=aw.ds&adid=2222222229710535108_0000000000_22488309517&wl0=&wl1=x&wl2=c&wl3=&wl4=&wl5=9009731&wl6=&wl7=&wl8=&wl9=pla&wl10=8175035&wl11=online&wl12=10535108&veh=sem&gad_source=1&gad_campaignid=22488321244&gbraid=0AAAAADmfBIpnwbCRCx-Lh8QmClJX7tCPp&gclid=Cj0KCQjw8KrFBhDUARIsAMvIApZAbILLGSMWrz1ABKhWgrRQmpk_e3aTcFm7hEG-wrTvuiJNb6qf1jAaAhBoEALw_wcB)'
-      - '70g [whole wheat flour](https://www.target.com/p/bob-39-s-red-mill-organic-whole-wheat-flour-5lbs/-/A-92889638?sid=&TCID=PDS-22806998596&gclsrc=aw.ds&gad_source=1&gad_campaignid=22803279746&gbraid=0AAAAAD-5dfZBxwL-BLt-ymR8_PLhoa3xI&gclid=Cj0KCQjw8KrFBhDUARIsAMvIApZsBV2zeEfCYO1LqrfoeLFww5kNUKvm8kiJL8-RcQ-4-qacCOa4VkEaAjIPEALw_wcB)'
-      - '290g + 15g + 15g water, room temperature (divided)'
-      - 80g peak levain
-      - '9g [salt](https://www.amazon.com/Diamond-Crystal-Baking-Kosher-8-5oz/dp/B0CHVLXM7R/ref=sr_1_6_pp?dib=eyJ2IjoiMSJ9.jc2WdEi1A5_iFEyZqDRiS5lOXcnLhPFL6wkhy3hAZVLJcTsU2sHs_J-AWzySX_HAuS2qp4iHJ-HErpaB5ETMOlhDG6toZVxC0T5EeFgS7A1mBDPeKeJgLsWIDa8ZfTRmxJyQT909kOGia7EGIudysRhLVA2FL_3NBEW9YliE6P81pHovQbK93WdQ1HuPUMvj0sRSNb23UHdpTZC4TiSrmWwVD3IkMIz7hH06xvhXw6u7dU1lvPT2aGsObUyIBb3MSo3QerQ3qLpcmKi8lcO2Y99_pYRXg0uLprCqGVnm_78.n6BzmLiS5vxRRSy05TXIxdTI2LHInGK3rND8pkGUcVg&dib_tag=se&keywords=baking+salt&qid=1756039494&sr=8-6)'
+      - '765g [bread flour](https://www.walmart.com/ip/King-Arthur-Unbleached-Flour-5-lbs/10535108?wmlspartner=wlpa&selectedSellerId=0&wmlspartner=wlpa&cn=FY26-ENTP-PMAX_CVP_cnv_dps_dsn_dis_ad_entp_e_n&gclsrc=aw.ds&adid=2222222229710535108_0000000000_22488309517&wl0=&wl1=x&wl2=c&wl3=&wl4=&wl5=9009731&wl6=&wl7=&wl8=&wl9=pla&wl10=8175035&wl11=online&wl12=10535108&veh=sem&gad_source=1&gad_campaignid=22488321244&gbraid=0AAAAADmfBIpnwbCRCx-Lh8QmClJX7tCPp&gclid=Cj0KCQjw8KrFBhDUARIsAMvIApZAbILLGSMWrz1ABKhWgrRQmpk_e3aTcFm7hEG-wrTvuiJNb6qf1jAaAhBoEALw_wcB)'
+      - '150g [whole wheat flour](https://www.target.com/p/bob-39-s-red-mill-organic-whole-wheat-flour-5lbs/-/A-92889638?sid=&TCID=PDS-22806998596&gclsrc=aw.ds&gad_source=1&gad_campaignid=22803279746&gbraid=0AAAAAD-5dfZBxwL-BLt-ymR8_PLhoa3xI&gclid=Cj0KCQjw8KrFBhDUARIsAMvIApZsBV2zeEfCYO1LqrfoeLFww5kNUKvm8kiJL8-RcQ-4-qacCOa4VkEaAjIPEALw_wcB)'
+      - '685g + 20g water, room temperature (divided)'
+      - 175g peak levain
+      - '20g [salt](https://www.amazon.com/Diamond-Crystal-Baking-Kosher-8-5oz/dp/B0CHVLXM7R/ref=sr_1_6_pp?dib=eyJ2IjoiMSJ9.jc2WdEi1A5_iFEyZqDRiS5lOXcnLhPFL6wkhy3hAZVLJcTsU2sHs_J-AWzySX_HAuS2qp4iHJ-HErpaB5ETMOlhDG6toZVxC0T5EeFgS7A1mBDPeKeJgLsWIDa8ZfTRmxJyQT909kOGia7EGIudysRhLVA2FL_3NBEW9YliE6P81pHovQbK93WdQ1HuPUMvj0sRSNb23UHdpTZC4TiSrmWwVD3IkMIz7hH06xvhXw6u7dU1lvPT2aGsObUyIBb3MSo3QerQ3qLpcmKi8lcO2Y99_pYRXg0uLprCqGVnm_78.n6BzmLiS5vxRRSy05TXIxdTI2LHInGK3rND8pkGUcVg&dib_tag=se&keywords=baking+salt&qid=1756039494&sr=8-6)'
 steps:
   - title: Levain
     items:
       - Mix starter with water and flour
-      - Cover and rest at 78°F for 5h
-  - title: Autolyse
+      - 'Cover and rest at 70°F until peaked, 6h'
+  - title: Autolyse (3h before bulk)
     items:
-      - Mix flour and the first portion of water (290g) until shaggy
-      - Pinch in the second portion of water (15g) until dry bits and chunks are gone
-      - Cover and rest at 78°F for 3h. Add levain to autolyse dough and mix until just combined (fermentalyse) + cover and rest at 78°F for 20m
+      - 'Mix flour and the first portion of water (685g) in a spiral mixer at 40% until integrated and no lumps. Cover and rest at 70°F for 3h.'
   - title: Bulk Fermentation
     items:
-      - Gently pinch in salt + remainder of water (15g). Rubaud and stretch in the bowl for 8m + cover and rest at 78°F for 20m (30m elapsed in bulk)
-      - 'Strong fold + cover and rest at 78°F for 30m (1:00h elapsed in bulk)'
-      - 'Strong fold + cover and rest at 78°F for 30m (1:30h elapsed in bulk)'
-      - 'Coil fold + cover and rest at 78°F for 30m (2:00h elapsed in bulk)'
-      - 'Coil fold + cover and rest at 78°F for approximately 2:00h (2:30h elapsed in bulk)'
-      - 'End of bulk when risen approximately 50% in volume (approximately 4:30h elapsed in bulk)'
+      - '[0m elapsed] Mix in levain in a spiral mixer for 5m + cover and rest at 70°F for 20m.'
+      - '[30m elapsed] Mix in salt + remainder of water (20g) at 15% speed for 1m. Turn speed up to 40% and mix for about 5m. Cover and rest at 70°F for 25m. Internal dough temp should be about 72°F.'
+      - '[1h elapsed] Coil fold + cover and rest at 70°F for 25m'
+      - '[1:30h elapsed] Coil fold + cover and rest at 70°F for 25m'
+      - '[2:00h elapsed] Coil fold + cover and rest at 70°F for 2:50h.'
+      - '[4:50h elapsed] End of bulk when risen approximately 100% in volume'
   - title: Shape
     items:
-      - Preshape and rest at 70°F for 30m
-      - Shape and place in banneton and rest at 70°F for 30m
-      - Place in 38°F refrigerator for 12-18h
+      - Divide / Preshape and rest at 70°F for 30m.
+      - Shape and place in banneton. Rest at 70°F for 10m.
+      - 'Stitch, cover and place in 37°F refrigerator for 12-18h'
   - title: Bake
     items:
-      - Preheat oven at 550°F for 30m
-      - Score loaf at 45° down center and bake in a covered dutch oven at 500°F for 6m
-      - 'Reinforcement expansion score, cover and bake for 14m'
-      - Bake uncovered at 500°F for 25m
-      - Transfer to cooling rack and cool for 2h before cutting
+      - Preheat oven at 550°F for 45m
+      - 'Score loaf at 45° angle about ¼ inch deep, slightly offset center and bake in a covered dutch oven at 470°F for 20m with an ice cube.'
+      - 'Bake uncovered at 470°F for 17m. Raise temp to 500°F and bake for 3 more minutes.'
+      - Place on baking rack and allow to cool for 4h before slicing
 notes:
   - The autolyse process allows flour to fully hydrate and develops gluten naturally
   - Bulk fermentation timing can vary based on temperature and starter activity
