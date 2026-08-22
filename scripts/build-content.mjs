@@ -6,7 +6,7 @@
  * once. Each recipe's body lands in its own file under `recipes/`, which the
  * route loads dynamically, so a visitor reading one recipe never downloads the
  * other eleven. That split is the whole point — the previous renderer shipped
- * all twelve bodies to every page.
+ * every body to every page.
  */
 
 import { mkdirSync, writeFileSync, rmSync, readFileSync, existsSync } from 'node:fs'

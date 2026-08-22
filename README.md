@@ -1,6 +1,6 @@
 # Recipes
 
-The Eat / Yeet recipe archive: twelve recipes as YAML fixtures, rendered by
+The Eat / Yeet recipe archive: thirteen recipes as YAML fixtures, rendered by
 **TanStack Start** into a fully prerendered static site and served from
 Cloudflare Pages at [eatyeet.com](https://eatyeet.com).
 
@@ -473,7 +473,13 @@ have mixed origins and should be treated as replacements unless noted otherwise:
   this repository history; keep treating them as unverified replacements until
   their provenance is confirmed.
 
-All twelve recipes now have images.
+- **chicken fettuccine alfredo** — added with the recipe, not from the old
+  platform. Owner-supplied **Pexels stock photo**
+  `pexels-ffawdyy-13294537.jpg`, resized to 619x1100. It is not a photograph of
+  this dish: the plate in it carries cured pork that this recipe does not
+  include, and the pasta is dressed differently. Treat it as illustrative.
+
+All thirteen recipes now have images.
 Searched and came up empty: the working tree, the Next.js image cache, all 53
 image files in git history across every branch, Chrome's HTTP and image caches
 (which hold only the 160x160 mascot icon), and `~/Downloads`, `~/Desktop`,

@@ -20,7 +20,7 @@ import { buildSeoMeta } from '../lib/seo'
  * only the card is.
  *
  * The original also listed every facet value the platform knew about, including
- * ones no recipe carried. This archive is twelve recipes and closed, so a value
+ * ones no recipe carried. This archive is small and closed, so a value
  * with nothing behind it is a permanent dead end; sections list only what has
  * recipes.
  */
@@ -54,7 +54,7 @@ interface BrowseCardData {
  *
  * Only the eight home-grid categories carry a curated image. The rest borrow a
  * photo from a recipe filed under them, preferring one no earlier card took.
- * Twelve recipes across fourteen categories means some photos still repeat
+ * Thirteen recipes across fourteen categories means some photos still repeat
  * (Sides and European have only sourdough between them), but a category with a
  * second recipe to offer uses it.
  */

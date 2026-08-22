@@ -1,6 +1,6 @@
 # Agent guide
 
-The Eat / Yeet recipe archive: 12 YAML fixtures rendered by TanStack Start
+The Eat / Yeet recipe archive: 13 YAML fixtures rendered by TanStack Start
 into a fully prerendered static site on Cloudflare Pages at eatyeet.com.
 No database, no API, **no server at runtime**.
 
@@ -173,7 +173,7 @@ And two properties that make it deceptive:
 
 ## 7. Don't fabricate provenance
 
-All twelve recipes currently have photos, but not every photo is original to the
+All thirteen recipes currently have photos, but not every photo is original to the
 old platform. Do not silently treat replacements as recovered originals. State
 gaps and substitutions plainly.
 

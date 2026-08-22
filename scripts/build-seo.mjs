@@ -77,7 +77,7 @@ Sitemap: ${SITE_URL}/sitemap.xml
  *
  * Without it a poisoned response self-heals on the next ordinary reload, at a
  * cost of one conditional request per asset per reload. That trade is not close
- * for a twelve-recipe site. See CLAUDE.md #6.
+ * for an archive this size. See CLAUDE.md #6.
  *
  * HTML gets an explicit five-minute ceiling rather than Pages' default. These
  * documents name the hashed assets, so a stale one points a browser at a build

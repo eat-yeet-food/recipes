@@ -63,7 +63,7 @@ export function facetIndex(recipes: RecipeSummary[]) {
 
 /**
  * Text match: every whitespace-separated term must appear somewhere in the
- * recipe's search text. Twelve recipes doesn't warrant an index.
+ * recipe's search text. Thirteen recipes doesn't warrant an index.
  */
 export function matchesQuery(recipe: RecipeSummary, query: string): boolean {
   const terms = query.toLowerCase().split(/\s+/).filter(Boolean)
