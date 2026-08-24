@@ -130,6 +130,15 @@ function renderMarkdownBlock(value) {
 const list = (value) => (Array.isArray(value) ? value : [])
 const num = (value) => (typeof value === 'number' ? value : null)
 const yieldAmount = (value) => (typeof value === 'number' || typeof value === 'string' ? value : null)
+const text = (value) => String(value ?? '').trim()
+
+function labelFromId(value) {
+  return text(value)
+    .split('-')
+    .filter(Boolean)
+    .map((part) => part.slice(0, 1).toUpperCase() + part.slice(1))
+    .join(' ')
+}
 
 function normalizeSectioned(value) {
   return list(value)
@@ -226,6 +235,32 @@ function normalizeBlocks(value, slug) {
   return blocks
 }
 
+function normalizeVariant(variant, data, baseBlocks, fallbackId) {
+  const id = text(variant?.id) || fallbackId
+  if (!id) return null
+
+  const rawBlocks = Array.isArray(variant?.blocks) ? variant.blocks : null
+  const blocks = rawBlocks ? normalizeBlocks(rawBlocks, `${data.slug ?? fallbackId} variant ${id}`) : baseBlocks
+
+  return {
+    id,
+    label: text(variant?.label) || labelFromId(id),
+    description: text(variant?.description) || (data.description ?? ''),
+    prepMinutes: num(variant?.prepMinutes) ?? num(data.prepMinutes),
+    cookMinutes: num(variant?.cookMinutes) ?? num(data.cookMinutes),
+    totalMinutes: num(variant?.totalMinutes) ?? num(data.totalMinutes),
+    yieldAmount: yieldAmount(variant?.yieldAmount) ?? yieldAmount(data.yieldAmount),
+    yieldUnit: variant?.yieldUnit ?? data.yieldUnit ?? '',
+    blocks,
+  }
+}
+
+function normalizeVariants(value, data, baseBlocks, slug) {
+  return list(value)
+    .map((variant, index) => normalizeVariant(variant, data, baseBlocks, `variant-${index + 1}`))
+    .filter(Boolean)
+}
+
 function searchTextForBlocks(blocks) {
   return blocks.flatMap((block) => {
     switch (block.type) {
@@ -251,7 +286,16 @@ function searchTextForBlocks(blocks) {
 
 /** Everything a text query should be able to match. */
 function searchTextFor(data) {
-  return [data.title, data.description, searchTextForBlocks(data.blocks)]
+  return [
+    data.title,
+    data.description,
+    searchTextForBlocks(data.blocks),
+    ...list(data.variants).flatMap((variant) => [
+      variant.label,
+      variant.description,
+      searchTextForBlocks(variant.blocks),
+    ]),
+  ]
     .join(' ')
     .toLowerCase()
 }
@@ -280,11 +324,20 @@ export function parseRecipe(source, fallbackSlug) {
     throw new Error(`${slug}: recipe body fields must live under blocks, not top level: ${legacyFields.join(', ')}`)
   }
 
+  const blocks = normalizeBlocks(data.blocks, slug)
+  const variants = normalizeVariants(data.variants, { ...data, slug }, blocks, slug)
+  const defaultVariant =
+    text(data.defaultVariant) && variants.some((variant) => variant.id === text(data.defaultVariant))
+      ? text(data.defaultVariant)
+      : variants[0]?.id ?? ''
+
   const recipe = {
     slug,
     title: data.title ?? fallbackSlug,
     description: data.description ?? '',
     category: data.category ?? '',
+    defaultVariant,
+    variants,
     courses: list(data.courses),
     cuisines: list(data.cuisines),
     methods: list(data.methods),
@@ -298,7 +351,7 @@ export function parseRecipe(source, fallbackSlug) {
     yieldUnit: data.yieldUnit ?? '',
     image: data.image ?? '',
     created: isoDate(data.created),
-    blocks: normalizeBlocks(data.blocks, slug),
+    blocks,
   }
 
   recipe.searchText = searchTextFor(recipe)

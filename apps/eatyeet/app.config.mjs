@@ -69,7 +69,7 @@ export const app = {
   staticPaths: ['/', '/recipes', '/browse', '/search'],
   sitemapStaticPaths: ['/', '/recipes', '/browse'],
   robotsDisallow: ['/search'],
-  previewPaths: ['', 'recipes', 'search', 'browse', 'recipes/artisan-new-york-pizza'],
+  previewPaths: ['', 'recipes', 'search', 'browse', 'recipes/new-york-style-pizza'],
   paths: {
     fixtures: 'apps/eatyeet/fixtures/recipes',
     publicDir: 'apps/eatyeet/public',

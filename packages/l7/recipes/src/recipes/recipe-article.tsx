@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 
-import { Book, Printer, Share2, Star } from 'lucide-react'
+import { Book, Printer, Share2 } from 'lucide-react'
 import { imageUrl } from '@eat-yeet/l1-recipe-model/recipes'
+import type { RecipeVariantSummary } from '@eat-yeet/l1-recipe-model/recipes'
 import { labelize } from '@eat-yeet/l2-recipe-domain/format'
 import { ContentPageArticle } from '@eat-yeet/l6-ui-content-blocks/page-article'
 import type { PageBlockRegistry } from '@eat-yeet/l6-ui-content-blocks/page-blocks'
@@ -32,6 +33,9 @@ function RecipeArticleHeader({
   printPage,
   onToggleCookMode,
   hasRecipeBlock,
+  variantOptions,
+  selectedVariantId,
+  onVariantChange,
 }: {
   page: RecipeContent
   cookMode: boolean
@@ -39,6 +43,9 @@ function RecipeArticleHeader({
   printPage: () => void
   onToggleCookMode: () => void
   hasRecipeBlock: boolean
+  variantOptions: RecipeVariantSummary[]
+  selectedVariantId: string
+  onVariantChange: (variantId: string) => void
 }) {
   const category = page.category ? labelize(page.category) : 'Recipe'
   const courses = page.courses.map(labelize).join(' / ')
@@ -56,6 +63,11 @@ function RecipeArticleHeader({
         <span>{page.title}</span>
       </nav>
       <h1 className="m-0 max-w-[690px] text-[34px] leading-[1.25] tracking-[1.2px] font-bold">{page.title}</h1>
+      <RecipeVariantSelector
+        variants={variantOptions}
+        selectedVariantId={selectedVariantId}
+        onVariantChange={onVariantChange}
+      />
       <div className="yeet-byline flex flex-wrap gap-x-[22px] gap-y-2.5 mt-2 text-[var(--yeet-tomato)] text-xs uppercase">
         <span>By Patrick Hogan</span>
         {courses && (
@@ -64,12 +76,7 @@ function RecipeArticleHeader({
           </span>
         )}
       </div>
-      <div className="flex gap-2 mt-3.5 mb-7 text-[var(--yeet-pink)]" role="img" aria-label="5 out of 5 stars">
-        {Array.from({ length: 5 }, (_, index) => (
-          <Star key={index} className="size-[22px]" strokeWidth={0} fill="currentColor" />
-        ))}
-      </div>
-      <div className="yeet-actions flex flex-wrap gap-1 mb-7" aria-label="Page actions">
+      <div className="yeet-actions flex flex-wrap gap-1 mt-7 mb-7" aria-label="Page actions">
         <RecipeAction variant="hero" href={pinUrl.toString()} target="_blank" rel="noreferrer">
           <Share2 className="size-3 max-[640px]:hidden" />
           Pin Recipe
@@ -97,22 +104,67 @@ function RecipeArticleHeader({
   )
 }
 
+function RecipeVariantSelector({
+  variants,
+  selectedVariantId,
+  onVariantChange,
+}: {
+  variants: RecipeVariantSummary[]
+  selectedVariantId: string
+  onVariantChange: (variantId: string) => void
+}) {
+  if (variants.length <= 1) return null
+
+  return (
+    <div className="mt-4 flex flex-wrap items-center gap-2" aria-label="Recipe variants">
+      {variants.map((variant) => {
+        const selected = variant.id === selectedVariantId
+        return (
+          <button
+            key={variant.id}
+            type="button"
+            aria-pressed={selected}
+            onClick={() => onVariantChange(variant.id)}
+            className={`min-h-9 rounded-md border px-3 text-xs font-extrabold uppercase tracking-[0.8px] transition-colors ${
+              selected
+                ? 'border-[var(--yeet-tomato)] bg-[var(--yeet-tomato)] text-white'
+                : 'border-[var(--yeet-border)] bg-white text-[var(--yeet-gray)] hover:border-[var(--yeet-tomato)] hover:text-[var(--yeet-tomato)]'
+            }`}
+          >
+            {variant.label}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
 export function RecipeArticle({
   page,
   siteUrl,
   blockRegistry,
   aside,
+  variantOptions = [],
+  selectedVariantId = '',
+  onVariantChange = () => {},
 }: {
   page: RecipeContent
   siteUrl: string
   blockRegistry: PageBlockRegistry<RecipePageBlockContext>
   aside?: (props: RecipeArticleAsideProps) => ReactNode
+  variantOptions?: RecipeVariantSummary[]
+  selectedVariantId?: string
+  onVariantChange?: (variantId: string) => void
 }) {
   const [cookMode, setCookMode] = useState(false)
   const wakeLockRef = useRef<ScreenWakeLockSentinel | null>(null)
   const photo = imageUrl(page)
   const heroAlt = `${page.title} hero image`
-  const pageUrl = `${siteUrl}/recipes/${page.slug}`
+  const variantQuery =
+    selectedVariantId && selectedVariantId !== page.defaultVariant
+      ? `?variant=${encodeURIComponent(selectedVariantId)}`
+      : ''
+  const pageUrl = `${siteUrl}/recipes/${page.slug}${variantQuery}`
   const pinUrl = new URL('https://www.pinterest.com/pin/create/button/')
   const firstRecipeBlockIndex = page.blocks.findIndex((block) => block.type === 'recipe')
   const hasRecipeBlock = firstRecipeBlockIndex >= 0
@@ -192,6 +244,9 @@ export function RecipeArticle({
           printPage={printPage}
           onToggleCookMode={toggleCookMode}
           hasRecipeBlock={hasRecipeBlock}
+          variantOptions={variantOptions}
+          selectedVariantId={selectedVariantId}
+          onVariantChange={onVariantChange}
         />
       )}
       media={photo ? <img src={photo} alt={heroAlt} className="w-full max-h-[690px] object-cover" /> : undefined}

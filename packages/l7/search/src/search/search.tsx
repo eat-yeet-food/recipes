@@ -65,7 +65,7 @@ function FacetGroup({
               />
               <span className="font-body text-sm text-ink/70">
                 {labelize(value)}
-                <span className="ml-1 text-ink/40">{count}</span>
+                <span className="ml-1 text-ink/65">{count}</span>
               </span>
             </label>
           ))}

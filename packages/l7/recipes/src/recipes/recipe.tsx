@@ -1,6 +1,6 @@
 import { RecipeCard } from '@eat-yeet/l6-ui-catalog/cards'
 import type { PageBlockRegistry } from '@eat-yeet/l6-ui-content-blocks/page-blocks'
-import type { RecipeSummary } from '@eat-yeet/l1-recipe-model/recipes'
+import type { RecipeSummary, RecipeVariantSummary } from '@eat-yeet/l1-recipe-model/recipes'
 import type { RecipeContent as Recipe } from '@eat-yeet/l4-content-model/recipes'
 import { RecipeArticle } from './recipe-article'
 import type { RecipePageBlockContext } from './recipe-blocks'
@@ -43,17 +43,26 @@ export function RecipeDetail({
   browseRecipes,
   siteUrl,
   blockRegistry,
+  variantOptions,
+  selectedVariantId,
+  onVariantChange,
 }: {
   recipe: Recipe
   browseRecipes: RecipeSummary[]
   siteUrl: string
   blockRegistry: PageBlockRegistry<RecipePageBlockContext>
+  variantOptions?: RecipeVariantSummary[]
+  selectedVariantId?: string
+  onVariantChange?: (variantId: string) => void
 }) {
   return (
     <RecipeArticle
       page={recipe}
       siteUrl={siteUrl}
       blockRegistry={blockRegistry}
+      variantOptions={variantOptions}
+      selectedVariantId={selectedVariantId}
+      onVariantChange={onVariantChange}
       aside={({ page, cookMode }) => (
         <BrowseRecipesAside currentRecipe={page} cookMode={cookMode} recipes={browseRecipes} />
       )}

@@ -153,7 +153,7 @@ check('View all categories -> /browse', catsHref === '/browse', String(catsHref)
 // --- recipe pages use normal white chrome -------------------------------
 // Recipe pages use normal white chrome. The header should start and stay
 // readable while scrolling.
-await page.goto(BASE + '/recipes/artisan-new-york-pizza', { waitUntil: 'networkidle' })
+await page.goto(BASE + '/recipes/new-york-style-pizza', { waitUntil: 'networkidle' })
 await page.waitForTimeout(300)
 const navTop = await page.evaluate(() => getComputedStyle(document.querySelector('nav')).backgroundColor)
 await page.evaluate(() => window.scrollTo(0, 1400))

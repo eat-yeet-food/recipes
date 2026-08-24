@@ -1,8 +1,21 @@
+export interface RecipeVariantSummary {
+  id: string
+  label: string
+  description: string
+  prepMinutes: number | null
+  cookMinutes: number | null
+  totalMinutes: number | null
+  yieldAmount: number | string | null
+  yieldUnit: string
+}
+
 export interface RecipeSummary {
   slug: string
   title: string
   description: string
   category: string
+  defaultVariant: string
+  variants: RecipeVariantSummary[]
   courses: string[]
   cuisines: string[]
   methods: string[]

@@ -67,7 +67,22 @@ for (const recipe of INDEX) {
 }
 
 const desktop = await newPage()
-await desktop.goto(`${BASE}/recipes/artisan-new-york-pizza`, { waitUntil: 'networkidle' })
+await desktop.goto(`${BASE}/recipes/new-york-style-pizza`, { waitUntil: 'networkidle' })
+check(
+  'pizza variant selector renders',
+  await desktop.locator('[aria-label="Recipe variants"] button').count() === 2,
+)
+await desktop.locator('[aria-label="Recipe variants"] button:has-text("Indoor Steel")').click()
+await desktop.waitForURL('**/recipes/new-york-style-pizza?variant=indoor-steel')
+const indoorFacts = await desktop.evaluate(() => document.body.textContent ?? '')
+check('indoor variant updates URL', desktop.url().endsWith('/recipes/new-york-style-pizza?variant=indoor-steel'), desktop.url())
+check('indoor variant swaps dough formula', indoorFacts.includes('852g') && indoorFacts.includes('17g canola oil'))
+check('indoor variant shows baking steel equipment', indoorFacts.includes('16" x 16" baking steel'))
+await desktop.locator('[aria-label="Recipe variants"] button:has-text("Outdoor Oven")').click()
+await desktop.waitForURL('**/recipes/new-york-style-pizza')
+const outdoorFacts = await desktop.evaluate(() => document.body.textContent ?? '')
+check('default variant clears URL param', desktop.url().endsWith('/recipes/new-york-style-pizza'), desktop.url())
+check('outdoor variant restores dough formula', outdoorFacts.includes('847g') && outdoorFacts.includes('576g cold water'))
 await desktop.locator('.yeet-card-actions button:has-text("Cook Mode")').click()
 await desktop.waitForTimeout(200)
 check(
@@ -81,7 +96,7 @@ check(
 await desktop.close()
 
 const phone = await newPage({ width: 390, height: 900 })
-await phone.goto(`${BASE}/recipes/artisan-new-york-pizza`, { waitUntil: 'networkidle' })
+await phone.goto(`${BASE}/recipes/new-york-style-pizza`, { waitUntil: 'networkidle' })
 check(
   'recipe browse sidebar hidden on phone',
   await phone.locator('[data-yeet-browse]').evaluate((el) => getComputedStyle(el).display === 'none'),

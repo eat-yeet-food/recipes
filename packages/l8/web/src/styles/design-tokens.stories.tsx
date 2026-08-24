@@ -68,7 +68,7 @@ function TypographyScale() {
     <div data-storybook-type-scale="">
       <div>
         <p data-storybook-label="">Display</p>
-        <h3>Artisan New York Pizza</h3>
+        <h3>New York Style Pizza</h3>
       </div>
       <div>
         <p data-storybook-label="">Body</p>

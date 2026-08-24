@@ -27,6 +27,39 @@ blocks:
 `, 'pizza'), /must define at least one valid block/)
   })
 
+  it('normalizes variants into searchable recipe metadata', () => {
+    const recipe = parseRecipe(`
+title: Pizza
+defaultVariant: outdoor
+variants:
+  - id: outdoor
+    label: Outdoor Oven
+  - id: indoor
+    label: Indoor Steel
+    description: Home oven bake
+    cookMinutes: 7
+    blocks:
+      - type: recipe
+        equipment:
+          - Baking steel
+        ingredients:
+          - Flour
+blocks:
+  - type: recipe
+    ingredients:
+      - Flour
+`, 'pizza')
+
+    assert.equal(recipe.defaultVariant, 'outdoor')
+    assert.equal(recipe.variants.length, 2)
+    assert.equal(recipe.variants[0].label, 'Outdoor Oven')
+    assert.equal(recipe.variants[0].blocks, recipe.blocks)
+    assert.equal(recipe.variants[1].cookMinutes, 7)
+    assert.equal(recipe.searchText.includes('outdoor oven'), true)
+    assert.equal(recipe.searchText.includes('indoor steel'), true)
+    assert.equal(recipe.searchText.includes('baking steel'), true)
+  })
+
   it('renders standard markdown blocks through the safe block allowlist', () => {
     const recipe = parseRecipe(`
 title: Pizza

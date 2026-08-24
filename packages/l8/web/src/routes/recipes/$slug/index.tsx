@@ -1,4 +1,4 @@
-import { createFileRoute, notFound } from '@tanstack/react-router'
+import { createFileRoute, notFound, useNavigate } from '@tanstack/react-router'
 
 import { RecipeDetail } from '@eat-yeet/l7-recipes/recipes/recipe'
 import { isoDuration, formatYield, labelize, stripTags } from '@eat-yeet/l2-recipe-domain/format'
@@ -6,13 +6,30 @@ import { imageUrl } from '@eat-yeet/l1-recipe-model/recipes'
 import { ssrPrefetch } from '@eat-yeet/l3-api-query/prefetch'
 import { pageBlockRegistry } from '@app/page-blocks'
 import { APP_CONFIG } from '@/lib/app-config'
-import type { RecipeBlock, RecipeContent as Recipe } from '@eat-yeet/l4-content-model/recipes'
+import {
+  recipeWithSelectedVariant,
+  selectedRecipeVariant,
+  type RecipeBlock,
+  type RecipeContent as Recipe,
+} from '@eat-yeet/l4-content-model/recipes'
 import { buildSeoMeta } from '@/lib/seo'
 import { recipeApi, recipeQueries } from '@/lib/api'
 
 const APP_COPY = APP_CONFIG.copy
 
+export interface RecipeUrl {
+  variant?: string
+}
+
+const str = (value: unknown) => (typeof value === 'string' && value ? value : undefined)
+
+function validateSearch(search: Record<string, unknown>): RecipeUrl {
+  const variant = str(search.variant)
+  return variant ? { variant } : {}
+}
+
 export const Route = createFileRoute('/recipes/$slug/')({
+  validateSearch,
   loader: async ({ context, params }) => {
     await ssrPrefetch(context.queryClient.prefetchQuery(recipeQueries.list()))
     const { recipe } = await context.queryClient.ensureQueryData(recipeQueries.detail(params.slug))
@@ -80,16 +97,30 @@ function RecipeJsonLd({ recipe }: { recipe: Recipe }) {
 
 function RecipeRoute() {
   const recipe = Route.useLoaderData()
+  const search = Route.useSearch()
+  const navigate = useNavigate({ from: Route.fullPath })
   const { data } = recipeApi.useList()
+  const selectedVariant = selectedRecipeVariant(recipe, search.variant)
+  const selectedRecipe = recipeWithSelectedVariant(recipe, search.variant)
+  const selectedVariantId = selectedVariant?.id ?? ''
+
+  const setVariant = (variantId: string) => {
+    void navigate({
+      search: variantId === recipe.defaultVariant ? {} : { variant: variantId },
+    })
+  }
 
   return (
     <>
-      <RecipeJsonLd recipe={recipe} />
+      <RecipeJsonLd recipe={selectedRecipe} />
       <RecipeDetail
-        recipe={recipe}
+        recipe={selectedRecipe}
         browseRecipes={data?.recipes ?? []}
         siteUrl={APP_CONFIG.siteUrl}
         blockRegistry={pageBlockRegistry}
+        variantOptions={recipe.variants}
+        selectedVariantId={selectedVariantId}
+        onVariantChange={setVariant}
       />
     </>
   )

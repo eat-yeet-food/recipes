@@ -59,6 +59,31 @@ export function buildContent({ appId, appPaths }) {
     })
   }
 
+  function versionRecipe(recipe) {
+    return {
+      ...recipe,
+      imageHash: recipe.image ? imageVersion(recipe.image) : '',
+      blocks: versionBlockImages(recipe.blocks ?? []),
+      variants: (recipe.variants ?? []).map((variant) => ({
+        ...variant,
+        blocks: versionBlockImages(variant.blocks ?? []),
+      })),
+    }
+  }
+
+  function indexRecipe(recipe) {
+    return Object.fromEntries(
+      Object.entries(recipe)
+        .filter(([key]) => !BODY.includes(key))
+        .map(([key, value]) => [
+          key,
+          key === 'variants'
+            ? value.map(({ blocks: _blocks, ...variant }) => variant)
+            : value,
+        ]),
+    )
+  }
+
   const recipes = loadRecipes(resolvedAppPaths.fixtures)
 
   rmSync(generatedOut, { recursive: true, force: true })
@@ -66,13 +91,9 @@ export function buildContent({ appId, appPaths }) {
   mkdirSync(join(generatedOut, 'recipes'), { recursive: true })
 
   const index = recipes.map((raw) => {
-    const recipe = {
-      ...raw,
-      imageHash: raw.image ? imageVersion(raw.image) : '',
-      blocks: versionBlockImages(raw.blocks ?? []),
-    }
+    const recipe = versionRecipe(raw)
     writeFileSync(join(generatedOut, 'recipes', `${recipe.slug}.json`), JSON.stringify(recipe))
-    return Object.fromEntries(Object.entries(recipe).filter(([key]) => !BODY.includes(key)))
+    return indexRecipe(recipe)
   })
 
   writeFileSync(join(generatedOut, 'index.json'), JSON.stringify(index))
