@@ -9,12 +9,19 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL, allPaths } from '#site-config'
+import {
+  APP_CATEGORIES,
+  APP_COPY,
+  DEFAULT_OG_IMAGE,
+  SITE_NAME,
+  SITE_URL,
+  allPaths,
+} from '#site-config'
+import { RESOLVED_APP_PATHS } from '../scripts/app-paths.mjs'
 
 const ROOT = join(import.meta.dirname, '..')
 const OUT = join(ROOT, '.output', 'public')
-const APP_ID = process.env.APP_ID || 'eatyeet'
-const INDEX = JSON.parse(readFileSync(join(ROOT, 'apps', APP_ID, 'generated', 'index.json'), 'utf8'))
+const INDEX = JSON.parse(readFileSync(join(RESOLVED_APP_PATHS.generatedDir, 'index.json'), 'utf8'))
 const firstRecipe = INDEX[0]
 
 const failures = []
@@ -82,36 +89,32 @@ function assertSeo({ path, title, description, ogType, ogImage, noindex = false 
 
 assertSeo({
   path: '/',
-  title: 'Eat / Yeet',
-  description:
-    'A focused recipe archive for breads, pasta, donuts, weeknight mains, and baking projects.',
+  title: APP_COPY.pages.homeTitle,
+  description: APP_COPY.description,
   ogType: 'website',
   ogImage: `${SITE_URL}${DEFAULT_OG_IMAGE}`,
 })
 
 assertSeo({
   path: '/recipes',
-  title: 'All Recipes | Eat / Yeet',
-  description:
-    'Every recipe in the collection — breads, pizza, pasta, donuts, cookies, and more. Tested, refined, and written without the filler.',
+  title: APP_COPY.pages.recipesTitle,
+  description: APP_COPY.pages.recipesDescription,
   ogType: 'website',
   ogImage: `${SITE_URL}${DEFAULT_OG_IMAGE}`,
 })
 
 assertSeo({
   path: '/browse',
-  title: 'Browse Recipes | Eat / Yeet',
-  description:
-    'Browse recipes by course, cuisine, cooking method, and dietary preference. Find your next meal without the clutter.',
+  title: APP_COPY.pages.browseTitle,
+  description: APP_COPY.pages.browseDescription,
   ogType: 'website',
-  ogImage: `${SITE_URL}/images/categories/mains.webp`,
+  ogImage: `${SITE_URL}${APP_CATEGORIES.find((category) => category.featured)?.image ?? DEFAULT_OG_IMAGE}`,
 })
 
 assertSeo({
   path: '/search',
-  title: 'Search Recipes | Eat / Yeet',
-  description:
-    'Search and filter recipes by cuisine, course, method, dietary restrictions, and more.',
+  title: APP_COPY.pages.searchTitle,
+  description: APP_COPY.pages.searchDescription,
   ogType: 'website',
   ogImage: `${SITE_URL}${DEFAULT_OG_IMAGE}`,
   noindex: true,
@@ -119,7 +122,7 @@ assertSeo({
 
 assertSeo({
   path: `/recipes/${firstRecipe.slug}`,
-  title: `${firstRecipe.title} | Eat / Yeet`,
+  title: `${firstRecipe.title} | ${APP_COPY.pages.recipeTitleSuffix}`,
   description: firstRecipe.description,
   ogType: 'article',
   ogImage: `${SITE_URL}/images/${firstRecipe.image}?v=${firstRecipe.imageHash}`,
@@ -141,7 +144,7 @@ if (script) {
   const jsonLd = JSON.parse(script)
   check('recipe JSON-LD type', jsonLd['@type'] === 'Recipe')
   check('recipe JSON-LD canonical URL', jsonLd.url === `${SITE_URL}/recipes/${firstRecipe.slug}`)
-  check('recipe JSON-LD author', jsonLd.author?.name === 'Patrick Hogan')
+  check('recipe JSON-LD author', jsonLd.author?.name === APP_COPY.jsonLdAuthor)
   check('recipe JSON-LD ingredients', Array.isArray(jsonLd.recipeIngredient) && jsonLd.recipeIngredient.length > 0)
   check('recipe JSON-LD instructions', Array.isArray(jsonLd.recipeInstructions) && jsonLd.recipeInstructions.length > 0)
 }

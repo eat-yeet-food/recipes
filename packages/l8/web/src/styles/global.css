@@ -14,6 +14,9 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+@source "../../../../../apps";
+@source "../../../../../packages";
+
 /* Generated components use dark: variants (button.tsx's aria-invalid and
    outline/ghost states, for example) even though this app has no dark-mode
    toggle and no route ever sets .dark. Declaring the variant costs nothing
@@ -97,6 +100,7 @@
   --font-weight-extrabold: 800;
 
   --layout-site-max: 1200px;
+  --layout-hero-max: 1500px;
   --max-width: var(--layout-site-max);
   --spacing-page-x: 2rem;
   --spacing-page-x-mobile: 1rem;

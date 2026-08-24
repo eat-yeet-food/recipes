@@ -2,19 +2,54 @@
  * Active app registry.
  *
  * App-owned copy, categories, paths, and deploy metadata live beside each app
- * under `apps/<app>/app.config.mjs`. This root module is only the synchronous
- * selection API used by Vite, build scripts, tests, and deploy tooling.
+ * under `apps/<app>/app.config.mjs`. This module discovers those app-owned
+ * configs by convention and owns only active app selection plus derived exports.
  */
 
-import { dpizzaovenApp } from './apps/dpizzaoven/app.config.mjs'
-import { eatyeetApp } from './apps/eatyeet/app.config.mjs'
+import { readdirSync } from 'node:fs'
 
-export const DEFAULT_APP_ID = 'eatyeet'
+const APP_CONFIG_FILE = 'app.config.mjs'
+const APP_ROOT = new URL('./apps/', import.meta.url)
 
-export const APPS = {
-  eatyeet: eatyeetApp,
-  dpizzaoven: dpizzaovenApp,
+async function discoverApps() {
+  const appDirs = readdirSync(APP_ROOT, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort()
+
+  const discoveredApps = {}
+
+  for (const appDir of appDirs) {
+    const module = await import(new URL(`./${appDir}/${APP_CONFIG_FILE}`, APP_ROOT).href)
+    const app = module.app ?? module.default
+
+    if (!app || typeof app !== 'object') {
+      throw new Error(`App config for ${appDir} must export an app object`)
+    }
+
+    if (app.id !== appDir) {
+      throw new Error(`App config id "${app.id}" must match apps/${appDir}`)
+    }
+
+    if (discoveredApps[app.id]) {
+      throw new Error(`Duplicate app id "${app.id}"`)
+    }
+
+    discoveredApps[app.id] = app
+  }
+
+  return discoveredApps
 }
+
+const APPS = await discoverApps()
+
+const defaultApps = Object.values(APPS).filter((app) => app.isDefault)
+
+if (defaultApps.length > 1) {
+  throw new Error(`Only one app config may set isDefault: ${defaultApps.map((app) => app.id).join(', ')}`)
+}
+
+export const DEFAULT_APP_ID = defaultApps[0]?.id ?? Object.keys(APPS)[0]
 
 function selectedAppId() {
   const bundled = typeof __APP_ID__ === 'string' ? __APP_ID__ : ''

@@ -1,8 +1,9 @@
 import { RecipeCard } from '@eat-yeet/l6-ui-catalog/cards'
-import { ContentPageArticle } from '@eat-yeet/l6-ui-content-blocks/page-article'
-import type { PageBlockRegistry, RecipePageBlockContext } from '@eat-yeet/l6-ui-content-blocks/page-blocks'
+import type { PageBlockRegistry } from '@eat-yeet/l6-ui-content-blocks/page-blocks'
 import type { RecipeSummary } from '@eat-yeet/l1-recipe-model/recipes'
 import type { RecipeContent as Recipe } from '@eat-yeet/l4-content-model/recipes'
+import { RecipeArticle } from './recipe-article'
+import type { RecipePageBlockContext } from './recipe-blocks'
 
 function BrowseRecipesAside({
   currentRecipe,
@@ -49,7 +50,7 @@ export function RecipeDetail({
   blockRegistry: PageBlockRegistry<RecipePageBlockContext>
 }) {
   return (
-    <ContentPageArticle
+    <RecipeArticle
       page={recipe}
       siteUrl={siteUrl}
       blockRegistry={blockRegistry}

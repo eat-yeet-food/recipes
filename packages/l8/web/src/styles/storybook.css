@@ -256,17 +256,9 @@
   gap: 34px;
 }
 
-[data-storybook-recipe-frame] {
+[data-storybook-content-frame] {
   overflow: hidden;
   border: 1px solid var(--storybook-border);
-}
-
-[data-storybook-recipe-frame] .yeet-hero {
-  padding-top: 42px;
-}
-
-[data-storybook-recipe-frame] .yeet-photo {
-  display: none;
 }
 
 @media (max-width: 760px) {

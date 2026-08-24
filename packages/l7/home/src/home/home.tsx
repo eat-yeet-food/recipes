@@ -43,6 +43,7 @@ type HomeCopy = {
   home: {
     eyebrow: string
     latestTitle: string
+    browseEyebrow: string
     browseTitle: string
   }
 }
@@ -60,54 +61,56 @@ function HomeHero({ copy }: { copy: HomeCopy }) {
   const { hero, wordmark } = copy
 
   return (
-    <section className="relative -mt-16 grid min-h-[85vh] min-h-[85svh] grid-cols-[1.2fr_1fr] items-center overflow-hidden bg-tint pt-16 max-md:grid-cols-1">
+    <section className="relative -mt-16 overflow-hidden bg-tint">
       <div
         className="absolute inset-0 hidden scale-105 bg-cover bg-center will-change-transform max-md:block"
         style={{ backgroundImage: `url('${hero.image}')` }}
       />
       <div className="absolute inset-0 hidden max-md:block" data-hero-scrim />
 
-      <div
-        className="pointer-events-none absolute top-1/2 right-[-5%] -translate-y-1/2 select-none font-hero text-[clamp(180px,22vw,320px)] leading-[0.85] text-brand/[0.03] max-md:hidden"
-        aria-hidden="true"
-      >
-        {wordmark.background}
-      </div>
-
-      {DOTS.map((dot) => (
-        <div key={dot} className={`pointer-events-none absolute rounded-full max-md:hidden ${dot}`} />
-      ))}
-
-      <div className="relative z-10 max-w-[600px] px-6 py-20 max-md:mx-auto max-md:text-center md:pl-[clamp(2rem,5vw,6rem)]">
-        <Wordmark copy={copy.wordmark} size="hero" onPhoto className="max-md:justify-center" />
-
-        <p className="mt-3 text-[19px] text-ink/70 max-md:text-white/90">
-          {hero.tagline}
-        </p>
-
-        <Link
-          to="/search"
-          className="mt-10 inline-flex items-center gap-2.5 rounded-full bg-brand-strong px-8 py-4 text-sm font-semibold uppercase tracking-[2px] text-white transition-all hover:-translate-y-0.5 hover:bg-ink"
-          data-cta
-        >
-          {hero.cta}
-          <ArrowRight className="size-4" />
-        </Link>
-      </div>
-
-      <div className="relative z-10 flex items-center justify-center max-md:hidden">
-        <div className="pointer-events-none absolute top-1/2 left-1/2 size-[440px] -translate-x-1/2 -translate-y-1/2 rounded-full" data-hero-glow />
+      <div className="relative mx-auto grid min-h-[85vh] min-h-[85svh] w-full max-w-[var(--layout-hero-max)] grid-cols-[1.2fr_1fr] items-center px-6 pt-16 max-md:grid-cols-1 md:px-10">
         <div
-          className="w-[min(400px,80%)] rotate-3 overflow-hidden rounded-3xl transition-transform duration-300 ease-out hover:rotate-0 hover:scale-[1.03]"
-          data-hero-media
+          className="pointer-events-none absolute top-1/2 right-0 -translate-y-1/2 select-none font-hero text-[clamp(180px,22vw,320px)] leading-[0.85] text-brand/[0.03] max-md:hidden"
+          aria-hidden="true"
         >
-          <img
-            src={hero.image}
-            alt={hero.imageAlt}
-            className="aspect-[3/4] w-full object-cover"
-            loading="eager"
-            fetchPriority="high"
-          />
+          {wordmark.background}
+        </div>
+
+        {DOTS.map((dot) => (
+          <div key={dot} className={`pointer-events-none absolute rounded-full max-md:hidden ${dot}`} />
+        ))}
+
+        <div className="relative z-10 max-w-[600px] py-20 max-md:mx-auto max-md:text-center">
+          <Wordmark copy={copy.wordmark} size="hero" onPhoto className="max-md:justify-center" />
+
+          <p className="mt-3 text-[19px] text-ink/70 max-md:text-white/90">
+            {hero.tagline}
+          </p>
+
+          <Link
+            to="/search"
+            className="mt-10 inline-flex items-center gap-2.5 rounded-full bg-brand-strong px-8 py-4 text-sm font-semibold uppercase tracking-[2px] text-white transition-all hover:-translate-y-0.5 hover:bg-ink"
+            data-cta
+          >
+            {hero.cta}
+            <ArrowRight className="size-4" />
+          </Link>
+        </div>
+
+        <div className="relative z-10 flex items-center justify-center max-md:hidden">
+          <div className="pointer-events-none absolute top-1/2 left-1/2 size-[440px] -translate-x-1/2 -translate-y-1/2 rounded-full" data-hero-glow />
+          <div
+            className="w-[min(400px,80%)] rotate-3 overflow-hidden rounded-3xl transition-transform duration-300 ease-out hover:rotate-0 hover:scale-[1.03]"
+            data-hero-media
+          >
+            <img
+              src={hero.image}
+              alt={hero.imageAlt}
+              className="aspect-[3/4] w-full object-cover"
+              loading="eager"
+              fetchPriority="high"
+            />
+          </div>
         </div>
       </div>
     </section>
@@ -171,7 +174,7 @@ export function HomePage({
         className="mx-auto max-w-[var(--max-width)] px-8 py-16"
         aria-label="Browse by Category"
       >
-        <SectionHeading eyebrow={home.eyebrow} title={home.browseTitle} />
+        <SectionHeading eyebrow={home.browseEyebrow} title={home.browseTitle} />
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           {featured.map((category) => (
             <BrowseCard

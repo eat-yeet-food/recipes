@@ -1,216 +1,184 @@
-# Agent guide
+# Agent Guide
 
-The Eat / Yeet recipe archive: 13 YAML fixtures rendered by TanStack Start
-into a fully prerendered static site on Cloudflare Pages at eatyeet.com.
-No database, no API, **no server at runtime**.
+This repository builds multiple static recipe apps from one pnpm/Nx workspace.
+One app config marks itself as the default; other apps are selected with
+`APP_ID`.
 
-Read `README.md` for the full picture. This file is the short list of things
-that have already gone wrong here.
+`AGENTS.md` points here so all agents use one source of repo guidance.
 
-`CLAUDE.md` is the source of truth for centralized agent and repo-skill
-guidance. Repo-specific adapters such as `AGENTS.md`, and any future local
-skills, should point here instead of copying workflow rules. If deployment
-changes, update this file and the README deploy runbook together so Claude,
-Codex, and subagents inherit the same command.
+## Required Start
 
-## 1. Only classes the original site used exist
+Before implementation work, read `.codex/skills/implement/SKILL.md`. It routes
+to the component architecture, owned controls, theme token, and pre-final
+verification policies for this repo.
 
-`src/styles/global.css` is the original site's **compiled production Tailwind
-build**. There is no Tailwind compiler in this project. A utility the original
-never used does not exist in that file, and using one **fails silently** —
-no error, no warning, just an unstyled element.
+## Layer Rules
 
-```bash
-node scripts/has-class.mjs 'lg:flex' 'mt-12'   # check before you use one
-npm run classes                                 # guard; also runs in build
-```
+Packages are nested under `packages/lN/name` and each package is an Nx project.
+The project name must start with the same layer number as its path and carry a
+matching `layer:lN` tag.
 
-This has shipped twice. `lg:flex lg:gap-10` left the search results row a plain
-block, so the filter sidebar stacked *above* the results on desktop instead of
-beside them. `mt-14` on a browse section was dead the day it was written.
+Current package stack:
 
-When a class is missing, **use one the original used**. Do not hand-write CSS
-and do not add a Tailwind build — either one drifts the design.
+- `packages/l0/foundation`
+- `packages/l1/api-model`
+- `packages/l1/recipe-model`
+- `packages/l2/recipe-domain`
+- `packages/l3/api-contract`
+- `packages/l3/api-query`
+- `packages/l3/api-static`
+- `packages/l4/content-model`
+- `packages/l4/content-build`
+- `packages/l5/ui-primitives`
+- `packages/l6/ui-catalog`
+- `packages/l6/ui-content-blocks`
+- `packages/l6/ui-shell`
+- `packages/l7/home`
+- `packages/l7/recipes`
+- `packages/l7/search`
+- `packages/l8/web`
 
-## 2. Know which surfaces still follow the original
-
-`/Users/phoganuci/src/yeet/frontend/apps/web/src/` holds the React components
-this was transcribed from. **Read them before changing markup or classes** on
-the home, browse, search, card, nav, footer, and command-palette surfaces.
-Every ported component here names its source at the top.
-
-Three surfaces have deliberately left the original. Do not "restore" any of
-them without being asked:
-
-**`/browse`** no longer uses the original's plain text cards. Its four facet
-sections render the home grid's photo card, so "View all categories" leads to a
-page that looks like the grid it came from. Categories without a curated image
-borrow a recipe photo; see the note in `src/routes/browse.tsx`.
-
-**Not-found and error states** are ours; the original had none worth porting.
-`components/error-states.tsx` owns all three — a bad URL, a route that threw,
-and a stale-build chunk failure — and they share one frame on purpose, so a
-visitor cannot tell which subsystem failed. They are wired at
-`router.tsx` (`defaultErrorComponent`, `defaultNotFoundComponent`) and at
-`__root.tsx`, and are covered by the `DeadEnds` Storybook story. The stale-build
-variant is not decoration: a failed dynamic import means the browser is holding
-a build that no longer exists, and a reload is the actual fix, so it says so
-instead of offering a retry that re-runs the same broken module graph.
-
-**Recipe detail pages** are no longer the original layout. The canonical
-`components/recipe.tsx` wrapper renders `components/recipe-butternut-trial.tsx`,
-which contains the Butternut-inspired article card, print/pin controls, cook
-mode, local Geller/Avenir font usage, and desktop-only "Browse Recipes" sidebar.
-Do not restore the old full-bleed hero or centered recipe card unless explicitly
-asked.
-
-`~/src/yeet` is **read-only**. Never modify anything under it.
-
-`format.ts`'s `humanizeMinutes` and `formatYield` are exact ports. `formatTime`
-keeps minutes alongside days ("4 days 4 hr 37 min"); `formatYield` does **not**
-pluralize ("2 16-inch pizza"). Changing either drifts card and header text.
-
-## 3. Verify visually, not just by assertion
-
-A control can render perfectly and be wired to nothing — a screenshot cannot
-tell. A pixel diff cannot tell you a link points at the wrong page.
+Lower layers must not import higher layers. Cross-package imports must be
+represented in the importing package's `tsconfig.json` references. Run:
 
 ```bash
-npm test          # build + static + interaction + guard self-tests
-npm run test:recipe-pages  # focused recipe redesign coverage
-npm run storybook # real Storybook at 127.0.0.1:6006
-npm run build-storybook # static Storybook build; also covered by npm test
-npm run parity    # pixel-diff against a baseline
-npm run serve     # look at it: 127.0.0.1:4321, served as Pages serves it
-npm run verify:prod [origin]  # cold-load the deployed site in Chrome
+pnpm run boundaries
+pnpm run typecheck:ts
 ```
 
-`verify:prod` is the only check that sees what a visitor sees. Everything above
-it tests the artifact; that one tests the artifact *plus* the edge in front of
-it, and those can disagree — see section 6.
+## Source Ownership
 
-Take screenshots and **actually look at them** when changing layout. Reusable
-visual decisions should also be represented in real Storybook stories under
-`src/stories/`, including type, color, button, link, form, card, grid, and
-recipe-page patterns.
+Root files orchestrate the workspace, active app selection, scripts, and shared
+tests. App/runtime source lives in packages.
 
-## 4. Query strings do not select files
+Use the existing owner for new code:
 
-Pages serves `/search/index.html` for `/search?courses=mains` — one prerendered
-document for every query string. So the search page must render its *unfiltered*
-state on the first client pass and apply params in an effect; rendering filtered
-results immediately is a hydration mismatch that throws away the server HTML.
-See the note in `src/routes/search.tsx`.
+- foundation helpers: `packages/l0/foundation`
+- recipe summary model: `packages/l1/recipe-model`
+- API loader/types: `packages/l1/api-model`
+- pure recipe operations: `packages/l2/recipe-domain`
+- API query client defaults, query keys, query options, and hooks:
+  `packages/l3/api-query`
+- static API helpers with app-supplied data: `packages/l3/api-static`
+- page/content view models: `packages/l4/content-model`
+- YAML/content generation: `packages/l4/content-build`
+- primitive controls: `packages/l5/ui-primitives`
+- shared UI patterns: `packages/l6/*`
+- feature composition: `packages/l7/*`
+- TanStack routes/bootstrap/styles: `packages/l8/web`
+- selected public app config adapter: `packages/l8/web/src/lib/app-config.ts`
+- app-owned config, recipe adapters, and app block registries: `apps/<app>`
+- selected API client wiring: `packages/l8/web/src/lib/api.ts`
 
-Interactions reached by clicking never reproduce this. Test cold navigations.
+Do not add new root `src/` files.
 
-## 5. Routes and origin live in one place
+## Styling
 
-`site.config.mjs` — the canonical origin and the prerender path list. The app,
-the prerenderer, and the sitemap all read it. They used to hold three copies
-and drifted.
+Tailwind compiles from `packages/l8/web/src/styles/global.css`.
+Use semantic theme tokens. Do not introduce raw color literals in component
+classes when a token should exist.
 
-Internal noindex app pages such as the historical
-`/recipes/artisan-new-york-pizza/butternut-trial` route belong in
-`TRIAL_PATHS`. They are prerendered for local/review use, but `build-seo.mjs`
-keeps them out of the sitemap. Storybook is not an app route; it lives in
-`.storybook/` and `src/stories/`.
+`site-overrides.css` is for font declarations, root variables, app-specific
+surface hooks, and scoped content rules that cannot be expressed on JSX nodes.
 
-## 6. A missing asset must 404, or the edge pins HTML under its URL
-
-Cloudflare Pages applies *every* matching `_headers` rule. A `Cache-Control`
-under `/*` does not act as a default; it combines with `/build/*`. Keep `/*` to
-security headers only.
-
-The deeper trap, which has now bitten twice. Three facts that are each fine
-alone and lethal together:
-
-1. **Pages answers an unknown path with the app shell under a 200** unless a
-   `404.html` exists.
-2. **Propagation is not atomic.** Uploading is — Wrangler uploads every file and
-   only then flips the manifest, so "assets first, HTML last" is already handled
-   and cannot be reordered. But for a window after the flip, an edge PoP can
-   answer a *present* asset URL with that fallback body.
-3. **`immutable` means never revalidate.** Anything cached in that window, at
-   the edge or in a browser, stays for a year.
-
-Result: a JS URL that the edge believes is a document. Chrome refuses the module
-on MIME grounds and the site does not hydrate.
-
-The second occurrence was self-inflicted: a post-deploy `curl` sweep of all 23
-`/build/*` URLs, seconds after the flip, cached the fallback body under every
-one of them. **A sweep of asset URLs during propagation is not a verification,
-it is a cache-poisoning tool.** Do not write one.
-
-Five guards, none of which should be removed:
-
-- `scripts/prerender.mjs` writes `404.html` and **fails the build** if an
-  unmatched path does not return 404. Pages then answers a miss with a real 404
-  under `no-store`, so there is no longer a cacheable wrong answer at all.
-  `test/verify.mjs` checks the file ships.
-- `scripts/build-seo.mjs` omits `immutable` from `/build/*`, so a bad response
-  self-heals on the next ordinary reload instead of lasting a year.
-- `scripts/build-seo.mjs` caps every HTML page at `max-age=300`. Documents name
-  the hashed assets, so a stale one pins a visitor to a superseded build; five
-  minutes bounds that. The rules are generated from `site.config.mjs` and are
-  per-path because a `Cache-Control` under `/*` would merge onto `/build/*`.
-- `npm run deploy` waits until the domain actually serves the new build, purges,
-  and only then verifies.
-- `test/verify-prod.mjs` cold-loads the live domain in Chrome.
-
-If one gets through anyway, `components/error-states.tsx` catches the fallout:
-a failed chunk import renders "Reload to Continue" in the site's own type rather
-than TanStack's bare panel. That is a cushion, not a fix — see section 2.
-
-And two properties that make it deceptive:
-
-- **`curl` is not a check.** It gets a different cache key than the browser and
-  returned correct JavaScript for the very URL Chrome was being served HTML for.
-  A green curl means nothing. Use the browser.
-- **A poisoned client is unreachable.** Purging the edge does not touch it. With
-  `immutable` gone an ordinary reload fixes it; while it was set, only a hard
-  reload did, and there was no way to tell visitors.
-
-## 7. Don't fabricate provenance
-
-All thirteen recipes currently have photos, but not every photo is original to the
-old platform. Do not silently treat replacements as recovered originals. State
-gaps and substitutions plainly.
-
-`README.md`'s "Image provenance" section records where every image came from,
-including the ones that are not photographs of these dishes. Keep it accurate.
-
-## 8. Recipe fixtures are YAML, not Markdown files
-
-Fixtures live in `fixtures/recipes/*.yaml`. Recipe body fields are structured
-as YAML arrays, but each displayed string inside `equipment`, `ingredients`,
-`steps`, `notes`, and `tips` is inline Markdown source rendered by
-`scripts/parse.mjs` at content-build time. Do not reintroduce frontmatter plus
-Markdown body parsing; the YAML schema exists so editors can lint the document
-shape while recipe prose still gets links and emphasis.
-
-## 9. Deploy through Doppler in non-interactive shells
-
-Cloudflare credentials live in Doppler. In Codex and other non-interactive
-shells, plain Wrangler fails because `CLOUDFLARE_API_TOKEN` is not set. Use:
+Check compiled utility availability before relying on unusual classes:
 
 ```bash
-doppler run -p yeet -c dev -- npm run deploy
+pnpm run build
+node scripts/has-class.mjs 'mt-12' 'w-[260px]'
 ```
 
-Deploy only `.output/public` after a passing `npm test` or a known-good
-`npm run build` plus targeted test run.
+`pnpm run classes` is part of the build.
 
-`npm run deploy` is wrangler **plus** an edge purge **plus** a browser check of
-the live domain, in that order. Do not hand-run the wrangler line instead: a
-deploy is not atomic at the custom domain, and skipping the purge or the
-verification is how section 6 happened. The token needs Pages:Edit, Zone:Read,
-and Cache Purge.
+## App Registry
 
-`npm run verify:prod [origin]` runs the browser check alone. Point it at a
-`*.pages.dev` deployment URL to judge the artifact, or at eatyeet.com to judge
-what visitors actually get — they can disagree, and only the second one is the
-site.
+`apps/<app>/app.config.mjs` owns that app's origin, route, fixture, public
+asset, Doppler, Cloudflare project, copy, categories, and preview path
+configuration. `site.config.mjs` discovers app configs by convention and owns
+only active app selection plus derived exports. Root scripts import it through
+`#site-config`. Do not statically import concrete app configs from root or
+shared layers.
 
-Centralized skills and adapter docs should refer to this section and the README
-runbook. Do not encode a separate Wrangler deploy command anywhere else.
+Package runtime code must not import `site.config.mjs` directly or climb to the
+workspace root. Vite injects the selected app's public runtime config as
+`__APP_CONFIG__`; web routes, stories, and SEO helpers consume it via
+`packages/l8/web/src/lib/app-config.ts`.
+
+Content generation is orchestrated from `scripts/build-content.mjs`, which
+passes the selected app paths from the active app config into
+`packages/l4/content-build`. Keep `packages/l4/content-build` independent of
+the root app selector.
+
+Generated app data belongs under `apps/<app>/generated`, never under shared
+packages. App stubs load their own app's generated `index.json` and
+`recipes/*.json`; shared layers may accept that data as input but must not own
+or import app-specific generated files.
+
+## API Access
+
+Keep reusable API and query behavior out of the app layer:
+
+- `packages/l3/api-contract` defines request, response, and service contracts.
+- `packages/l3/api-query` defines QueryClient defaults, query keys, recipe
+  query options, and React Query hooks.
+- `apps/<app>/src/recipes.stub.ts` provides the active app's fixture stub
+  implementation and loads app-owned generated fixtures.
+- `apps/<app>/src/page-blocks.ts` constructs the active app's page block
+  registry. Current apps register only shared blocks from the proper package
+  layer, but apps can add their own registrations here later.
+- Vite maps `@app/recipes` and `@app/page-blocks` to the selected app modules at
+  build time; do not reintroduce a runtime selector that statically imports
+  every app module.
+- `packages/l8/web/src/lib/api.ts` selects the active app stub and creates the
+  recipe API access object.
+
+Routes and stories may use the selected API access object from
+`packages/l8/web/src/lib/api.ts`, but should not import generated recipe data
+or fixture chunks directly. Each app gets its own stub entry point so future
+apps can swap transport behavior without changing query code.
+
+## Verification
+
+Before final commit or deploy for app, routing, UI, styling, SEO, or content
+changes, run:
+
+```bash
+pnpm test
+pnpm run test:a11y
+pnpm run test:lighthouse
+```
+
+For a non-default app before launch, also run:
+
+```bash
+APP_ID=<app-id> pnpm run build
+APP_ID=<app-id> node scripts/verify-build.test.mjs
+```
+
+If a verification command fails, fix the cause or document the blocker.
+
+## Deployment
+
+Deploy the default app:
+
+```bash
+doppler run -p yeet -c dev -- pnpm run deploy
+```
+
+Deploy a specific app:
+
+```bash
+APP_ID=<app-id> doppler run -p yeet -c dev -- pnpm run deploy
+```
+
+The deploy script builds, uploads to Cloudflare Pages, purges cache, and verifies
+the production origin.
+
+Never deploy `.output/public` manually. `pnpm run deploy` owns the production
+safety rails: it deletes any stale build output, rebuilds the selected app,
+writes a deploy identity manifest, refuses to upload if the manifest does not
+match `APP_ID`, `SITE_URL`, and the Cloudflare Pages project, and passes
+`--branch main` to Wrangler so deployments from an isolated worktree still
+target the production Pages branch instead of a preview alias. This is
+specifically to prevent a sample app such as `dpizzaoven` from being uploaded to
+the `eatyeet` production project.

@@ -20,8 +20,9 @@ const EAT_YEET_CATEGORIES = [
   { slug: 'everyday', label: 'Everyday', facet: 'occasions', value: 'everyday' },
 ]
 
-export const eatyeetApp = {
+export const app = {
   id: 'eatyeet',
+  isDefault: true,
   label: 'Eat / Yeet',
   siteName: 'Eat / Yeet',
   siteUrl: 'https://eatyeet.com',
@@ -42,6 +43,7 @@ export const eatyeetApp = {
     home: {
       eyebrow: 'Top Eats',
       latestTitle: 'Latest Recipes',
+      browseEyebrow: 'Explore',
       browseTitle: 'Browse by Category',
     },
     pages: {
@@ -75,3 +77,5 @@ export const eatyeetApp = {
     generatedDir: 'apps/eatyeet/generated',
   },
 }
+
+export default app

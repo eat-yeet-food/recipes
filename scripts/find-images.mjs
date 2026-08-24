@@ -208,7 +208,7 @@ const html = `<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Image candidates — Eat / Yeet</title>
+<title>Image candidates</title>
 <style>
   :root { --charcoal:#2D2D2D; --pink:#FF2D78; --peach:#FFF0E5; --white:#fff; --muted:rgba(45,45,45,.62); --border:rgba(45,45,45,.12); }
   * { box-sizing:border-box; margin:0; padding:0; }

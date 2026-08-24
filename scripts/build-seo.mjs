@@ -9,8 +9,9 @@ import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { allPaths, ROBOTS_DISALLOW, SITE_URL, sitemapPaths } from '#site-config'
+import { allPaths, APP_ID, CLOUDFLARE_PROJECT, ROBOTS_DISALLOW, SITE_URL, sitemapPaths } from '#site-config'
 import { RESOLVED_APP_PATHS } from './app-paths.mjs'
+import { deploymentIdentity, writeDeployManifest } from './deploy-manifest.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const OUT = join(ROOT, '.output', 'public')
@@ -107,5 +108,6 @@ ${pageRules}`
 writeFileSync(join(OUT, 'sitemap.xml'), sitemap)
 writeFileSync(join(OUT, 'robots.txt'), robots)
 writeFileSync(join(OUT, '_headers'), headers)
+writeDeployManifest(OUT, deploymentIdentity({ appId: APP_ID, cloudflareProject: CLOUDFLARE_PROJECT, siteUrl: SITE_URL }))
 
 console.log(`seo: sitemap.xml (${urls.length} urls) + robots.txt + _headers`)

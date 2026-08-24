@@ -23,22 +23,24 @@
  * Usage: pnpm run deploy
  */
 import { execFileSync } from 'node:child_process'
-import { readFileSync } from 'node:fs'
+import { readFileSync, rmSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { APP_ID, CLOUDFLARE_PROJECT, DOPPLER, SITE_URL } from '#site-config'
+import { APP_ID, CLOUDFLARE_PROJECT, DEFAULT_APP_ID, DOPPLER, SITE_URL } from '#site-config'
+import { assertDeployManifest, deploymentIdentity } from './deploy-manifest.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const OUT = join(ROOT, '.output', 'public')
 const PROJECT = CLOUDFLARE_PROJECT
 const ZONE = new URL(SITE_URL).hostname
+const PRODUCTION_BRANCH = 'main'
 
 const token = process.env.CLOUDFLARE_API_TOKEN
 if (!token) {
   console.error(
     'CLOUDFLARE_API_TOKEN is not set. Run through Doppler:\n' +
-      `  ${APP_ID === 'eatyeet' ? '' : `APP_ID=${APP_ID} `}` +
+      `  ${APP_ID === DEFAULT_APP_ID ? '' : `APP_ID=${APP_ID} `}` +
       `doppler run -p ${DOPPLER.project} -c ${DOPPLER.config} -- pnpm run deploy`,
   )
   process.exit(1)
@@ -63,11 +65,15 @@ function localAssets() {
   return [...html.matchAll(/\/build\/[A-Za-z0-9._-]+\.(?:js|css)/g)].map((m) => m[0])
 }
 
+step(`build ${APP_ID} for ${SITE_URL}`)
+rmSync(join(ROOT, '.output'), { recursive: true, force: true })
+execFileSync('pnpm', ['run', 'build'], { stdio: 'inherit' })
+assertDeployManifest(OUT, deploymentIdentity({ appId: APP_ID, cloudflareProject: PROJECT, siteUrl: SITE_URL }))
 const expected = localAssets()
 if (expected.length === 0) throw new Error('no /build/* assets found in .output/public/index.html')
 
-step(`deploy .output/public -> ${PROJECT}`)
-execFileSync('npx', ['wrangler', 'pages', 'deploy', OUT, '--project-name', PROJECT], {
+step(`deploy .output/public -> ${PROJECT} production (${PRODUCTION_BRANCH})`)
+execFileSync('npx', ['wrangler', 'pages', 'deploy', OUT, '--project-name', PROJECT, '--branch', PRODUCTION_BRANCH], {
   stdio: 'inherit',
 })
 

@@ -12,7 +12,7 @@ const TEST_APP_CONFIG = {
     description: '',
     wordmark: { first: 'Test', second: 'Kitchen', background: 'TEST' },
     hero: { image: '', imageAlt: '', tagline: '', cta: '' },
-    home: { eyebrow: '', latestTitle: '', browseTitle: '' },
+    home: { eyebrow: '', latestTitle: '', browseEyebrow: '', browseTitle: '' },
     pages: {
       homeTitle: '',
       recipesTitle: '',
@@ -69,16 +69,16 @@ describe('buildSeoMeta', () => {
       title: 'Recipe',
       description: 'desc',
       canonicalPath: '/recipes/pizza',
-      ogImage: 'https://cdn.eatyeet.com/pizza.jpg',
+      ogImage: 'https://cdn.example.test/pizza.jpg',
     }, TEST_APP_CONFIG)
 
     assert.deepEqual(result.meta.find((meta) => meta.property === 'og:image'), {
       property: 'og:image',
-      content: 'https://cdn.eatyeet.com/pizza.jpg',
+      content: 'https://cdn.example.test/pizza.jpg',
     })
     assert.deepEqual(result.meta.find((meta) => meta.name === 'twitter:image'), {
       name: 'twitter:image',
-      content: 'https://cdn.eatyeet.com/pizza.jpg',
+      content: 'https://cdn.example.test/pizza.jpg',
     })
   })
 

@@ -34,10 +34,7 @@
     },
     "content": {
       "inputs": ["{workspaceRoot}/apps/**/*", "{workspaceRoot}/site.config.mjs", "{workspaceRoot}/packages/l4/content-build/src/**/*"],
-      "outputs": [
-        "{workspaceRoot}/apps/eatyeet/generated",
-        "{workspaceRoot}/apps/dpizzaoven/generated"
-      ]
+      "outputs": ["{workspaceRoot}/apps/*/generated"]
     },
     "boundaries": {
       "inputs": [

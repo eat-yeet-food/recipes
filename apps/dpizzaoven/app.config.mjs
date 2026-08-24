@@ -17,7 +17,7 @@ const DPIZZAOVEN_CATEGORIES = [
   { slug: 'gluten-free', label: 'Gluten Free', facet: 'restrictions', value: 'gluten-free' },
 ]
 
-export const dpizzaovenApp = {
+export const app = {
   id: 'dpizzaoven',
   label: "Dave's Pizza Oven",
   siteName: "Dave's Pizza Oven",
@@ -39,6 +39,7 @@ export const dpizzaovenApp = {
     home: {
       eyebrow: 'From the Oven',
       latestTitle: 'Latest Recipes',
+      browseEyebrow: 'Explore',
       browseTitle: 'Browse by Style',
     },
     pages: {
@@ -72,3 +73,5 @@ export const dpizzaovenApp = {
     generatedDir: 'apps/dpizzaoven/generated',
   },
 }
+
+export default app

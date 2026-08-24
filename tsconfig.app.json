@@ -12,7 +12,7 @@
   "include": [
     "vite.config.ts",
     "site.config.mjs",
-    ".storybook",
+    "packages/l8/web/.storybook",
     "apps/*/app.config.mjs",
     "apps/*/src",
     "scripts",

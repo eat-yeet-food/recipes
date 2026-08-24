@@ -11,11 +11,11 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { readFileSync } from 'node:fs'
 
+import { RESOLVED_APP_PATHS } from '#web-test/app-paths'
 import { startStatic } from '#web-test/static-server'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', '..', '..', '..', '..')
-const APP_ID = process.env.APP_ID || 'eatyeet'
-const INDEX = JSON.parse(readFileSync(join(ROOT, 'apps', APP_ID, 'generated', 'index.json'), 'utf8'))
+const INDEX = JSON.parse(readFileSync(join(RESOLVED_APP_PATHS.generatedDir, 'index.json'), 'utf8'))
 
 const server = await startStatic(join(ROOT, '.output', 'public'))
 const BASE = server.url.replace(/\/$/, '')
@@ -76,7 +76,7 @@ check(
 )
 check(
   'cook mode marks article root',
-  await desktop.locator('.yeet.yeet-cook').count() === 1,
+  await desktop.locator('.yeet[data-cook-mode="true"]').count() === 1,
 )
 await desktop.close()
 

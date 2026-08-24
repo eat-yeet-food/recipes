@@ -45,6 +45,7 @@ export interface AppPaths {
 
 export interface RecipeApp {
   id: string
+  isDefault?: boolean
   label: string
   siteName: string
   siteUrl: string
@@ -73,8 +74,7 @@ export interface SitemapEntry {
   lastmod?: string
 }
 
-export const DEFAULT_APP_ID: 'eatyeet'
-export const APPS: Record<string, RecipeApp>
+export const DEFAULT_APP_ID: string
 export const APP_ID: string
 export const ACTIVE_APP: RecipeApp
 export const SITE_URL: string

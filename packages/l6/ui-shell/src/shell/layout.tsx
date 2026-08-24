@@ -62,12 +62,6 @@ export function Nav({
     ? 'bg-transparent'
     : 'bg-white/92 backdrop-blur-[16px] shadow-[0_1px_0_color-mix(in_srgb,var(--color-ink)_8%,transparent)]'
 
-  const iconClass = heroVisible
-    ? 'h-12 drop-shadow-[0_2px_8px_color-mix(in_srgb,var(--color-black)_40%,transparent)] max-md:h-10'
-    : onHeroPage
-      ? 'h-12 max-md:h-10 max-md:drop-shadow-[0_2px_8px_color-mix(in_srgb,var(--color-black)_40%,transparent)]'
-      : 'h-12'
-
   // <Wordmark> carries its own color, so only the over-photo shadow varies.
   const wordmarkClass = onHeroPage
     ? 'transition-nav-icon max-md:drop-shadow-[0_2px_12px_color-mix(in_srgb,var(--color-black)_50%,transparent)]'
@@ -92,7 +86,6 @@ export function Nav({
       >
         <div className="flex items-center gap-2">
           <Link to="/" data-site-brand="" className="flex items-center gap-2" aria-label={`${siteName} home`}>
-            <img src="/donut-icon.svg" alt="" className={`transition-nav-icon ${iconClass}`} />
             <Wordmark copy={wordmark} size="nav" onPhoto={onHeroPage} className={wordmarkClass} />
           </Link>
         </div>

@@ -13,12 +13,12 @@ import { launch } from 'chrome-launcher'
 import lighthouse from 'lighthouse'
 import { chromium } from 'playwright'
 
+import { RESOLVED_APP_PATHS } from '#web-test/app-paths'
 import { startStatic } from '#web-test/static-server'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', '..', '..')
 const OUT = join(ROOT, '.output', 'public')
-const APP_ID = process.env.APP_ID || 'eatyeet'
-const INDEX = JSON.parse(readFileSync(join(ROOT, 'apps', APP_ID, 'generated', 'index.json'), 'utf8'))
+const INDEX = JSON.parse(readFileSync(join(RESOLVED_APP_PATHS.generatedDir, 'index.json'), 'utf8'))
 const MIN = {
   accessibility: Number(process.env.LH_ACCESSIBILITY_MIN ?? 0.95),
   seo: Number(process.env.LH_SEO_MIN ?? 1),

@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "imports": {
+    "#web-test/app-paths": "./src/test/app-paths.mjs",
     "#web-test/static-server": "./src/test/static-server.mjs"
   }
 }

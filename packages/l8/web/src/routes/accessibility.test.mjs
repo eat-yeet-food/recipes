@@ -12,12 +12,12 @@ import { fileURLToPath } from 'node:url'
 import AxeBuilder from '@axe-core/playwright'
 import { chromium } from 'playwright'
 
+import { RESOLVED_APP_PATHS } from '#web-test/app-paths'
 import { startStatic } from '#web-test/static-server'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', '..', '..')
 const OUT = join(ROOT, '.output', 'public')
-const APP_ID = process.env.APP_ID || 'eatyeet'
-const INDEX = JSON.parse(readFileSync(join(ROOT, 'apps', APP_ID, 'generated', 'index.json'), 'utf8'))
+const INDEX = JSON.parse(readFileSync(join(RESOLVED_APP_PATHS.generatedDir, 'index.json'), 'utf8'))
 const IMPACTS = (process.env.A11Y_IMPACTS ?? 'serious,critical')
   .split(',')
   .map((impact) => impact.trim())

@@ -1,3 +1,3 @@
-import { createSharedPageBlockRegistry } from '@eat-yeet/l6-ui-content-blocks/page-blocks'
+import { createRecipePageBlockRegistry } from '@eat-yeet/l7-recipes/recipes/recipe-blocks'
 
-export const pageBlockRegistry = createSharedPageBlockRegistry()
+export const pageBlockRegistry = createRecipePageBlockRegistry()

@@ -16,6 +16,7 @@ export interface AppCopy {
   home: {
     eyebrow: string
     latestTitle: string
+    browseEyebrow: string
     browseTitle: string
   }
   pages: {

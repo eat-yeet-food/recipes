@@ -110,7 +110,7 @@ allows('DOM attribute values', {
 allows('urls, meta keys, and css values', {
   'a.tsx':
     `export const M = [{property:'og:site_name'},{name:'twitter:card'}]\n` +
-    `export const U = 'https://eatyeet.com'\n` +
+    `export const U = 'https://example.test'\n` +
     `export const NS = 'http://www.w3.org/2000/svg'\n` +
     `export const G = 'linear-gradient(180deg, rgba(45,45,45,0.55) 0%, transparent 50%)'`,
 })

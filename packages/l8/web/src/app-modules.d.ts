@@ -8,7 +8,8 @@ declare module '@app/recipes' {
 }
 
 declare module '@app/page-blocks' {
-  import type { PageBlockRegistry, RecipePageBlockContext } from '@eat-yeet/l6-ui-content-blocks/page-blocks'
+  import type { PageBlockRegistry } from '@eat-yeet/l6-ui-content-blocks/page-blocks'
+  import type { RecipePageBlockContext } from '@eat-yeet/l7-recipes/recipes/recipe-blocks'
 
   export const pageBlockRegistry: PageBlockRegistry<RecipePageBlockContext>
 }
