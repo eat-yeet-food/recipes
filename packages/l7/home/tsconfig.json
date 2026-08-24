@@ -1,0 +1,28 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "tsBuildInfoFile": "../../../.nx/cache/packages/l7/home.tsbuildinfo",
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "../../../.nx/types/packages/l7/home"
+  },
+  "references": [
+    {
+      "path": "../../l1/recipe-model/tsconfig.json"
+    },
+    {
+      "path": "../../l2/recipe-domain/tsconfig.json"
+    },
+    {
+      "path": "../../l6/ui-catalog/tsconfig.json"
+    },
+    {
+      "path": "../../l6/ui-shell/tsconfig.json"
+    }
+  ],
+  "include": [
+    "src"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "name": "l6-ui-catalog",
+  "projectType": "library",
+  "sourceRoot": "src",
+  "tags": ["layer:l6", "scope:ui", "type:lib"],
+  "metadata": {
+    "tsConfig": "tsconfig.json"
+  },
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -b packages/l6/ui-catalog/tsconfig.json --pretty false"
+      }
+    }
+  }
+}

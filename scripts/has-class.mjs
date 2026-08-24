@@ -1,22 +1,36 @@
 /**
- * Does the compiled stylesheet define these classes?
+ * Does the compiled build define these classes?
  *
  *   node scripts/has-class.mjs lg:flex mt-12 'w-[260px]'
  *
- * `global.css` is a finished Tailwind build with no compiler behind it, so a
- * utility the original site never used does not exist and silently styles
- * nothing. Check before reaching for one; `npm run classes` catches it later,
- * but this answers the question while you are still writing the markup.
+ * Tailwind v4 compiles live from the `@theme` block in `src/styles/global.css`,
+ * but only emits a utility for what it finds used in scanned source — so a
+ * typo or an unused arbitrary value still silently styles nothing. Check
+ * before reaching for one; `pnpm run classes` catches it later, but this
+ * answers the question while you are still writing the markup.
+ *
+ * Requires a prior `vite build` — this reads `.output/public/build/*.css`,
+ * the compiled output, not the `@theme` source.
  *
  * Quote arguments containing brackets — they are shell globs otherwise.
  */
 
-import { readFileSync } from 'node:fs'
-import { join, dirname } from 'node:path'
+import { readFileSync, readdirSync, existsSync } from 'node:fs'
+import { join, dirname, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
-const css = readFileSync(join(ROOT, 'src', 'styles', 'global.css'), 'utf8')
+const BUILD_DIR = join(ROOT, '.output', 'public', 'build')
+
+if (!existsSync(BUILD_DIR)) {
+  console.error(`has-class: no build output at ${relative(ROOT, BUILD_DIR)} — run 'vite build' first`)
+  process.exit(2)
+}
+
+const css = readdirSync(BUILD_DIR)
+  .filter((f) => f.endsWith('.css'))
+  .map((f) => readFileSync(join(BUILD_DIR, f), 'utf8'))
+  .join('\n')
 
 const defined = new Set(
   [...css.matchAll(/\.(-?(?:[A-Za-z_]|\\.)(?:[\w-]|\\.)*)/g)].map(([, raw]) =>
@@ -39,6 +53,6 @@ for (const name of names) {
 
 if (missing > 0) {
   console.log(`\n${missing} of ${names.length} would style nothing.`)
-  console.log('Use a class the original site used rather than hand-writing CSS.')
+  console.log('Use a real Tailwind utility, or extend the @theme block in global.css.')
 }
 process.exit(missing > 0 ? 1 : 0)

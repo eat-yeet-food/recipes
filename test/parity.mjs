@@ -1,10 +1,9 @@
 /**
- * Pixel parity against the previous rendering engine.
+ * Pixel parity against the stored visual baseline.
  *
- * The old string-template renderer and this one are supposed to produce the
- * same pixels — same compiled stylesheet, same class names, same markup. This
- * diffs fresh screenshots against a baseline captured from that engine and
- * writes a visual diff for anything that moved.
+ * Fresh screenshots should match the committed baseline: same compiled
+ * stylesheet, same class names, same markup. This writes a visual diff for
+ * anything that moved.
  *
  *   node test/parity.mjs <baselineDir> [--update]
  */

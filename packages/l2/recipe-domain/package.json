@@ -1,0 +1,9 @@
+{
+  "name": "@eat-yeet/l2-recipe-domain",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./format": "./src/format.ts",
+    "./search": "./src/search.ts"
+  }
+}

@@ -1,0 +1,346 @@
+@font-face {
+  font-family: "geller-headline";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/geller/gellertest-headlinelight.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "geller-headline";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/geller/typekit-geller-headline-regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "geller-headline";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/geller/gellertest-headlinemedium.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "geller-headline";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/geller/gellertest-headlinesemibold.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "geller-headline";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/geller/typekit-geller-headline-bold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "geller-headline";
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url("/fonts/geller/gellertest-headlineblack.otf") format("opentype");
+}
+
+@font-face {
+  font-family: Avenir;
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/avenir/avenirnextltpro-medium-webfont.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Avenir Bold";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src:
+    local("Avenir Bold"),
+    url("/fonts/avenir/AvenirNextLTPro-Bold.woff2") format("woff2");
+}
+
+:root {
+  --font-body: Avenir, Avenir, Georgia, sans-serif;
+  --font-display: "geller-headline", Georgia, serif;
+  --font-nav: inherit;
+
+  /*
+   * Chrome ink. Deliberately *not* the build's --ink (#2d2d2d):
+   * the nav and footer follow the Butternut recipe pages, which set this exact
+   * value as --yeet-gray in global.css, so the chrome agrees with the article it
+   * frames. Every tint below is mixed from this one value — never re-typed.
+   */
+  --ink-chrome: #373e40;
+
+  /*
+   * The wordmark gradient's light stop. A real token rather than a mix of
+   * --brand, because the lockup is the one place the exact value is art-
+   * directed rather than derived.
+   */
+  --brand-soft: #f472b6;
+}
+
+body {
+  font-family: var(--font-body);
+}
+
+.font-display {
+  font-family: var(--font-display);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+[data-site-nav] {
+  font-family: var(--font-body);
+}
+
+[data-site-nav]:not(.bg-transparent) {
+  border-bottom: 1px solid color-mix(in srgb, var(--ink-chrome) 10%, transparent);
+  box-shadow: none;
+}
+
+[data-site-nav-inner] {
+  max-width: 1180px;
+}
+
+/* Nav links match the footer's caps: same face, size, weight, and tracking. */
+[data-site-nav] .font-nav {
+  font-family: "Avenir Bold", Avenir, Georgia, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1.95px;
+  text-transform: uppercase;
+}
+
+[data-site-footer] {
+  border-top: 1px solid color-mix(in srgb, var(--ink-chrome) 12%, transparent);
+  font-family: var(--font-body);
+}
+
+/* Sizing and face come from <Wordmark>; this only holds the footer's rhythm. */
+[data-site-footer-brand] {
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+[data-site-footer-links] a {
+  color: var(--ink-chrome);
+  font-family: "Avenir Bold", Avenir, Georgia, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1.95px;
+}
+
+[data-site-footer-links] a:hover {
+  color: color-mix(in srgb, var(--ink-chrome) 72%, transparent);
+}
+
+body:has(.yeet) {
+  font-family: var(--font-body);
+}
+
+body:has(.yeet) nav {
+  font-family: inherit;
+}
+
+.yeet {
+  --yeet-sans: var(--font-body);
+  --yeet-serif: "geller-headline", Georgia, serif;
+  /* The article's own art-directed palette. These lived as inline custom
+     properties on the frozen build's own .yeet{} rule (§9.1's Layer A);
+     that rule is gone now that global.css is live-compiled Tailwind (it
+     only emits utility classes it finds used, never an arbitrary class
+     selector like .yeet), so this is their new -- and only -- home.
+     --yeet-cream is carried forward unused, same as before: nothing paints
+     with it, but the Storybook token story still displays it as a named
+     swatch. */
+  --yeet-gray: #373e40;
+  --yeet-tomato: #d43f2b;
+  --yeet-tomato-strong: #a83224;
+  --yeet-pink: #f9dfe2;
+  --yeet-light-pink: #fef4f5;
+  --yeet-cream: #f7f1e7;
+  --yeet-border: #d7d8d9;
+  font-family: var(--yeet-sans) !important;
+}
+
+/* Markdown-rendered links inside ingredient/step/notes/tips text reach the
+   DOM via dangerouslySetInnerHTML with no class attribute at all
+   (scripts/parse.mjs) -- there is no JSX element to put a Tailwind
+   className on, so this stays scoped plain CSS rather than becoming a
+   utility class like everything else on this page. */
+.yeet a {
+  color: var(--color-black);
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: inset 0 -0.45em 0 var(--yeet-pink);
+  transition: box-shadow 0.18s ease, color 0.18s ease;
+}
+
+.yeet a:hover {
+  color: var(--yeet-tomato);
+  box-shadow: inset 0 -0.75em 0 var(--yeet-pink);
+}
+
+.yeet h1,
+.yeet h2,
+.yeet h3 {
+  font-family: var(--yeet-serif) !important;
+  letter-spacing: 0;
+}
+
+.yeet h1,
+.yeet h2,
+.yeet h3 {
+  font-weight: 700;
+}
+
+/* Positioning, sizing, and colour for .yeet-hero/-hero-copy/h1/-dek/-shell/
+   -card/[data-yeet-browse]/[data-yeet-browse-heading]/[data-yeet-browse-grid]
+   are Tailwind utility classes directly on their elements in
+   page-article.tsx and route-owned sidebar composition. */
+
+.yeet [data-yeet-browse] a {
+  color: inherit;
+  box-shadow: none;
+  text-decoration: none;
+}
+
+.yeet [data-yeet-browse] a:hover {
+  color: inherit;
+  box-shadow: none;
+}
+
+.yeet [data-yeet-browse] h3 {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  font-size: 24px;
+  line-height: 1.08;
+  text-align: center;
+}
+
+.yeet [data-yeet-browse] p,
+.yeet [data-yeet-browse] svg,
+.yeet [data-yeet-browse] a > div:last-child > div:last-child {
+  display: none;
+}
+
+.yeet .yeet-crumbs,
+.yeet .yeet-byline,
+.yeet .yeet-kicker,
+.yeet h4,
+.yeet-meta-grid dt {
+  font-family: var(--font-action);
+  font-weight: 700;
+  letter-spacing: 1.95px;
+}
+
+/* The breadcrumb trail's own links/segments stay chrome-grey with no
+   underline-box-shadow decoration, unlike every other link in the article
+   (.yeet a above). Needs to be real CSS, not a Tailwind class on the <a>:
+   .yeet a:hover's specificity (one class + a pseudo-class) ties with a plain
+   utility class and beats it on load order (site-overrides.css loads after
+   global.css) -- a hover:text-[...] utility here would be silently inert. */
+.yeet-crumbs a,
+.yeet-crumbs span {
+  color: var(--yeet-gray);
+  box-shadow: none;
+}
+
+.yeet-actions a {
+  color: var(--yeet-gray);
+  text-decoration: none;
+  box-shadow: none;
+}
+
+.yeet-card-actions a {
+  color: var(--color-white);
+  text-decoration: none;
+  box-shadow: none;
+}
+
+.yeet-actions a:hover,
+.yeet-card-actions a:hover {
+  color: var(--color-white);
+  box-shadow: none;
+}
+
+.yeet-card li a {
+  color: var(--yeet-gray);
+  font-weight: 800;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--ink-chrome) 35%, transparent);
+  text-underline-offset: 2px;
+  box-shadow: none;
+}
+
+.yeet-card li a:hover {
+  color: var(--yeet-gray);
+  text-decoration-color: var(--yeet-gray);
+  box-shadow: none;
+}
+
+/* ---------------------------------------------------------------------------
+ * Brand-tinted decoration.
+ *
+ * These were arbitrary-value Tailwind classes with the colour baked in
+ * (`shadow-[0_4px_20px_rgba(233,30,99,0.2)]`), which meant they could not
+ * follow a token — and were the wrong pink anyway: rgba(233,30,99) is #E91E63,
+ * not --brand (#ff2d78). Scoped CSS on a data attribute is the pattern the
+ * README already prefers over inventing utilities that the compiled build
+ * (§1) does not contain.
+ * ------------------------------------------------------------------------- */
+
+[data-cta] {
+  box-shadow: 0 4px 20px color-mix(in srgb, var(--color-brand) 20%, transparent);
+}
+
+[data-cta]:hover {
+  box-shadow: 0 8px 30px color-mix(in srgb, var(--color-brand) 30%, transparent);
+}
+
+[data-hero-glow] {
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--color-brand) 8%, transparent) 0%,
+    transparent 70%
+  );
+}
+
+[data-hero-media] {
+  box-shadow: 0 24px 80px color-mix(in srgb, var(--color-brand) 12%, transparent);
+}
+
+/* The scrim that keeps the wordmark legible over the mobile hero photo. Mixed
+   from --ink so a theme with a lighter ground gets a lighter scrim. */
+[data-hero-scrim] {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-ink) 55%, transparent) 0%,
+    color-mix(in srgb, var(--color-ink) 45%, transparent) 50%,
+    color-mix(in srgb, var(--color-ink) 60%, transparent) 100%
+  );
+}
+
+/* The lockup's second word. Stops are tokens so the wordmark rethemes with
+   everything else; `bg-clip-text` and `text-transparent` stay Tailwind's.
+ *
+ * This sheet loads after global.css, so it outranks the `max-md:[background:
+ * none]` escape that turns the word solid white over the mobile hero photo
+ * (see CLAUDE.md §2). Restore that here rather than removing it — without this
+ * block the gradient paints as a filled slab behind white text. */
+[data-wordmark-gradient] {
+  background-image: linear-gradient(135deg, var(--brand-soft), var(--color-brand));
+}
+
+@media (max-width: 767px) {
+  [data-wordmark-gradient][data-on-photo] {
+    background-image: none;
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "name": "l8-web",
+  "projectType": "application",
+  "sourceRoot": "src",
+  "tags": ["layer:l8", "scope:web", "type:app"],
+  "metadata": {
+    "tsConfig": "tsconfig.json"
+  },
+  "targets": {
+    "content": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm run content"
+      },
+      "outputs": [
+        "{workspaceRoot}/apps/eatyeet/generated",
+        "{workspaceRoot}/apps/dpizzaoven/generated"
+      ]
+    },
+    "dev": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm run dev"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm run build"
+      },
+      "outputs": ["{workspaceRoot}/.output/public", "{workspaceRoot}/.output/server"]
+    },
+    "preview": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm run preview"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm run test"
+      }
+    },
+    "test-unit": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm run test:unit"
+      }
+    },
+    "boundaries": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm run boundaries"
+      }
+    },
+    "test-a11y": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm run test:a11y"
+      }
+    },
+    "test-lighthouse": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm run test:lighthouse"
+      }
+    },
+    "build-storybook": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm run build-storybook"
+      },
+      "outputs": ["{workspaceRoot}/storybook-static"]
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm run serve"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm run typecheck"
+      }
+    },
+    "typecheck-ts": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm run typecheck:ts"
+      }
+    }
+  }
+}

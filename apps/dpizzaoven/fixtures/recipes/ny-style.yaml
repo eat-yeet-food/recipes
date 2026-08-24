@@ -1,0 +1,106 @@
+slug: ny-style
+title: The NY Slice
+description: 'My everyday pie. 48-hour cold ferment, bread flour, Bianco DiNapoli sauce.'
+category: savory
+prepMinutes: 0
+cookMinutes: 0
+totalMinutes: 2880
+yieldAmount: 2
+yieldUnit: 14" pies
+image: ny-style.png
+courses:
+  - pizzas
+cuisines:
+  - ny
+methods:
+  - home-oven
+  - baking-steel
+restrictions: []
+occasions:
+  - make-ahead
+ingredientTypes:
+  - ny
+  - cold_ferment
+  - bread_flour
+  - weeknight
+created: '2026-03-18'
+blocks:
+  - type: recipe
+    equipment:
+      - baking steel
+      - gozney peel
+      - microplane
+      - bianco whole
+    ingredients:
+      - title: Dough (makes 2 balls)
+        items:
+          - 500 g bread flour (King Arthur or Caputo Americana)
+          - 315 g water (63% hydration)
+          - 10 g fine sea salt
+          - 2 g instant dry yeast
+          - 15 g olive oil
+          - 5 g sugar
+      - title: Sauce
+        items:
+          - 1 can Bianco DiNapoli whole peeled tomatoes (28 oz)
+          - 1 tsp fine sea salt
+          - '1 tsp sugar (optional, balances acidity)'
+          - 1 tbsp olive oil
+      - title: The build
+        items:
+          - '8 oz low-moisture whole-milk mozzarella, hand-shredded'
+          - Microplaned Parmigiano Reggiano
+          - 'fresh basil, post-bake'
+          - olive oil finish
+    steps:
+      - title: Build the dough
+        items:
+          - 'Whisk flour, salt, and yeast in a big bowl. Add water, oil, and sugar. Mix by hand until no dry flour remains, shaggy is fine. Cover and rest 20 min.'
+          - '*You''ll know it''s right when:* After the 20-minute rest, the dough should look hydrated and slightly more cohesive than when you mixed it. The autolyse is doing the early gluten work for you, no need to knead yet.'
+      - title: Stretch and fold
+        items:
+          - 'Four sets of stretch-and-folds, 20 min apart. By set three the dough should feel alive. That''s it.'
+          - '*You''ll know it''s right when:* Each fold gets easier. By set four, the dough should resist stretching slightly and have a smooth, taut surface. If it still feels limp and shapeless, do a fifth fold.'
+      - title: Ball and cold ferment
+        items:
+          - 'Divide into two balls (about 420g each). Tight seams down. Into oiled containers, lids on. Fridge for at least 48 hours. 72 is better.'
+          - '*You''ll know it''s right when:* Each ball should be smooth and round on top with a sealed pinch underneath. By hour 48 in the fridge, the balls will have grown about 30-50% and look puffy. Press one gently, it should indent slightly and spring back about halfway. Full spring back = under-fermented.'
+      - title: Crush the sauce
+        items:
+          - 'Open the can. Pour off a splash of juice (not all of it). Crush the tomatoes with your hand until they''re rustic, little chunks are good. Mix with salt, sugar, oil. Done. Do not cook it.'
+          - '*You''ll know it''s right when:* Texture should be chunky and rustic, not pureed. You want visible tomato pieces. If it looks like marinara, you crushed too much.'
+      - title: Pull and warm
+        items:
+          - 'Two hours before bake, pull the dough. Let it come to room temp. It should feel soft and bubbly.'
+          - '*You''ll know it''s right when:* The dough should feel pillowy when you press a finger gently into it. Cold dough is firm and tense. If it''s still firm after 2 hours, give it 30 more minutes.'
+      - title: Stretch
+        items:
+          - 'Flour the ball heavy. Push from the center out, leaving a rim. Lift and rotate on your knuckles. 14 inches. If it tears, patch it, nobody cares.'
+          - '*You''ll know it''s right when:* The center should be thin enough that you can almost see your hand through it. The outer 1-inch rim stays thicker, that becomes your cornicione. If it keeps snapping back, the dough is too cold, let it rest another 20 minutes.'
+      - title: Launch + bake
+        items:
+          - 'Steel on the top rack. Oven at 550°F for an hour minimum before launch. Dress the pie on a floured peel: sauce, cheese, parm. Launch. 6-7 minutes. Rotate halfway. You want leopard spots on the rim and brown freckles on the cheese.'
+          - '*You''ll know it''s right when:* Look for: dark leopard spots (not uniform brown, distinct dark spots) on the rim, small charred bubbles on the cheese, and a bottom that''s golden brown with a few char marks when you peek. If the rim is uniform pale brown after 7 minutes, your oven didn''t get hot enough, hit it with the broiler for 60 seconds.'
+      - title: Finish
+        items:
+          - 'Out of the oven: olive oil drizzle, torn basil, another hit of microplaned parm. Let it sit 90 seconds before the cut.'
+          - '*You''ll know it''s right when:* Wait the full 90 seconds. The cheese sets, the crust finishes crisping from residual heat, and the bottom finishes drying. Cut too soon and the toppings slide and the crust steams from underneath.'
+    notes:
+      - 'If your oven only hits 500°F, move the steel to the middle rack and add 2 minutes. If you don''t have a steel, get one. It''s the single biggest upgrade you can make.'
+      - '**My dough was too sticky to handle** Your flour absorbs less water than mine, or your kitchen is humid. Bread flour brands vary by ~3% in water absorption. Add 1 tablespoon of flour at a time during the mix until it pulls away from the bowl. The dough should be tacky but not stick to your hands. Always err drier on the first batch, you can compensate next time with more hydration.'
+      - '**My crust didn''t get leopard-spotted** Your oven didn''t get hot enough, or you didn''t preheat the steel long enough. The leopard spots come from extreme surface heat charring small patches of the dough. Preheat the steel on the top rack at max oven temperature (550°F or whatever yours hits) for a FULL hour. Then run the broiler on high for the last 5 minutes BEFORE you launch. The broiler boosts surface temp another 100-150°F.'
+      - '**My pizza was floppy, slices didn''t hold up** Bottom crust didn''t crisp. Usually means the steel wasn''t hot enough OR you used too much sauce (steam from sauce softens the bottom). Two changes: preheat steel longer (full hour minimum, 90 minutes is better), and use less sauce. NY style is 4-5 tablespoons per pie, spread thin to the edges. Sauce that pools in the center steams the crust.'
+      - '**My cheese went brown and oily before the crust cooked** Too much cheese, or pre-shredded cheese with anti-caking agents. The agents (cellulose, potato starch) prevent proper melt. Use 4-6 oz of low-moisture mozz per 14-inch pie, hand-shredded from a block. Pre-shredded breaks before the crust is done.'
+      - '**The dough wouldn''t stretch, kept snapping back** Under-fermented dough or dough straight from the fridge. Cold dough is tense, fermented dough is relaxed. Make sure your balls have cold-fermented at least 24 hours (48-72 is better), and pull them from the fridge 2-3 hours before stretching. Press the dough, it should slowly bounce back about halfway, not snap back to the starting shape.'
+      - '**The sauce tasted bitter or acidic** Bad canned tomatoes (cheap, low quality) or you cooked the sauce too long. Use Bianco DiNapoli or San Marzano DOP. For NY style, the sauce is UNCOOKED, just crushed tomatoes + salt + a pinch of sugar to balance. The 6-minute oven bake cooks it enough.'
+      - '**I couldn''t get the pizza off the peel, it stuck** Too much flour or pizza sat on the peel too long. Wet dough + flour-coated peel = paste glue after 60 seconds. Dress the pizza FAST (under 2 minutes). Use semolina flour or fine cornmeal on the peel, it acts like ball bearings. Do a quick test shake of the peel BEFORE you launch. If the pizza doesn''t slide, lift an edge and slip more flour under.'
+      - '**The bottom was burnt but the top was undercooked** Steel too low in the oven, or oven temp not high enough for the broiler to finish the top. Move the steel to the TOP rack (not middle, not bottom). The broiler element is up there, and the hot steel handles the bottom from rising heat. This is the single biggest setup change for NY style.'
+    tips:
+      - '**Hand-shred the mozzarella.** Pre-shredded cheese is coated in anti-caking starches that prevent it from melting properly. You want a clean, even melt with those crispy brown spots, bagged cheese won''t do it. Buy a block of low-moisture whole-milk mozz and shred it yourself. 10 seconds of extra work, dramatically better pizza.'
+      - '**Bianco DiNapoli tomatoes are worth it.** I''ve tested every supermarket brand. Bianco costs $2-3 more per can but has 3x the tomato flavor and less acidity. If you can''t find them, use 6-in-1 or Jersey Fresh. Avoid anything labeled ''crushed'', you want whole peeled so YOU control the crush.'
+      - '**Preheat the steel for a FULL hour.** 30 minutes isn''t enough. The steel needs to saturate with heat throughout its thickness, not just the surface. Set a timer for 60 minutes minimum after the oven beeps that it''s at temp.'
+      - '**For the best chew, 72 hours beats 48.** If you have the planning ahead, push it to 72. The flavor difference is real. Any longer than 72 and the gluten starts breaking down.'
+      - '**Dust the peel with semolina, not flour.** Flour burns at 550°F and turns bitter. Semolina tolerates the heat and adds a subtle corn note. Rimicini semolina is my pick.'
+      - '**Rotate the pie halfway through.** Home ovens have hot spots. A 90° turn at the 3-minute mark ensures even bake. Use a metal peel for this, try to flip with a wood peel and you''ll drop it.'
+      - '**Top with post-bake finishing oil + fresh basil.** A drizzle of good olive oil (not the cheap cooking stuff, the fancy bottle) and torn fresh basil leaves AFTER the pie comes out is what takes it from good to great. Basil on the pizza before baking turns black and bitter. Always add after.'
+      - '**If the bottom won''t brown, your steel isn''t hot enough.** Two fixes: preheat longer (90 minutes if you have time), or put the steel on the very top rack (yes, top, radiant heat reflects back). I know it sounds wrong. Try it.'

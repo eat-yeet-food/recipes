@@ -1,8 +1,9 @@
 import type { StorybookConfig } from '@storybook/react-vite'
 import { mergeConfig, type PluginOption } from 'vite'
 import { fileURLToPath, URL } from 'node:url'
+import { APP_PATHS } from '../site.config.mjs'
 
-const routerMock = fileURLToPath(new URL('../src/storybook/router-mock.tsx', import.meta.url))
+const routerMock = fileURLToPath(new URL('../packages/l8/web/src/storybook/router-mock.tsx', import.meta.url))
 const appOnlyPluginPattern = /(tanstack|nitro|suppress-module-directive)/i
 
 function withoutAppOnlyPlugins(plugins: PluginOption[] = []): PluginOption[] {
@@ -16,13 +17,13 @@ function withoutAppOnlyPlugins(plugins: PluginOption[] = []): PluginOption[] {
 }
 
 const config: StorybookConfig = {
-  stories: ['../src/**/*.stories.@(ts|tsx)'],
+  stories: ['../packages/l8/web/src/**/*.stories.@(ts|tsx)'],
   addons: ['@storybook/addon-docs'],
   framework: {
     name: '@storybook/react-vite',
     options: {},
   },
-  staticDirs: ['../public'],
+  staticDirs: [`../${APP_PATHS.publicDir}`],
   viteFinal: async (config) =>
     mergeConfig(
       {

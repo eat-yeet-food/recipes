@@ -1,0 +1,8 @@
+{
+  "name": "@eat-yeet/l8-web",
+  "private": true,
+  "type": "module",
+  "imports": {
+    "#web-test/static-server": "./src/test/static-server.mjs"
+  }
+}

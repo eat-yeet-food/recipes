@@ -5,16 +5,16 @@
  *
  * Downloads the image, resizes it to 1100px on the long edge (the recipe hero
  * renders at most ~1440 CSS px, and every byte is served on first paint),
- * writes it to public/images/<slug>.jpg, and adds the `image:` line to the
- * recipe's YAML document if it isn't already there.
+ * writes it to the active app's images directory, and adds the `image:` line to
+ * the recipe's YAML document if it isn't already there.
  */
 
 import { writeFileSync, readFileSync, existsSync, mkdirSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
-import { join, dirname } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
+import { APP_ID, APP_PATHS } from '#site-config'
+import { RESOLVED_APP_PATHS } from './app-paths.mjs'
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const [slug, source] = process.argv.slice(2)
 
 if (!slug || !source) {
@@ -22,13 +22,13 @@ if (!slug || !source) {
   process.exit(1)
 }
 
-const recipePath = join(ROOT, 'fixtures', 'recipes', `${slug}.yaml`)
+const recipePath = join(RESOLVED_APP_PATHS.fixtures, `${slug}.yaml`)
 if (!existsSync(recipePath)) {
-  console.error(`No such recipe: fixtures/recipes/${slug}.yaml`)
+  console.error(`No such recipe for ${APP_ID}: ${APP_PATHS.fixtures}/${slug}.yaml`)
   process.exit(1)
 }
 
-const imageDir = join(ROOT, 'public', 'images')
+const imageDir = RESOLVED_APP_PATHS.imagesDir
 mkdirSync(imageDir, { recursive: true })
 const target = join(imageDir, `${slug}.jpg`)
 
@@ -63,5 +63,5 @@ if (/^image:/m.test(recipeSource)) {
 }
 
 const kb = (readFileSync(target).length / 1024).toFixed(0)
-console.log(`  public/images/${slug}.jpg (${kb} KB)`)
-console.log('\nNow run: npm run build')
+console.log(`  ${APP_PATHS.imagesDir}/${slug}.jpg (${kb} KB)`)
+console.log('\nNow run: pnpm run build')

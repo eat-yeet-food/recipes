@@ -1,0 +1,8 @@
+{
+  "name": "@eat-yeet/l0-foundation",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./utils": "./src/utils.ts"
+  }
+}

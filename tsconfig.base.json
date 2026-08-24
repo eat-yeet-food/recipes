@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "types": ["vite/client", "node"],
+    "paths": {
+      "@eat-yeet/l0-foundation/*": ["./packages/l0/foundation/src/*"],
+      "@eat-yeet/l1-api-model/*": ["./packages/l1/api-model/src/*"],
+      "@eat-yeet/l1-recipe-model/*": ["./packages/l1/recipe-model/src/*"],
+      "@eat-yeet/l2-recipe-domain/*": ["./packages/l2/recipe-domain/src/*"],
+      "@eat-yeet/l3-api-contract/*": ["./packages/l3/api-contract/src/*"],
+      "@eat-yeet/l3-api-query/*": ["./packages/l3/api-query/src/*"],
+      "@eat-yeet/l3-api-static/*": ["./packages/l3/api-static/src/*"],
+      "@eat-yeet/l4-content-model/*": ["./packages/l4/content-model/src/*"],
+      "@eat-yeet/l4-content-build/*": ["./packages/l4/content-build/src/*"],
+      "@eat-yeet/l5-ui-primitives/*": ["./packages/l5/ui-primitives/src/*"],
+      "@eat-yeet/l6-ui-catalog/*": ["./packages/l6/ui-catalog/src/*"],
+      "@eat-yeet/l6-ui-content-blocks/*": ["./packages/l6/ui-content-blocks/src/*"],
+      "@eat-yeet/l6-ui-shell/*": ["./packages/l6/ui-shell/src/*"],
+      "@eat-yeet/l7-home/*": ["./packages/l7/home/src/*"],
+      "@eat-yeet/l7-recipes/*": ["./packages/l7/recipes/src/*"],
+      "@eat-yeet/l7-search/*": ["./packages/l7/search/src/*"],
+      "@eat-yeet/l8-web/*": ["./packages/l8/web/src/*"]
+    }
+  }
+}

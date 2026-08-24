@@ -1,0 +1,148 @@
+slug: cast-iron-pan-pizza
+title: 'Cast Iron Pan Pizza, The Buttery, Cheesy, Crispy-Edged Method'
+description: '70% hydration dough, par-baked then flipped, blanketed in three cheeses with a frico-crispy edge. The pan pizza you make on a Tuesday and remember on Friday.'
+category: savory
+prepMinutes: 0
+cookMinutes: 0
+totalMinutes: 240
+yieldAmount: 1
+yieldUnit: × 12-inch pan pizza
+image: cast-iron-pan-pizza.jpg
+video:
+  src: cast-iron-pan-pizza.mp4
+  width: 720
+  height: 1280
+  duration: 79
+courses:
+  - pizzas
+cuisines:
+  - pan
+methods:
+  - cast-iron
+restrictions: []
+occasions:
+  - weekend
+ingredientTypes:
+  - cast_iron
+  - pan_pizza
+  - detroit_style
+  - 70%_hydration
+  - frico_edge
+  - three_cheese
+created: '2026-05-18'
+blocks:
+  - type: recipe
+    equipment:
+      - '[object Object]'
+      - '[object Object]'
+      - '[object Object]'
+      - '[object Object]'
+      - '[object Object]'
+    ingredients:
+      - title: Dough
+        items:
+          - 285 g bread flour
+          - 200 g water (room temp)
+          - 6 g fine sea salt
+          - 3 g sugar
+          - 8 g extra virgin olive oil (plus more for pan)
+          - 0.85 g instant yeast
+      - title: Cheese Layer
+        items:
+          - '1.5 cup low-moisture whole-milk mozzarella, shredded'
+          - '1 cup low-moisture part-skim mozzarella, shredded'
+          - '1 cup sharp cheddar, shredded'
+      - title: Sauce + Finishing
+        items:
+          - 1 cup crushed tomatoes (Bianco di Napoli preferred)
+          - pinch of fine sea salt
+          - dried oregano
+          - 'Parmigiano Reggiano (microplaned, finish)'
+          - 'Pecorino Romano (microplaned, finish)'
+    steps:
+      - title: Weigh out all ingredients
+        items:
+          - 'Use a digital scale, preferably a microscale for the yeast and salt (anything under 15g). Eyeballing 0.85g of yeast gives wildly inconsistent results between batches.'
+      - title: Mix dry ingredients
+        items:
+          - 'Combine bread flour, salt, sugar, and instant yeast in a large bowl. Whisk to evenly distribute the salt and yeast through the flour.'
+      - title: Add wet ingredients
+        items:
+          - 'Pour in the water and olive oil. Mix with a rubber spatula or your hands until everything comes together into a shaggy, slightly sticky mass. Don''t over-mix here, just combine until no dry flour remains.'
+      - title: Cover and rest 30 minutes
+        items:
+          - 'Cover the bowl with a damp towel or plastic wrap. Let the dough rest at room temp for 30 minutes. This is the autolyse step, the flour fully hydrates and the gluten begins to develop on its own without any work.'
+      - title: Stretch and fold (round 1)
+        items:
+          - 'Wet your hands. Grab one side of the dough, pull it up and over to the middle. Press down. Rotate the bowl 90 degrees and repeat. Do this 4 times total, top, right, bottom, left. The dough should feel noticeably tighter and smoother.'
+      - title: 'Rest 30 minutes, repeat as needed'
+        items:
+          - 'Cover and rest 30 minutes. Then check the window pane test (next step). If it doesn''t pass, do another round of stretch-and-folds and rest another 30 min. Most batches need 2-3 rounds total at 70% hydration.'
+      - title: Window pane test
+        items:
+          - 'Pinch off a small piece of dough. Stretch it slowly between your fingers. It should stretch thin enough to see light through without tearing. If it tears immediately, do another stretch-and-fold round.'
+          - '*You''ll know it''s right when:* When you stretch the dough between your thumbs and forefingers, you should be able to see a thin film of light through it, the dough should be translucent but not tear for at least 2-3 inches of stretch. If it tears immediately, gluten isn''t developed yet, do one more fold round.'
+      - title: 'Optional: cold ferment 1-3 days'
+        items:
+          - 'Once gluten is developed, you can store the dough covered in the fridge up to 3 days for deeper flavor. Pull out 1 hour before using. Or skip the cold ferment and proceed immediately, both work.'
+      - title: Oil the cast iron pan generously
+        items:
+          - 'Pour 1-2 tablespoons of olive oil into your 12-inch cast iron pan. Tilt and swirl to coat the entire bottom and lower sides. The oil basically deep-fries the bottom of the dough during baking, don''t be stingy.'
+          - '*You''ll know it''s right when:* Oil should fully coat the bottom and run up the sides about 1/2 inch. You should see a uniform shimmer when you tilt the pan. Skimping here = pale, un-crispy bottom. Don''t skimp.'
+      - title: Press dough into the pan
+        items:
+          - 'Place the dough ball into the oiled pan. Using your fingertips, press it out to the edges. It won''t reach the wall immediately, that''s fine. Press what you can without tearing. Cover with a lid or plastic wrap and let rest 1 hour.'
+          - '*You''ll know it''s right when:* Don''t force the dough if it resists, you''ll tear it. Get it to maybe 70% of the pan, cover, and let the rest do the work. After 1 hour the dough should have noticeably relaxed and stretched closer to the pan walls on its own.'
+      - title: Dimple and let rise 3-5 hours
+        items:
+          - 'After the 1-hour rest, the dough will have relaxed. Dimple it evenly across the surface with your fingertips (like focaccia) and gently push it the rest of the way to the pan edges. Cover and let rise 3-5 hours at room temp. Longer = better, go 5-6 hours if you have time.'
+          - '*You''ll know it''s right when:* After 3-5 hours of final rise, the dough should be visibly puffy, fill the pan corner-to-corner, and have a bubbly surface from the dimples plus gas pockets. Press gently with a fingertip: the indent should slowly spring back about halfway, not fully (over-proofed) and not snap back (under-proofed).'
+      - title: Preheat oven to 500°F for 1 hour
+        items:
+          - 'About 1 hour before you plan to bake, set your oven to 500°F. The 1-hour preheat is essential, you want the oven (and any baking stone/steel if you have one) fully saturated with heat.'
+      - title: Par-bake 6-8 minutes
+        items:
+          - 'Place the proofed pan in the oven and bake the dough alone (no toppings) for 6-8 minutes. The dough should puff up and turn lightly golden, not browned. Pull it out before it gets too dark.'
+          - '*You''ll know it''s right when:* The dough should be puffed up and pale golden, set on the surface but with NO real browning. If the edges are turning brown, pull immediately. If it''s still raw-looking and slack after 6 min, give it another 90 seconds. The bottom should release from the pan when you slide a spatula under.'
+      - title: 'Cool the dough on a rack, cool the pan'
+        items:
+          - Carefully transfer the par-baked dough to a wire cooling rack. Let it cool for 20 minutes. The pan should also cool down some during this time.
+      - title: 'Re-oil the pan, flip the dough back in'
+        items:
+          - 'Add fresh oil or melted butter to the pan. Place the par-baked dough back in the pan, UPSIDE DOWN. The smoother par-baked bottom now becomes the top surface for your toppings. This gives you a flat, even canvas.'
+          - '*You''ll know it''s right when:* The new oil should be enough to sizzle audibly when the warm par-baked dough goes back in. The smooth (formerly bottom) side should be facing UP for toppings. If the surface looks bumpy and dimpled, you flipped wrong.'
+      - title: 'Cheese the pizza, all the way to the edge'
+        items:
+          - 'Sprinkle the whole-milk mozzarella and cheddar across the center of the pizza. Then line the EDGES with the part-skim mozzarella, push it all the way against the pan wall. This is what creates the frico-crispy cheese edge that''s the whole point of pan pizza.'
+          - '*You''ll know it''s right when:* Cheese MUST touch the pan walls all around. If you see any dough margin, push cheese into it. The visible cheese-to-pan contact is what creates the frico (caramelized) edge. No edge contact = no frico = sad pan pizza.'
+      - title: 'Add sauce, salt, oregano, pecorino'
+        items:
+          - 'Dollop the crushed tomatoes over the cheese in a few spots (don''t spread evenly, leave cheese visible between dollops). Sprinkle a pinch of salt and dried oregano over the sauce. Add a heavy shower of microplaned Pecorino Romano right on top.'
+          - '*You''ll know it''s right when:* About 60-70% of the cheese should still be visible after saucing, you want WHITE patches of cheese showing between RED dollops of sauce. The patchwork is what makes pan pizza look pan pizza, not just sloppy.'
+      - title: 'Add any other toppings, then final bake 8-10 min'
+        items:
+          - 'Now''s the time for any other toppings you want, pepperoni, sausage, peppers, onions, whatever. Slide the pan back into the 500°F oven and bake another 8-10 minutes until the cheese is bubbling, the edges are deeply browned (look for the frico crisp), and the toppings are cooked through.'
+          - '*You''ll know it''s right when:* Pull when: cheese in the center is bubbly and brown-spotted, edges are deep mahogany brown (the frico, not pale gold), and you can see the cheese ring around the pan wall is crispy and lacy. If edges are still pale, give it 2 more minutes. If center is brown but edges are pale, your oven is uneven, rotate the pan.'
+      - title: Finish with Parm and serve
+        items:
+          - 'Pull the pizza from the oven. Immediately microplane some Parmigiano Reggiano over the top, the residual heat melts it just slightly without burning. Let rest 2-3 minutes (the cheese sets and the crust crisps), then run a thin spatula around the edge and slide the whole pizza out of the pan onto a cutting board. Slice into 6-8 wedges and serve immediately.'
+          - '*You''ll know it''s right when:* After 2-3 minutes of rest, the pizza should release from the pan when you nudge it with a spatula. If it sticks at any edge, run the spatula around once more. The whole pie should slide out as a single unit onto your cutting board.'
+    notes:
+      - 'Cast iron pan pizza is a Tuesday-night kind of recipe. Stop fighting your dough, let cast iron do the work. The technique is what matters most: dough + oil + pan + heat + cheese-to-edge. Everything else is variation.'
+      - '**My crust was pale and not crispy on the bottom** Not enough oil in the pan, OR cast iron wasn''t preheated long enough, OR oven temp too low. 1-2 tablespoons of olive oil minimum, the oil deep-fries the bottom. Preheat the OVEN with the pan in it (the pan should be hot before dough goes in) for full hour. 500°F minimum.'
+      - '**The dough didn''t pass the window pane test** Gluten not fully developed yet. Either need more stretch-and-folds, or your flour was lower protein than expected. Do another round of stretch-and-folds, rest 30 minutes, test again. Some batches need 3-4 rounds. If it still won''t pass after 4 rounds, your flour might be AP (lower protein), switch to bread flour next time.'
+      - '**The cheese edge didn''t form a frico crust** Cheese didn''t extend to the pan walls, OR you used pre-shredded cheese (anti-caking agents prevent browning). Cheese must touch the pan walls on ALL sides. Push it aggressively against the metal. Use hand-shredded part-skim mozz at the edges, the lower fat content browns crispier than whole-milk.'
+      - '**The middle of the dough was raw under all that cheese** Skipped the par-bake step OR loaded too much cheese without enough cooking time. The par-bake is non-negotiable. 6-8 minutes alone before adding toppings cooks the dough through. Then 8-10 minutes more for the cheese and toppings. Total bake time = 14-18 minutes.'
+      - '**Pan pizza stuck to the pan, ripped apart when I tried to remove it** Cast iron wasn''t seasoned, OR you didn''t let pizza rest 2-3 minutes before removing. Season your cast iron: thin coat of oil, 400°F oven for 1 hour, repeat 2-3 times. Always let pizza rest 2-3 minutes after baking, the cheese sets and releases naturally. Then run a thin spatula around the edge.'
+      - '**The dough was too sticky to press into the pan** 70% hydration is high. The dough is supposed to be slack and somewhat sticky. Wet your fingers when pressing the dough, sticky dough sticks to dry hands but slides off wet ones. Use light pressure, don''t compress the air out. If it really won''t cooperate, dust your fingers with semolina instead of more flour.'
+      - '**The 3-5 hour rise didn''t make the dough much bigger** Cold kitchen (below 70°F), or yeast issues. Cast iron pan pizza relies on a long room-temp final rise for that airy texture. Find a warm spot: top of the fridge, on top of the oven with the light on, near a sunny window. Cover the pan to keep moisture in. Go 5-6 hours if needed, the dough should clearly double in size from when you first dimpled it.'
+      - '**I added pepperoni and it burned to charcoal** Pepperoni on TOP of the cheese where it gets direct top-down heat for 8-10 minutes. For Detroit-style: pepperoni goes UNDER the cheese (on the dough first, then cheese on top). For cast iron style: par-cook pepperoni slightly before adding to reduce final-bake time, OR add it in the last 5 minutes.'
+    tips:
+      - '**Use a 10-12 inch cast iron pan.** Too big and the dough spreads thin. Too small and it puffs into a bread loaf. A standard 12-inch Lodge skillet is perfect.'
+      - '**Oil the pan generously.** Not ''a thin film'' generously, like 1-2 tablespoons of olive oil swirled around so the pan is properly wet. The oil basically deep-fries the bottom of the crust during the bake. That''s the goal.'
+      - '**Let the dough rise as long as you can.** The recipe says 3-5 hours in the pan, but if you have time, go 5-6 hours. The longer the final pan-proof, the airier and more flavorful the crust. Same-day in 3 hours is fine; longer is better.'
+      - '**Cold ferment if you can plan ahead.** Mix the dough, develop the gluten, then store in the fridge 1-3 days before pressing into the pan. The cold ferment adds the deli-bread flavor we love in the [hoagie roll dough](/recipes/hoagie-roll-dough) and our [classic NY dough](/recipes/classic-ny-pizza-dough). Pull it out 1 hour before pressing into the pan.'
+      - '**Dimple the dough, don''t deflate it.** After the first 1-hour proof in the pan, use your fingertips to gently press dimples across the surface (think focaccia). This pops the largest air bubbles so you don''t get giant pockets in the finished pizza. But press gently, you want texture, not deflation.'
+      - '**The par-bake is when you preheat the pan separately.** After the par-bake comes out, the pan is screaming hot but the dough is on a cooling rack. You re-oil/butter the pan, then place the par-baked dough back in upside-down. The hot pan + fresh fat = ultra-crispy bottom on the FINAL bake.'
+      - '**Cheese to the edge.** I cannot say this enough. Push the cheese ALL the way to the pan wall. Don''t leave a clean border. The frico edge is the entire reason to make pan pizza vs other styles.'
+      - '**Pecorino at the finish hits different.** A heavy shower of microplaned Pecorino Romano AFTER the final bake, while the pizza is still hot, adds funk and saltiness that elevates everything. Don''t bake it in (it goes bitter). Always add after.'

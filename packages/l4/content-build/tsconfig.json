@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "tsBuildInfoFile": "../../../.nx/cache/packages/l4/content-build.tsbuildinfo",
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "../../../.nx/types/packages/l4/content-build"
+  },
+  "include": ["src"]
+}

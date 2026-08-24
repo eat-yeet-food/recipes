@@ -1,0 +1,54 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "tsBuildInfoFile": "../../../.nx/cache/packages/l8/web.tsbuildinfo",
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "../../../.nx/types/packages/l8/web",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "references": [
+    {
+      "path": "../../l1/recipe-model/tsconfig.json"
+    },
+    {
+      "path": "../../l2/recipe-domain/tsconfig.json"
+    },
+    {
+      "path": "../../l3/api-contract/tsconfig.json"
+    },
+    {
+      "path": "../../l3/api-query/tsconfig.json"
+    },
+    {
+      "path": "../../l3/api-static/tsconfig.json"
+    },
+    {
+      "path": "../../l4/content-model/tsconfig.json"
+    },
+    {
+      "path": "../../l6/ui-catalog/tsconfig.json"
+    },
+    {
+      "path": "../../l6/ui-content-blocks/tsconfig.json"
+    },
+    {
+      "path": "../../l6/ui-shell/tsconfig.json"
+    },
+    {
+      "path": "../../l7/home/tsconfig.json"
+    },
+    {
+      "path": "../../l7/recipes/tsconfig.json"
+    },
+    {
+      "path": "../../l7/search/tsconfig.json"
+    }
+  ],
+  "include": ["src"],
+  "exclude": ["src/**/*.test.mjs"]
+}

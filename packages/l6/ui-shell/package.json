@@ -1,0 +1,8 @@
+{
+  "name": "@eat-yeet/l6-ui-shell",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./shell/*": "./src/shell/*.tsx"
+  }
+}

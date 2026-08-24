@@ -1,6 +1,5 @@
 /**
- * Screenshots the prerendered site over HTTP so the rendering can be compared
- * against the previous engine's output.
+ * Screenshots the prerendered site over HTTP for visual regression checks.
  *
  * Usage: node test/shots.mjs [outDir]
  */
@@ -15,8 +14,8 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const OUT = process.argv.slice(2).find((a) => !a.startsWith('--')) ?? join(ROOT, 'dist', 'shots')
 
 /**
- * Named to match the baseline captured from the previous engine. `category` is
- * absent by design — those pages were never on the original site and are gone.
+ * Named to match the visual baseline. `category` is absent by design because
+ * browse facets resolve to search URLs rather than standalone category pages.
  */
 export const SHOTS = [
   { name: 'home', path: '/', full: true },
@@ -24,6 +23,9 @@ export const SHOTS = [
   { name: 'recipe', path: '/recipes/artisan-new-york-pizza', full: true },
   { name: 'search', path: '/search', full: false },
   { name: 'home-mobile', path: '/', full: false, viewport: { width: 390, height: 844 } },
+  { name: 'browse', path: '/browse', full: true },
+  { name: 'recipes-index', path: '/recipes', full: true },
+  { name: 'recipe-mobile', path: '/recipes/artisan-new-york-pizza', full: false, viewport: { width: 390, height: 844 } },
 ]
 
 export async function capture(outDir) {

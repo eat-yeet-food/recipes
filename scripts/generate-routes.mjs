@@ -2,8 +2,9 @@
  * Generate TanStack Router's route tree without running a Vite build.
  *
  * Vite does this through the TanStack Start plugin, but the standalone
- * `npm run typecheck` path calls `tsc` directly. Fresh clones do not have the
- * ignored `src/routeTree.gen.ts`, so typechecking has to create it first.
+ * `pnpm run typecheck` path calls `tsc` directly. Fresh clones do not have the
+ * ignored `packages/l8/web/src/routeTree.gen.ts`, so typechecking has to create
+ * it first.
  */
 
 import { dirname, join } from 'node:path'
@@ -27,8 +28,8 @@ declare module '@tanstack/react-start' {
 const config = getConfig(
   {
     target: 'react',
-    routesDirectory: join(ROOT, 'src', 'routes'),
-    generatedRouteTree: join(ROOT, 'src', 'routeTree.gen.ts'),
+    routesDirectory: join(ROOT, 'packages', 'l8', 'web', 'src', 'routes'),
+    generatedRouteTree: join(ROOT, 'packages', 'l8', 'web', 'src', 'routeTree.gen.ts'),
     routeTreeFileFooter,
   },
   ROOT,
@@ -37,4 +38,4 @@ const config = getConfig(
 const generator = new Generator({ config, root: ROOT })
 await generator.run()
 
-console.log('routes: src/routeTree.gen.ts')
+console.log('routes: packages/l8/web/src/routeTree.gen.ts')

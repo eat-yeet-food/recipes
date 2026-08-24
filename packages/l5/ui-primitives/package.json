@@ -1,0 +1,8 @@
+{
+  "name": "@eat-yeet/l5-ui-primitives",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./primitives/*": "./src/primitives/*.tsx"
+  }
+}

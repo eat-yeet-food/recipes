@@ -1,0 +1,9 @@
+{
+  "name": "@eat-yeet/l3-api-contract",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./categories": "./src/categories.ts",
+    "./recipes": "./src/recipes.ts"
+  }
+}

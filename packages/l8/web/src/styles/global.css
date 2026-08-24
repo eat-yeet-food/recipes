@@ -1,0 +1,191 @@
+@import "tailwindcss";
+/* tw-animate-css and shadcn/tailwind.css come from the shadcn init flow
+   (`npx shadcn@latest init --template start --base radix --preset nova`):
+   tw-animate-css supplies the animate-in/animate-out utilities the Command/
+   Dialog primitives use for their data-[state=open|closed] transitions
+   (§5.3), and shadcn/tailwind.css supplies the data-open/data-closed/
+   data-checked/... custom variants and accordion keyframes every Radix-
+   backed primitive relies on. Both are tree-shaken like any other Tailwind
+   source -- an unused @utility or @custom-variant costs nothing in the
+   compiled output. The init flow also tried to install @fontsource-variable/
+   geist and repoint --font-sans at "Geist Variable" via its own @theme
+   inline block -- reverted; this project has its own font stack (below) and
+   was never asked to adopt shadcn's default preset typography. */
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/* Generated components use dark: variants (button.tsx's aria-invalid and
+   outline/ghost states, for example) even though this app has no dark-mode
+   toggle and no route ever sets .dark. Declaring the variant costs nothing
+   when unused, and its absence would silently drop those classes from the
+   compiled build -- check-classes.mjs (§7) would then flag them as used but
+   undefined. */
+@custom-variant dark (&:is(.dark *));
+
+/* ---- self-hosted hero font. Body/display/nav are the current Avenir/Geller
+   stack declared in site-overrides.css; only Bowlby remains here because the
+   shared wordmark and home hero use font-hero outside the block page. ---- */
+@font-face {
+  font-family: "Bowlby One SC";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/fonts/bowlby-one-sc-latin.woff2) format("woff2");
+}
+
+@theme {
+  /* ---- semantic colour tier — values below are the CURRENT resolved hex
+     values read directly out of the frozen build (CLAUDE.md's token table).
+     Retheming the whole site stays "swap twelve values." ---- */
+  --color-brand: #ff2d78;
+  --color-brand-strong: #e01e65;
+  --color-brand-alt: #ff8c42;
+  --color-brand-soft: #f472b6;
+  --color-ink: #2d2d2d;
+  --color-danger: #e63946;
+  --color-tint: #fff0f3;
+  --color-warm: #fff0e5;
+  --color-warm-deep: #ffe4d1;
+  --color-highlight: #ffc857;
+  --color-support: #6b7b5e;
+  --color-support-strong: #5f6e53;
+  --color-support-soft: #8a9b7a;
+
+  /* ---- aliases point at semantic tokens instead of restating hex values. ---- */
+  --color-background: #fff;
+  --color-black: #000;
+  --color-white: #fff;
+  --color-card: #fff;
+  --color-card-foreground: var(--color-ink);
+  --color-popover: #fff;
+  --color-popover-foreground: var(--color-ink);
+  --color-primary: var(--color-brand);
+  --color-primary-foreground: #fff;
+  --color-secondary: var(--color-warm-deep);
+  --color-secondary-foreground: var(--color-ink);
+  --color-muted: #f5f5f4;
+  --color-muted-foreground: color-mix(in srgb, var(--color-ink) 68%, transparent);
+  --color-accent: var(--color-highlight);
+  --color-accent-foreground: var(--color-ink);
+  --color-foreground: var(--color-ink);
+  --color-border: color-mix(in srgb, var(--color-ink) 8%, transparent);
+  --color-border-light: color-mix(in srgb, var(--color-ink) 8%, transparent);
+  --color-border-medium: color-mix(in srgb, var(--color-ink) 12%, transparent);
+  --color-input: color-mix(in srgb, var(--color-ink) 12%, transparent);
+  --color-ring: var(--color-support);
+  --color-sidebar: var(--color-warm-deep);
+  --color-sidebar-foreground: var(--color-ink);
+  --color-sidebar-accent: var(--color-highlight);
+  --color-sidebar-accent-foreground: var(--color-ink);
+  --color-sidebar-border: color-mix(in srgb, var(--color-ink) 8%, transparent);
+  --color-sidebar-ring: var(--color-support);
+
+  /* ---- non-colour tokens the app already depends on via custom utilities
+     and arbitrary values. @font-face declarations for Avenir/Geller live in
+     site-overrides.css, where the rest of the typography override lives. ---- */
+  --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-body: Avenir, Avenir, Georgia, sans-serif;
+  --font-display: "geller-headline", Georgia, serif;
+  --font-hero: "Bowlby One SC", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-nav: "Avenir Bold", Avenir, Georgia, sans-serif;
+  --font-action: "Avenir Bold", Avenir, Georgia, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+
+  --layout-site-max: 1200px;
+  --max-width: var(--layout-site-max);
+  --spacing-page-x: 2rem;
+  --spacing-page-x-mobile: 1rem;
+  --spacing-section-y: 5rem;
+  --breakpoint-mobile: 640px;
+  --breakpoint-tablet: 768px;
+  --breakpoint-desktop: 1024px;
+  --breakpoint-wide: 1200px;
+  --z-recipe-actions: 2;
+  --z-nav: 50;
+  --z-dialog: 50;
+  --z-skip-link: 100;
+
+  /* shadcn's own convention for computing a nested control's radius relative
+     to its container (e.g. input-group.tsx's "calc(var(--radius)-3px)").
+     Tailwind v4 already ships --radius-sm/md/lg/xl as fixed values (used
+     directly by button.tsx etc.); this is the separate, unitless "base" a
+     generated component scales off of, not a project design-scale value. */
+  --radius: 0.625rem;
+
+  --transition-fast: .2s cubic-bezier(.4, 0, .2, 1);
+  --transition-medium: .4s cubic-bezier(.4, 0, .2, 1);
+  --transition-slow: .6s cubic-bezier(.4, 0, .2, 1);
+  --transition-nav: .45s cubic-bezier(.16, 1, .3, 1);
+}
+
+/* ---- custom named utilities the app already uses with variants
+   (hover:shadow-card-hover etc.) — Tailwind v4's @utility directive so they
+   get full variant support, matching what the frozen build compiled. ---- */
+@utility transition-card-hover {
+  transition: translate var(--transition-medium), box-shadow var(--transition-medium);
+}
+@utility transition-image-zoom {
+  transition: scale var(--transition-slow), opacity var(--transition-medium);
+}
+@utility transition-nav {
+  transition: background-color var(--transition-nav), box-shadow var(--transition-nav), backdrop-filter var(--transition-nav);
+}
+@utility transition-nav-icon {
+  transition: filter var(--transition-nav), height var(--transition-nav), drop-shadow var(--transition-nav);
+}
+@utility transition-nav-text {
+  transition: color var(--transition-nav), text-shadow var(--transition-nav), font-size var(--transition-nav);
+}
+@utility shadow-card-hover {
+  box-shadow: 0 12px 32px color-mix(in srgb, var(--color-brand) 12%, transparent);
+}
+
+/* ---- base-layer rules the app needs in addition to Tailwind's own preflight;
+   they are not utility classes, so live Tailwind compilation will not infer
+   them from component source. ---- */
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color-scheme: light;
+    background-color: var(--color-white);
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--color-ink) 15%, transparent) transparent;
+  }
+  body {
+    font-family: var(--font-body);
+    color: var(--color-ink);
+    background-color: var(--color-white);
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    font-size: 16px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+  a {
+    color: var(--color-brand);
+    transition: color var(--transition-fast);
+    text-decoration: none;
+  }
+  a:hover {
+    color: var(--color-brand-strong);
+  }
+  ::selection {
+    color: var(--color-ink);
+    background: color-mix(in srgb, var(--color-brand) 15%, transparent);
+  }
+  /* shadcn init's own default: every element gets this app's border/ring
+     tokens as its implicit border-color/outline-color. Inert until an
+     element also sets a border width or outline style, so it changes
+     nothing today -- it just means a future shadcn component that renders
+     a bare `border` class doesn't need `border-border` spelled out too. */
+  * {
+    @apply border-border outline-ring/50;
+  }
+}

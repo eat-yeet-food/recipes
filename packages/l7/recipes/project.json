@@ -1,0 +1,18 @@
+{
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "name": "l7-recipes",
+  "projectType": "library",
+  "sourceRoot": "src",
+  "tags": ["layer:l7", "scope:recipes", "type:lib"],
+  "metadata": {
+    "tsConfig": "tsconfig.json"
+  },
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -b packages/l7/recipes/tsconfig.json --pretty false"
+      }
+    }
+  }
+}

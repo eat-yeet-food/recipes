@@ -1,0 +1,18 @@
+{
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "name": "l2-recipe-domain",
+  "projectType": "library",
+  "sourceRoot": "src",
+  "tags": ["layer:l2", "scope:recipes", "type:lib"],
+  "metadata": {
+    "tsConfig": "tsconfig.json"
+  },
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -b packages/l2/recipe-domain/tsconfig.json --pretty false"
+      }
+    }
+  }
+}

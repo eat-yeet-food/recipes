@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "tsBuildInfoFile": "../../../.nx/cache/packages/l3/api-query.tsbuildinfo",
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "../../../.nx/types/packages/l3/api-query"
+  },
+  "references": [
+    {
+      "path": "../api-contract/tsconfig.json"
+    }
+  ],
+  "include": ["src"]
+}

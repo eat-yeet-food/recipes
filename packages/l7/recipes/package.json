@@ -1,0 +1,8 @@
+{
+  "name": "@eat-yeet/l7-recipes",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./recipes/*": "./src/recipes/*.tsx"
+  }
+}

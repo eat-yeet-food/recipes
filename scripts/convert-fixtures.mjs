@@ -1,5 +1,5 @@
 /**
- * One-time conversion: seeds/fixtures.sql -> fixtures/recipes/*.yaml
+ * One-time conversion: seeds/fixtures.sql -> active app recipe YAML
  *
  * Reads the Postgres COPY blocks out of the yeet seed dump and rewrites each
  * published recipe as a YAML document. Structured
@@ -14,10 +14,12 @@ import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import yaml from 'js-yaml'
+import { APP_ID, APP_PATHS } from '#site-config'
+import { RESOLVED_APP_PATHS } from './app-paths.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const SQL_PATH = process.argv[2] || join(ROOT, '..', 'yeet', 'seeds', 'fixtures.sql')
-const OUT_DIR = join(ROOT, 'fixtures', 'recipes')
+const OUT_DIR = RESOLVED_APP_PATHS.fixtures
 
 // --- Postgres COPY text-format decoding ---------------------------------
 
@@ -169,11 +171,16 @@ function toRecipeYaml(recipe, sections, itemsBySection, tips) {
   const ofType = (type) => sections.filter((s) => s.type === type).sort(bySortOrder)
   const doc = {
     ...recipeScalars(recipe),
-    equipment: sectionList(ofType('equipment'), itemsBySection),
-    ingredients: sectionList(ofType('ingredients'), itemsBySection),
-    steps: sectionList(ofType('instructions'), itemsBySection),
-    notes: tipList(tips.filter((t) => t.type === 'note')),
-    tips: tipList(tips.filter((t) => t.type === 'tip')),
+    blocks: [
+      {
+        type: 'recipe',
+        equipment: sectionList(ofType('equipment'), itemsBySection),
+        ingredients: sectionList(ofType('ingredients'), itemsBySection),
+        steps: sectionList(ofType('instructions'), itemsBySection),
+        notes: tipList(tips.filter((t) => t.type === 'note')),
+        tips: tipList(tips.filter((t) => t.type === 'tip')),
+      },
+    ],
   }
   return yaml.dump(doc, {
     lineWidth: -1,
@@ -214,4 +221,4 @@ for (const recipe of published) {
   console.log(`  ${recipe.slug}.yaml`)
 }
 
-console.log(`\nWrote ${published.length} recipes to fixtures/recipes/`)
+console.log(`\nWrote ${published.length} recipes to ${APP_ID}: ${APP_PATHS.fixtures}/`)

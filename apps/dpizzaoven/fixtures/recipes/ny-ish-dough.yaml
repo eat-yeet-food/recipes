@@ -1,0 +1,108 @@
+slug: ny-ish-dough
+title: New York (ish) Dough
+description: 'The cold-fermented NY-style dough. 280g bread + 120g AP flour, 65% hydration, 1-2 day fridge ferment. Two 14-16 inch pies.'
+category: savory
+prepMinutes: 0
+cookMinutes: 0
+totalMinutes: 8
+yieldAmount: 2
+yieldUnit: 14-16 inch pizzas
+image: ny-ish-dough.jpg
+video:
+  src: ny-ish-dough.mp4
+  width: 720
+  height: 1280
+  duration: 63
+courses:
+  - doughs
+cuisines:
+  - ny
+methods:
+  - home-oven
+restrictions: []
+occasions:
+  - weeknight
+ingredientTypes:
+  - ny_style
+  - cold_ferment
+  - bread_flour
+  - ap_flour
+  - pizza_dough
+  - dave_hale
+created: '2026-04-23'
+blocks:
+  - type: recipe
+    equipment:
+      - baking steel
+    ingredients:
+      - title: Ingredients
+        items:
+          - 280 bread flour
+          - 120 All Purpose flour
+          - 260 g water (65%)
+          - 1.2 g instant dry yeast (0.3%)
+          - 10 g salt (2.5%)
+          - 8 g olive oil (2%)
+          - 8 g sugar (2%)
+    steps:
+      - title: Add all dry ingredients to a large bowl and mix with a
+        items:
+          - Add all dry ingredients to a large bowl and mix with a spatula or wooden spoon.
+      - title: Add oil and cold water to manage the dough temperature
+        items:
+          - Add oil and cold water to manage the dough temperature throughout the process. Higher temperature doughs during mixing can overproof faster. I recommend water around 60-65 degrees.
+      - title: 'If using a mixer, refer to the other tab labeled (Using a'
+        items:
+          - 'If using a mixer, refer to the other tab labeled (Using a Mixer).'
+      - title: Mix with your spoon or spatula until there is no more dry
+        items:
+          - Mix with your spoon or spatula until there is no more dry bits remaining then dump on a clean countertop.
+      - title: Knead the dough for 5-7 minutes
+        items:
+          - 'Knead the dough for 5-7 minutes. Scrape off your hands along the way. If it way too sticky, let it rest (covered) for 15-20 minutes.'
+          - '*You''ll know it''s right when:* After 5-7 min, dough should be smooth and slightly glossy. Should feel tacky like a Post-it note: grabs your finger lightly but lifts cleanly. Sticky = leaves dough on your hands.'
+      - title: 'After kneading, cover in a lightly oiled bowl for 30 minutes'
+        items:
+          - 'After kneading, cover in a lightly oiled bowl for 30 minutes'
+      - title: 'After 30 minutes, perform a series of four stretch and folds'
+        items:
+          - 'After 30 minutes, perform a series of four stretch and folds. Pull the dough from one side and fold on top to the other. Rotate 90 degrees and repeat for all four sides.'
+      - title: 'Rest, covered for another 30 minutes'
+        items:
+          - 'Rest, covered for another 30 minutes.'
+      - title: 'After 30 minutes, see if the dough passes the "window pane'
+        items:
+          - 'After 30 minutes, see if the dough passes the "window pane test." See picture. We are trying to pull two sides of dough up and stretch as thin as possible.'
+          - '*You''ll know it''s right when:* Thin film should hold for 2-3 inches of stretch before tearing. Slightly translucent, you should see light through it. If tears immediately, gluten not developed yet, do another fold round.'
+      - title: You will repeat stretch and folds every 30 minutes until it
+        items:
+          - You will repeat stretch and folds every 30 minutes until it passes the window pane test.
+      - title: 'If it does not pass after four attempts, move to the next'
+        items:
+          - 'If it does not pass after four attempts, move to the next step.'
+      - title: 'Once you pass the window pane test, cover in the fridge for'
+        items:
+          - 'Once you pass the window pane test, cover in the fridge for 1-2 days.'
+          - '*You''ll know it''s right when:* By 24 hr, dough should have grown about 30%. By 48 hr, surface should look bubbly when you tilt the container. Past 72 hours, dough goes slack, time to bake.'
+      - title: Ball the dough 1 day before you make pizza
+        items:
+          - Ball the dough 1 day before you make pizza.
+      - title: Place the dough in individual containers or on a baking
+        items:
+          - 'Place the dough in individual containers or on a baking sheet, then put back in the fridge.'
+      - title: 'On the day of making pizza, pull the dough out of the'
+        items:
+          - 'On the day of making pizza, pull the dough out of the fridge 3-5 hours before you plan on baking.'
+          - '*You''ll know it''s right when:* After 3-5 hours, press gently with fingertip, indent should slowly spring back about halfway. Balls should look slightly domed and feel pillowy.'
+      - title: ENJOY!
+        items:
+          - ENJOY!
+    notes:
+      - 'This is a COLD-ferment dough, different animal from my 24-hour room-temp recipe. The fridge slows fermentation to a crawl which gives you a narrow 1-2 day window to bake (after that, the dough goes slack). If you need more flexibility, make the room-temp 24-hour recipe instead.'
+      - '**Dough went past 72 hours in fridge and went slack** Cold-ferment doughs have a 1-2 day sweet spot. Past 72 hours, gluten breaks down. Set a phone alarm at 24 and 48 hour marks. If you need more flexibility, use [room-temp 24-hour dough recipe](/recipes/24-hour-room-temp-dough) instead, more forgiving timing.'
+      - '**Dough refused to stretch after pulling from fridge** Not enough room-temp time after fridge OR insufficient cold ferment. Full 3-5 hours at room temp before stretching is non-negotiable. Cold dough WILL fight you. If still resisting, give it 30 more minutes. Patience saves the dough.'
+      - '**Bread + AP flour blend felt slack and lacked structure** The 70/30 blend is purposefully softer than 100% bread flour. That''s the texture goal. If you want more structure, swap to 100% bread flour (400g instead of the blend). You''ll get a chewier, more ''NY classic'' bite. The AP blend is for those who like a slightly softer slice.'
+      - '**Window pane never passed after 4 fold rounds** Initial knead wasn''t long enough, OR your AP flour was very low protein. Add an extra fold round (5 total instead of 4). Or extend initial knead to 8-9 minutes. Some AP brands (like store-brand) are lower protein than King Arthur, may need more work.'
+      - '**My dough barely rose in the fridge** Yeast was weak/expired OR fridge runs very cold (below 35°F). Check yeast expiration. Most home fridges are 37-40°F, which is ideal. Below 35°F slows yeast to a crawl. Reposition dough container to a slightly warmer shelf of the fridge.'
+      - '**I balled the dough early and now it''s over-proofed** Pulled from fridge too soon after balling, OR room temp too warm for the bench proof. Ball 1 day BEFORE baking, return balls to fridge for that day, then pull 3-5 hours before baking. If balls overproof on bench, bake immediately, they''ll still work but oven spring will be reduced.'
+    tips: []

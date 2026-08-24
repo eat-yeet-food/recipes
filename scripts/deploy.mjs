@@ -20,25 +20,26 @@
  * Requires CLOUDFLARE_API_TOKEN with Pages:Edit, Zone:Read and Cache Purge.
  * Run through Doppler; see CLAUDE.md section 9.
  *
- * Usage: npm run deploy
+ * Usage: pnpm run deploy
  */
 import { execFileSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { SITE_URL } from '../site.config.mjs'
+import { APP_ID, CLOUDFLARE_PROJECT, DOPPLER, SITE_URL } from '#site-config'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const OUT = join(ROOT, '.output', 'public')
-const PROJECT = 'eatyeet'
+const PROJECT = CLOUDFLARE_PROJECT
 const ZONE = new URL(SITE_URL).hostname
 
 const token = process.env.CLOUDFLARE_API_TOKEN
 if (!token) {
   console.error(
     'CLOUDFLARE_API_TOKEN is not set. Run through Doppler:\n' +
-      '  doppler run -p yeet -c dev -- npm run deploy',
+      `  ${APP_ID === 'eatyeet' ? '' : `APP_ID=${APP_ID} `}` +
+      `doppler run -p ${DOPPLER.project} -c ${DOPPLER.config} -- pnpm run deploy`,
   )
   process.exit(1)
 }
@@ -75,9 +76,8 @@ execFileSync('npx', ['wrangler', 'pages', 'deploy', OUT, '--project-name', PROJE
 // not enough — the manifest flips before every PoP can serve every file, and a
 // browser opened in that gap gets a 404 for a chunk that plainly exists.
 //
-// Probing the asset URLs directly used to be the dangerous act that caused all
-// this. It is safe now, and only now: a miss returns 404 under `no-store`
-// (because 404.html exists), so a probe that arrives early caches nothing.
+// Direct asset probes are safe here: a miss returns 404 under `no-store`
+// because 404.html exists, so a probe that arrives early caches nothing.
 step(`wait for ${ZONE} to serve this build`)
 let live = false
 for (let attempt = 1; attempt <= 45 && !live; attempt += 1) {
@@ -85,7 +85,7 @@ for (let attempt = 1; attempt <= 45 && !live; attempt += 1) {
   try {
     const html = await (await fetch(`${SITE_URL}/?deploy-probe=${Date.now()}`)).text()
     if (!expected.every((asset) => html.includes(asset))) {
-      process.stdout.write(`  attempt ${attempt}: HTML is still the previous build\n`)
+      process.stdout.write(`  attempt ${attempt}: HTML is still a stale build\n`)
       continue
     }
     const codes = await Promise.all(

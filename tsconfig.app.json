@@ -1,0 +1,23 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": ".nx/types/root",
+    "tsBuildInfoFile": ".nx/cache/tsconfig.app.tsbuildinfo"
+  },
+  "references": [{ "path": "./packages/l8/web/tsconfig.json" }],
+  "include": [
+    "vite.config.ts",
+    "site.config.mjs",
+    ".storybook",
+    "apps/*/app.config.mjs",
+    "apps/*/src",
+    "scripts",
+    "test",
+    "packages/l4/content-build/src",
+    "packages/l8/web/src/**/*.test.mjs"
+  ]
+}

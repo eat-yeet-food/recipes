@@ -9,7 +9,8 @@
 
 import { createServer } from 'node:net'
 
-import { allPaths } from '../site.config.mjs'
+import { allPaths } from '#site-config'
+import { RESOLVED_APP_PATHS } from './app-paths.mjs'
 import { mkdirSync, writeFileSync, readFileSync, existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { spawn } from 'node:child_process'
@@ -25,7 +26,7 @@ if (!existsSync(SERVER)) {
   process.exit(1)
 }
 
-const index = JSON.parse(readFileSync(join(ROOT, 'src', 'generated', 'index.json'), 'utf8'))
+const index = JSON.parse(readFileSync(join(RESOLVED_APP_PATHS.generatedDir, 'index.json'), 'utf8'))
 const paths = allPaths(index)
 
 function reservePort() {

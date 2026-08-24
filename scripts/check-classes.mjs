@@ -2,12 +2,20 @@
  * Guard: every Tailwind class the components use must exist in the compiled
  * stylesheet.
  *
- * `src/styles/global.css` is the original site's *production* Tailwind build.
- * There is no Tailwind compiler in this project, so a class the original site
- * never used simply does not exist — and using one fails silently, styling
- * nothing. That is not hypothetical: `lg:flex` on the search page's row left it
- * a plain block, so the filter sidebar stacked above the results on desktop
+ * Tailwind v4 compiles live now (`@tailwindcss/vite`, from the `@theme` block
+ * in `src/styles/global.css`), but that source file is not a class list — it's
+ * `@theme`/`@utility`/`@layer` declarations, and Tailwind only emits a utility
+ * class for what it actually finds used in scanned source. A typo'd class still
+ * produces nothing: it isn't valid Tailwind
+ * syntax, or nothing anywhere references it, so nothing compiles it. Same
+ * silent-failure symptom, different root cause. That is not hypothetical:
+ * `lg:flex` on the search page's row once left it a
+ * plain block, so the filter sidebar stacked above the results on desktop
  * instead of sitting beside them, and nothing errored.
+ *
+ * So this guard reads the *compiled build output* (`.output/public/build/
+ * *.css`) instead of the source file — which means a build has to exist first.
+ * `pnpm run build` runs this after `vite build` for exactly that reason.
  *
  * Classes reach the DOM through more than `className="…"` — ternaries, hoisted
  * constants, and props like `sizeClass` / `extra` all end up there. So this
@@ -15,22 +23,29 @@
  * is a class list, rather than trying to recognize the shapes that wrap one.
  */
 
-import { readFileSync, readdirSync, statSync } from 'node:fs'
+import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs'
 import { join, dirname, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-// An explicit root lets test/check-classes.test.mjs point this at fixtures and
+// An explicit root lets scripts/check-classes.test.mjs point this at fixtures and
 // prove the guard still catches each shape a class can reach the DOM through.
 const ROOT = process.argv[2] ?? join(dirname(fileURLToPath(import.meta.url)), '..')
-const CSS = join(ROOT, 'src', 'styles', 'global.css')
+const BUILD_DIR = join(ROOT, '.output', 'public', 'build')
 
 /**
- * Class selectors the stylesheet defines, unescaped back to source form. The
- * leading character must be name-like so decimals in values (`.5rem`) are not
- * harvested as classes.
+ * Class selectors the compiled build defines, unescaped back to source form.
+ * The leading character must be name-like so decimals in values (`.5rem`) are
+ * not harvested as classes. Reads every `.css` file under the build directory
+ * (currently two: `global-<hash>.css`, `site-overrides-<hash>.css`) rather
+ * than hardcoding names, since the hashes change every build.
  */
 function definedClasses() {
-  const css = readFileSync(CSS, 'utf8')
+  if (!existsSync(BUILD_DIR)) {
+    console.error(`classes: no build output at ${relative(ROOT, BUILD_DIR)} — run 'vite build' first`)
+    process.exit(1)
+  }
+  const cssFiles = readdirSync(BUILD_DIR).filter((f) => f.endsWith('.css'))
+  const css = cssFiles.map((f) => readFileSync(join(BUILD_DIR, f), 'utf8')).join('\n')
   const found = new Set()
   for (const [, raw] of css.matchAll(/\.(-?(?:[A-Za-z_]|\\.)(?:[\w-]|\\.)*)/g)) {
     found.add(raw.replace(/\\(.)/g, '$1'))
@@ -151,18 +166,35 @@ function stripComments(source) {
     .replace(/(^|[^:])\/\/[^\n]*/g, (m, lead) => lead + ' '.repeat(m.length - lead.length))
 }
 
-/** Markers the original emitted for lucide icons; never styled by the sheet. */
+/** Markers lucide adds to icons; never styled by the sheet. */
 const NON_UTILITY = new Set(['lucide', 'lucide-'])
+
+/**
+ * Tailwind's `group`/`peer` declaration classes (bare, or named — `group/
+ * button`, `peer/field`) never compile to a standalone `.group{}`/`.peer{}`
+ * rule themselves; only a `group-*:`/`peer-*:` *consumer* elsewhere (e.g.
+ * `group-hover:opacity-100`, `group-data-selected/command-item:text-foreground`)
+ * emits a compound selector referencing them. shadcn's generated components
+ * declare several (button.tsx's `group/button`, command.tsx's `group/
+ * command-item`) whether or not this specific file happens to consume them,
+ * so checking these against compiled output the same way as a real utility
+ * always produces a false positive.
+ */
+const GROUP_OR_PEER = /^(group|peer)(\/[\w-]+)?$/
 
 const defined = definedClasses()
 const problems = []
 
-for (const file of sourceFiles(join(ROOT, 'src'))) {
+const sourceRoots = ['packages', 'src']
+  .map((dir) => join(ROOT, dir))
+  .filter((dir) => existsSync(dir))
+
+for (const file of sourceRoots.flatMap(sourceFiles)) {
   const source = stripComments(readFileSync(file, 'utf8'))
   const name = relative(ROOT, file)
   const lineAt = (index) => source.slice(0, index).split('\n').length
   const report = (token, index) => {
-    if (NON_UTILITY.has(token) || defined.has(token)) return
+    if (NON_UTILITY.has(token) || GROUP_OR_PEER.test(token) || defined.has(token)) return
     problems.push({ file: name, line: lineAt(index), token })
   }
 

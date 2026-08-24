@@ -1,0 +1,8 @@
+{
+  "name": "@eat-yeet/l7-search",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./search/*": "./src/search/*.tsx"
+  }
+}

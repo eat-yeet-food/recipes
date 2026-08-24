@@ -1,0 +1,22 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "tsBuildInfoFile": "../../../.nx/cache/packages/l6/ui-shell.tsbuildinfo",
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "../../../.nx/types/packages/l6/ui-shell"
+  },
+  "references": [
+    {
+      "path": "../../l0/foundation/tsconfig.json"
+    },
+    {
+      "path": "../../l5/ui-primitives/tsconfig.json"
+    }
+  ],
+  "include": [
+    "src"
+  ]
+}

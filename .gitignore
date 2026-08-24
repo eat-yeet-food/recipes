@@ -1,8 +1,11 @@
 node_modules/
+.nx/
 dist/
 .output/
 .nitro/
 .tanstack/
 src/generated/
 src/routeTree.gen.ts
+apps/*/generated/
+packages/l8/web/src/routeTree.gen.ts
 storybook-static/

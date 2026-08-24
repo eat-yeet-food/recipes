@@ -1,0 +1,60 @@
+{
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "defaultBase": "main",
+  "workspaceLayout": {
+    "appsDir": "apps",
+    "libsDir": "packages"
+  },
+  "namedInputs": {
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "production": [
+      "default",
+      "!{projectRoot}/**/*.stories.tsx",
+      "!{projectRoot}/**/*.test.ts",
+      "!{projectRoot}/**/*.test.mjs",
+      "!{projectRoot}/dist/**",
+      "!{projectRoot}/storybook-static/**"
+    ],
+    "sharedGlobals": [
+      "{workspaceRoot}/package.json",
+      "{workspaceRoot}/pnpm-lock.yaml",
+      "{workspaceRoot}/site.config.mjs",
+      "{workspaceRoot}/tsconfig.base.json",
+      "{workspaceRoot}/tsconfig.json"
+    ]
+  },
+  "targetDefaults": {
+    "build": {
+      "inputs": ["production", "^production"],
+      "outputs": ["{workspaceRoot}/.output/public", "{workspaceRoot}/.output/server"]
+    },
+    "build-storybook": {
+      "inputs": ["default", "^production"],
+      "outputs": ["{workspaceRoot}/storybook-static"]
+    },
+    "content": {
+      "inputs": ["{workspaceRoot}/apps/**/*", "{workspaceRoot}/site.config.mjs", "{workspaceRoot}/packages/l4/content-build/src/**/*"],
+      "outputs": [
+        "{workspaceRoot}/apps/eatyeet/generated",
+        "{workspaceRoot}/apps/dpizzaoven/generated"
+      ]
+    },
+    "boundaries": {
+      "inputs": [
+        "{workspaceRoot}/apps/**/project.json",
+        "{workspaceRoot}/packages/**/project.json",
+        "{workspaceRoot}/project.json",
+        "{workspaceRoot}/scripts/check-layer-imports.mjs",
+        "{workspaceRoot}/tsconfig.json",
+        "{workspaceRoot}/tsconfig.*.json"
+      ]
+    },
+    "test": {
+      "inputs": ["default", "^production"]
+    },
+    "typecheck": {
+      "inputs": ["default", "^production"],
+      "dependsOn": ["boundaries", "^typecheck"]
+    }
+  }
+}

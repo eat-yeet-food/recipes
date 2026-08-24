@@ -1,0 +1,8 @@
+{
+  "name": "@eat-yeet/l7-home",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./home/*": "./src/home/*.tsx"
+  }
+}

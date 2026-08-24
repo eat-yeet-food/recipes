@@ -1,0 +1,8 @@
+{
+  "name": "@eat-yeet/l1-api-model",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./loader": "./src/loader.ts"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "l3-api-query",
+  "sourceRoot": "packages/l3/api-query/src",
+  "projectType": "library",
+  "tags": ["layer:l3"],
+  "metadata": {
+    "tsConfig": "tsconfig.json"
+  },
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -b packages/l3/api-query/tsconfig.json --pretty false"
+      }
+    }
+  }
+}

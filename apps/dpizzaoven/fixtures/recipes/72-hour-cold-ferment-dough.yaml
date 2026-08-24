@@ -1,0 +1,78 @@
+slug: 72-hour-cold-ferment-dough
+title: 72-Hour Cold Ferment Dough
+description: The dough I come back to every time. Three days of flavor development. My go-to.
+category: savory
+prepMinutes: 0
+cookMinutes: 0
+totalMinutes: 4320
+yieldAmount: 2
+yieldUnit: × 14" balls
+image: 72-hour-cold-ferment-dough.jpg
+courses:
+  - pizzas
+cuisines:
+  - ny
+methods:
+  - home-oven
+restrictions: []
+occasions:
+  - make-ahead
+ingredientTypes:
+  - 72_hour
+  - cold_ferment
+  - pizza_dough
+  - long_ferment
+  - youtube
+  - classic
+created: '2026-04-18'
+blocks:
+  - type: recipe
+    equipment:
+      - baking steel
+    ingredients:
+      - title: Dough
+        items:
+          - 500 g bread flour (King Arthur)
+          - 325 g cool water (65% hydration)
+          - 12.5 g fine sea salt (2.5%)
+          - 1 g instant dry yeast (0.2%)
+          - 15 g olive oil (3%)
+          - 5 g sugar (1%)
+    steps:
+      - title: Autolyse (optional but worth it)
+        items:
+          - Mix flour and water until just combined. Let sit 30 min covered. Flour hydrates without your help. Makes later kneading easier.
+          - '*You''ll know it''s right when:* After mix, dough is shaggy and rough. After 30-min autolyse, it should look hydrated and slightly smoother. Pat the surface, it should feel tacky but uniform, not powdery.'
+      - title: Add the rest + mix
+        items:
+          - 'Add salt, yeast, sugar, oil. Mix by hand or in a stand mixer on low for 5-6 minutes until the dough comes together smooth.'
+          - '*You''ll know it''s right when:* By minute 5-6, dough should be smooth and slightly glossy. Window pane test: pinch off a small piece, stretch it slowly, should stretch thin enough to see light without tearing.'
+      - title: Bulk room-temp rest
+        items:
+          - Cover and rest at room temperature for 30 minutes. Do one set of 4 stretch-and-folds after 30 min.
+          - '*You''ll know it''s right when:* After 30 min plus folds, dough should feel taut and smooth. Surface should have slight tension when poked. Now it''s ready for the long cold ferment.'
+      - title: Ball
+        items:
+          - 'Divide into 2 × 420g balls. Pull tight by tucking edges under. Smooth top, seam on the bottom. Place in oiled containers with tight lids.'
+          - '*You''ll know it''s right when:* Each ball should be smooth and taut on top with a sealed pinch underneath. If you see folds or seams on the top, redo the shaping. Smooth balls cold-ferment evenly; lumpy balls have weak spots.'
+      - title: Cold ferment (the magic)
+        items:
+          - 'Refrigerate for 72 hours. Don''t touch. The magic happens in the quiet. Enzymes break down starches into simple sugars, the lactic bacteria develop flavor, the gluten relaxes into something extensible and airy.'
+          - '*You''ll know it''s right when:* By hour 72, balls should look puffy, slightly domed, and have grown 40-60%. The container should smell like a pizzeria when you open it (earthy, slightly tangy). If still flat after 72 hours, your yeast was weak or the fridge too cold.'
+      - title: Pull + rest
+        items:
+          - '2 hours before bake: pull from fridge. Let warm at room temp. The dough should feel soft, slightly puffy, and alive.'
+          - '*You''ll know it''s right when:* After 2 hours, press gently with a fingertip, indent should slowly spring back about halfway. Should feel pillowy, soft, and extensible. Cold dough is tight dough; warmed dough cooperates.'
+      - title: Stretch
+        items:
+          - Hand-stretch to 14 inches. Never a rolling pin. Top and launch.
+          - '*You''ll know it''s right when:* Center should be thin enough to see your hand through when held to light. 1/2 inch rim stays untouched (becomes the cornicione). If dough resists stretching, give it 20 more minutes rest.'
+    notes:
+      - '0.2% yeast is intentional. Low yeast + long time = flavor development. If you bump yeast to fix impatience, you lose the whole point. Also: don''t skip the autolyse. 30 minutes of hands-off resting at the start saves you 5 minutes of kneading later and produces better final dough structure.'
+      - '**Dough didn''t taste any different than my 24-hour dough** Either your fridge is too cold and slowed everything down, OR something else went wrong (under-mixed gluten, dead yeast). Check fridge temperature, ideal is 38-40°F. Below 35°F slows fermentation too much. Make sure dough goes into fridge AFTER it''s smooth and the folds are done, not while still shaggy.'
+      - '**Past 72 hours and now my dough is too slack and tears** Gluten has broken down. The window for cold ferment is 48-96 hours max; past that, it''s done. Bake what you have, it''ll still be okay (just won''t have the structure of a 72-hour ferment). Next time, set a phone alarm for the 72-hour mark.'
+      - '**Used 5g of yeast instead of 1g, dough exploded out of container in 24 hours** Over-yeasted dough ferments way too fast in the fridge. If caught early, bake immediately. Don''t keep going, the gluten will be eaten by the over-active yeast. Next time: use 1g (0.2% of flour). The whole point of long cold ferment is LOW yeast plus LONG time.'
+      - '**Dough rose dramatically in the first 24 hours then deflated** Used too much yeast OR fridge wasn''t cold enough. 1g (0.2%) is correct yeast amount. Fridge should be 38-40°F. If kitchen is warm during the 30-min bulk rest, dough can over-ferment before going into fridge.'
+      - '**I skipped the autolyse and the dough was harder to mix** Autolyse pre-hydrates the flour and pre-develops some gluten. Add 2-3 minutes to your knead time if you skip autolyse. Or just don''t skip it, 30 minutes of hands-off resting saves you work later. The autolyse is genuinely worth the time.'
+      - '**Dough was too hard to stretch after 72 hours** Insufficient bench rest after pulling from fridge. Full 2 hours at room temp minimum. Cold gluten is tight; warm gluten relaxes. If still tight, give it 30 more minutes. Never fight a dough.'
+    tips: []

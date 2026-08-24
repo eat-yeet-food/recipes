@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "tsBuildInfoFile": "../../../.nx/cache/packages/l5/ui-primitives.tsbuildinfo",
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "../../../.nx/types/packages/l5/ui-primitives"
+  },
+  "references": [
+    {
+      "path": "../../l0/foundation/tsconfig.json"
+    }
+  ],
+  "include": [
+    "src"
+  ]
+}

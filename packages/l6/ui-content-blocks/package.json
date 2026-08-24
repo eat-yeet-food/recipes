@@ -1,0 +1,9 @@
+{
+  "name": "@eat-yeet/l6-ui-content-blocks",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./page-article": "./src/page-article.tsx",
+    "./page-blocks": "./src/page-blocks.tsx"
+  }
+}

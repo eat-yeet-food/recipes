@@ -1,0 +1,9 @@
+{
+  "name": "@eat-yeet/l4-content-model",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./blocks": "./src/blocks.ts",
+    "./recipes": "./src/recipes.ts"
+  }
+}

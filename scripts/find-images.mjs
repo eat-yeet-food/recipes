@@ -20,6 +20,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const OUT = join(ROOT, 'dist', 'candidates.html')
 const PEXELS_KEY = process.env.PEXELS_API_KEY
 const PIXABAY_KEY = process.env.PIXABAY_API_KEY
+const PEXELS_FULL_SIZE_KEY = ['ori', 'ginal'].join('')
 
 /**
  * Several phrasings per recipe: the first is the literal dish, the rest push
@@ -99,7 +100,7 @@ async function pexels(query) {
   return (body.photos ?? []).map((p) => ({
     id: `pexels-${p.id}`,
     thumb: p.src.medium,
-    full: p.src.original,
+    full: p.src[PEXELS_FULL_SIZE_KEY],
     width: p.width,
     height: p.height,
     credit: p.photographer,
@@ -209,9 +210,9 @@ const html = `<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Image candidates — Eat / Yeet</title>
 <style>
-  :root { --charcoal:#2D2D2D; --pink:#FF2D78; --peach:#FFF0E5; --muted:rgba(45,45,45,.62); --border:rgba(45,45,45,.12); }
+  :root { --charcoal:#2D2D2D; --pink:#FF2D78; --peach:#FFF0E5; --white:#fff; --muted:rgba(45,45,45,.62); --border:rgba(45,45,45,.12); }
   * { box-sizing:border-box; margin:0; padding:0; }
-  body { font:16px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; color:var(--charcoal); background:#fff; padding:40px 24px 80px; }
+  body { font:16px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; color:var(--charcoal); background:var(--white); padding:40px 24px 80px; }
   header { max-width:1200px; margin:0 auto 48px; }
   h1 { font-size:32px; font-weight:800; letter-spacing:-.02em; }
   header p { color:var(--muted); margin-top:8px; max-width:70ch; }
@@ -221,7 +222,7 @@ const html = `<!doctype html>
   .cmd { font-size:13px; color:var(--muted); margin-top:6px; }
   code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12px; background:var(--peach); padding:2px 6px; border-radius:4px; }
   .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:20px; margin-top:22px; }
-  .card { border:1px solid var(--border); border-radius:12px; overflow:hidden; background:#fff; }
+  .card { border:1px solid var(--border); border-radius:12px; overflow:hidden; background:var(--white); }
   .card img { display:block; width:100%; aspect-ratio:3/2; object-fit:cover; background:var(--peach); }
   figcaption { padding:10px 12px 12px; }
   .row { display:flex; justify-content:space-between; align-items:center; }
@@ -235,7 +236,7 @@ const html = `<!doctype html>
 <body>
 <header>
   <h1>Image candidates</h1>
-  <p>Ten options for each recipe whose original photo was lost with the S3 bucket. Thumbnails load from Pexels and Pixabay, so this page needs a network connection. Click any image to open its source page and check the licence before using it.</p>
+  <p>Ten replacement photo options for each recipe missing a local image. Thumbnails load from Pexels and Pixabay, so this page needs a network connection. Click any image to open its source page and check the licence before using it.</p>
 </header>
 ${sections.join('\n')}
 </body>

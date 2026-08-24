@@ -9,7 +9,8 @@ import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { allPaths, SITE_URL } from '../site.config.mjs'
+import { allPaths, ROBOTS_DISALLOW, SITE_URL, sitemapPaths } from '#site-config'
+import { RESOLVED_APP_PATHS } from './app-paths.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const OUT = join(ROOT, '.output', 'public')
@@ -20,7 +21,7 @@ if (!existsSync(OUT)) {
   process.exit(1)
 }
 
-const index = JSON.parse(readFileSync(join(ROOT, 'src', 'generated', 'index.json'), 'utf8'))
+const index = JSON.parse(readFileSync(join(RESOLVED_APP_PATHS.generatedDir, 'index.json'), 'utf8'))
 
 const escapeXml = (s) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
@@ -30,12 +31,7 @@ const escapeXml = (s) =>
  * one interactive page whose filters live in query params, and pointing a
  * crawler at it only competes with the recipe pages it links to.
  */
-const urls = [
-  { loc: '/' },
-  { loc: '/recipes' },
-  { loc: '/browse' },
-  ...index.map((r) => ({ loc: `/recipes/${r.slug}`, lastmod: r.created })),
-]
+const urls = sitemapPaths(index)
 
 const sitemap = [
   '<?xml version="1.0" encoding="UTF-8"?>',
@@ -52,7 +48,7 @@ const sitemap = [
 
 const robots = `User-agent: *
 Allow: /
-Disallow: /search
+${ROBOTS_DISALLOW.map((path) => `Disallow: ${path}`).join('\n')}
 
 Sitemap: ${SITE_URL}/sitemap.xml
 `

@@ -13,7 +13,7 @@
  */
 import { chromium } from 'playwright'
 
-import { SITE_URL, STATIC_PATHS } from '../site.config.mjs'
+import { SITE_URL, STATIC_PATHS } from '#site-config'
 
 const ORIGIN = (process.argv[2] ?? SITE_URL).replace(/\/$/, '')
 

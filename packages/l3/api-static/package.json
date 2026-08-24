@@ -1,0 +1,8 @@
+{
+  "name": "@eat-yeet/l3-api-static",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./recipes": "./src/recipes.ts"
+  }
+}

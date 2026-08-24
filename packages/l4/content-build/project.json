@@ -1,0 +1,28 @@
+{
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "name": "l4-content-build",
+  "projectType": "library",
+  "sourceRoot": "src",
+  "tags": ["layer:l4", "scope:content", "type:lib"],
+  "metadata": {
+    "tsConfig": "tsconfig.json"
+  },
+  "targets": {
+    "content": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm run content"
+      },
+      "outputs": [
+        "{workspaceRoot}/apps/eatyeet/generated",
+        "{workspaceRoot}/apps/dpizzaoven/generated"
+      ]
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -b packages/l4/content-build/tsconfig.json --pretty false"
+      }
+    }
+  }
+}

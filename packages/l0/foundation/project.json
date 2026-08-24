@@ -1,0 +1,18 @@
+{
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "name": "l0-foundation",
+  "projectType": "library",
+  "sourceRoot": "src",
+  "tags": ["layer:l0", "scope:foundation", "type:lib"],
+  "metadata": {
+    "tsConfig": "tsconfig.json"
+  },
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -b packages/l0/foundation/tsconfig.json --pretty false"
+      }
+    }
+  }
+}

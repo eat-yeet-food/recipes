@@ -1,0 +1,18 @@
+{
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "name": "l7-home",
+  "projectType": "library",
+  "sourceRoot": "src",
+  "tags": ["layer:l7", "scope:home", "type:lib"],
+  "metadata": {
+    "tsConfig": "tsconfig.json"
+  },
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -b packages/l7/home/tsconfig.json --pretty false"
+      }
+    }
+  }
+}

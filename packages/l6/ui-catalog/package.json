@@ -1,0 +1,8 @@
+{
+  "name": "@eat-yeet/l6-ui-catalog",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./cards": "./src/cards.tsx"
+  }
+}

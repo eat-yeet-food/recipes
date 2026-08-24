@@ -1,0 +1,18 @@
+{
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "name": "l3-api-contract",
+  "projectType": "library",
+  "sourceRoot": "src",
+  "tags": ["layer:l3", "scope:api", "type:lib"],
+  "metadata": {
+    "tsConfig": "tsconfig.json"
+  },
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -b packages/l3/api-contract/tsconfig.json --pretty false"
+      }
+    }
+  }
+}
