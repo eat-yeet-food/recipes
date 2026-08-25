@@ -76,7 +76,7 @@ variants:
               - 20g pecorino romano
               - '[Olive oil](https://www.amazon.com/Graza-Sizzle-Extra-Virgin-Olive-Oil-Cooking-High-Polyphenol/dp/B09WV8DBPV/ref=asc_df_B09WV8DBPV?mcid=70ed972e0350313daddca3d5ee42bc1a&tag=hyprod-20&linkCode=df0&hvadid=693367302614&hvpos&hvnetw=g&hvrand=17371064147806287911&hvpone&hvptwo&hvqmt&hvdev=c&hvdvcmdl&hvlocint&hvlocphy=9009731&hvtargid=pla-2006470262336&psc=1&hvocijid=17371064147806287911-B09WV8DBPV-&hvexpln=0)'
               - '50g [Semolina flour](https://shop.kingarthurbaking.com/items/semolina-flour?utm_source=google&utm_medium=cpc&utm_term&utm_content=adtaxi&gad_source=1&gad_campaignid=22480904075&gbraid=0AAAAADiGhPK4w0ymJ2ZHxouS0qcChO-7Y&gclid=CjwKCAjwmenCBhA4EiwAtVjzmibHOPT_R4uMvXe44GRfVd6KqCijZEJnd1ENYHCiJnd1_Hctc8QaOBoC_80QAvD_BwE) + 50g [all purpose flour](https://www.wholefoodsmarket.com/product/365-by-whole-foods-market-all-purpose-flour-80-oz-b074jd6hhh) for dusting'
-              - 1/8 tsp dried oregano
+              - 1/4 tsp dried oregano
         steps:
           - title: Dough
             items:
@@ -158,7 +158,7 @@ blocks:
           - 20g pecorino romano
           - '[Olive oil](https://www.amazon.com/Graza-Sizzle-Extra-Virgin-Olive-Oil-Cooking-High-Polyphenol/dp/B09WV8DBPV/ref=asc_df_B09WV8DBPV?mcid=70ed972e0350313daddca3d5ee42bc1a&tag=hyprod-20&linkCode=df0&hvadid=693367302614&hvpos&hvnetw=g&hvrand=17371064147806287911&hvpone&hvptwo&hvqmt&hvdev=c&hvdvcmdl&hvlocint&hvlocphy=9009731&hvtargid=pla-2006470262336&psc=1&hvocijid=17371064147806287911-B09WV8DBPV-&hvexpln=0)'
           - '50g [Semolina flour](https://shop.kingarthurbaking.com/items/semolina-flour?utm_source=google&utm_medium=cpc&utm_term&utm_content=adtaxi&gad_source=1&gad_campaignid=22480904075&gbraid=0AAAAADiGhPK4w0ymJ2ZHxouS0qcChO-7Y&gclid=CjwKCAjwmenCBhA4EiwAtVjzmibHOPT_R4uMvXe44GRfVd6KqCijZEJnd1ENYHCiJnd1_Hctc8QaOBoC_80QAvD_BwE) + 50g [all purpose flour](https://www.wholefoodsmarket.com/product/365-by-whole-foods-market-all-purpose-flour-80-oz-b074jd6hhh) for dusting'
-          - ⅛ tsp dried oregano
+          - 1/4 tsp dried oregano
     steps:
       - title: Dough
         items:
