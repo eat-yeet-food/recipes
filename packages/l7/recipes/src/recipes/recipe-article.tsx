@@ -251,7 +251,7 @@ export function RecipeArticle({
       )}
       media={photo ? <img src={photo} alt={heroAlt} className="w-full max-h-[690px] object-cover" /> : undefined}
       mediaClassName={cookMode ? 'hidden' : undefined}
-      mainClassName={cookMode ? 'pt-6' : undefined}
+      mainClassName={cookMode ? 'grid-cols-1 max-w-[816px] pt-6' : undefined}
       articleClassName={cookMode ? 'mt-0 shadow-none' : undefined}
       aside={aside?.({ page, cookMode })}
     />

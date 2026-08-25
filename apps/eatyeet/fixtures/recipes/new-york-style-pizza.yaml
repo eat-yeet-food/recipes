@@ -1,5 +1,6 @@
 slug: new-york-style-pizza
 title: New York Style Pizza
+order: 3
 description: 'Cold-fermented New York-style pizza dough with outdoor-oven and indoor-steel variants.'
 category: savory
 prepMinutes: 4590
@@ -60,11 +61,11 @@ variants:
         ingredients:
           - title: Dough
             items:
-              - '852g [Costco all-purpose flour](https://www.costco.com/p/-/kirkland-signature-organic-unbleached-all-purpose-flour-10-lbs-2-count/4000063331.)'
-              - 554g cold water
-              - 17g canola oil
+              - '905g [Costco all-purpose flour](https://www.costco.com/p/-/kirkland-signature-organic-unbleached-all-purpose-flour-10-lbs-2-count/4000063331.)'
+              - 588g cold water
+              - 18g canola oil
               - '3/4 tsp [SAF red instant yeast](https://www.amazon.com/LeSaffre-LEAVENING_AGENT/dp/B0CFDPMWWC)'
-              - '17g [Diamond Crystal Baking Salt](https://www.amazon.com/Diamond-Crystal-Baking-Kosher-8-5oz/dp/B0CHVLXM7R/) or fine sea salt'
+              - '18g [Diamond Crystal Baking Salt](https://www.amazon.com/Diamond-Crystal-Baking-Kosher-8-5oz/dp/B0CHVLXM7R/) or fine sea salt'
           - title: Pizza Sauce
             items:
               - 1 can Bianco di Napoli whole peeled tomatoes
@@ -83,7 +84,7 @@ variants:
               - Add the water, flour, canola oil, salt, and yeast to the spiral mixer all at once.
               - Mix at 40% speed until the dough reads 72F on your IR thermometer. Scrape the bowl and hook down with your bench scraper if dough climbs.
               - Transfer the dough to your bench. Knead shortly, guide dough with bench scraper into the form of a ball, place in a bowl, cover with saran wrap, and allow it to rest at room temperature for 1.5h.
-              - Divide and shape dough into 3 balls, shooting for about 480g each. The formula lands around 1,440g total dough after salt, oil, and yeast. Pull four times in gentle circles on your unfloured bench until smooth on the top. Pinch any bottom seam that remains.
+              - Divide and shape dough into 3 balls, shooting for about 510g each. The formula lands around 1,530g total dough after salt, oil, and yeast. Pull four times in gentle circles on your unfloured bench until smooth on the top. Pinch any bottom seam that remains.
               - Grease your proofing container with canola oil. Transfer the dough to the container with your bench scraper. After placing in a proofing container, lightly oil your hands and gently rub the top of the dough to make it less sticky and retain moisture. Cover and place in the refrigerator for 2-3 days.
           - title: Pre-Assembly
             items:
@@ -112,7 +113,7 @@ variants:
               - Transfer the pizza to a cutting board, slice, and return to the wire rack to keep crispy.
               - Serve hot.
         notes:
-          - This dough formula uses Costco all-purpose flour at 65% hydration with 2% canola oil and lands around 1,440g total dough, or about 480g per dough ball.
+          - This dough formula uses Costco all-purpose flour at 65% hydration with 2% canola oil and lands around 1,530g total dough, or about 510g per dough ball.
           - The canola oil is here because this version bakes at home-oven temperatures. It helps browning and tenderness on a baking steel.
           - Great [article](https://www.richardeaglespoon.com/articles/how-to-pizza) with a lot info.
           - Good [video](https://www.youtube.com/watch?v=TQYApZ_-P24) with more info, not always reliable but pretty informative.
@@ -143,10 +144,10 @@ blocks:
     ingredients:
       - title: Dough
         items:
-          - '847g [Costco all-purpose flour](https://www.costco.com/p/-/kirkland-signature-organic-unbleached-all-purpose-flour-10-lbs-2-count/4000063331.)'
-          - 576g cold water
-          - '¾ tsp [SAF red instant yeast](https://www.amazon.com/LeSaffre-LEAVENING_AGENT/dp/B0CFDPMWWC)'
-          - '17g [Diamond Crystal Baking Salt](https://www.amazon.com/Diamond-Crystal-Baking-Kosher-8-5oz/dp/B0CHVLXM7R/) or fine sea salt'
+          - '900g [Costco all-purpose flour](https://www.costco.com/p/-/kirkland-signature-organic-unbleached-all-purpose-flour-10-lbs-2-count/4000063331.)'
+          - 612g cold water
+          - '3/4 tsp [SAF red instant yeast](https://www.amazon.com/LeSaffre-LEAVENING_AGENT/dp/B0CFDPMWWC)'
+          - '18g [Diamond Crystal Baking Salt](https://www.amazon.com/Diamond-Crystal-Baking-Kosher-8-5oz/dp/B0CHVLXM7R/) or fine sea salt'
       - title: Pizza Sauce
         items:
           - 1 can Bianco di Napoli whole peeled tomatoes
@@ -165,7 +166,7 @@ blocks:
           - 'Add the water, flour, salt, and yeast to the spiral mixer all at once.'
           - Mix at 40% speed until the dough reads 72°F on your IR thermometer. Scrape the bowl and hook down with your bench scraper if dough climbs.
           - 'Transfer the dough to your bench. Knead shortly, guide dough with bench scraper into the form of a ball, place in a bowl, cover with saran wrap, and allow it to rest at room temperature for 1.5h.'
-          - "Divide and shape dough into 3 balls, shooting for about 480g each. The formula lands around 1,440g total dough after salt and yeast. Pull four times in gentle circles on your unfloured bench until smooth on the top. Pinch any bottom seam that remains. Circular dough balls make circular pizzas \U0001F642 ([video](https://www.youtube.com/watch?v=Vo5OW8Xkah4&t=9s))."
+          - "Divide and shape dough into 3 balls, shooting for about 510g each. The formula lands around 1,530g total dough after salt and yeast. Pull four times in gentle circles on your unfloured bench until smooth on the top. Pinch any bottom seam that remains. Circular dough balls make circular pizzas \U0001F642 ([video](https://www.youtube.com/watch?v=Vo5OW8Xkah4&t=9s))."
           - 'Grease your proofing container with canola oil. Transfer the dough to the container with your bench scraper. After placing in a proofing container, lightly oil your hands and gently rub the top of the dough to make it less sticky and retain moisture. Cover and place in the refrigerator for 2-3 days.'
       - title: Pre-Assembly
         items:
@@ -194,7 +195,7 @@ blocks:
           - 'Transfer the pizza to a cutting board, slice, and return to the wire rack to keep crispy.'
           - Serve hot.
     notes:
-      - 'This dough formula uses Costco all-purpose flour at 68% hydration and lands around 1,440g total dough, or about 480g per dough ball.'
+      - 'This dough formula uses Costco all-purpose flour at 68% hydration and lands around 1,530g total dough, or about 510g per dough ball.'
       - Olive oil and sugar have been withheld from this recipe due to high temperatures of the pizza oven to prevent burning. These are often employed in lower temperature ovens to improve browning.
       - 'Great [article](https://www.richardeaglespoon.com/articles/how-to-pizza) with a lot info.'
       - 'Good [video](https://www.youtube.com/watch?v=TQYApZ_-P24) with more info, not always reliable but pretty informative.'

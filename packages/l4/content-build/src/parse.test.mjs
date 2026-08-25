@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { join } from 'node:path'
+import { tmpdir } from 'node:os'
 
-import { parseRecipe } from './parse.mjs'
+import { loadRecipes, parseRecipe } from './parse.mjs'
 
 describe('parseRecipe blocks', () => {
   it('rejects legacy top-level recipe body fields', () => {
@@ -58,6 +61,43 @@ blocks:
     assert.equal(recipe.searchText.includes('outdoor oven'), true)
     assert.equal(recipe.searchText.includes('indoor steel'), true)
     assert.equal(recipe.searchText.includes('baking steel'), true)
+  })
+
+  it('loads recipes by explicit order before falling back to created date', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'recipes-order-'))
+
+    try {
+      writeFileSync(join(dir, 'newer.yaml'), `
+title: Newer
+created: '2026-01-01'
+blocks:
+  - type: recipe
+    ingredients:
+      - Flour
+`)
+      writeFileSync(join(dir, 'first.yaml'), `
+title: First
+order: 1
+created: '2025-01-01'
+blocks:
+  - type: recipe
+    ingredients:
+      - Flour
+`)
+      writeFileSync(join(dir, 'second.yaml'), `
+title: Second
+order: 2
+created: '2026-02-01'
+blocks:
+  - type: recipe
+    ingredients:
+      - Flour
+`)
+
+      assert.deepEqual(loadRecipes(dir).map((recipe) => recipe.slug), ['first', 'second', 'newer'])
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
   })
 
   it('renders standard markdown blocks through the safe block allowlist', () => {

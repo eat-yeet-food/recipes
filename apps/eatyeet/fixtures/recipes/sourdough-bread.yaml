@@ -1,5 +1,6 @@
 slug: sourdough-bread
 title: Sourdough Bread
+order: 4
 description: 'Traditional sourdough bread, featuring a long fermentation process for complex flavor and perfect texture.'
 category: savory
 prepMinutes: 60

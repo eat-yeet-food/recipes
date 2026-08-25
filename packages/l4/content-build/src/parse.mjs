@@ -334,6 +334,7 @@ export function parseRecipe(source, fallbackSlug) {
   const recipe = {
     slug,
     title: data.title ?? fallbackSlug,
+    order: num(data.order),
     description: data.description ?? '',
     category: data.category ?? '',
     defaultVariant,
@@ -358,10 +359,15 @@ export function parseRecipe(source, fallbackSlug) {
   return recipe
 }
 
-/** Read every fixture, newest first. */
+/** Read every fixture, explicit order first, then newest first. */
 export function loadRecipes(dir) {
   return readdirSync(dir)
     .filter((f) => /\.ya?ml$/.test(f))
     .map((file) => parseRecipe(readFileSync(join(dir, file), 'utf8'), file.replace(/\.ya?ml$/, '')))
-    .sort((a, b) => (b.created ?? '').localeCompare(a.created ?? '') || a.title.localeCompare(b.title))
+    .sort((a, b) => {
+      if (a.order !== null && b.order !== null && a.order !== b.order) return a.order - b.order
+      if (a.order !== null && b.order === null) return -1
+      if (a.order === null && b.order !== null) return 1
+      return (b.created ?? '').localeCompare(a.created ?? '') || a.title.localeCompare(b.title)
+    })
 }

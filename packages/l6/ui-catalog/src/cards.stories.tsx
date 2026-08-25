@@ -10,6 +10,7 @@ const recipes: RecipeSummary[] = [
   {
     slug: 'new-york-style-pizza',
     title: 'New York Style Pizza',
+    order: null,
     description: 'Cold-fermented dough baked hot with tomato sauce and frozen cheese.',
     category: 'mains',
     defaultVariant: 'outdoor-oven',
@@ -54,6 +55,7 @@ const recipes: RecipeSummary[] = [
   {
     slug: 'brown-butter-chocolate-chip-cookies',
     title: 'Brown Butter Chocolate Chip Cookies',
+    order: null,
     description: 'Chewy cookies with nutty brown butter and crisp edges.',
     category: 'desserts',
     defaultVariant: '',
@@ -77,6 +79,7 @@ const recipes: RecipeSummary[] = [
   {
     slug: 'raised-donuts',
     title: 'Raised Donuts',
+    order: null,
     description: 'Light yeast donuts finished with vanilla glaze.',
     category: 'desserts',
     defaultVariant: '',

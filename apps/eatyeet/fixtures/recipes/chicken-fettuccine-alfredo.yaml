@@ -1,6 +1,7 @@
 slug: chicken-fettuccine-alfredo
-title: Chicken Fettuccine Alfredo
-description: 'Fettuccine tossed in a Parmigiano cream sauce emulsified with starchy pasta water, topped with chicken seared in the same pan.'
+title: Fettuccine Alfredo
+order: 6
+description: 'Fettuccine tossed in a Parmigiano cream sauce emulsified with starchy pasta water, with grilled chicken if you want it.'
 category: savory
 prepMinutes: 15
 cookMinutes: 25
@@ -14,6 +15,7 @@ cuisines:
   - italian
 methods:
   - stovetop
+  - grilling
 restrictions: []
 occasions:
   - everyday
@@ -36,8 +38,6 @@ blocks:
           - '4 cloves garlic, minced'
           - 1½ tsp kosher salt
           - ½ tsp freshly ground black pepper
-          - '1 tbsp canola oil, for the pan'
-          - 1 tbsp unsalted butter
       - title: Sauce
         items:
           - 6 tbsp unsalted butter
@@ -58,20 +58,19 @@ blocks:
       - title: Marinade
         items:
           - 'Whisk the ¼ cup canola oil, lemon juice, garlic, salt, and pepper together in a bowl or zip-top bag. Add the chicken and turn to coat.'
-          - Refrigerate 3–24 hours. Pull it out about 30 min before cooking so it is not going into the pan straight from the fridge.
+          - Refrigerate 3–24 hours. Pull it out about 30 min before cooking so it is not going onto the grill straight from the fridge.
       - title: Chicken
         items:
-          - 'Scrape the marinade off the chicken and pat it dry. Clinging garlic scorches over a 10-minute sear, and wet chicken steams instead of browning.'
-          - 'Heat the 1 tbsp canola oil in a large straight-sided skillet over medium-high until it shimmers, 2–3 min. Skip the nonstick — the browned bits left behind are the base of the sauce.'
-          - 'Swirl the pan to coat, add the chicken, and leave it alone until the underside is golden and releases on its own, 5–7 min. If it sticks when you go to turn it, it isn''t ready.'
-          - 'Flip, drop the butter in between the pieces, and swirl the pan to spread it as it melts. Cook to 165°F internal, another 5–7 min.'
+          - 'Scrape the marinade off the chicken and pat it dry. Clinging garlic scorches over the hot part of the grill, and wet chicken steams instead of browning.'
+          - 'Use a tenderizing beater to pound the chicken to an even thickness so it grills evenly.'
+          - 'Grill over the hotter part of a 400°F grill for about 5 min per side, until the chicken reaches 165°F internal.'
           - 'Rest on a board for 3 min, then cut into ½-inch slices and tent with foil.'
       - title: Pasta
         items:
           - 'Boil the fettuccine in well-salted water and pull it 1 minute short of the package''s al dente. Reserve ½ cup of the pasta water plus a mug more, then drain.'
       - title: Sauce
         items:
-          - 'In the same skillet over medium heat, melt the butter and scrape up the fond. Add the shallots and cook until tender, about 2 min.'
+          - 'In a large straight-sided skillet over medium heat, melt the butter. Add the shallots and cook until tender, about 2 min.'
           - 'Pour in the cream, bring to a boil, then drop to medium-low and simmer 3 min.'
           - 'Off the heat, stir in the Parmigiano, salt, and pepper until smooth. Keeping it off direct heat is what stops the cheese from breaking.'
       - title: Finish

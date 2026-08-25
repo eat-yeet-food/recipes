@@ -12,6 +12,7 @@ export interface RecipeVariantSummary {
 export interface RecipeSummary {
   slug: string
   title: string
+  order: number | null
   description: string
   category: string
   defaultVariant: string

@@ -76,13 +76,13 @@ await desktop.locator('[aria-label="Recipe variants"] button:has-text("Indoor St
 await desktop.waitForURL('**/recipes/new-york-style-pizza?variant=indoor-steel')
 const indoorFacts = await desktop.evaluate(() => document.body.textContent ?? '')
 check('indoor variant updates URL', desktop.url().endsWith('/recipes/new-york-style-pizza?variant=indoor-steel'), desktop.url())
-check('indoor variant swaps dough formula', indoorFacts.includes('852g') && indoorFacts.includes('17g canola oil'))
+check('indoor variant swaps dough formula', indoorFacts.includes('905g') && indoorFacts.includes('18g canola oil'))
 check('indoor variant shows baking steel equipment', indoorFacts.includes('16" x 16" baking steel'))
 await desktop.locator('[aria-label="Recipe variants"] button:has-text("Outdoor Oven")').click()
 await desktop.waitForURL('**/recipes/new-york-style-pizza')
 const outdoorFacts = await desktop.evaluate(() => document.body.textContent ?? '')
 check('default variant clears URL param', desktop.url().endsWith('/recipes/new-york-style-pizza'), desktop.url())
-check('outdoor variant restores dough formula', outdoorFacts.includes('847g') && outdoorFacts.includes('576g cold water'))
+check('outdoor variant restores dough formula', outdoorFacts.includes('900g') && outdoorFacts.includes('612g cold water'))
 await desktop.locator('.yeet-card-actions button:has-text("Cook Mode")').click()
 await desktop.waitForTimeout(200)
 check(
@@ -92,6 +92,21 @@ check(
 check(
   'cook mode marks article root',
   await desktop.locator('.yeet[data-cook-mode="true"]').count() === 1,
+)
+check(
+  'cook mode centers recipe card with surrounding content',
+  await desktop.evaluate(() => {
+    const header = document.querySelector('.yeet > header')
+    const card = document.querySelector('.yeet main > article')
+    if (!header || !card) return false
+
+    const headerBox = header.getBoundingClientRect()
+    const cardBox = card.getBoundingClientRect()
+    const headerCenter = headerBox.left + headerBox.width / 2
+    const cardCenter = cardBox.left + cardBox.width / 2
+
+    return Math.abs(headerCenter - cardCenter) <= 2
+  }),
 )
 await desktop.close()
 
