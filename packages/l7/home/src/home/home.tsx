@@ -160,7 +160,7 @@ export function HomePage({
     <>
       <HomeHero copy={copy} />
 
-      <section className="mx-auto max-w-[var(--max-width)] px-8 py-20">
+      <section className="mx-auto max-w-[var(--max-width)] px-8 pb-8 pt-20">
         <SectionHeading eyebrow={home.eyebrow} title={home.latestTitle} />
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {latestRecipes.slice(0, MAX_SECTION_SIZE).map((recipe) => (
@@ -171,7 +171,7 @@ export function HomePage({
       </section>
 
       <section
-        className="mx-auto max-w-[var(--max-width)] px-8 py-16"
+        className="mx-auto max-w-[var(--max-width)] px-8 pb-16 pt-8"
         aria-label="Browse by Category"
       >
         <SectionHeading eyebrow={home.browseEyebrow} title={home.browseTitle} />
