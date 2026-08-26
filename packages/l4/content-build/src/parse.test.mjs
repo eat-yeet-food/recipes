@@ -108,7 +108,7 @@ blocks:
     markdown: |
       ## Starter
 
-      Use **ripe** starter and [safe links](https://example.com).
+      Use **ripe** starter, [safe links](https://example.com), and [internal links](/learn).
 
       <script>alert("nope")</script>
       [bad](javascript:alert(1))
@@ -117,7 +117,8 @@ blocks:
     assert.equal(recipe.blocks[0].type, 'markdown')
     assert.match(recipe.blocks[0].html, /<h2>Starter<\/h2>/)
     assert.match(recipe.blocks[0].html, /<strong>ripe<\/strong>/)
-    assert.match(recipe.blocks[0].html, /<a href="https:\/\/example.com">safe links<\/a>/)
+    assert.match(recipe.blocks[0].html, /<a href="https:\/\/example.com" target="_blank" rel="noopener noreferrer">safe links<\/a>/)
+    assert.match(recipe.blocks[0].html, /<a href="\/learn">internal links<\/a>/)
     assert.doesNotMatch(recipe.blocks[0].html, /<script>/)
     assert.doesNotMatch(recipe.blocks[0].html, /javascript:/)
   })

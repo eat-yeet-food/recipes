@@ -60,6 +60,11 @@ const isSafeUrl = (href) => {
   }
 }
 
+const linkAttributes = (href) => {
+  const target = /^(https?:)?\/\//.test(href) ? ' target="_blank" rel="noopener noreferrer"' : ''
+  return `href="${escapeHtml(href)}"${target}`
+}
+
 function renderInlineTokens(tokens = []) {
   return tokens.map((token) => {
     switch (token.type) {
@@ -80,7 +85,7 @@ function renderInlineTokens(tokens = []) {
       case 'link': {
         const text = renderInlineTokens(token.tokens)
         if (!isSafeUrl(token.href)) return text
-        return `<a href="${escapeHtml(token.href)}">${text}</a>`
+        return `<a ${linkAttributes(token.href)}>${text}</a>`
       }
       case 'image':
       case 'html':

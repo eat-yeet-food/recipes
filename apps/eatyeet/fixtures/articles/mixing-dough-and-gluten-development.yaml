@@ -17,9 +17,11 @@ blocks:
     markdown: |
       ## Choose your mixing method
 
-      Mixing is not just combining flour and water. It hydrates flour, distributes salt and yeast or starter, organizes gluten, and changes dough temperature.
+      Mixing is not just combining flour and water. It hydrates flour, distributes salt and yeast or starter, organizes gluten, and changes dough temperature. Dough temperature matters because it controls how fast fermentation moves from this point forward: warmer dough rises faster, chills more slowly, and gives you less margin before the dough becomes over-fermented or weak.
 
-      A recipe can give timing, but the better target is dough behavior: cohesive, elastic, extensible, and strong enough for the style you are making. The method changes how quickly you get there and how much heat you add along the way.
+      Gluten is the stretchy protein network that helps dough trap fermentation gas and hold its shape; King Arthur has a useful [beginner guide to gluten](https://www.kingarthurbaking.com/blog/2021/08/18/a-beginners-guide-to-gluten) if you want the longer version. A recipe can give timing, but the better target is dough behavior: cohesive, elastic, extensible, and strong enough for the style you are making. Elastic means the dough springs back; extensible means it can stretch without tearing right away.
+
+      The method changes how quickly you reach that behavior and how much friction heat you add while mixing. Friction heat is heat created by kneading or machine mixing; it is one reason a dough can leave the mixer warmer than the water you started with.
 
   - type: image
     layout:
@@ -37,6 +39,18 @@ blocks:
         alt: Compact spiral mixer developing pizza dough
         caption: Spiral mixers develop dough efficiently and are useful for pizza, bread, sourdough, and larger batches.
 
+  - type: markdown
+    markdown: |
+      ## Terms worth knowing
+
+      The windowpane test is a way to check gluten development. Pinch off a small piece of dough and gently stretch it; if it can get thin enough for light to pass through before tearing, the dough has a strong gluten network. King Arthur has a clear [windowpane walkthrough](https://www.kingarthurbaking.com/blog/2022/10/14/what-is-the-windowpane-test-for-bread-dough).
+
+      A full windowpane is not always the early goal. Same-day sandwich bread or enriched dough often needs more development during mixing because it will be shaped soon. Doughs that rest for many hours or overnight can start with a weaker windowpane because hydration, folds, and time continue organizing gluten while the dough rests.
+
+      Bulk fermentation is the first rise after mixing, before shaping. Proofing is the final rise after shaping. Hydration is the amount of water compared with flour, so a 70% hydration dough has 70g water for every 100g flour.
+
+      A starter is a live sourdough culture used to ferment dough instead of, or alongside, commercial yeast. An autolyse is a rest after flour and water are mixed but before the final mix; it gives flour time to hydrate and can make dough easier to stretch. King Arthur's [autolyse guide](https://www.kingarthurbaking.com/blog/2017/09/29/autolyse-sourdough) goes deeper.
+
   - type: section
     layout: prose
     columns:
@@ -47,7 +61,7 @@ blocks:
 
               Lean doughs are mostly flour, water, salt, and yeast or starter. They usually tolerate direct mixing well. Mix until the dough is cohesive, then decide whether the formula needs moderate or full gluten development.
 
-              If you use an autolyse, low-hydration doughs can be tougher to finish by hand because the rested dough starts firm and resists folding. Wet hands help, but a short machine mix may be more realistic for stiff pizza or bagel-style dough.
+              If you use an autolyse, low-hydration doughs can be tougher to finish by hand because the rested dough starts firm and resists folding. I would usually skip autolyse for pizza dough that will rest for a day or longer; that long rest already gives flour time to hydrate and gluten time to organize. Wet hands help, but a short machine mix may be more realistic for stiff bagel-style dough.
 
               Salt from the beginning also makes the rough-to-smooth stage take longer. It tightens the dough and slows hydration, so do not assume a rough surface means the mix has failed.
           - type: image
@@ -89,7 +103,7 @@ blocks:
     tone: tip
     title: Watch dough temperature
     markdown: |
-      Dough temperature matters because fermentation time, dough strength, and final texture depend on temperature through mixing, bulk, proofing, and cold holding. Warm dough moves faster; if it stays warm too long, proteolysis can weaken gluten and leave the dough slack, sticky, or hard to shape.
+      Dough temperature matters because fermentation time, dough strength, and final texture depend on temperature through mixing, bulk fermentation, proofing, and cold holding. Warm dough moves faster; if it stays warm too long, proteolysis can weaken gluten and leave the dough slack, sticky, or hard to shape. Proteolysis means protein breakdown. A little helps dough relax and stretch, but too much breaks down the structure you were trying to build. King Arthur's sourdough acidity article explains the risk of [proteolytic activity and gluten degradation](https://www.kingarthurbaking.com/blog/2022/02/22/how-to-make-your-sourdough-bread-more-or-less-sour-part-3).
 
       Use final dough temperature as the main control point, not a rule by itself. Same-day yeast dough often lands around 75-78F. Next-day sourdough can land around 75-77F, but warmer dough gives you less margin. Several-day cold proof pizza dough often benefits from a cooler finish around 71-72F.
 
