@@ -46,12 +46,16 @@ blocks:
               ## Lean doughs
 
               Lean doughs are mostly flour, water, salt, and yeast or starter. They usually tolerate direct mixing well. Mix until the dough is cohesive, then decide whether the formula needs moderate or full gluten development.
+
+              If you use an autolyse, low-hydration doughs can be tougher to finish by hand because the rested dough starts firm and resists folding. Wet hands help, but a short machine mix may be more realistic for stiff pizza or bagel-style dough.
       - blocks:
           - type: markdown
             markdown: |
               ## Enriched doughs
 
               Enriched doughs contain fat, sugar, eggs, milk, or butter. Fat can coat flour and slow gluten formation, so many doughs mix better when butter is delayed until the dough is already cohesive and elastic.
+
+              They are difficult to develop fully by hand, especially once butter or a lot of sugar is involved. A planetary mixer can still struggle because the dough may climb the hook, smear against the bowl, warm quickly, or look broken before it comes together.
 
               Butter should be pliable: cool, bendable, and able to incorporate without tearing the dough.
 
@@ -75,8 +79,8 @@ blocks:
           - Pizza, bread, sourdough, and larger batches where efficient development and temperature control matter.
       - label: Watch
         values:
-          - Sticky dough, over-flouring the bench, and skipping rests.
-          - Friction heat, dough climbing the hook, and mixer strain.
+          - Sticky dough, over-flouring the bench, skipping rests, and stiff autolysed doughs.
+          - Friction heat, dough climbing the hook, mixer strain, and enriched doughs that smear before they strengthen.
           - Overmixing because development happens faster than expected.
       - label: Temperature
         values:
