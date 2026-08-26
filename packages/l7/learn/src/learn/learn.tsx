@@ -209,7 +209,7 @@ export function ArticleDetailPage({
         hasRelated ? 'grid-cols-[minmax(0,770px)_280px] gap-20' : '!grid-cols-1',
       )}
       articleClassName={cn(
-        '!m-0 !border-0 !bg-transparent !p-0 !shadow-none text-lg leading-[1.72] max-[1080px]:mx-auto max-[640px]:text-[17px] [&_section]:!text-lg [&_section]:!leading-[1.72] max-[640px]:[&_section]:!text-[17px] [&>div:first-child>section]:border-t-0 [&>div:first-child>section]:pt-0',
+        '!m-0 !border-0 !bg-transparent !p-0 !shadow-none text-lg leading-[1.72] max-[1080px]:mx-auto max-[640px]:text-[17px] [&_section]:!text-lg [&_section]:!leading-[1.72] max-[640px]:[&_section]:!text-[17px] [&>div>section]:!border-t-0 [&>div:first-child>section]:pt-0',
         hasRelated ? '!max-w-[770px]' : '!max-w-none',
       )}
       aside={hasRelated ? (
