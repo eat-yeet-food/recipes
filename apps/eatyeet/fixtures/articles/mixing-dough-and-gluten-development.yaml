@@ -89,27 +89,22 @@ blocks:
     tone: tip
     title: Watch dough temperature
     markdown: |
-      Use final dough temperature as a control, not a rule by itself. Same-day yeast dough often lands around 75-78F. Next-day sourdough can land around 75-77F, but warmer dough gives you less margin. Several-day cold proof pizza dough often benefits from a cooler finish around 71-72F.
+      Dough temperature matters because fermentation time, dough strength, and final texture depend on temperature through mixing, bulk, proofing, and cold holding. Warm dough moves faster; if it stays warm too long, proteolysis can weaken gluten and leave the dough slack, sticky, or hard to shape.
 
-  - type: comparison
-    title: Method at a Glance
-    columns:
-      - Hand mixing
-      - Planetary mixer
-      - Spiral mixer
-    rows:
-      - label: Best for
-        values:
-          - No equipment, sourdough, learning dough feel, and small batches.
-          - Home bakers with a stand mixer; enriched doughs and moderate batches.
-          - Pizza, bread, sourdough, and larger batches where efficient development and temperature control matter.
-      - label: Watch
-        values:
-          - Sticky dough, over-flouring the bench, skipping rests, and stiff autolysed doughs.
-          - Friction heat, dough climbing the hook, mixer strain, and enriched doughs that smear before they strengthen.
-          - Overmixing because development happens faster than expected.
-      - label: Temperature
-        values:
-          - Usually adds the least friction heat.
-          - Can warm dough quickly, especially at higher speed.
-          - Efficient, but still check final dough temperature.
+      Use final dough temperature as the main control point, not a rule by itself. Same-day yeast dough often lands around 75-78F. Next-day sourdough can land around 75-77F, but warmer dough gives you less margin. Several-day cold proof pizza dough often benefits from a cooler finish around 71-72F.
+
+  - type: markdown
+    markdown: |
+      ## Methods at a Glance
+
+      ### Hand mixing
+
+      Hand mixing is best when you want to learn how dough changes under your hands, especially with sourdough or small batches. It adds very little friction heat, but it is slower and easier to underdo. Sticky doughs tempt you to add too much bench flour, stiff autolysed doughs can resist folding, and enriched doughs can be exhausting to develop fully by hand.
+
+      ### Planetary mixer
+
+      A planetary stand mixer is the common home-machine option and can handle many lean doughs and some enriched doughs. Its tradeoff is heat and strain: dough can climb the hook, smear against the bowl, or warm quickly at higher speed. Enriched dough may look broken before it comes together, so watch dough behavior instead of only watching the clock.
+
+      ### Spiral mixer
+
+      A spiral mixer develops gluten efficiently and is strong for pizza, bread, sourdough, and larger batches. It usually reaches a smooth, elastic dough faster than the other methods, which is the benefit and the risk. Check the dough sooner than you think, because it is easier to overshoot development when the mixer is doing the work quickly.
