@@ -48,16 +48,42 @@ blocks:
               Lean doughs are mostly flour, water, salt, and yeast or starter. They usually tolerate direct mixing well. Mix until the dough is cohesive, then decide whether the formula needs moderate or full gluten development.
 
               If you use an autolyse, low-hydration doughs can be tougher to finish by hand because the rested dough starts firm and resists folding. Wet hands help, but a short machine mix may be more realistic for stiff pizza or bagel-style dough.
+
+              Salt from the beginning also makes the rough-to-smooth stage take longer. It tightens the dough and slows hydration, so do not assume a rough surface means the mix has failed.
+          - type: image
+            layout:
+              mode: grid
+              columns: 2
+              aspect: square
+            images:
+              - src: lean-dough-smooth.jpg
+                alt: Smooth ball of lean dough on a wooden board
+                caption: Smooth lean dough looks cohesive and taut, with a surface that has started to organize.
+              - src: lean-dough-rough.jpg
+                alt: Rough lean dough on a floured counter
+                caption: Rough lean dough can look torn, shaggy, or uneven before enough hydration, rest, or mixing brings it together.
       - blocks:
           - type: markdown
             markdown: |
               ## Enriched doughs
 
-              Enriched doughs contain fat, sugar, eggs, milk, or butter. Fat can coat flour and slow gluten formation, so many doughs mix better when butter is delayed until the dough is already cohesive and elastic.
+              Enriched doughs contain fat, sugar, eggs, milk, or butter. Fat can coat flour and slow gluten formation, so many doughs mix better when butter is delayed until the dough is already cohesive and elastic. Letting the dough rest for about 10 minutes before adding butter or other fat can also help gluten organize before the fat goes in.
 
               They are difficult to develop fully by hand, especially once butter or a lot of sugar is involved. A planetary mixer can still struggle because the dough may climb the hook, smear against the bowl, warm quickly, or look broken before it comes together.
 
               Butter should be pliable: cool, bendable, and able to incorporate without tearing the dough.
+          - type: image
+            layout:
+              mode: grid
+              columns: 2
+              aspect: portrait
+            images:
+              - src: enriched-dough-early-mix.jpg
+                alt: Enriched dough smeared against the side of a mixing bowl during early mixing
+                caption: Early enriched dough can smear, look greasy, or seem broken before the gluten network catches up.
+              - src: enriched-dough-smooth.jpg
+                alt: Smooth enriched dough shaped into braided loaves
+                caption: Smooth enriched dough looks cohesive, supple, and glossy enough to shape cleanly.
 
   - type: callout
     tone: tip
