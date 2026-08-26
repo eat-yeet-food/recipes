@@ -112,7 +112,7 @@ const categories: Array<{ label: string; imageUrl: string; search: SearchParams 
 const articles: ArticleSummary[] = [
   {
     slug: 'mixing-dough-and-gluten-development',
-    title: 'Mixing Dough and Gluten Development',
+    title: 'Developing Dough and Mixing Methodologies',
     order: 1,
     description: 'Choose the right mixing method and development target for pizza, bread, sourdough, and enriched doughs.',
     type: 'guide',
@@ -121,7 +121,7 @@ const articles: ArticleSummary[] = [
     image: 'hand-mixing-dough.jpg',
     imageHash: '',
     created: '2026-08-25',
-    searchText: 'mixing dough gluten development',
+    searchText: 'developing dough mixing methodologies',
   },
   {
     slug: 'spiral-mixer-dough',

@@ -1,5 +1,5 @@
 slug: mixing-dough-and-gluten-development
-title: Mixing Dough and Gluten Development
+title: Developing Dough and Mixing Methodologies
 order: 1
 type: guide
 category: dough
@@ -38,7 +38,7 @@ blocks:
         caption: Spiral mixers develop dough efficiently and are useful for pizza, bread, sourdough, and larger batches.
 
   - type: section
-    layout: split
+    layout: prose
     columns:
       - blocks:
           - type: markdown
