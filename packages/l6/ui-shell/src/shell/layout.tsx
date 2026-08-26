@@ -94,6 +94,9 @@ export function Nav({
             <Link to="/search" className={linkClass}>
               Recipes
             </Link>
+            <Link to="/learn" className={linkClass}>
+              Learn
+            </Link>
           </div>
           <div className="hidden md:flex items-center gap-3">
             <Button
@@ -152,17 +155,13 @@ export function Nav({
           >
             Browse
           </Link>
-          <button
-            type="button"
-            data-palette-open=""
-            onClick={() => {
-              setMenuOpen(false)
-              onOpenPalette()
-            }}
-            className="rounded px-2 py-3 text-left font-nav text-sm font-[900] uppercase tracking-wider text-ink hover:bg-ink/5"
+          <Link
+            to="/learn"
+            onClick={() => setMenuOpen(false)}
+            className="rounded px-2 py-3 font-nav text-sm font-[900] uppercase tracking-wider text-ink hover:bg-ink/5"
           >
-            Search
-          </button>
+            Learn
+          </Link>
         </div>
       </div>
     </nav>
@@ -194,6 +193,9 @@ export function Footer({ siteName, wordmark }: { siteName: string; wordmark: Wor
           </Link>
           <Link to="/browse" className={linkClass}>
             Browse
+          </Link>
+          <Link to="/learn" className={linkClass}>
+            Learn
           </Link>
         </nav>
         <p className="mt-4 text-[11px] tracking-[1px] text-ink/70">

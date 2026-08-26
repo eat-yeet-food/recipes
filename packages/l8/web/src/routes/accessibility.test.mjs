@@ -5,7 +5,7 @@
  * A11Y_IMPACTS=minor,moderate,serious,critical to ratchet the target tighter.
  */
 
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -18,12 +18,22 @@ import { startStatic } from '#web-test/static-server'
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', '..', '..')
 const OUT = join(ROOT, '.output', 'public')
 const INDEX = JSON.parse(readFileSync(join(RESOLVED_APP_PATHS.generatedDir, 'index.json'), 'utf8'))
+const ARTICLE_INDEX_FILE = join(RESOLVED_APP_PATHS.generatedDir, 'articles', 'index.json')
+const ARTICLE_INDEX = existsSync(ARTICLE_INDEX_FILE) ? JSON.parse(readFileSync(ARTICLE_INDEX_FILE, 'utf8')) : []
 const IMPACTS = (process.env.A11Y_IMPACTS ?? 'serious,critical')
   .split(',')
   .map((impact) => impact.trim())
   .filter(Boolean)
 
-const paths = ['/', '/recipes', '/browse', '/search', `/recipes/${INDEX[0].slug}`]
+const paths = [
+  '/',
+  '/recipes',
+  '/browse',
+  '/search',
+  '/learn',
+  `/recipes/${INDEX[0].slug}`,
+  ...(ARTICLE_INDEX[0] ? [`/learn/${ARTICLE_INDEX[0].slug}`] : []),
+]
 
 const server = await startStatic(OUT)
 const browser = await chromium.launch()

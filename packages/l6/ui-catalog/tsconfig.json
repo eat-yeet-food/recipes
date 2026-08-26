@@ -10,6 +10,12 @@
   },
   "references": [
     {
+      "path": "../../l0/foundation/tsconfig.json"
+    },
+    {
+      "path": "../../l1/article-model/tsconfig.json"
+    },
+    {
       "path": "../../l1/recipe-model/tsconfig.json"
     },
     {

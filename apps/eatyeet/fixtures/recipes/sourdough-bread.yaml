@@ -20,6 +20,14 @@ occasions:
   - everyday
 ingredientTypes: []
 created: '2025-02-10'
+learning:
+  mixing:
+    defaultMethod: spiral
+    allowedMethods:
+      - hand
+      - spiral
+    targetDevelopment: moderate-gluten
+    article: mixing-dough-and-gluten-development
 blocks:
   - type: recipe
     equipment:

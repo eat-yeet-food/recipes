@@ -109,7 +109,8 @@ function RecipeBlockView({
         {page.description && <p className="m-0 mb-6 text-base leading-[1.7]">{page.description}</p>}
         <MetaList page={page} />
         <div
-          className={`yeet-card-actions grid grid-cols-3 gap-3 mt-6 mb-1 max-[640px]:grid-cols-1 print:hidden ${cookMode ? 'sticky top-3 z-[var(--z-recipe-actions)] bg-white pb-3' : ''}`}
+          data-recipe-card-actions=""
+          className={`grid grid-cols-3 gap-3 mt-6 mb-1 max-[640px]:grid-cols-1 print:hidden ${cookMode ? 'sticky top-3 z-[var(--z-recipe-actions)] bg-white pb-3' : ''}`}
           aria-label="Recipe card actions"
         >
           <RecipeAction variant="card" onClick={printPage}>

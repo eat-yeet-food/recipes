@@ -31,8 +31,14 @@ export interface AppCopy {
     browseIntro: string
     searchTitle: string
     searchDescription: string
+    learnTitle: string
+    learnHeading: string
+    learnDescription: string
+    learnIntro: string
     recipeFallbackTitle: string
     recipeTitleSuffix: string
+    articleFallbackTitle: string
+    articleTitleSuffix: string
   }
   jsonLdAuthor: string
 }

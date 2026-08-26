@@ -3,6 +3,7 @@
   "compilerOptions": {
     "paths": {
       "@eat-yeet/l0-foundation/*": ["../../../packages/l0/foundation/src/*"],
+      "@eat-yeet/l1-article-model/*": ["../../../packages/l1/article-model/src/*"],
       "@eat-yeet/l1-api-model/*": ["../../../packages/l1/api-model/src/*"],
       "@eat-yeet/l1-recipe-model/*": ["../../../packages/l1/recipe-model/src/*"],
       "@eat-yeet/l2-recipe-domain/*": ["../../../packages/l2/recipe-domain/src/*"],
@@ -16,6 +17,7 @@
       "@eat-yeet/l6-ui-content-blocks/*": ["../../../packages/l6/ui-content-blocks/src/*"],
       "@eat-yeet/l6-ui-shell/*": ["../../../packages/l6/ui-shell/src/*"],
       "@eat-yeet/l7-home/*": ["../../../packages/l7/home/src/*"],
+      "@eat-yeet/l7-learn/*": ["../../../packages/l7/learn/src/*"],
       "@eat-yeet/l7-recipes/*": ["../../../packages/l7/recipes/src/*"],
       "@eat-yeet/l7-search/*": ["../../../packages/l7/search/src/*"],
       "@eat-yeet/l8-web/*": ["../../../packages/l8/web/src/*"]

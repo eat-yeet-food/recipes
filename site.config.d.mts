@@ -16,6 +16,7 @@ export interface AppCopy {
   home: {
     eyebrow: string
     latestTitle: string
+    browseEyebrow: string
     browseTitle: string
   }
   pages: {
@@ -30,14 +31,21 @@ export interface AppCopy {
     browseIntro: string
     searchTitle: string
     searchDescription: string
+    learnTitle: string
+    learnHeading: string
+    learnDescription: string
+    learnIntro: string
     recipeFallbackTitle: string
     recipeTitleSuffix: string
+    articleFallbackTitle: string
+    articleTitleSuffix: string
   }
   jsonLdAuthor: string
 }
 
 export interface AppPaths {
   fixtures: string
+  articleFixtures?: string
   publicDir: string
   imagesDir: string
   generatedDir: string
@@ -69,6 +77,11 @@ export interface SitemapRecipe {
   created?: string
 }
 
+export interface SitemapArticle {
+  slug: string
+  created?: string
+}
+
 export interface SitemapEntry {
   loc: string
   lastmod?: string
@@ -92,5 +105,5 @@ export const PREVIEW_PATHS: string[]
 export const APP_PATHS: AppPaths
 export const APP_COPY: AppCopy
 export const APP_CATEGORIES: Category[]
-export function allPaths(index: SitemapRecipe[]): string[]
-export function sitemapPaths(index: SitemapRecipe[]): SitemapEntry[]
+export function allPaths(index: SitemapRecipe[], articles?: SitemapArticle[]): string[]
+export function sitemapPaths(index: SitemapRecipe[], articles?: SitemapArticle[]): SitemapEntry[]

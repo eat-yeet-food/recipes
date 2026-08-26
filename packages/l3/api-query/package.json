@@ -9,6 +9,7 @@
     "./provider": "./src/provider.tsx",
     "./query-client": "./src/query-client.ts",
     "./query-keys": "./src/query-keys.ts",
+    "./articles": "./src/articles.ts",
     "./recipes": "./src/recipes.ts"
   },
   "dependencies": {

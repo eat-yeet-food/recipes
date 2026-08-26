@@ -13,7 +13,7 @@ const blocks: PageBlock[] = [
   },
   {
     type: 'image',
-    layout: { mode: 'grid', columns: 2 },
+    layout: { mode: 'grid', columns: 2, aspect: 'landscape' },
     images: [
       {
         src: '/images/hero-donuts.jpg',
@@ -25,6 +25,46 @@ const blocks: PageBlock[] = [
         alt: 'Raised donuts on a cooling rack',
         caption: 'Second image in the same block.',
       },
+    ],
+  },
+  {
+    type: 'section',
+    layout: 'split',
+    columns: [
+      {
+        blocks: [
+          {
+            type: 'markdown',
+            html: '<h2>Split Column</h2><p>Section blocks can arrange existing blocks side by side on wider screens.</p>',
+          },
+        ],
+      },
+      {
+        blocks: [
+          {
+            type: 'callout',
+            tone: 'tip',
+            title: 'Authoring intent',
+            html: '<p>The model expresses layout intent without tying it to article type.</p>',
+          },
+        ],
+      },
+    ],
+  },
+  {
+    type: 'steps',
+    title: 'Procedure',
+    items: [
+      { title: 'Mix', html: '<p>Combine until cohesive.</p>' },
+      { title: 'Rest', html: '<p>Let time hydrate the flour.</p>' },
+    ],
+  },
+  {
+    type: 'comparison',
+    title: 'Comparison',
+    columns: ['Planetary', 'Spiral'],
+    rows: [
+      { label: 'Heat', values: ['<p>Warms quickly.</p>', '<p>More efficient.</p>'] },
     ],
   },
   { type: 'youtube', id: 'abc_123-xyz', title: 'Recipe video' },

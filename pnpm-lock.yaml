@@ -14,6 +14,9 @@ importers:
       '@eat-yeet/l1-api-model':
         specifier: workspace:*
         version: link:packages/l1/api-model
+      '@eat-yeet/l1-article-model':
+        specifier: workspace:*
+        version: link:packages/l1/article-model
       '@eat-yeet/l1-recipe-model':
         specifier: workspace:*
         version: link:packages/l1/recipe-model
@@ -50,6 +53,9 @@ importers:
       '@eat-yeet/l7-home':
         specifier: workspace:*
         version: link:packages/l7/home
+      '@eat-yeet/l7-learn':
+        specifier: workspace:*
+        version: link:packages/l7/learn
       '@eat-yeet/l7-recipes':
         specifier: workspace:*
         version: link:packages/l7/recipes
@@ -170,6 +176,8 @@ importers:
 
   packages/l1/api-model: {}
 
+  packages/l1/article-model: {}
+
   packages/l1/recipe-model: {}
 
   packages/l2/recipe-domain: {}
@@ -200,6 +208,8 @@ importers:
   packages/l6/ui-shell: {}
 
   packages/l7/home: {}
+
+  packages/l7/learn: {}
 
   packages/l7/recipes: {}
 

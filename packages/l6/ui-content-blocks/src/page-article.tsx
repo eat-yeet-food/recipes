@@ -35,6 +35,8 @@ export function ContentPageArticle<TContext>({
   mainClassName,
   articleClassName,
 }: ContentPageArticleProps<TContext>) {
+  const hasAside = Boolean(aside)
+
   return (
     <div
       {...rootAttributes}
@@ -61,13 +63,17 @@ export function ContentPageArticle<TContext>({
 
       <main
         className={cn(
-          'relative grid grid-cols-[minmax(0,760px)_300px] items-start gap-14 max-w-[1120px] mx-auto px-7 pb-[72px] pt-[58px] max-[1080px]:block max-[1080px]:max-w-[760px] max-[640px]:px-[18px] max-[640px]:pb-[56px] max-[640px]:pt-[34px] print:max-w-none print:p-0',
+          'relative grid items-start mx-auto px-7 pb-[72px] pt-[58px] max-[640px]:px-[18px] max-[640px]:pb-[56px] max-[640px]:pt-[34px] print:max-w-none print:p-0',
+          hasAside
+            ? 'grid-cols-[minmax(0,760px)_300px] gap-14 max-w-[1120px] max-[1080px]:block max-[1080px]:max-w-[760px]'
+            : 'grid-cols-1 max-w-[1120px]',
           mainClassName,
         )}
       >
         <article
           className={cn(
-            'yeet-card mt-12 max-w-[760px] bg-white border-2 border-[var(--yeet-gray)] px-9 pb-[38px] pt-[34px] shadow-[18px_18px_0_var(--yeet-pink)] max-[900px]:shadow-[10px_10px_0_var(--yeet-pink)] max-[640px]:px-[22px] max-[640px]:pb-[30px] max-[640px]:pt-[26px] print:m-0 print:border-0 print:shadow-none print:p-0',
+            'mt-12 print:m-0 print:border-0 print:shadow-none print:p-0',
+            hasAside ? 'max-w-[760px]' : 'max-w-none',
             articleClassName,
           )}
           aria-label={articleLabel}

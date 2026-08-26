@@ -13,6 +13,9 @@
   },
   "references": [
     {
+      "path": "../../l1/article-model/tsconfig.json"
+    },
+    {
       "path": "../../l1/recipe-model/tsconfig.json"
     },
     {
@@ -44,6 +47,9 @@
     },
     {
       "path": "../../l7/home/tsconfig.json"
+    },
+    {
+      "path": "../../l7/learn/tsconfig.json"
     },
     {
       "path": "../../l7/recipes/tsconfig.json"

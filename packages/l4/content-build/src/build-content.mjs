@@ -10,17 +10,19 @@
 
 import { mkdirSync, writeFileSync, rmSync, readFileSync, existsSync } from 'node:fs'
 import { createHash } from 'node:crypto'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 
-import { loadRecipes } from './parse.mjs'
+import { loadArticles, loadRecipes } from './parse.mjs'
 import { resolveAppPaths } from './app-paths.mjs'
 
-const BODY = ['blocks']
+const RECIPE_BODY = ['blocks', 'learning']
+const ARTICLE_BODY = ['blocks']
 
 export function buildContent({ appId, appPaths }) {
   const resolvedAppPaths = resolveAppPaths(appPaths)
   const generatedOut = resolvedAppPaths.generatedDir
   const images = resolvedAppPaths.imagesDir
+  const articleFixtures = resolvedAppPaths.articleFixtures ?? join(dirname(resolvedAppPaths.fixtures), 'articles')
 
   /**
    * A content hash for the recipe's photo, used as a `?v=` on its URL.
@@ -48,6 +50,15 @@ export function buildContent({ appId, appPaths }) {
 
   function versionBlockImages(blocks) {
     return blocks.map((block) => {
+      if (block.type === 'section') {
+        return {
+          ...block,
+          columns: block.columns.map((column) => ({
+            ...column,
+            blocks: versionBlockImages(column.blocks ?? []),
+          })),
+        }
+      }
       if (block.type !== 'image') return block
       return {
         ...block,
@@ -71,10 +82,18 @@ export function buildContent({ appId, appPaths }) {
     }
   }
 
-  function indexRecipe(recipe) {
+  function versionArticle(article) {
+    return {
+      ...article,
+      imageHash: article.image ? imageVersion(article.image) : '',
+      blocks: versionBlockImages(article.blocks ?? []),
+    }
+  }
+
+  function indexContent(content, bodyFields) {
     return Object.fromEntries(
-      Object.entries(recipe)
-        .filter(([key]) => !BODY.includes(key))
+      Object.entries(content)
+        .filter(([key]) => !bodyFields.includes(key))
         .map(([key, value]) => [
           key,
           key === 'variants'
@@ -84,11 +103,17 @@ export function buildContent({ appId, appPaths }) {
     )
   }
 
+  function indexRecipe(recipe) {
+    return indexContent(recipe, RECIPE_BODY)
+  }
+
   const recipes = loadRecipes(resolvedAppPaths.fixtures)
+  const articles = loadArticles(articleFixtures)
 
   rmSync(generatedOut, { recursive: true, force: true })
   mkdirSync(generatedOut, { recursive: true })
   mkdirSync(join(generatedOut, 'recipes'), { recursive: true })
+  mkdirSync(join(generatedOut, 'articles'), { recursive: true })
 
   const index = recipes.map((raw) => {
     const recipe = versionRecipe(raw)
@@ -98,6 +123,18 @@ export function buildContent({ appId, appPaths }) {
 
   writeFileSync(join(generatedOut, 'index.json'), JSON.stringify(index))
 
+  const articleIndex = articles.map((raw) => {
+    const article = versionArticle(raw)
+    writeFileSync(join(generatedOut, 'articles', `${article.slug}.json`), JSON.stringify(article))
+    return indexContent(article, ARTICLE_BODY)
+  })
+
+  writeFileSync(join(generatedOut, 'articles', 'index.json'), JSON.stringify(articleIndex))
+
   const indexKb = (Buffer.byteLength(JSON.stringify(index)) / 1024).toFixed(0)
-  console.log(`content(${appId}): ${recipes.length} recipes -> index.json (${indexKb} KB) + ${recipes.length} body chunks`)
+  const articleIndexKb = (Buffer.byteLength(JSON.stringify(articleIndex)) / 1024).toFixed(0)
+  console.log(
+    `content(${appId}): ${recipes.length} recipes -> index.json (${indexKb} KB) + ${recipes.length} body chunks; ` +
+      `${articles.length} articles -> articles/index.json (${articleIndexKb} KB) + ${articles.length} body chunks`,
+  )
 }

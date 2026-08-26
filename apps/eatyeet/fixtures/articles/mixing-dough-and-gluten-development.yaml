@@ -1,0 +1,85 @@
+slug: mixing-dough-and-gluten-development
+title: Mixing Dough and Gluten Development
+order: 1
+type: guide
+category: dough
+tags:
+  - bread
+  - pizza
+  - sourdough
+  - enriched-dough
+image: hand-mixing-dough.jpg
+created: 2026-08-25
+description: Choose the right mixing method and development target for pizza, bread, sourdough, and enriched doughs.
+
+blocks:
+  - type: markdown
+    markdown: |
+      ## Choose your mixing method
+
+      Mixing is not just combining flour and water. It hydrates flour, distributes salt and yeast or starter, organizes gluten, and changes dough temperature.
+
+      A recipe can give timing, but the better target is dough behavior: cohesive, elastic, extensible, and strong enough for the style you are making. The method changes how quickly you get there and how much heat you add along the way.
+
+  - type: image
+    layout:
+      mode: grid
+      columns: 3
+      aspect: landscape
+    images:
+      - src: hand-mixing-dough.jpg
+        alt: Hands mixing dough on a floured work surface
+        caption: Hand mixing is slow, tactile, and useful for sourdough or when you want to learn dough feel.
+      - src: planetary-mixer-dough.jpg
+        alt: Planetary stand mixer with dough hook mixing bread dough
+        caption: Planetary mixers are common at home, but they can heat dough quickly.
+      - src: spiral-mixer-dough.jpg
+        alt: Compact spiral mixer developing pizza dough
+        caption: Spiral mixers develop dough efficiently and are useful for pizza, bread, sourdough, and larger batches.
+
+  - type: section
+    layout: split
+    columns:
+      - blocks:
+          - type: markdown
+            markdown: |
+              ## Lean doughs
+
+              Lean doughs are mostly flour, water, salt, and yeast or starter. They usually tolerate direct mixing well. Mix until the dough is cohesive, then decide whether the formula needs moderate or full gluten development.
+      - blocks:
+          - type: markdown
+            markdown: |
+              ## Enriched doughs
+
+              Enriched doughs contain fat, sugar, eggs, milk, or butter. Fat can coat flour and slow gluten formation, so many doughs mix better when butter is delayed until the dough is already cohesive and elastic.
+
+              Butter should be pliable: cool, bendable, and able to incorporate without tearing the dough.
+
+  - type: callout
+    tone: tip
+    title: Watch dough temperature
+    markdown: |
+      Use final dough temperature as a control, not a rule by itself. Same-day yeast dough often lands around 75-78F. Next-day sourdough can land around 75-77F, but warmer dough gives you less margin. Several-day cold proof pizza dough often benefits from a cooler finish around 71-72F.
+
+  - type: comparison
+    title: Method at a Glance
+    columns:
+      - Hand mixing
+      - Planetary mixer
+      - Spiral mixer
+    rows:
+      - label: Best for
+        values:
+          - No equipment, sourdough, learning dough feel, and small batches.
+          - Home bakers with a stand mixer; enriched doughs and moderate batches.
+          - Pizza, bread, sourdough, and larger batches where efficient development and temperature control matter.
+      - label: Watch
+        values:
+          - Sticky dough, over-flouring the bench, and skipping rests.
+          - Friction heat, dough climbing the hook, and mixer strain.
+          - Overmixing because development happens faster than expected.
+      - label: Temperature
+        values:
+          - Usually adds the least friction heat.
+          - Can warm dough quickly, especially at higher speed.
+          - Efficient, but still check final dough temperature.

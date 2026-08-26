@@ -2,6 +2,7 @@
   "files": [],
   "references": [
     { "path": "./packages/l0/foundation/tsconfig.json" },
+    { "path": "./packages/l1/article-model/tsconfig.json" },
     { "path": "./packages/l1/api-model/tsconfig.json" },
     { "path": "./packages/l1/recipe-model/tsconfig.json" },
     { "path": "./packages/l2/recipe-domain/tsconfig.json" },
@@ -15,6 +16,7 @@
     { "path": "./packages/l6/ui-content-blocks/tsconfig.json" },
     { "path": "./packages/l6/ui-shell/tsconfig.json" },
     { "path": "./packages/l7/home/tsconfig.json" },
+    { "path": "./packages/l7/learn/tsconfig.json" },
     { "path": "./packages/l7/recipes/tsconfig.json" },
     { "path": "./packages/l7/search/tsconfig.json" },
     { "path": "./packages/l8/web/tsconfig.json" },

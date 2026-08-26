@@ -4,7 +4,7 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 
-import { loadRecipes, parseRecipe } from './parse.mjs'
+import { loadRecipes, parseArticle, parseRecipe } from './parse.mjs'
 
 describe('parseRecipe blocks', () => {
   it('rejects legacy top-level recipe body fields', () => {
@@ -130,6 +130,7 @@ blocks:
     layout:
       mode: grid
       columns: 2
+      aspect: square
     images:
       - src: pizza-step.jpg
         alt: Pizza on a peel
@@ -138,7 +139,7 @@ blocks:
 
     assert.deepEqual(recipe.blocks[0], {
       type: 'image',
-      layout: { mode: 'grid', columns: 2 },
+      layout: { mode: 'grid', columns: 2, aspect: 'square' },
       images: [
         {
           src: 'pizza-step.jpg',
@@ -229,5 +230,56 @@ blocks:
       { type: 'youtube', id: 'empty_title', title: 'Recipe video' },
     ])
     assert.equal(recipe.searchText.includes('shaping pizza'), true)
+  })
+
+  it('normalizes editorial article blocks recursively', () => {
+    const article = parseArticle(`
+title: Mixer Guide
+blocks:
+  - type: section
+    layout: split
+    columns:
+      - blocks:
+          - type: markdown
+            markdown: |
+              ## First column
+
+              Build **strength**.
+      - blocks:
+          - type: image
+            src: mixer.jpg
+            alt: Mixer with dough
+  - type: callout
+    tone: warning
+    title: Watch heat
+    markdown: Keep dough cool.
+  - type: steps
+    title: Method
+    items:
+      - title: Mix
+        markdown: Mix until smooth.
+  - type: comparison
+    title: Choose a mixer
+    columns:
+      - Planetary
+      - Spiral
+    rows:
+      - label: Heat
+        values:
+          - Warmer
+          - Cooler
+`, 'mixer-guide')
+
+    assert.equal(article.blocks[0].type, 'section')
+    assert.equal(article.blocks[0].layout, 'split')
+    assert.equal(article.blocks[0].columns[0].blocks[0].type, 'markdown')
+    assert.equal(article.blocks[1].type, 'callout')
+    assert.equal(article.blocks[1].tone, 'warning')
+    assert.equal(article.blocks[2].type, 'steps')
+    assert.equal(article.blocks[3].type, 'comparison')
+    assert.equal(article.searchText.includes('first column'), true)
+    assert.equal(article.searchText.includes('mixer with dough'), true)
+    assert.equal(article.searchText.includes('watch heat'), true)
+    assert.equal(article.searchText.includes('choose a mixer'), true)
   })
 })

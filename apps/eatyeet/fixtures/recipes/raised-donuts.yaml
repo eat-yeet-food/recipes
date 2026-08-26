@@ -24,6 +24,15 @@ ingredientTypes:
   - milk
   - fats_and_oils
 created: '2025-03-05'
+learning:
+  mixing:
+    defaultMethod: spiral
+    allowedMethods:
+      - hand
+      - planetary
+      - spiral
+    targetDevelopment: full-gluten-windowpane
+    article: mixing-dough-and-gluten-development
 blocks:
   - type: recipe
     equipment:

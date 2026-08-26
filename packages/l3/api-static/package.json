@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "exports": {
+    "./articles": "./src/articles.ts",
     "./recipes": "./src/recipes.ts"
   }
 }

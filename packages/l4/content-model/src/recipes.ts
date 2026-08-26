@@ -3,6 +3,48 @@ import type { PageBlock } from './blocks'
 
 export type { PageBlock, RecipeBlock, Section } from './blocks'
 
+export type MixingMethod = 'hand' | 'planetary' | 'spiral'
+
+export type DoughDevelopmentMethod =
+  | 'stretch-and-folds'
+  | 'coil-folds'
+  | 'slap-and-folds'
+  | 'rubaud'
+  | 'bassinage'
+
+export interface RecipeLearningReference {
+  article: string
+  label: string
+}
+
+export interface RecipeMixingLearning {
+  defaultMethod: MixingMethod
+  allowedMethods: MixingMethod[]
+  targetDevelopment: string
+  article: string
+  methodArticles: Partial<Record<MixingMethod, string>>
+}
+
+export interface RecipeDoughStrengthLearning {
+  methods: DoughDevelopmentMethod[]
+  article: string
+  methodArticles: Partial<Record<DoughDevelopmentMethod, string>>
+}
+
+export interface RecipeFinalDoughTemperature {
+  targetF: number | null
+  rangeF: [number, number] | null
+  reason: string
+  article: string
+}
+
+export interface RecipeLearning {
+  mixing?: RecipeMixingLearning
+  doughStrength?: RecipeDoughStrengthLearning
+  handling: RecipeLearningReference[]
+  finalDoughTemperature?: RecipeFinalDoughTemperature
+}
+
 export interface RecipeContentVariant extends RecipeVariantSummary {
   blocks: PageBlock[]
 }
@@ -10,6 +52,7 @@ export interface RecipeContentVariant extends RecipeVariantSummary {
 export interface RecipeContent extends RecipeSummary {
   blocks: PageBlock[]
   variants: RecipeContentVariant[]
+  learning?: RecipeLearning
 }
 
 export function selectedRecipeVariant(recipe: RecipeContent, variantId?: string) {

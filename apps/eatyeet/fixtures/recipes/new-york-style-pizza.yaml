@@ -21,6 +21,15 @@ occasions:
 ingredientTypes:
   - cheese
 created: '2025-01-15'
+learning:
+  mixing:
+    defaultMethod: spiral
+    allowedMethods:
+      - hand
+      - planetary
+      - spiral
+    targetDevelopment: moderate-gluten
+    article: mixing-dough-and-gluten-development
 defaultVariant: outdoor-oven
 variants:
   - id: outdoor-oven

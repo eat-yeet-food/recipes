@@ -10,6 +10,7 @@ import { ACTIVE_APP, APP_ID, APP_PATHS } from '#site-config'
 
 const ROOT = fileURLToPath(new URL('.', import.meta.url))
 const WEB_SRC = fileURLToPath(new URL('./packages/l8/web/src', import.meta.url))
+const ACTIVE_ARTICLE_MODULE = fileURLToPath(new URL(`./apps/${APP_ID}/src/articles.stub.ts`, import.meta.url))
 const ACTIVE_RECIPE_MODULE = fileURLToPath(new URL(`./apps/${APP_ID}/src/recipes.stub.ts`, import.meta.url))
 const ACTIVE_PAGE_BLOCKS_MODULE = fileURLToPath(new URL(`./apps/${APP_ID}/src/page-blocks.ts`, import.meta.url))
 const PUBLIC_APP_CONFIG = {
@@ -68,6 +69,7 @@ export default defineConfig({
   // public shapes through packages/l8/web/src/app-modules.d.ts.
   resolve: {
     alias: [
+      { find: '@app/articles', replacement: ACTIVE_ARTICLE_MODULE },
       { find: '@app/recipes', replacement: ACTIVE_RECIPE_MODULE },
       { find: '@app/page-blocks', replacement: ACTIVE_PAGE_BLOCKS_MODULE },
       { find: '@', replacement: WEB_SRC },

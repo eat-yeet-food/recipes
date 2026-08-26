@@ -1,0 +1,18 @@
+{
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "name": "l1-article-model",
+  "projectType": "library",
+  "sourceRoot": "src",
+  "tags": ["layer:l1", "scope:articles", "type:lib"],
+  "metadata": {
+    "tsConfig": "tsconfig.json"
+  },
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -b packages/l1/article-model/tsconfig.json --pretty false"
+      }
+    }
+  }
+}

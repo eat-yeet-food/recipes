@@ -205,32 +205,6 @@ body:has(.yeet) nav {
    are Tailwind utility classes directly on their elements in
    page-article.tsx and route-owned sidebar composition. */
 
-.yeet [data-yeet-browse] a {
-  color: inherit;
-  box-shadow: none;
-  text-decoration: none;
-}
-
-.yeet [data-yeet-browse] a:hover {
-  color: inherit;
-  box-shadow: none;
-}
-
-.yeet [data-yeet-browse] h3 {
-  border: 0;
-  margin: 0;
-  padding: 0;
-  font-size: 24px;
-  line-height: 1.08;
-  text-align: center;
-}
-
-.yeet [data-yeet-browse] p,
-.yeet [data-yeet-browse] svg,
-.yeet [data-yeet-browse] a > div:last-child > div:last-child {
-  display: none;
-}
-
 .yeet .yeet-crumbs,
 .yeet .yeet-byline,
 .yeet .yeet-kicker,
@@ -250,24 +224,6 @@ body:has(.yeet) nav {
 .yeet-crumbs a,
 .yeet-crumbs span {
   color: var(--yeet-gray);
-  box-shadow: none;
-}
-
-.yeet-actions a {
-  color: var(--yeet-gray);
-  text-decoration: none;
-  box-shadow: none;
-}
-
-.yeet-card-actions a {
-  color: var(--color-white);
-  text-decoration: none;
-  box-shadow: none;
-}
-
-.yeet-actions a:hover,
-.yeet-card-actions a:hover {
-  color: var(--color-white);
   box-shadow: none;
 }
 

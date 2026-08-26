@@ -83,11 +83,11 @@ await desktop.waitForURL('**/recipes/new-york-style-pizza')
 const outdoorFacts = await desktop.evaluate(() => document.body.textContent ?? '')
 check('default variant clears URL param', desktop.url().endsWith('/recipes/new-york-style-pizza'), desktop.url())
 check('outdoor variant restores dough formula', outdoorFacts.includes('900g') && outdoorFacts.includes('612g cold water'))
-await desktop.locator('.yeet-card-actions button:has-text("Cook Mode")').click()
+await desktop.locator('[data-recipe-card-actions] button:has-text("Cook Mode")').click()
 await desktop.waitForTimeout(200)
 check(
   'cook mode hides browse sidebar',
-  await desktop.locator('[data-yeet-browse]').evaluate((el) => getComputedStyle(el).display === 'none'),
+  await desktop.locator('[data-yeet-browse]').count() === 0,
 )
 check(
   'cook mode marks article root',

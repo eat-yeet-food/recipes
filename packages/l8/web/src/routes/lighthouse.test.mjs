@@ -5,7 +5,7 @@
  * held at 95+ here, with axe covering concrete WCAG violations separately.
  */
 
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -19,13 +19,22 @@ import { startStatic } from '#web-test/static-server'
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', '..', '..')
 const OUT = join(ROOT, '.output', 'public')
 const INDEX = JSON.parse(readFileSync(join(RESOLVED_APP_PATHS.generatedDir, 'index.json'), 'utf8'))
+const ARTICLE_INDEX_FILE = join(RESOLVED_APP_PATHS.generatedDir, 'articles', 'index.json')
+const ARTICLE_INDEX = existsSync(ARTICLE_INDEX_FILE) ? JSON.parse(readFileSync(ARTICLE_INDEX_FILE, 'utf8')) : []
 const MIN = {
   accessibility: Number(process.env.LH_ACCESSIBILITY_MIN ?? 0.95),
   seo: Number(process.env.LH_SEO_MIN ?? 1),
 }
 const ROUTE_TIMEOUT_MS = Number(process.env.LH_ROUTE_TIMEOUT_MS ?? 45_000)
 
-const paths = ['/', '/recipes', '/browse', `/recipes/${INDEX[0].slug}`]
+const paths = [
+  '/',
+  '/recipes',
+  '/browse',
+  '/learn',
+  `/recipes/${INDEX[0].slug}`,
+  ...(ARTICLE_INDEX[0] ? [`/learn/${ARTICLE_INDEX[0].slug}`] : []),
+]
 const server = await startStatic(OUT)
 const failures = []
 

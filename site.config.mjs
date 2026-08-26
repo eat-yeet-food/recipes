@@ -86,14 +86,19 @@ export const APP_CATEGORIES = ACTIVE_APP.categories
  * why the search page must render its unfiltered state on the first client
  * pass. See the note in src/routes/search.tsx.
  */
-export function allPaths(index) {
-  return [...STATIC_PATHS, ...index.map((recipe) => `/recipes/${recipe.slug}`)]
+export function allPaths(index, articles = []) {
+  return [
+    ...STATIC_PATHS,
+    ...index.map((recipe) => `/recipes/${recipe.slug}`),
+    ...articles.map((article) => `/learn/${article.slug}`),
+  ]
 }
 
 /** Crawlable URLs for sitemap.xml. Interactive/noindex pages stay out. */
-export function sitemapPaths(index) {
+export function sitemapPaths(index, articles = []) {
   return [
     ...SITEMAP_STATIC_PATHS,
     ...index.map((recipe) => ({ loc: `/recipes/${recipe.slug}`, lastmod: recipe.created })),
+    ...articles.map((article) => ({ loc: `/learn/${article.slug}`, lastmod: article.created })),
   ].map((entry) => (typeof entry === 'string' ? { loc: entry } : entry))
 }

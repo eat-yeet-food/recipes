@@ -22,7 +22,10 @@ import { RESOLVED_APP_PATHS } from '../scripts/app-paths.mjs'
 const ROOT = join(import.meta.dirname, '..')
 const OUT = join(ROOT, '.output', 'public')
 const INDEX = JSON.parse(readFileSync(join(RESOLVED_APP_PATHS.generatedDir, 'index.json'), 'utf8'))
+const ARTICLE_INDEX_FILE = join(RESOLVED_APP_PATHS.generatedDir, 'articles', 'index.json')
+const ARTICLE_INDEX = existsSync(ARTICLE_INDEX_FILE) ? JSON.parse(readFileSync(ARTICLE_INDEX_FILE, 'utf8')) : []
 const firstRecipe = INDEX[0]
+const firstArticle = ARTICLE_INDEX[0]
 
 const failures = []
 const check = (name, ok, detail = '') => {
@@ -121,6 +124,14 @@ assertSeo({
 })
 
 assertSeo({
+  path: '/learn',
+  title: APP_COPY.pages.learnTitle,
+  description: APP_COPY.pages.learnDescription,
+  ogType: 'website',
+  ogImage: `${SITE_URL}${DEFAULT_OG_IMAGE}`,
+})
+
+assertSeo({
   path: `/recipes/${firstRecipe.slug}`,
   title: `${firstRecipe.title} | ${APP_COPY.pages.recipeTitleSuffix}`,
   description: firstRecipe.description,
@@ -128,7 +139,19 @@ assertSeo({
   ogImage: `${SITE_URL}/images/${firstRecipe.image}?v=${firstRecipe.imageHash}`,
 })
 
-for (const path of allPaths(INDEX)) {
+if (firstArticle) {
+  assertSeo({
+    path: `/learn/${firstArticle.slug}`,
+    title: `${firstArticle.title} | ${APP_COPY.pages.articleTitleSuffix}`,
+    description: firstArticle.description,
+    ogType: 'article',
+    ogImage: firstArticle.image
+      ? `${SITE_URL}/images/${firstArticle.image}?v=${firstArticle.imageHash}`
+      : `${SITE_URL}${DEFAULT_OG_IMAGE}`,
+  })
+}
+
+for (const path of allPaths(INDEX, ARTICLE_INDEX)) {
   const head = headData(readPage(path))
   check(`${path} has one canonical`, head.links.filter((link) => link.rel === 'canonical').length === 1)
   check(`${path} has one title`, head.title.length > 0)

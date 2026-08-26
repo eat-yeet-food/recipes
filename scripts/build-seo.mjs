@@ -23,6 +23,8 @@ if (!existsSync(OUT)) {
 }
 
 const index = JSON.parse(readFileSync(join(RESOLVED_APP_PATHS.generatedDir, 'index.json'), 'utf8'))
+const articleIndexPath = join(RESOLVED_APP_PATHS.generatedDir, 'articles', 'index.json')
+const articleIndex = existsSync(articleIndexPath) ? JSON.parse(readFileSync(articleIndexPath, 'utf8')) : []
 
 const escapeXml = (s) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
@@ -32,7 +34,7 @@ const escapeXml = (s) =>
  * one interactive page whose filters live in query params, and pointing a
  * crawler at it only competes with the recipe pages it links to.
  */
-const urls = sitemapPaths(index)
+const urls = sitemapPaths(index, articleIndex)
 
 const sitemap = [
   '<?xml version="1.0" encoding="UTF-8"?>',
@@ -86,7 +88,7 @@ Sitemap: ${SITE_URL}/sitemap.xml
  */
 const PAGE_CACHE_CONTROL = 'public, max-age=300, must-revalidate'
 
-const pageRules = allPaths(index)
+const pageRules = allPaths(index, articleIndex)
   .map((path) => `${path}\n  Cache-Control: ${PAGE_CACHE_CONTROL}\n`)
   .join('\n')
 

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 
 import { Book, Printer, Share2 } from 'lucide-react'
+import { cn } from '@eat-yeet/l0-foundation/utils'
 import { imageUrl } from '@eat-yeet/l1-recipe-model/recipes'
 import type { RecipeVariantSummary } from '@eat-yeet/l1-recipe-model/recipes'
 import { labelize } from '@eat-yeet/l2-recipe-domain/format'
@@ -76,7 +77,7 @@ function RecipeArticleHeader({
           </span>
         )}
       </div>
-      <div className="yeet-actions flex flex-wrap gap-1 mt-7 mb-7" aria-label="Page actions">
+      <div className="flex flex-wrap gap-1 mt-7 mb-7" aria-label="Page actions">
         <RecipeAction variant="hero" href={pinUrl.toString()} target="_blank" rel="noreferrer">
           <Share2 className="size-3 max-[640px]:hidden" />
           Pin Recipe
@@ -252,7 +253,10 @@ export function RecipeArticle({
       media={photo ? <img src={photo} alt={heroAlt} className="w-full max-h-[690px] object-cover" /> : undefined}
       mediaClassName={cookMode ? 'hidden' : undefined}
       mainClassName={cookMode ? 'grid-cols-1 max-w-[816px] pt-6' : undefined}
-      articleClassName={cookMode ? 'mt-0 shadow-none' : undefined}
+      articleClassName={cn(
+        'yeet-card bg-white border-2 border-[var(--yeet-gray)] px-9 pb-[38px] pt-[34px] shadow-[18px_18px_0_var(--yeet-pink)] max-[900px]:shadow-[10px_10px_0_var(--yeet-pink)] max-[640px]:px-[22px] max-[640px]:pb-[30px] max-[640px]:pt-[26px]',
+        cookMode && 'mt-0 shadow-none',
+      )}
       aside={aside?.({ page, cookMode })}
     />
   )

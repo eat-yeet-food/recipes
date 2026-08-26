@@ -1,0 +1,18 @@
+{
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "name": "l7-learn",
+  "projectType": "library",
+  "sourceRoot": "src",
+  "tags": ["layer:l7", "scope:learn", "type:feature"],
+  "metadata": {
+    "tsConfig": "tsconfig.json"
+  },
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -b packages/l7/learn/tsconfig.json --pretty false"
+      }
+    }
+  }
+}

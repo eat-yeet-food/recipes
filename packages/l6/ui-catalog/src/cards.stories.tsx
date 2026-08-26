@@ -1,10 +1,11 @@
 import type { ReactNode } from 'react'
 
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import type { ArticleSummary } from '@eat-yeet/l1-article-model/articles'
 import type { RecipeSummary } from '@eat-yeet/l1-recipe-model/recipes'
 import type { SearchParams } from '@eat-yeet/l2-recipe-domain/search'
 
-import { BrowseCard, RecipeCard, RecipeGrid, SectionHeading } from './cards'
+import { ArticleCard, BrowseCard, RecipeCard, RecipeGrid, SectionHeading } from './cards'
 
 const recipes: RecipeSummary[] = [
   {
@@ -108,6 +109,35 @@ const categories: Array<{ label: string; imageUrl: string; search: SearchParams 
   { label: 'Desserts', imageUrl: '/images/categories/desserts.webp', search: { category: 'desserts' } },
 ]
 
+const articles: ArticleSummary[] = [
+  {
+    slug: 'mixing-dough-and-gluten-development',
+    title: 'Mixing Dough and Gluten Development',
+    order: 1,
+    description: 'Choose the right mixing method and development target for pizza, bread, sourdough, and enriched doughs.',
+    type: 'guide',
+    category: 'dough',
+    tags: ['bread', 'pizza', 'sourdough'],
+    image: 'hand-mixing-dough.jpg',
+    imageHash: '',
+    created: '2026-08-25',
+    searchText: 'mixing dough gluten development',
+  },
+  {
+    slug: 'spiral-mixer-dough',
+    title: 'Spiral Mixer Dough',
+    order: 4,
+    description: 'Mix bread, pizza, sourdough, and enriched doughs in a spiral mixer with temperature in mind.',
+    type: 'technique',
+    category: 'dough',
+    tags: ['bread', 'pizza'],
+    image: 'spiral-mixer-dough.jpg',
+    imageHash: '',
+    created: '2026-08-25',
+    searchText: 'spiral mixer dough',
+  },
+]
+
 function StorySection({ eyebrow, title, children }: { eyebrow: string; title: string; children: ReactNode }) {
   return (
     <section data-storybook-section="">
@@ -171,6 +201,25 @@ export const BrowseCards: Story = {
               imageUrl={category.imageUrl}
               search={category.search}
             />
+          ))}
+        </div>
+      </StorySection>
+    </StoryCanvas>
+  ),
+}
+
+export const ArticleCards: Story = {
+  render: () => (
+    <StoryCanvas>
+      <StorySection eyebrow="Cards" title="Article Cards">
+        <div data-storybook-card-row="">
+          {articles.map((article) => (
+            <ArticleCard key={article.slug} article={article} />
+          ))}
+        </div>
+        <div className="mt-8 grid max-w-[300px] gap-[26px]">
+          {articles.map((article) => (
+            <ArticleCard key={article.slug} article={article} />
           ))}
         </div>
       </StorySection>

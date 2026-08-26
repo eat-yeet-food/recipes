@@ -1,0 +1,8 @@
+{
+  "name": "@eat-yeet/l1-article-model",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./articles": "./src/articles.ts"
+  }
+}

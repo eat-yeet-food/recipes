@@ -5,7 +5,7 @@
  * browser never needs a markdown parser — the shipped file carries plain data.
  */
 
-import { readdirSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { marked } from 'marked'
 import yaml from 'js-yaml'
@@ -13,6 +13,18 @@ import yaml from 'js-yaml'
 const SECTIONED = new Set(['equipment', 'ingredients', 'steps'])
 const LEGACY_BODY_FIELDS = new Set(['equipment', 'ingredients', 'steps', 'notes', 'tips'])
 const IMAGE_LAYOUTS = new Set(['vertical', 'flex', 'grid'])
+const IMAGE_ASPECTS = new Set(['natural', 'landscape', 'square', 'portrait'])
+const SECTION_LAYOUTS = new Set(['prose', 'split', 'feature'])
+const CALLOUT_TONES = new Set(['note', 'tip', 'warning'])
+const ARTICLE_TYPES = new Set(['guide', 'technique', 'reference'])
+const MIXING_METHODS = new Set(['hand', 'planetary', 'spiral'])
+const DOUGH_DEVELOPMENT_METHODS = new Set([
+  'stretch-and-folds',
+  'coil-folds',
+  'slap-and-folds',
+  'rubaud',
+  'bassinage',
+])
 const SAFE_URL_BASE = 'https://example.com'
 
 const decodeEntities = (text) =>
@@ -181,7 +193,8 @@ function normalizeImageLayout(layout = {}) {
   const value = layout && typeof layout === 'object' ? layout : {}
   const mode = IMAGE_LAYOUTS.has(value.mode) ? value.mode : 'vertical'
   const columns = [1, 2, 3].includes(value.columns) ? value.columns : undefined
-  return { mode, ...(columns ? { columns } : {}) }
+  const aspect = IMAGE_ASPECTS.has(value.aspect) ? value.aspect : undefined
+  return { mode, ...(columns ? { columns } : {}), ...(aspect ? { aspect } : {}) }
 }
 
 function normalizeImageBlock(block) {
@@ -198,6 +211,60 @@ function normalizeImageBlock(block) {
     : null
 }
 
+function normalizeSectionBlock(block) {
+  const layout = SECTION_LAYOUTS.has(block.layout) ? block.layout : 'prose'
+  const columns = list(block.columns ?? (block.blocks ? [{ blocks: block.blocks }] : []))
+    .map((column) => {
+      const blocks = normalizeNestedBlocks(column?.blocks ?? column)
+      return blocks.length > 0 ? { blocks } : null
+    })
+    .filter(Boolean)
+
+  return columns.length > 0 ? { type: 'section', layout, columns } : null
+}
+
+function normalizeCalloutBlock(block) {
+  const title = renderMarkdown(block.title)
+  const html = renderMarkdownBlock(block.markdown ?? block.text ?? '')
+  const tone = CALLOUT_TONES.has(block.tone) ? block.tone : 'note'
+
+  return title || html ? { type: 'callout', tone, title, html } : null
+}
+
+function normalizeStepsBlock(block) {
+  const items = list(block.items)
+    .map((item) => {
+      if (typeof item === 'string') {
+        const html = renderMarkdownBlock(item)
+        return html ? { title: '', html } : null
+      }
+
+      const title = renderMarkdown(item?.title)
+      const html = renderMarkdownBlock(item?.markdown ?? item?.text ?? item?.description ?? '')
+      return title || html ? { title, html } : null
+    })
+    .filter(Boolean)
+
+  return items.length > 0
+    ? { type: 'steps', title: renderMarkdown(block.title), items }
+    : null
+}
+
+function normalizeComparisonBlock(block) {
+  const columns = list(block.columns).map(renderMarkdown).filter(Boolean)
+  const rows = list(block.rows)
+    .map((row) => {
+      const label = renderMarkdown(row?.label)
+      const values = list(row?.values).map(renderMarkdownBlock).filter(Boolean)
+      return label && values.length > 0 ? { label, values } : null
+    })
+    .filter(Boolean)
+
+  return columns.length > 0 && rows.length > 0
+    ? { type: 'comparison', title: renderMarkdown(block.title), columns, rows }
+    : null
+}
+
 function normalizeYouTubeId(value) {
   const text = String(value ?? '').trim()
   return /^[\w-]{6,}$/.test(text) ? text : ''
@@ -211,6 +278,14 @@ function normalizeBlock(block) {
     }
     case 'image':
       return normalizeImageBlock(block)
+    case 'section':
+      return normalizeSectionBlock(block)
+    case 'callout':
+      return normalizeCalloutBlock(block)
+    case 'steps':
+      return normalizeStepsBlock(block)
+    case 'comparison':
+      return normalizeComparisonBlock(block)
     case 'recipe': {
       const body = normalizeRecipePayload(block)
       return body.equipment.length || body.ingredients.length || body.steps.length || body.notes.length || body.tips.length
@@ -227,8 +302,12 @@ function normalizeBlock(block) {
   }
 }
 
+function normalizeNestedBlocks(value) {
+  return list(value).map(normalizeBlock).filter(Boolean)
+}
+
 function normalizeBlocks(value, slug) {
-  const blocks = list(value).map(normalizeBlock).filter(Boolean)
+  const blocks = normalizeNestedBlocks(value)
   if (blocks.length === 0) {
     throw new Error(`${slug}: recipe fixtures must define at least one valid block`)
   }
@@ -261,6 +340,92 @@ function normalizeVariants(value, data, baseBlocks, slug) {
     .filter(Boolean)
 }
 
+function oneOf(value, allowed, fallback = '') {
+  const normalized = text(value)
+  return allowed.has(normalized) ? normalized : fallback
+}
+
+function normalizeMixingLearning(value) {
+  if (!value || typeof value !== 'object') return undefined
+  const allowedMethods = list(value.allowedMethods).map((method) => oneOf(method, MIXING_METHODS)).filter(Boolean)
+  const defaultMethod = oneOf(value.defaultMethod, MIXING_METHODS, allowedMethods[0] ?? '')
+  const article = text(value.article)
+  const methodArticles =
+    value.methodArticles && typeof value.methodArticles === 'object'
+      ? Object.fromEntries(
+          Object.entries(value.methodArticles)
+            .map(([method, slug]) => [oneOf(method, MIXING_METHODS), text(slug)])
+            .filter(([method, slug]) => method && slug),
+        )
+      : {}
+
+  if (!defaultMethod || allowedMethods.length === 0 || !article) return undefined
+
+  return {
+    defaultMethod,
+    allowedMethods: allowedMethods.includes(defaultMethod) ? allowedMethods : [defaultMethod, ...allowedMethods],
+    targetDevelopment: text(value.targetDevelopment),
+    article,
+    methodArticles,
+  }
+}
+
+function normalizeDoughStrengthLearning(value) {
+  if (!value || typeof value !== 'object') return undefined
+  const methods = list(value.methods).map((method) => oneOf(method, DOUGH_DEVELOPMENT_METHODS)).filter(Boolean)
+  const article = text(value.article)
+  const methodArticles =
+    value.methodArticles && typeof value.methodArticles === 'object'
+      ? Object.fromEntries(
+          Object.entries(value.methodArticles)
+            .map(([method, slug]) => [oneOf(method, DOUGH_DEVELOPMENT_METHODS), text(slug)])
+            .filter(([method, slug]) => method && slug),
+        )
+      : {}
+
+  return methods.length > 0 && article ? { methods, article, methodArticles } : undefined
+}
+
+function normalizeLearningReference(value) {
+  if (!value || typeof value !== 'object') return null
+  const article = text(value.article)
+  const label = text(value.label)
+  return article && label ? { article, label } : null
+}
+
+function normalizeFinalDoughTemperature(value) {
+  if (!value || typeof value !== 'object') return undefined
+  const article = text(value.article)
+  const range = list(value.rangeF)
+  const rangeF =
+    range.length === 2 && range.every((part) => typeof part === 'number')
+      ? [range[0], range[1]]
+      : null
+
+  if (!article) return undefined
+
+  return {
+    targetF: num(value.targetF),
+    rangeF,
+    reason: text(value.reason),
+    article,
+  }
+}
+
+function normalizeLearning(value) {
+  if (!value || typeof value !== 'object') return undefined
+  const learning = {
+    mixing: normalizeMixingLearning(value.mixing),
+    doughStrength: normalizeDoughStrengthLearning(value.doughStrength),
+    handling: list(value.handling).map(normalizeLearningReference).filter(Boolean),
+    finalDoughTemperature: normalizeFinalDoughTemperature(value.finalDoughTemperature),
+  }
+
+  return learning.mixing || learning.doughStrength || learning.handling.length || learning.finalDoughTemperature
+    ? learning
+    : undefined
+}
+
 function searchTextForBlocks(blocks) {
   return blocks.flatMap((block) => {
     switch (block.type) {
@@ -268,6 +433,21 @@ function searchTextForBlocks(blocks) {
         return [stripTags(block.html)]
       case 'image':
         return block.images.flatMap((image) => [image.alt, stripTags(image.caption ?? '')])
+      case 'section':
+        return block.columns.flatMap((column) => searchTextForBlocks(column.blocks))
+      case 'callout':
+        return [block.title, stripTags(block.html)]
+      case 'steps':
+        return [
+          block.title,
+          ...block.items.flatMap((item) => [item.title, stripTags(item.html)]),
+        ]
+      case 'comparison':
+        return [
+          block.title,
+          ...block.columns,
+          ...block.rows.flatMap((row) => [row.label, ...row.values.map(stripTags)]),
+        ]
       case 'recipe':
         return [
           sectionText(block.ingredients),
@@ -353,6 +533,7 @@ export function parseRecipe(source, fallbackSlug) {
     image: data.image ?? '',
     created: isoDate(data.created),
     blocks,
+    learning: normalizeLearning(data.learning),
   }
 
   recipe.searchText = searchTextFor(recipe)
@@ -364,6 +545,54 @@ export function loadRecipes(dir) {
   return readdirSync(dir)
     .filter((f) => /\.ya?ml$/.test(f))
     .map((file) => parseRecipe(readFileSync(join(dir, file), 'utf8'), file.replace(/\.ya?ml$/, '')))
+    .sort((a, b) => {
+      if (a.order !== null && b.order !== null && a.order !== b.order) return a.order - b.order
+      if (a.order !== null && b.order === null) return -1
+      if (a.order === null && b.order !== null) return 1
+      return (b.created ?? '').localeCompare(a.created ?? '') || a.title.localeCompare(b.title)
+    })
+}
+
+function articleSearchTextFor(data) {
+  return [
+    data.title,
+    data.description,
+    data.type,
+    data.category,
+    ...list(data.tags),
+    searchTextForBlocks(data.blocks),
+  ]
+    .join(' ')
+    .toLowerCase()
+}
+
+export function parseArticle(source, fallbackSlug) {
+  const data = yaml.load(source) ?? {}
+  const slug = text(data.slug) || fallbackSlug
+  const blocks = normalizeBlocks(data.blocks, slug)
+  const article = {
+    slug,
+    title: text(data.title) || labelFromId(fallbackSlug),
+    order: num(data.order),
+    description: text(data.description),
+    type: oneOf(data.type, ARTICLE_TYPES, 'guide'),
+    category: text(data.category),
+    tags: list(data.tags).map(text).filter(Boolean),
+    image: text(data.image),
+    created: isoDate(data.created),
+    blocks,
+  }
+
+  article.searchText = articleSearchTextFor(article)
+  return article
+}
+
+export function loadArticles(dir) {
+  if (!existsSync(dir)) return []
+
+  return readdirSync(dir)
+    .filter((f) => /\.ya?ml$/.test(f))
+    .map((file) => parseArticle(readFileSync(join(dir, file), 'utf8'), file.replace(/\.ya?ml$/, '')))
     .sort((a, b) => {
       if (a.order !== null && b.order !== null && a.order !== b.order) return a.order - b.order
       if (a.order !== null && b.order === null) return -1

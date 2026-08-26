@@ -37,6 +37,7 @@
   },
   "dependencies": {
     "@eat-yeet/l0-foundation": "workspace:*",
+    "@eat-yeet/l1-article-model": "workspace:*",
     "@eat-yeet/l1-api-model": "workspace:*",
     "@eat-yeet/l1-recipe-model": "workspace:*",
     "@eat-yeet/l2-recipe-domain": "workspace:*",
@@ -50,6 +51,7 @@
     "@eat-yeet/l6-ui-content-blocks": "workspace:*",
     "@eat-yeet/l6-ui-shell": "workspace:*",
     "@eat-yeet/l7-home": "workspace:*",
+    "@eat-yeet/l7-learn": "workspace:*",
     "@eat-yeet/l7-recipes": "workspace:*",
     "@eat-yeet/l7-search": "workspace:*",
     "@tanstack/react-router": "^1.163.3",

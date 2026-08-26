@@ -1,4 +1,12 @@
-export type PageBlock = MarkdownBlock | ImageBlock | RecipeBlock | YouTubeBlock
+export type PageBlock =
+  | MarkdownBlock
+  | ImageBlock
+  | SectionBlock
+  | CalloutBlock
+  | StepsBlock
+  | ComparisonBlock
+  | RecipeBlock
+  | YouTubeBlock
 
 export interface Section {
   title: string
@@ -15,12 +23,47 @@ export interface ImageBlock {
   layout: {
     mode: 'vertical' | 'flex' | 'grid'
     columns?: 1 | 2 | 3
+    aspect?: 'natural' | 'landscape' | 'square' | 'portrait'
   }
   images: Array<{
     src: string
     alt: string
     caption?: string
     imageHash?: string
+  }>
+}
+
+export interface SectionBlock {
+  type: 'section'
+  layout: 'prose' | 'split' | 'feature'
+  columns: Array<{
+    blocks: PageBlock[]
+  }>
+}
+
+export interface CalloutBlock {
+  type: 'callout'
+  tone: 'note' | 'tip' | 'warning'
+  title: string
+  html: string
+}
+
+export interface StepsBlock {
+  type: 'steps'
+  title: string
+  items: Array<{
+    title: string
+    html: string
+  }>
+}
+
+export interface ComparisonBlock {
+  type: 'comparison'
+  title: string
+  columns: string[]
+  rows: Array<{
+    label: string
+    values: string[]
   }>
 }
 

@@ -5,7 +5,9 @@
 
 import { Link } from '@tanstack/react-router'
 
-import { Clock, UtensilsCrossed } from 'lucide-react'
+import { BookOpen, Clock, UtensilsCrossed } from 'lucide-react'
+import { cn } from '@eat-yeet/l0-foundation/utils'
+import { articleImageUrl, type ArticleSummary } from '@eat-yeet/l1-article-model/articles'
 import { humanizeMinutes, formatYield } from '@eat-yeet/l2-recipe-domain/format'
 import { imageUrl, type RecipeSummary } from '@eat-yeet/l1-recipe-model/recipes'
 import type { SearchParams } from '@eat-yeet/l2-recipe-domain/search'
@@ -25,9 +27,20 @@ export function SectionHeading({ eyebrow, title }: { eyebrow: string; title: str
   )
 }
 
-const CardFallback = () => (
+const CATALOG_CARD_LINK_CLASS =
+  'group flex flex-col overflow-hidden rounded-lg bg-white !text-ink no-underline !shadow-sm transition-card-hover will-change-[translate,box-shadow] hover:-translate-y-1 hover:!text-ink hover:no-underline hover:!shadow-card-hover'
+
+const CATALOG_CARD_TITLE_CLASS = 'min-h-[2.5em] text-[22px] max-sm:text-[19px]'
+const CATALOG_CARD_DESCRIPTION_CLASS =
+  'line-clamp-3 min-h-[4.875em] text-sm leading-relaxed text-ink/65'
+
+const CardFallback = ({ icon = 'recipe' }: { icon?: 'recipe' | 'article' }) => (
   <div className="absolute inset-0 bg-warm-deep flex items-center justify-center">
-    <UtensilsCrossed className="size-10 text-ink/15" strokeWidth="1.25" />
+    {icon === 'article' ? (
+      <BookOpen className="size-10 text-ink/15" strokeWidth="1.25" />
+    ) : (
+      <UtensilsCrossed className="size-10 text-ink/15" strokeWidth="1.25" />
+    )}
   </div>
 )
 
@@ -41,7 +54,7 @@ export function RecipeCard({ recipe }: { recipe: RecipeSummary }) {
     <Link
       to="/recipes/$slug"
       params={{ slug: recipe.slug }}
-      className="group flex flex-col overflow-hidden rounded-lg bg-white shadow-sm transition-card-hover will-change-[translate,box-shadow] hover:-translate-y-1 hover:shadow-card-hover"
+      className={CATALOG_CARD_LINK_CLASS}
     >
       <div className="relative aspect-[3/2] w-full overflow-hidden">
         {src ? (
@@ -60,11 +73,13 @@ export function RecipeCard({ recipe }: { recipe: RecipeSummary }) {
         )}
       </div>
       <div className="flex flex-1 flex-col p-6 max-sm:p-5">
-        <h3 className="font-display text-[22px] font-extrabold leading-tight text-ink max-sm:text-[19px]">
+        <h3
+          className={cn('font-display font-extrabold leading-tight text-ink', CATALOG_CARD_TITLE_CLASS)}
+        >
           {recipe.title}
         </h3>
         <div className="mt-2.5 flex-1">
-          <p className="line-clamp-3 text-sm leading-relaxed text-ink/65">
+          <p className={CATALOG_CARD_DESCRIPTION_CLASS}>
             {recipe.description}
           </p>
         </div>
@@ -84,6 +99,57 @@ export function RecipeCard({ recipe }: { recipe: RecipeSummary }) {
             )}
           </div>
         )}
+      </div>
+    </Link>
+  )
+}
+
+const ARTICLE_TYPE_LABELS = {
+  guide: 'Guide',
+  technique: 'Technique',
+  reference: 'Reference',
+} satisfies Record<ArticleSummary['type'], string>
+
+/** Article summary card using the same card system as recipes. */
+export function ArticleCard({ article }: { article: ArticleSummary }) {
+  const src = articleImageUrl(article)
+
+  return (
+    <Link
+      to="/learn/$slug"
+      params={{ slug: article.slug }}
+      className={CATALOG_CARD_LINK_CLASS}
+    >
+      <div className="relative aspect-[3/2] w-full overflow-hidden">
+        {src ? (
+          <div className="absolute inset-0 bg-warm-deep">
+            <img
+              src={src}
+              alt={article.title}
+              width="800"
+              height="533"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              className="absolute inset-0 h-full w-full object-cover transition-image-zoom group-hover:scale-[1.06]"
+            />
+          </div>
+        ) : (
+          <CardFallback icon="article" />
+        )}
+      </div>
+      <div className="flex flex-1 flex-col p-6 max-sm:p-5">
+        <p className="mb-2 text-[11px] font-semibold uppercase tracking-[2px] text-support-strong">
+          {ARTICLE_TYPE_LABELS[article.type]}
+        </p>
+        <h3
+          className={cn('font-display font-extrabold leading-tight text-ink', CATALOG_CARD_TITLE_CLASS)}
+        >
+          {article.title}
+        </h3>
+        <div className="mt-2.5 flex-1">
+          <p className={CATALOG_CARD_DESCRIPTION_CLASS}>
+            {article.description}
+          </p>
+        </div>
       </div>
     </Link>
   )

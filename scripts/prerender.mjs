@@ -27,7 +27,9 @@ if (!existsSync(SERVER)) {
 }
 
 const index = JSON.parse(readFileSync(join(RESOLVED_APP_PATHS.generatedDir, 'index.json'), 'utf8'))
-const paths = allPaths(index)
+const articleIndexPath = join(RESOLVED_APP_PATHS.generatedDir, 'articles', 'index.json')
+const articleIndex = existsSync(articleIndexPath) ? JSON.parse(readFileSync(articleIndexPath, 'utf8')) : []
+const paths = allPaths(index, articleIndex)
 
 function reservePort() {
   return new Promise((resolve, reject) => {
