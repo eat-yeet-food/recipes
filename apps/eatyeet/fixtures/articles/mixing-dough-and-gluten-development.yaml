@@ -43,13 +43,21 @@ blocks:
     markdown: |
       ## Terms worth knowing
 
-      The windowpane test is a way to check gluten development. Pinch off a small piece of dough and gently stretch it; if it can get thin enough for light to pass through before tearing, the dough has a strong gluten network. King Arthur has a clear [windowpane walkthrough](https://www.kingarthurbaking.com/blog/2022/10/14/what-is-the-windowpane-test-for-bread-dough).
+      - **Windowpane test:** A way to check gluten development. Pinch off a small piece of dough and gently stretch it; if it can get thin enough for light to pass through before tearing, the dough has a strong gluten network. King Arthur has a clear [windowpane walkthrough](https://www.kingarthurbaking.com/blog/2022/10/14/what-is-the-windowpane-test-for-bread-dough).
 
-      A full windowpane is not always the early goal. Same-day sandwich bread or enriched dough often needs more development during mixing because it will be shaped soon. Doughs that rest for many hours or overnight can start with a weaker windowpane because hydration, folds, and time continue organizing gluten while the dough rests.
+      - **Full windowpane:** Not always the early goal. Same-day sandwich bread or enriched dough often needs more development during mixing because it will be shaped soon. Doughs that rest for many hours or overnight can start with a weaker windowpane because hydration, folds, and time continue organizing gluten while the dough rests.
 
-      Bulk fermentation is the first rise after mixing, before shaping. Proofing is the final rise after shaping. Hydration is the amount of water compared with flour, so a 70% hydration dough has 70g water for every 100g flour.
+      - **Bulk fermentation:** The first rise after mixing, before shaping.
 
-      A starter is a live sourdough culture used to ferment dough instead of, or alongside, commercial yeast. An autolyse is a rest after flour and water are mixed but before the final mix; it gives flour time to hydrate and can make dough easier to stretch. King Arthur's [autolyse guide](https://www.kingarthurbaking.com/blog/2017/09/29/autolyse-sourdough) goes deeper.
+      - **Proofing:** The final rise after shaping.
+
+      - **Hydration:** The amount of water compared with flour, so a 70% hydration dough has 70g water for every 100g flour.
+
+      - **Starter:** A live sourdough culture used to ferment dough instead of, or alongside, commercial yeast.
+
+      - **Autolyse:** A rest after flour and water are mixed but before the final mix; it gives flour time to hydrate and can make dough easier to stretch. King Arthur's [autolyse guide](https://www.kingarthurbaking.com/blog/2017/09/29/autolyse-sourdough) goes deeper.
+
+      - **Proteolysis:** Protein breakdown. A little helps dough relax and stretch, but too much breaks down the structure you were trying to build. King Arthur's sourdough acidity article explains the risk of [proteolytic activity and gluten degradation](https://www.kingarthurbaking.com/blog/2022/02/22/how-to-make-your-sourdough-bread-more-or-less-sour-part-3).
 
   - type: section
     layout: prose
@@ -99,11 +107,11 @@ blocks:
                 alt: Smooth enriched dough shaped into braided loaves
                 caption: Smooth enriched dough looks cohesive, supple, and glossy enough to shape cleanly.
 
-  - type: callout
-    tone: tip
-    title: Watch dough temperature
+  - type: markdown
     markdown: |
-      Dough temperature matters because fermentation time, dough strength, and final texture depend on temperature through mixing, bulk fermentation, proofing, and cold holding. Warm dough moves faster; if it stays warm too long, proteolysis can weaken gluten and leave the dough slack, sticky, or hard to shape. Proteolysis means protein breakdown. A little helps dough relax and stretch, but too much breaks down the structure you were trying to build. King Arthur's sourdough acidity article explains the risk of [proteolytic activity and gluten degradation](https://www.kingarthurbaking.com/blog/2022/02/22/how-to-make-your-sourdough-bread-more-or-less-sour-part-3).
+      ## Watch dough temperature
+
+      Dough temperature matters because fermentation time, dough strength, and final texture depend on temperature through mixing, bulk fermentation, proofing, and cold holding. Warm dough moves faster; if it stays warm too long, proteolysis can weaken gluten and leave the dough slack, sticky, or hard to shape.
 
       Use final dough temperature as the main control point, not a rule by itself. Same-day yeast dough often lands around 75-78F. Next-day sourdough can land around 75-77F, but warmer dough gives you less margin. Several-day cold proof pizza dough often benefits from a cooler finish around 71-72F.
 
