@@ -1,7 +1,7 @@
 slug: pollo-asado
 title: Pollo Asado
 order: 1
-description: 'Smoky chicken thighs marinated in a double batch of chipotle adobo, garlic, and rice bran oil. The extra sauce coats every piece generously, and a finishing salt dust seasons the char straight off the grill.'
+description: 'Smoky chicken thighs marinated in chipotle adobo, garlic, and rice bran oil. The sauce coats every piece generously, and a finishing salt dust seasons the char straight off the grill.'
 category: savory
 prepMinutes: 30
 cookMinutes: 15
@@ -29,9 +29,9 @@ blocks:
       - title: ''
         items:
           - '4 [chipotle peppers in adobo sauce](https://www.amazon.com/s?k=chipotles+in+adobo+sauce), from the can'
-          - '8 garlic cloves, peeled and trimmed'
-          - 6 tbsp rice bran oil (or any neutral oil)
-          - '1 tbsp salt, plus more for dusting after grilling'
+          - '4 garlic cloves, peeled and trimmed'
+          - 60g rice bran oil (or any neutral oil)
+          - '2g salt, plus more for dusting after grilling'
           - 3 lb boneless skinless chicken thighs
     steps:
       - title: ''
