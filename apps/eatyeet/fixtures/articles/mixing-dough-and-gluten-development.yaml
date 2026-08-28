@@ -1,5 +1,5 @@
 slug: mixing-dough-and-gluten-development
-title: Developing Dough and Mixing Methodologies
+title: Mixing Dough and Building Gluten
 order: 1
 type: guide
 category: dough
@@ -10,18 +10,20 @@ tags:
   - enriched-dough
 image: dough-development-header.jpg
 created: 2026-08-25
-description: Choose the right mixing method and development target for pizza, bread, sourdough, and enriched doughs.
+description: Learn how mixing builds gluten, how to tell when dough is developed enough, and how to choose a hand, stand-mixer, or spiral-mixer approach.
 
 blocks:
   - type: markdown
     markdown: |
-      ## Choose your mixing method
+      ## Building Structure
 
-      Mixing is not just combining flour and water. It hydrates flour, distributes salt and yeast or starter, organizes gluten, and changes dough temperature. Dough temperature matters because it controls how fast fermentation moves from this point forward: warmer dough rises faster, chills more slowly, and gives you less margin before the dough becomes over-fermented or weak.
+      The goal of mixing is to turn flour, water, salt, and yeast or starter into dough that is even, elastic, and strong enough to hold fermentation gas. You are not just waiting for the ingredients to combine; you are building structure while keeping the dough manageable for the recipe you are making.
 
-      Gluten is the stretchy protein network that helps dough trap fermentation gas and hold its shape; King Arthur has a useful [beginner guide to gluten](https://www.kingarthurbaking.com/blog/2021/08/18/a-beginners-guide-to-gluten) if you want the longer version. A recipe can give timing, but the better target is dough behavior: cohesive, elastic, extensible, and strong enough for the style you are making. Elastic means the dough springs back; extensible means it can stretch without tearing right away.
+      Once mixing starts, the dough usually looks shaggy, sticky, and uneven. As water works into the flour and the ingredients spread through the bowl, it gathers into a cohesive mass. With mixing, folds, or rest, that rough mass smooths out and becomes more elastic, springing back when you press or stretch it. As gluten continues organizing, the dough also becomes more extensible, stretching thinner before it tears. The target is enough strength and stretch for the bread, pizza, or pastry you are making.
 
-      The method changes how quickly you reach that behavior and how much friction heat you add while mixing. Friction heat is heat created by kneading or machine mixing; it is one reason a dough can leave the mixer warmer than the water you started with.
+      Gluten is the network that makes that strength and stretch possible. Wheat flour contains glutenin and gliadin proteins; once they are hydrated, mixing and resting help them link into strands that run through the dough like a web. During fermentation, gas collects inside that web. If the web is too weak, the bubbles tear through it and the dough collapses. If it is strong but not extensible enough, the bubbles cannot expand and the dough resists rise and oven spring. By the end of mixing, the dough should be organized enough to hold gas and flexible enough to expand around it. King Arthur has a useful [beginner guide to gluten](https://www.kingarthurbaking.com/blog/2021/08/18/a-beginners-guide-to-gluten) if you want the longer version.
+
+      Once you know how a recipe behaves, that understanding lets you adjust the method to fit your tools and preferences: more hand mixing, more rest, a shorter machine mix, or a different mixer speed, as long as the dough reaches the same structure.
 
   - type: image
     layout:
@@ -39,25 +41,18 @@ blocks:
         alt: Compact spiral mixer developing pizza dough
         caption: Spiral mixers develop dough efficiently and are useful for pizza, bread, sourdough, and larger batches.
 
+  # TODO: Take a windowpane photo and upload it later.
   - type: markdown
     markdown: |
-      ## Terms worth knowing
+      ## Stages of Development
 
-      - **Windowpane test:** A way to check gluten development. Pinch off a small piece of dough and gently stretch it; if it can get thin enough for light to pass through before tearing, the dough has a strong gluten network. King Arthur has a clear [windowpane walkthrough](https://www.kingarthurbaking.com/blog/2022/10/14/what-is-the-windowpane-test-for-bread-dough).
+      Dry flour disappears first. At the beginning, the main job is getting water into the flour. Scrape the bowl and fold through the dough until there are no dry pockets left.
 
-      - **Full windowpane:** Not always the early goal. Same-day sandwich bread or enriched dough often needs more development during mixing because it will be shaped soon. Doughs that rest for many hours or overnight can start with a weaker windowpane because hydration, folds, and time continue organizing gluten while the dough rests.
+      The surface begins to smooth after the flour is hydrated. Rest, folding, and mixing all help. The dough should feel less like torn paste and more like a stretchy sheet.
 
-      - **Bulk fermentation:** The first rise after mixing, before shaping.
+      For many breads and enriched doughs, the goal before shaping is a strong enough gluten network to pass the windowpane test. Pinch off a small piece and gently stretch it. If it can get thin enough for light to pass through before tearing, the dough has enough structure to hold fermentation gas through shaping, proofing, and baking. King Arthur has a clear [windowpane walkthrough](https://www.kingarthurbaking.com/blog/2022/10/14/what-is-the-windowpane-test-for-bread-dough).
 
-      - **Proofing:** The final rise after shaping.
-
-      - **Hydration:** The amount of water compared with flour, so a 70% hydration dough has 70g water for every 100g flour.
-
-      - **Starter:** A live sourdough culture used to ferment dough instead of, or alongside, commercial yeast.
-
-      - **Autolyse:** A rest after flour and water are mixed but before the final mix; it gives flour time to hydrate and can make dough easier to stretch. King Arthur's [autolyse guide](https://www.kingarthurbaking.com/blog/2017/09/29/autolyse-sourdough) goes deeper.
-
-      - **Proteolysis:** Protein breakdown. A little helps dough relax and stretch, but too much breaks down the structure you were trying to build. King Arthur's sourdough acidity article explains the risk of [proteolytic activity and gluten degradation](https://www.kingarthurbaking.com/blog/2022/02/22/how-to-make-your-sourdough-bread-more-or-less-sour-part-3).
+      A full windowpane is not necessary for every dough. Doughs that rest for many hours or cold proof over several days can start with a weaker windowpane because hydration, folds, and time continue organizing gluten while the dough rests. Doughs like Liege waffles also do not need the same strong, elastic sheet because they are enriched, pressed in a waffle iron, and should stay tender instead of developing like a tall loaf. Use the windowpane as evidence for recipes that need it, not as a rule for every mix.
 
   - type: section
     layout: prose
@@ -67,11 +62,13 @@ blocks:
             markdown: |
               ## Lean doughs
 
-              Lean doughs are mostly flour, water, salt, and yeast or starter. They usually tolerate direct mixing well. Mix until the dough is cohesive, then decide whether the formula needs moderate or full gluten development.
+              Lean doughs are mostly flour, water, salt, and yeast or sourdough starter. The first goal is an even dough: no dry flour, salt and yeast or starter distributed through the bowl, and enough structure that the dough moves as one mass.
 
-              If you use an autolyse, low-hydration doughs can be tougher to finish by hand because the rested dough starts firm and resists folding. I would usually skip autolyse for pizza dough that will rest for a day or longer; that long rest already gives flour time to hydrate and gluten time to organize. Wet hands help, but a short machine mix may be more realistic for stiff bagel-style dough.
+              From there, the goal depends on when the dough needs to be shaped. If it will be shaped soon, keep mixing or folding until it is smoother, more elastic, and strong enough for the recipe. If it will ferment for many hours, get folded during bulk, or cold proof for days, you can often stop earlier because time will keep hydrating the flour and organizing gluten.
 
-              Salt from the beginning also makes the rough-to-smooth stage take longer. It tightens the dough and slows hydration, so do not assume a rough surface means the mix has failed.
+              When salt is added at the beginning of the mix, the rough-to-smooth stage usually takes longer. Salt tightens the dough and slows hydration, so it will take the dough more work or time to develop.
+
+              If you want the dough to stretch more easily with less mixing, combine only the flour and water, let that rough dough rest, then add the salt and yeast or starter afterward. This approach is called an autolyse. It can help tight dough relax, but it is not always useful: long-rest pizza has hydration time naturally built into a proofing step that spans days. King Arthur's [autolyse guide](https://www.kingarthurbaking.com/blog/2017/09/29/autolyse-sourdough) goes deeper.
           - type: image
             layout:
               mode: grid
@@ -89,11 +86,11 @@ blocks:
             markdown: |
               ## Enriched doughs
 
-              Enriched doughs contain fat, sugar, eggs, milk, or butter. Fat can coat flour and slow gluten formation, so many doughs mix better when butter is delayed until the dough is already cohesive and elastic. Letting the dough rest for about 10 minutes before adding butter or other fat can also help gluten organize before the fat goes in.
+              Enriched doughs contain fat, sugar, eggs, milk, or butter. Fat can coat flour and slow gluten formation, so many doughs mix better when butter is delayed until the dough is already cohesive and elastic. Letting the dough rest for about 10 minutes before adding butter or other fat can also help gluten organize before the fat goes in. Butter should be pliable: cool, bendable, and able to incorporate without tearing the dough.
 
-              They are difficult to develop fully by hand, especially once butter or a lot of sugar is involved. A planetary mixer can still struggle because the dough may climb the hook, smear against the bowl, warm quickly, or look broken before it comes together.
+              Developing enriched dough fully by hand is possible, but it is a much longer and more demanding job once butter or a lot of sugar is involved. Work in short rounds of pressing, stretching, and folding with rests between them, rather than trying to knead it continuously. The finished dough should no longer look greasy or torn; it should feel smooth, elastic, and supple, hold together as a glossy mass, and stretch into a thin windowpane before it tears. This can take well over 30 minutes of active work, spread across those rests.
 
-              Butter should be pliable: cool, bendable, and able to incorporate without tearing the dough.
+              A planetary mixer usually reaches that final stage in about 10 to 20 minutes after the butter is fully incorporated; a spiral mixer may take 5 to 10 minutes. Those are starting ranges, not a target to chase. In either mixer, stop to scrape the bowl and pull the dough down from the hook when needed, then check for a smooth, elastic windowpane. A planetary mixer can make the dough climb the hook, smear against the bowl, and warm quickly. A spiral works faster, so check sooner and more often once the dough starts looking cohesive.
           - type: image
             layout:
               mode: grid
@@ -111,22 +108,27 @@ blocks:
     markdown: |
       ## Watch dough temperature
 
-      Dough temperature matters because fermentation time, dough strength, and final texture depend on temperature through mixing, bulk fermentation, proofing, and cold holding. Warm dough moves faster; if it stays warm too long, proteolysis can weaken gluten and leave the dough slack, sticky, or hard to shape.
+      Mixing builds gluten, but it also warms the dough. The temperature when mixing ends sets the pace for the rest of the recipe: warmer dough ferments sooner, while cooler dough gives you more time. The goal is to finish near the temperature the recipe expects, so the dough rises on schedule and keeps enough strength to shape and bake well.
 
-      Use final dough temperature as the main control point, not a rule by itself. Same-day yeast dough often lands around 75-78F. Next-day sourdough can land around 75-77F, but warmer dough gives you less margin. Several-day cold proof pizza dough often benefits from a cooler finish around 71-72F.
+      Check the final dough temperature as soon as mixing ends. Same-day yeast dough often lands around 75-78F. Next-day sourdough can land around 75-77F, but warmer dough gives you less margin before it gets ahead of its schedule. Several-day cold-proof pizza dough often benefits from a cooler finish around 71-72F. When dough finishes too warm, its first rise moves quickly and it can become slack, sticky, and difficult to shape sooner than the recipe suggests.
 
+      Spiral mixers can add heat quickly through mixing friction. When a dough needs a cool final temperature, use very cold water or replace part of the mix water with crushed ice. Weigh the ice as part of the recipe's total water; it melts as you mix and absorbs some of that friction heat.
+
+      Enriched dough often needs a longer final mix, so cool butter helps keep the dough from getting too warm while it develops. The butter still needs to be pliable enough to incorporate cleanly. To get both, place very cold butter between sheets of parchment and beat it with a rolling pin until it flexes without cracking. It can stay cold while becoming workable enough to add gradually, helping the dough reach full development without climbing too far above its target temperature.
+
+  # TODO: Add a "What to Learn Next" section after this methods overview, guiding readers to the most useful next lesson for their dough and chosen method.
   - type: markdown
     markdown: |
       ## Methods at a Glance
 
       ### Hand mixing
 
-      Hand mixing is best when you want to learn how dough changes under your hands, especially with sourdough or small batches. It adds very little friction heat, but it is slower and easier to underdo. Sticky doughs tempt you to add too much bench flour, stiff autolysed doughs can resist folding, and enriched doughs can be exhausting to develop fully by hand.
+      Hand mixing gives you the most direct way to track dough development, especially with sourdough or small batches. It adds very little friction heat, but it is slower and easier to underdo. Sticky doughs tempt you to add too much bench flour, stiff autolysed doughs can resist folding, and enriched doughs can be exhausting to develop fully by hand.
 
       ### Planetary mixer
 
-      A planetary stand mixer is the common home-machine option and can handle many lean doughs and some enriched doughs. Its tradeoff is heat and strain: dough can climb the hook, smear against the bowl, or warm quickly at higher speed. Enriched dough may look broken before it comes together, so watch dough behavior instead of only watching the clock.
+      A planetary stand mixer is the common home-machine option and can handle many lean doughs and some enriched doughs. It often adds less heat than a spiral mixer, but its mixing action can be inefficient: dough can climb the hook, smear against the bowl, or rotate without getting stretched and worked consistently. That makes full gluten development, and a strong windowpane, difficult to achieve in many doughs. Stop to scrape the bowl and pull the dough down from the hook, then judge progress by the dough's smoothness and stretch rather than the clock alone.
 
       ### Spiral mixer
 
-      A spiral mixer develops gluten efficiently and is strong for pizza, bread, sourdough, and larger batches. It usually reaches a smooth, elastic dough faster than the other methods, which is the benefit and the risk. Check the dough sooner than you think, because it is easier to overshoot development when the mixer is doing the work quickly.
+      A spiral mixer develops gluten efficiently and is strong for pizza, bread, sourdough, and larger batches. As the dough develops, look for a pumpkin shape: a single pleated mass gathered around the spiral and breaker bar at the center of the bowl. That shows the mixer is engaging the dough rather than simply dragging it around the bowl. It usually reaches the desired development faster than the other methods, which is the benefit and the risk. Use the pumpkin as a visual cue, then confirm the dough's stretch and temperature before deciding it is ready.

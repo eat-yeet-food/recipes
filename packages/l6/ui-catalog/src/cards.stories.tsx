@@ -112,16 +112,17 @@ const categories: Array<{ label: string; imageUrl: string; search: SearchParams 
 const articles: ArticleSummary[] = [
   {
     slug: 'mixing-dough-and-gluten-development',
-    title: 'Developing Dough and Mixing Methodologies',
+    title: 'Mixing Dough and Building Gluten',
     order: 1,
-    description: 'Choose the right mixing method and development target for pizza, bread, sourdough, and enriched doughs.',
+    description:
+      'Learn how mixing builds gluten, how to tell when dough is developed enough, and how to choose a hand, stand-mixer, or spiral-mixer approach.',
     type: 'guide',
     category: 'dough',
     tags: ['bread', 'pizza', 'sourdough'],
     image: 'hand-mixing-dough.jpg',
     imageHash: '',
     created: '2026-08-25',
-    searchText: 'developing dough mixing methodologies',
+    searchText: 'mixing dough building gluten',
   },
   {
     slug: 'spiral-mixer-dough',
