@@ -30,7 +30,7 @@ export function SectionHeading({ eyebrow, title }: { eyebrow: string; title: str
 const CATALOG_CARD_LINK_CLASS =
   'group flex flex-col overflow-hidden rounded-lg bg-white !text-ink no-underline !shadow-sm transition-card-hover will-change-[translate,box-shadow] hover:-translate-y-1 hover:!text-ink hover:no-underline hover:!shadow-card-hover'
 
-const CATALOG_CARD_TITLE_CLASS = 'min-h-[2.5em] text-[22px] max-sm:text-[19px]'
+const CATALOG_CARD_TITLE_CLASS = 'm-0 min-h-[2.12em] text-[22px] leading-[1.06] max-sm:text-[19px]'
 const CATALOG_CARD_DESCRIPTION_CLASS =
   'line-clamp-3 min-h-[4.875em] text-sm leading-relaxed text-ink/65'
 
@@ -74,7 +74,7 @@ export function RecipeCard({ recipe }: { recipe: RecipeSummary }) {
       </div>
       <div className="flex flex-1 flex-col p-6 max-sm:p-5">
         <h3
-          className={cn('font-display font-extrabold leading-tight text-ink', CATALOG_CARD_TITLE_CLASS)}
+          className={cn('font-display font-extrabold text-ink', CATALOG_CARD_TITLE_CLASS)}
         >
           {recipe.title}
         </h3>
@@ -141,7 +141,7 @@ export function ArticleCard({ article }: { article: ArticleSummary }) {
           {ARTICLE_TYPE_LABELS[article.type]}
         </p>
         <h3
-          className={cn('font-display font-extrabold leading-tight text-ink', CATALOG_CARD_TITLE_CLASS)}
+          className={cn('font-display font-extrabold text-ink', CATALOG_CARD_TITLE_CLASS)}
         >
           {article.title}
         </h3>

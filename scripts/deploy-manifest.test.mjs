@@ -34,9 +34,9 @@ test('deploy manifest rejects a build for another app', () => {
     writeDeployManifest(
       dir,
       deploymentIdentity({
-        appId: 'dpizzaoven',
-        cloudflareProject: 'dpizzaoven',
-        siteUrl: 'https://dpizzaoven.com',
+        appId: 'preview-app',
+        cloudflareProject: 'preview-app',
+        siteUrl: 'https://preview.example.com',
       }),
     )
 

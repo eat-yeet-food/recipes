@@ -1,5 +1,5 @@
 slug: mixing-dough-and-gluten-development
-title: Mixing Dough and Building Gluten
+title: Mixing and Developing Bread Dough
 order: 1
 type: guide
 category: dough
@@ -12,6 +12,7 @@ image: dough-development-header.jpg
 created: 2026-08-25
 description: Learn how mixing builds gluten, how to tell when dough is developed enough, and how to choose a hand, stand-mixer, or spiral-mixer approach.
 
+# TODO: Add a dedicated guide to mixing batters and tender doughs such as cookie dough, where gluten development is intentionally limited.
 blocks:
   - type: markdown
     markdown: |
@@ -104,13 +105,18 @@ blocks:
                 alt: Smooth enriched dough shaped into braided loaves
                 caption: Smooth enriched dough looks cohesive, supple, and glossy enough to shape cleanly.
 
+  # TODO: Add a dedicated bulk-fermentation article using https://thesourdoughjourney.com/the-ultimate-sourdough-bulk-fermentation-guide/ as a reference.
   - type: markdown
     markdown: |
-      ## Watch dough temperature
+      ## Dough Temperature
 
-      Mixing builds gluten, but it also warms the dough. The temperature when mixing ends sets the pace for the rest of the recipe: warmer dough ferments sooner, while cooler dough gives you more time. The goal is to finish near the temperature the recipe expects, so the dough rises on schedule and keeps enough strength to shape and bake well.
+      Mixing builds gluten, but it also warms the dough. The temperature when mixing ends, called the final dough temperature, is the starting point for the first rise. The goal is to finish near the temperature the recipe expects, so the dough ferments on schedule without losing the structure you just developed.
 
-      Check the final dough temperature as soon as mixing ends. Same-day yeast dough often lands around 75-78F. Next-day sourdough can land around 75-77F, but warmer dough gives you less margin before it gets ahead of its schedule. Several-day cold-proof pizza dough often benefits from a cooler finish around 71-72F. When dough finishes too warm, its first rise moves quickly and it can become slack, sticky, and difficult to shape sooner than the recipe suggests.
+      As dough rests, protease enzymes naturally present in flour gradually cut some of the protein chains in the gluten network. This process is called proteolysis. A limited amount helps the dough relax and stretch. If it goes too far, the network loses strength and the dough becomes slack, sticky, difficult to shape, and less able to hold fermentation gas. Warmer dough moves through this process faster, so final dough temperature controls more than the fermentation schedule; it also affects how quickly the structure begins to soften.
+
+      Check the final dough temperature as soon as mixing ends. Same-day yeast dough often lands around 75-78F. Next-day sourdough can land around 75-77F, but warmer dough gives you less margin before it gets ahead of its schedule. Several-day cold-proof pizza dough often benefits from a cooler finish around 71-72F. When dough finishes too warm, both fermentation and proteolysis move faster, so the dough may become sticky and difficult to shape sooner than the recipe suggests.
+
+      Sourdough is a useful special case. If a long bulk fermentation regularly leaves the dough sticky or weak, try finishing near 72F, keeping the bulk at or below 72F, and allowing more time instead of using more warmth. A lower-hydration starter can support this approach and help the dough retain strength, but it does not simply make the final dough drier: starter maturity, acidity, inoculation, flour, and the formula's total hydration still affect the result. Keep those variables in mind when comparing methods, and judge the end of bulk by the dough's rise and strength rather than by the clock alone. The goal is controlled maturation: enough time to build flavor potential without weakening the dough before it reaches the oven.
 
       Spiral mixers can add heat quickly through mixing friction. When a dough needs a cool final temperature, use very cold water or replace part of the mix water with crushed ice. Weigh the ice as part of the recipe's total water; it melts as you mix and absorbs some of that friction heat.
 

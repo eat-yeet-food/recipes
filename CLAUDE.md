@@ -179,6 +179,6 @@ safety rails: it deletes any stale build output, rebuilds the selected app,
 writes a deploy identity manifest, refuses to upload if the manifest does not
 match `APP_ID`, `SITE_URL`, and the Cloudflare Pages project, and passes
 `--branch main` to Wrangler so deployments from an isolated worktree still
-target the production Pages branch instead of a preview alias. This is
-specifically to prevent a sample app such as `dpizzaoven` from being uploaded to
-the `eatyeet` production project.
+target the production Pages branch instead of a preview alias. This prevents
+build output for one app from being uploaded to another app's production
+project.
