@@ -1,0 +1,80 @@
+slug: developing-dough-by-hand
+title: Kneading Dough by Hand
+order: 2
+type: technique
+category: dough
+tags:
+  - bread
+  - hydration
+  - whole-wheat
+  - hand-mixing
+image: developing-dough-by-hand.jpg
+created: '2026-08-28'
+description: Learn how to knead firm and wet bread dough by hand, when a rest can shorten the work, and how to tell when the dough is ready.
+
+blocks:
+  - type: markdown
+    markdown: |
+      ## Consider Three Lean Doughs
+
+      This guide compares three lean bread doughs: white-flour dough at 65% hydration, white-flour dough at 75%, and 75% dough made with equal parts white and whole-wheat flour. Hydration is the weight of the water compared with the weight of the flour. It helps predict how the dough will handle, but the flour also matters.
+
+      The 65% dough is firm enough for conventional counter kneading. The 75% white dough is wetter and needs a motion that uses its stickiness instead of fighting it. The whole-wheat dough benefits from a rest before kneading because whole-wheat flour takes longer to absorb water. These three examples show how to adjust the work without adding flour and changing the recipe. King Arthur's [hydration guide](https://www.kingarthurbaking.com/blog/2023/01/11/bread-hydration) explains the calculation in more detail.
+
+  - type: steps
+    title: 'Firm Dough: Fold, Push, and Turn'
+    items:
+      - title: Mix the dough
+        markdown: Combine the ingredients until no dry flour remains. Move the rough dough to a clean counter. If it feels tacky, resist adding flour; it should become less sticky as it develops.
+      - title: Fold and push
+        markdown: Fold the far edge toward you with one hand. Use the heel of your other hand to push the folded dough down and away. The push should stretch the dough, not flatten it against the counter.
+      - title: Turn and repeat
+        markdown: Turn the dough a quarter turn, fold it, and push again. Keep a steady rhythm so every part of the dough is stretched. Use a bench scraper to gather any pieces that stick to the counter.
+      - title: Check the dough
+        markdown: Stop when the surface is smooth, the dough feels elastic, and a gentle stretch no longer produces a rough tear. A 65% white dough may reach this point after several minutes, but the change in the dough matters more than the clock.
+
+  - type: steps
+    title: 'Wet Dough: Slap and Fold'
+    items:
+      - title: Start on a clean counter
+        markdown: A 75% white dough may spread and stick too much for fold-push-turn kneading. Leave the counter unfloured so the dough keeps the hydration intended by the recipe.
+      - title: Stretch and fold
+        markdown: Pick the dough up by one side and let its weight stretch it. Set the lower end against the counter, fold the dough over itself, then pick it up from another side and repeat. Alternating sides develops the dough evenly.
+      - title: Work quickly and lightly
+        markdown: A quick, light motion gives the dough less time to stick to your hands and the counter. Use a bench scraper to gather it when needed. If sticking becomes difficult, clean and lightly wet your hands, but do not drip extra water into the dough.
+      - title: Check the dough
+        markdown: The dough is ready when it is smoother, more elastic, and able to stretch thinly without tearing immediately. Wet dough usually needs more active work than firm dough, but stop by these changes rather than by a fixed number of turns.
+
+  - type: markdown
+    markdown: |
+      ## Alternative: Rubaud Mixing
+
+      Use the Rubaud method when you want to keep wet dough in the bowl instead of working it on the counter. Lightly wet one hand, slide your fingers under one side of the dough, scoop it upward, stretch it, and let it fall back into the bowl. Repeat in a quick, circular motion while your other hand turns the bowl.
+
+      The dough will feel loose and sticky at first. As you continue, it should gather into a more connected mass, pull away from the bowl more cleanly, and stretch farther before tearing. If it begins to resist or tear, cover it and let it rest before continuing. Slap-and-fold and Rubaud mixing build toward the same result; choose the method that is easier to control in your workspace.
+
+  - type: markdown
+    markdown: |
+      ## Whole-Wheat Dough: Rest Before Kneading
+
+      Whole-wheat flour absorbs water more slowly than white flour. Mixing the flour and water first, then covering the dough and letting it rest, gives the flour time to hydrate before the remaining ingredients and active kneading. This flour-and-water rest is called an autolyse.
+
+      After the rest, add the remaining ingredients as directed by the recipe and knead the dough with the wet-dough method. It should become smooth and elastic with less active work than the unrested 75% white dough. The whole-wheat dough may also feel firmer even though both formulas have the same hydration, because the whole-wheat flour holds more water. King Arthur's [autolyse guide](https://www.kingarthurbaking.com/blog/2017/09/29/autolyse-sourdough) explains when the rest is useful and when it may be unnecessary.
+
+  - type: markdown
+    markdown: |
+      ## Compare the Finished Doughs
+
+      Check each dough by pinching off a small piece and stretching it gently. Developed dough should form a thin sheet before it tears. This is the windowpane test.
+
+      The 65% dough should feel smooth, strong, and easy to hold. The 75% white dough should feel softer and stretch farther. The half-whole-wheat dough can reach similar strength but may feel less wet than the white dough at the same hydration. Bran can also make its windowpane look less even. The goal is not to make all three doughs feel identical; it is to develop enough strength for each formula. King Arthur's [windowpane guide](https://www.kingarthurbaking.com/blog/2022/10/14/what-is-the-windowpane-test-for-bread-dough) shows how to perform the test without forcing the dough.
+
+  - type: markdown
+    markdown: |
+      ## What to Remember
+
+      - Use fold-push-turn kneading for firm dough that holds its shape on the counter.
+      - Use slap-and-fold for wet dough that spreads under conventional kneading.
+      - Use a bench scraper and lightly wet hands instead of adding flour to sticky dough.
+      - Consider an autolyse when whole-wheat flour or higher hydration makes the dough slow to hydrate.
+      - Stop when the dough is smooth, elastic, and able to stretch without tearing immediately. Time is only a checkpoint.
