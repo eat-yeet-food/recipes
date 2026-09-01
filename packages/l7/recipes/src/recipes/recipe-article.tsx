@@ -49,7 +49,6 @@ function RecipeArticleHeader({
   onVariantChange: (variantId: string) => void
 }) {
   const category = page.category ? labelize(page.category) : 'Recipe'
-  const courses = page.courses.map(labelize).join(' / ')
   const crumbCourse = page.courses[0] ? labelize(page.courses[0]) : category
 
   return (
@@ -69,14 +68,7 @@ function RecipeArticleHeader({
         selectedVariantId={selectedVariantId}
         onVariantChange={onVariantChange}
       />
-      <div className="yeet-byline flex flex-wrap gap-x-[22px] gap-y-2.5 mt-2 text-[var(--yeet-tomato)] text-xs uppercase">
-        <span>By Patrick Hogan</span>
-        {courses && (
-          <span className="relative before:absolute before:-left-3 before:top-[0.45em] before:size-1 before:rounded-full before:bg-[var(--yeet-tomato)] before:content-['']">
-            {courses}
-          </span>
-        )}
-      </div>
+      <div className="yeet-byline mt-2 text-xs uppercase text-[var(--yeet-tomato)]">By Patrick Hogan</div>
       <div className="flex flex-wrap gap-1 mt-7 mb-7" aria-label="Page actions">
         <RecipeAction variant="hero" href={pinUrl.toString()} target="_blank" rel="noreferrer">
           <Share2 className="size-3 max-[640px]:hidden" />
