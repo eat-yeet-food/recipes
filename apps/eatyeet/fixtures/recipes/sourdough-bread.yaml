@@ -28,6 +28,8 @@ learning:
       - spiral
     targetDevelopment: moderate-gluten
     article: mixing-dough-and-gluten-development
+    methodArticles:
+      spiral: mixing-dough-in-a-spiral-mixer
 blocks:
   - type: recipe
     equipment:

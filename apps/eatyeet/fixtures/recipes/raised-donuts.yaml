@@ -33,6 +33,8 @@ learning:
       - spiral
     targetDevelopment: full-gluten-windowpane
     article: mixing-dough-and-gluten-development
+    methodArticles:
+      spiral: mixing-dough-in-a-spiral-mixer
 blocks:
   - type: recipe
     equipment:

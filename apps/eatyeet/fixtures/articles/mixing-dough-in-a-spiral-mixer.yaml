@@ -1,0 +1,118 @@
+slug: mixing-dough-in-a-spiral-mixer
+title: Mixing Dough in a Spiral Mixer
+order: 3
+type: technique
+category: dough
+tags:
+  - bread
+  - pizza
+  - sourdough
+  - enriched-dough
+  - spiral-mixing
+image: spiral-mixer-dough.jpg
+created: '2026-09-01'
+description: Learn how to mix pizza, butter-enriched dough, and high-hydration sourdough in a spiral mixer by planning ingredient order, dough development, and final temperature.
+
+blocks:
+  - type: markdown
+    markdown: |
+      A spiral mixer develops dough quickly, but the approach must be tweaked for each dough application. Pizza dough needs enough strength for dividing and a long cold ferment. Enriched doughs, such as brioche, cinnamon rolls, and donuts, need a strong gluten network before and after the butter goes in. High-hydration sourdough stops at moderate development because coil folds continue the work during bulk fermentation.
+
+      Use the three dough applications below as worked examples, not universal programs. Mixer percentages, batch engagement, friction, and mixing time vary by machine. Plan the ingredient order and final dough temperature before you start, then let the dough's cohesion, stretch, and temperature tell you when to stop.
+
+  - type: markdown
+    markdown: |
+      ## Before You Mix
+
+      Make sure the batch is large enough for your mixer to engage. The dough should be caught by the spiral, gathered around the breaker bar, and repeatedly folded as the bowl turns. As it develops, it may collect into the pleated “pumpkin” shape described in [Mixing and Developing Bread Dough](/learn/mixing-dough-and-gluten-development). If the dough only skates around the bowl or smears without folding, stop the machine, scrape the bowl and spiral, and check the mixer's batch guidance before increasing the speed.
+
+      Treat speed as a relative control. The percentages in this article are settings for the Ooni Halo Pro Spiral Mixer; they do not guarantee the same mixing action or heat on another machine. Use them only as checkpoints, watch how the batch moves, and stop the machine before scraping or testing the dough.
+
+      Spiral mixing creates heat. Start with ice-cold water, then check the dough temperature as it smooths so friction does not push it past the formula's target.
+
+  - type: steps
+    title: 'Pizza Dough: Lean Dough'
+    headingLevel: 2
+    items:
+      - title: Chill the water
+        markdown: >-
+          For example, pizza can be a lean dough made with flour, water, salt, and yeast. Chill a pitcher with water and ice, then weigh only the cold water into the mixer bowl.
+      - title: Add everything at once
+        markdown: >-
+          Add the water, flour, salt, and yeast together. This dough does not need a separate hydration rest because the 2–3-day cold ferment gives the flour plenty of time to hydrate and the gluten network more time to organize.
+      - title: Mix at 40% and begin checking
+        markdown: >-
+          Mix until the dough is cohesive and reads 72°F. Scrape the bowl and spiral with the machine stopped if dough climbs or stops folding. The target is moderate strength, not a full windowpane: the dough should move as one mass and stretch without immediately tearing, while remaining cool enough for its long fermentation.
+      - title: Hand the dough off to fermentation
+        markdown: >-
+          Give the dough a short bench knead, round it, and rest it covered at room temperature for 1½ hours. Divide and shape the balls, then refrigerate them for 2–3 days.
+
+  - type: steps
+    title: 'Butter-Enriched Dough: Brioche, Cinnamon Rolls, and Donuts'
+    headingLevel: 2
+    items:
+      - title: Make the butter cold and pliable
+        markdown: >-
+          Roll the cold butter between parchment until it bends without cracking and still peels away cleanly. Butter that is hard can tear the developing dough; butter that is greasy can smear through it and raise the final temperature. Brioche, cinnamon-roll, and donut formulas that delay butter use the same type of staged approach.
+      - title: Build a base before adding butter
+        markdown: >-
+          Mix every ingredient except the butter for about 4 minutes, scraping with the machine stopped as needed. Stop this first mix near 69°F, when the ingredients are combined and the dough has begun to gather. Cover it and rest for 20 minutes so hydration and time can continue organizing the gluten.
+      - title: Develop the rested dough
+        markdown: >-
+          Mix at medium-high speed for a few minutes and begin checking as the dough approaches 73°F. It should look smoother and more elastic before the fat goes in; this base gives the gluten network enough strength to accept the butter.
+      - title: Add butter gradually
+        markdown: >-
+          Add the butter in small strips over about 5 minutes. Wait for each addition to disappear into the dough instead of loading all the fat at once. The dough may look slick or broken briefly, but it should gather again as the butter becomes evenly incorporated.
+      - title: Finish at a full windowpane
+        markdown: >-
+          Mix for a few more minutes and stop when a small piece stretches into a thin, translucent sheet before tearing. A finish near 78°F suits a dough that will ferment soon after mixing; use a cooler target for a longer fermentation so the dough does not weaken as quickly over time. Temperature is a checkpoint; the smooth, supple dough and strong windowpane are the development target.
+
+  - type: steps
+    title: 'Sourdough: Lean, High-Hydration Dough'
+    headingLevel: 2
+    items:
+      - title: Hydrate the flour first
+        markdown: >-
+          For high-hydration sourdough, mix the flour with most of the water at 40% speed (Ooni Halo) just until no dry flour remains. Cover and autolyse according to the formula before adding the levain.
+      - title: 0:00 elapsed — Mix in the levain
+        markdown: >-
+          Add the ripe levain and mix for 5 minutes. Cover the dough and rest it at 70°F for 20 minutes. This staged addition lets the flour hydrate before fermentation begins and gives the dough another rest before salt tightens it.
+      - title: 0:30 elapsed — Add salt and develop
+        markdown: >-
+          Add the salt with the held-back water at 15% speed and mix for 1 minute. This late water addition is called bassinage. Increase the mixer to 40% and mix for about 5 minutes. Stop near 72°F when the dough is cohesive, elastic, and stronger than it was after the autolyse, but do not chase the full windowpane used for butter-enriched dough. Cover and rest at 70°F for 25 minutes.
+      - title: 1:00 elapsed — First coil fold
+        markdown: >-
+          Coil fold the dough, cover, and rest at 70°F for 25 minutes.
+      - title: 1:30 elapsed — Second coil fold
+        markdown: >-
+          Coil fold the dough again, cover, and rest at 70°F for 25 minutes.
+      - title: 2:00 elapsed — Third coil fold
+        markdown: >-
+          Complete the final coil fold, cover, and leave the dough undisturbed at 70°F for the remainder of bulk fermentation.
+      - title: 4:50 elapsed — End bulk
+        markdown: >-
+          End bulk when the dough has risen approximately 100% in volume. Use the rise as the completion cue; the elapsed time is a checkpoint.
+      - title: Preshape and rest
+        markdown: >-
+          Divide and preshape the dough, then rest it at 70°F for 30 minutes.
+      - title: Shape
+        markdown: >-
+          Shape the dough and place it in a banneton. Rest at 70°F for 10 minutes, then stitch, cover, and refrigerate according to the formula.
+
+  - type: markdown
+    markdown: |
+      ## Common Problems
+
+      **The dough is not catching.** Stop the mixer and scrape the bowl and spiral. Confirm that the batch is within the machine's working range and that the dough is repeatedly gathering and folding before adding speed or time.
+
+      **The dough is heating too quickly.** Check sooner on the next batch and begin with colder water or other chilled ingredients where the formula allows. A faster setting is not useful if friction makes the dough overshoot its final temperature before it reaches the development target.
+
+      **The butter-enriched dough looks greasy or torn.** Make sure the base dough has become elastic before adding butter. Keep the butter cold but bendable, add it gradually, and wait for each portion to incorporate before adding more.
+
+      **The sourdough is weak or overly tight during bulk.** Review the machine mix and folds together. Weak dough may have left the mixer too early or need more development during bulk; resistant dough may have been mixed farther than the fold schedule expects.
+
+  - type: markdown
+    markdown: |
+      ## What to Learn Next
+
+      Read [Mixing and Developing Bread Dough](/learn/mixing-dough-and-gluten-development) for the broader progression from hydration through gluten development, final dough temperature, and mixer choice. If you want to make the same judgments without a machine, continue with [Kneading Dough by Hand](/learn/developing-dough-by-hand) for methods matched to firm, wet, and whole-wheat doughs.
