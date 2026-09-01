@@ -256,6 +256,7 @@ blocks:
     markdown: Keep dough cool.
   - type: steps
     title: Method
+    headingLevel: 3
     items:
       - title: Mix
         markdown: Mix until smooth.
@@ -277,6 +278,7 @@ blocks:
     assert.equal(article.blocks[1].type, 'callout')
     assert.equal(article.blocks[1].tone, 'warning')
     assert.equal(article.blocks[2].type, 'steps')
+    assert.equal(article.blocks[2].headingLevel, 3)
     assert.equal(article.blocks[3].type, 'comparison')
     assert.equal(article.searchText.includes('first column'), true)
     assert.equal(article.searchText.includes('mixer with dough'), true)

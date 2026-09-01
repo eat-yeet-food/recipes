@@ -251,7 +251,12 @@ function normalizeStepsBlock(block) {
     .filter(Boolean)
 
   return items.length > 0
-    ? { type: 'steps', title: renderMarkdown(block.title), items }
+    ? {
+        type: 'steps',
+        title: renderMarkdown(block.title),
+        ...(block.headingLevel === 3 ? { headingLevel: 3 } : {}),
+        items,
+      }
     : null
 }
 

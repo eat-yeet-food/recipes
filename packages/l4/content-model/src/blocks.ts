@@ -51,6 +51,7 @@ export interface CalloutBlock {
 export interface StepsBlock {
   type: 'steps'
   title: string
+  headingLevel?: 2 | 3
   items: Array<{
     title: string
     html: string

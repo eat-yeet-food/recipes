@@ -15,6 +15,14 @@ const Html = ({ as: Tag = 'div', html, ...rest }: { as?: any; html: string } & R
   <Tag {...rest} dangerouslySetInnerHTML={{ __html: html }} />
 )
 
+function unwrapSingleParagraph(html: string) {
+  const trimmed = html.trim()
+  if (!trimmed.startsWith('<p>') || !trimmed.endsWith('</p>')) return null
+
+  const inner = trimmed.slice(3, -4)
+  return inner.includes('<p>') || inner.includes('</p>') ? null : inner
+}
+
 export type PageBlockRenderer<TBlock extends PageBlock, TContext> = (props: {
   block: TBlock
   index: number
@@ -169,32 +177,58 @@ function CalloutBlockView({ block }: { block: CalloutBlock }) {
 }
 
 function StepsBlockView({ block }: { block: StepsBlock }) {
+  const Heading = block.headingLevel === 3 ? 'h3' : 'h2'
+  const headingClass =
+    block.headingLevel === 3
+      ? 'mb-5 text-[26px] font-bold leading-tight text-[var(--yeet-gray)]'
+      : 'mb-5 text-[34px] font-bold leading-none text-[var(--yeet-gray)]'
+
   return (
     <section className="border-t border-[var(--yeet-border)] pt-[30px]">
       {block.title && (
-        <h2 className="mb-5 text-[34px] font-bold leading-none text-[var(--yeet-gray)]">
+        <Heading className={headingClass}>
           {block.title}
-        </h2>
+        </Heading>
       )}
       <ol className="grid gap-5 [counter-reset:step]">
-        {block.items.map((item, index) => (
-          <li
-            key={index}
-            className="grid grid-cols-[40px_minmax(0,1fr)] gap-4 [counter-increment:step] before:grid before:size-10 before:place-items-center before:rounded-full before:bg-[var(--yeet-tomato)] before:text-sm before:font-extrabold before:text-white before:content-[counter(step)]"
-          >
-            <div>
-              {item.title && (
-                <h3 className="mb-2 text-[24px] font-bold leading-tight text-[var(--yeet-gray)]">
-                  {item.title}
-                </h3>
-              )}
-              <Html
-                html={item.html}
-                className="text-base leading-relaxed text-[var(--yeet-gray)] [&_p]:mb-3 [&_p:last-child]:mb-0"
-              />
-            </div>
-          </li>
-        ))}
+        {block.items.map((item, index) => {
+          const inlineHtml = unwrapSingleParagraph(item.html)
+          const titleSuffix = /[.!?:]$/.test(item.title) ? '' : '.'
+
+          return (
+            <li
+              key={index}
+              className="grid grid-cols-[40px_minmax(0,1fr)] gap-4 [counter-increment:step] before:grid before:size-10 before:place-items-center before:rounded-full before:bg-[var(--yeet-tomato)] before:text-sm before:font-extrabold before:text-white before:content-[counter(step)]"
+            >
+              <div className="text-base leading-relaxed text-[var(--yeet-gray)]">
+                {item.title && inlineHtml !== null ? (
+                  <p>
+                    <strong className="font-semibold">
+                      {item.title}
+                      {titleSuffix}
+                    </strong>{' '}
+                    <Html as="span" html={inlineHtml} />
+                  </p>
+                ) : (
+                  <>
+                    {item.title && (
+                      <p className="mb-3">
+                        <strong className="font-semibold">
+                          {item.title}
+                          {titleSuffix}
+                        </strong>
+                      </p>
+                    )}
+                    <Html
+                      html={item.html}
+                      className="[&_p]:mb-3 [&_p:last-child]:mb-0"
+                    />
+                  </>
+                )}
+              </div>
+            </li>
+          )
+        })}
       </ol>
     </section>
   )
