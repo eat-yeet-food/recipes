@@ -73,12 +73,12 @@ blocks:
           - Mix flour and the first portion of water (685g) in a spiral mixer at 40% until integrated and no lumps. Cover and rest at 70°F for 3h.
       - title: Bulk Fermentation
         items:
-          - '[0m elapsed] Mix in levain in a spiral mixer for 5m + cover and rest at 70°F for 20m.'
-          - '[30m elapsed] Mix in salt + remainder of water (20g) at 15% speed for 1m. Turn speed up to 40% and mix for about 5m. Cover and rest at 70°F for 25m. Internal dough temp should be about 72°F.'
-          - '[1h elapsed] Coil fold + cover and rest at 70°F for 25m'
-          - '[1:30h elapsed] Coil fold + cover and rest at 70°F for 25m'
-          - '[2:00h elapsed] Coil fold + cover and rest at 70°F for 2:50h.'
-          - '[4:50h elapsed] End of bulk when risen approximately 100% in volume'
+          - '**[0m elapsed]** Mix in levain in a spiral mixer for 5m + cover and rest at 70°F for 20m.'
+          - '**[30m elapsed]** Mix in salt + remainder of water (20g) at 15% speed for 1m. Turn speed up to 40% and mix for about 5m. Cover and rest at 70°F for 25m. Internal dough temp should be about 72°F.'
+          - '**[1h elapsed]** Coil fold + cover and rest at 70°F for 25m'
+          - '**[1:30h elapsed]** Coil fold + cover and rest at 70°F for 25m'
+          - '**[2:00h elapsed]** Coil fold + cover and rest at 70°F for 2:50h.'
+          - '**[4:50h elapsed]** End of bulk when risen approximately 100% in volume'
       - title: Shape
         items:
           - Divide / Preshape and rest at 70°F for 30m.
