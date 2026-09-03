@@ -73,7 +73,7 @@ function blockImageUrl(image: { src: string; imageHash?: string }) {
 
 function MarkdownBlockView({ block }: { block: MarkdownBlock }) {
   return (
-    <section className="border-t border-[var(--yeet-border)] pt-[30px] text-base leading-[1.72] [&_blockquote]:border-l-4 [&_blockquote]:border-[var(--yeet-pink)] [&_blockquote]:pl-4 [&_blockquote]:text-[var(--yeet-gray)] [&_h2]:mb-4 [&_h2]:text-[34px] [&_h2]:font-bold [&_h2]:leading-none [&_h3]:mb-3 [&_h3]:text-[26px] [&_h3]:font-bold [&_h4]:mb-2.5 [&_h4]:text-[13px] [&_h4]:uppercase [&_h4]:text-[var(--yeet-tomato)] [&_hr]:my-7 [&_hr]:border-[var(--yeet-border)] [&_li]:mb-2 [&_ol]:mb-5 [&_ol]:list-decimal [&_ol]:pl-[22px] [&_p]:mb-5 [&_ul]:mb-5 [&_ul]:list-disc [&_ul]:pl-[22px]">
+    <section className="border-t border-[var(--yeet-border)] pt-[30px] text-base leading-[1.72] [&_blockquote]:border-l-4 [&_blockquote]:border-[var(--yeet-pink)] [&_blockquote]:pl-4 [&_blockquote]:text-[var(--yeet-gray)] [&_h2]:mb-4 [&_h2]:text-[34px] [&_h2]:font-bold [&_h2]:leading-none [&_h3]:mb-3 [&_h3]:text-[26px] [&_h3]:font-bold [&_h4]:mb-2.5 [&_h4]:text-[13px] [&_h4]:uppercase [&_h4]:text-[var(--yeet-tomato)] [&_hr]:my-7 [&_hr]:border-[var(--yeet-border)] [&_li]:mb-2 [&_ol]:mb-5 [&_ol]:list-decimal [&_ol]:pl-[22px] [&_p]:mb-5 [&_p:last-child]:mb-0 [&_ul]:mb-5 [&_ul]:list-disc [&_ul]:pl-[22px]">
       <Html html={block.html} />
     </section>
   )
@@ -154,14 +154,14 @@ function CalloutBlockView({ block }: { block: CalloutBlock }) {
     block.tone === 'warning'
       ? 'border-[var(--yeet-tomato)] bg-[var(--yeet-light-pink)]'
       : block.tone === 'tip'
-        ? 'border-[var(--color-support)] bg-[var(--color-muted)]'
+        ? 'border-[var(--color-brand-alt)] bg-[var(--color-warm)]'
         : 'border-[var(--yeet-border)] bg-[var(--yeet-light-pink)]'
 
   return (
     <section className="border-t border-[var(--yeet-border)] pt-[30px]">
       <div className={`border-l-4 px-5 py-4 ${toneClass}`}>
         {block.title && (
-          <h3 className="mb-2 text-[22px] font-bold leading-tight text-[var(--yeet-gray)]">
+          <h3 className="mb-2 text-[22px] font-bold leading-tight text-[var(--yeet-tomato-strong)]">
             {block.title}
           </h3>
         )}

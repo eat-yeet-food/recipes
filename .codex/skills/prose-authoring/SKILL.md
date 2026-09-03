@@ -5,7 +5,7 @@ description: Plan and collaboratively draft educational articles, guides, and le
 
 # Prose Authoring
 
-Build practical instructional prose collaboratively. Align on the reader's goal, decision path, section hierarchy, and content format before drafting.
+Build practical instructional prose collaboratively. Align on the reader's learning need, decision path or task, section hierarchy, and content format before drafting.
 
 ## Workflow
 
@@ -15,13 +15,19 @@ Build practical instructional prose collaboratively. Align on the reader's goal,
 4. After approval, create the document skeleton with the agreed headings and any known asset TODOs. Preserve the approved order.
 5. Draft one section at a time. Ask for feedback after each section and wait for sign-off before drafting the next one.
 6. Within a section, revise only the paragraph or idea under discussion unless a related transition must change. Do not churn prose the user has already approved.
-7. After all sections are approved, make a continuity pass for repeated ideas, missing transitions, inconsistent terminology, and conclusions that do not follow from the preceding explanation. Keep approved substance intact unless a correction is necessary.
+7. After all sections are approved, make two focused passes. First check teaching logic, evidence, transitions, terminology, and whether conclusions follow from the explanation. Then check directness, headings, formatting, repetition, and voice. Keep approved substance intact unless a correction is necessary.
 
 If the user explicitly requests a complete draft in one pass, follow that instruction instead of imposing review gates.
 
 ## Article Architecture
 
-Organize each article around the reader's goal, not around a catalog of facts or terminology. A useful default sequence is:
+Choose the article's teaching mode before imposing an architecture:
+
+- Explanatory articles should organize mechanisms, relationships, observable effects, and limitations into a coherent account. Include practical tips where they clarify an implication, but do not force the article into a planning-and-control frame.
+- Procedural articles should organize the inputs, sequence, checkpoints, and completion evidence around the task the reader will perform.
+- Decision guides should establish the relevant criteria before presenting alternatives and tradeoffs.
+
+For a procedural article, a useful default sequence is:
 
 1. The outcome and plan the reader needs before starting.
 2. The inputs, constraints, and tools that affect that plan.
@@ -32,9 +38,9 @@ Organize each article around the reader's goal, not around a catalog of facts or
 
 Change this sequence when the subject demands it, but make every section earn its place in the reader's progression.
 
-Let the article title establish the subject. Open with a short, inviting lead unless another heading introduces a real decision or topic boundary. Avoid academic inventory headings and generic setup sections that merely restate the title. Give the reader a plan before presenting examples; examples should illustrate that plan rather than serve as specimens the reader must decode first.
+Let the article title establish the subject. Open with a short, inviting lead unless another heading introduces a real decision or topic boundary. Avoid academic inventory headings and generic setup sections that merely restate the title. In procedural work, give the reader the relevant plan before presenting examples; examples should illustrate that plan rather than serve as specimens the reader must decode first.
 
-Use headings for real topic boundaries. A parent topic is an H2; alternatives within it are H3 subsections with short distinguishing names. Prefer concise, natural labels such as "Whole-Wheat Considerations" when guidance varies, and reserve prescriptive headings for actions that are actually required.
+Use headings for real topic boundaries. A parent topic is an H2; alternatives within it are H3 subsections with short distinguishing names. Prefer concise, literal subject labels over question scaffolding that begins with “What,” “How,” or “Why” when the surrounding article already supplies that context. Prefer a direct positive statement over a slogan, wordplay, or a contrarian construction such as “X Is Not Y” or “X Is More Than Y” when the same idea can be named directly. Reserve prescriptive headings for actions that are actually required.
 
 ## Choose the Right Content Form
 
@@ -43,11 +49,15 @@ Use headings for real topic boundaries. A parent topic is an H2; alternatives wi
 - Use numbered steps for procedures the reader performs in sequence. Do not flatten a useful procedure into paragraphs to work around a layout or heading limitation.
 - Place each alternative method in its own subsection under the shared parent topic. Make the names parallel and easy to distinguish.
 - Treat a numbered step's label as a bold lead-in within the instruction paragraph, not as another heading. Split it from the paragraph only when the step contains multiple paragraphs or subordinate ideas.
+- Use an insight or takeaway callout only when it helps the reader scan a substantive section. Place it immediately after the section heading, give it a specific conclusion-driven title rather than a generic label such as “Takeaway,” and make its body useful beyond repeating the heading.
+- Keep a parent section's overview as ordinary prose when it introduces the subsections. Do not invent a titled callout merely to format an introductory paragraph.
+- Present a final “Key Takeaways” summary as an ordinary heading and list unless the user or template requests a callout.
+- When insight callouts are meant to stand out visually, use the document or site's semantic accent treatment rather than a neutral gray default. Preserve the existing design-token system.
 - If the content system cannot express the intended hierarchy, adjust the representation or implementation instead of assigning content a false semantic role for visual styling.
 
 ## Evidence, Timing, and Technical Detail
 
-- Give the reader a plan from information available before starting. Name the material or formula, tools and workspace, temperature, and schedule when they affect the method. Observations during the process confirm progress and completion; they do not replace advance planning.
+- For procedures, give the reader a plan from information available before starting. Name the material or formula, tools and workspace, temperature, and schedule when they affect the method. Observations during the process confirm progress and completion; they do not replace advance planning.
 - Explain the need before introducing a tactic. Show the relevant behavior first, then name and define the technical term when it becomes useful.
 - Prefer observable evidence over detached definitions. Describe what changes, what the reader should look for, and what that change means.
 - Include a relative time estimate when it helps the reader plan or know when to begin checking. Use a stated context and treat the range as a checkpoint, not a promise.
@@ -60,6 +70,7 @@ Use headings for real topic boundaries. A parent topic is an H2; alternatives wi
 - Start sections with the reader's purpose or immediate question. Avoid abstract openings that do not help the reader decide or act.
 - Introduce concepts only when the reader needs them. Do not front-load misconceptions, terminology, or side cases.
 - Prefer direct, beginner-readable language without flattening meaningful distinctions.
+- Explain a mechanism directly when plain language is sufficient. Use an analogy only when it materially improves understanding; do not let a cute comparison become the article's organizing device or substitute for the explanation.
 - Remove redundant stages and facts that are accurate but poorly timed. Narrative flow matters more than including every related claim.
 - End with a clear next step or adjacent lesson.
 
