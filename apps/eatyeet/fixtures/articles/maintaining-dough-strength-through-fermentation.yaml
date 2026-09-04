@@ -15,9 +15,9 @@ description: Learn how hydration, folds, gas, temperature, time, acidity, and pr
 blocks:
   - type: markdown
     markdown: |
-      Dough strength continues changing after mixing ends. Water keeps moving through the flour, gluten proteins rearrange, folds reorganize the dough, and fermentation gas stretches the developing network. At the same time, protein breakdown, acidification, and continuing expansion can gradually soften it. The dough that enters the oven is the result of all of these changes, not simply the strength established in the mixer.
+      Dough strength continues changing after mixing ends. Water keeps moving through the flour, gluten proteins rearrange, folds organize the dough, and fermentation gas stretches the developing network. Later, acidification, protein breakdown, and continued expansion can soften that same network. Managing strength therefore means noticing whether the dough is still gaining cohesion, merely looking taut because it is full of gas, or beginning to lose its ability to hold together.
 
-      Strong dough is able to resist deformation and retain gas, but resistance alone is not enough. Dough must also extend as its bubbles expand and as it is shaped. A very tight dough can resist stretching without holding gas particularly well, while a soft, extensible dough can still have a continuous network. Strength is therefore best judged by how the dough stretches, recovers, and holds its form together.
+      Strong dough resists deformation, retains gas, and still stretches as its bubbles expand and as it is shaped. During bulk fermentation, lift an edge and watch what happens: improving dough rises as a connected sheet, offers increasing resistance, and settles with a rounded edge. Dough that becomes progressively stickier, flatter, or easier to tear is losing structural margin. Those changes are more useful than the clock or volume alone when deciding whether to fold, end bulk, or cool the dough.
 
   - type: markdown
     markdown: |
@@ -32,7 +32,7 @@ blocks:
     markdown: |
       Elasticity is the tendency to spring back after stretching. Extensibility is the ability to stretch before tearing. Glutenin proteins contribute much of dough's elastic strength, while gliadins contribute flow and extensibility. Hydration, mixing, salt, acidity, and rest change how those proteins interact, so the balance is not fixed by the flour alone.
 
-      A dough that snaps back immediately may need time to relax rather than more mixing. A dough that stretches easily but cannot recover or hold a rounded edge may need more development, or it may already have weakened. The same sensation can have different causes, which is why one poke or one windowpane should not be used as a complete diagnosis.
+      A dough that snaps back immediately but still feels smooth and cohesive may need time to relax rather than more mixing. A dough that stretches easily but cannot recover or hold a rounded edge may need more development if it is early in bulk, or it may already have weakened if it previously held shape and is now becoming sticky or ragged. The direction of change matters more than one poke or one windowpane.
 
       For a useful comparison, rest a small piece for a few minutes before stretching it. This reduces the temporary tension created by handling. Then look for a thin, continuous film, an even resistance to stretching, and edges that narrow gradually rather than splitting abruptly.
 
@@ -55,9 +55,9 @@ blocks:
     markdown: |
       Flour does not hydrate uniformly the instant water is added. During rest, water continues moving among starch, gluten proteins, damaged starch, and fiber. Better hydration can turn a rough mass into a more continuous dough without additional mechanical work.
 
-      Gluten also changes during rest. Protein chains relax from the stress of mixing and form new interactions. A [study of mixing and resting](https://pubmed.ncbi.nlm.nih.gov/33494212/) found that rest restored part of the large glutenin structures disrupted during longer mixing. A separate [study of repeated sheeting and rest](https://pubmed.ncbi.nlm.nih.gov/40191844/) likewise found that the cycles produced a more organized network with greater resistance to deformation.
+      Gluten also changes during rest. Protein chains relax from the stress of mixing and form new interactions. In a [study of mixing and resting](https://pubmed.ncbi.nlm.nih.gov/33494212/), extending mixing from three to five minutes reduced the measured large glutenin structures by about 20%, while a subsequent rest restored part of them. A separate [study of repeated sheeting and rest](https://pubmed.ncbi.nlm.nih.gov/40191844/) found that alternating those treatments produced a more organized network with greater resistance to deformation. The second experiment used sheeted dough rather than fermenting bread dough, but both support a practical observation: a short rest can improve cohesion after mechanical work, so reassess the dough before assuming that more mixing is the answer.
 
-      Relaxation can make the dough feel softer even while its network becomes more coherent. That is why a dough may stretch into a better windowpane after a short rest. Rest is not unlimited development, however. Over longer periods, fermentation, enzyme activity, and continuing water migration can begin to weaken the network, particularly in warm or highly hydrated dough.
+      Relaxation can make dough feel softer while it becomes smoother and more coherent. After a short rest, it should stretch farther with less ragged tearing and form a more even windowpane. If it only becomes looser, stickier, and less able to lift as one piece, waiting is no longer improving it. Rest is not unlimited development; over longer periods, fermentation, enzyme activity, and continued hydration can begin to weaken the network, particularly in warm or highly hydrated dough.
 
   - type: markdown
     markdown: |
@@ -74,7 +74,7 @@ blocks:
 
       This expansion can make a fermented dough appear stronger because the surface becomes taut and the mass holds a rounded shape. Much of that visible tension comes from gas pressure. Degas a sample and the underlying dough may feel less developed than its inflated shape suggested.
 
-      Gas production rate matters as well as total rise. In a [controlled study of yeast and dough expansion](https://pubmed.ncbi.nlm.nih.gov/28455072/), changing carbon-dioxide formation kinetics affected the point at which gas escaped the dough and altered loaf volume. A dough can therefore lose structural integrity because gas accumulates faster than the network can accommodate it, even before a long fermentation has caused extensive proteolysis.
+      Gas production rate matters as well as total rise. In a [controlled study of yeast and dough expansion](https://pubmed.ncbi.nlm.nih.gov/28455072/), changing how quickly carbon dioxide formed changed when gas began escaping, and one yeast treatment produced loaves with 21% less volume even though the dough became more extensible. The practical warning is that a fast-rising dough is not necessarily getting stronger. If volume races ahead while the surface begins blistering, large bubbles merge, or gentle lifting releases gas, reduce yeast or dough temperature on the next batch rather than trying to repair the late dough with more folds.
 
   - type: markdown
     markdown: |
@@ -106,7 +106,9 @@ blocks:
     markdown: |
       Wheat flour contains proteases, including enzymes that become more active as dough acidifies. Their primary action cuts proteins into smaller peptides. Sourdough bacteria then use their own transport and peptidase systems to take up and break down many of those peptides further. The exact contribution of flour and microbial enzymes varies with the flour, culture, pH, temperature, and time.
 
-      Proteolysis is useful in moderation. It increases extensibility and releases peptides and amino acids that can influence fermentation and flavor. It becomes a structural problem when protein breakdown advances far enough that the dough loses resistance and gas retention. In one [study comparing sourdough bacteria with acidified controls](https://pmc.ncbi.nlm.nih.gov/articles/PMC126681/), several bacterial cultures increased free amino acids and softened the dough more than acidification alone. Another [study of wheat sourdough](https://onlinelibrary.wiley.com/doi/pdf/10.1094/CCHEM.2004.81.1.87) found extensive glutenin degradation under acidic fermentation conditions and identified cereal aspartic proteases as the main active enzymes in that system.
+      Proteolysis is useful in moderation. It increases extensibility and releases peptides and amino acids that can influence fermentation and flavor. It becomes a structural problem when protein breakdown advances far enough that the dough loses resistance and gas retention. In one [study comparing sourdough bacteria with acidified controls](https://pmc.ncbi.nlm.nih.gov/articles/PMC126681/), a dough fermented with one bacterial culture had roughly half the resistance of the acidified control and stretched about 60% farther before breaking. That large difference shows what advanced softening looks like in practice: the dough may open easily, but it pushes back less and has less capacity to support itself.
+
+      Another [study of wheat sourdough](https://onlinelibrary.wiley.com/doi/pdf/10.1094/CCHEM.2004.81.1.87) found that most of the largest glutenin polymers degraded under strongly acidic fermentation conditions, and the flour's own proteases were active at the low pH used in the experiment but not at the higher comparison pH. This does not supply a universal hour or acidity limit for home dough. It explains why a warm, ripe, increasingly acidic sourdough can move from pleasantly extensible to fragile even without rough handling. Once that trend begins, ending bulk or cooling the dough preserves more strength than adding folds.
 
       Acidity also changes protein charge, solubility, and interactions directly, so sourdough weakening should not be reduced to a single enzyme. Gas expansion, hydration, reduction and oxidation reactions, and mechanical damage continue at the same time. *Proteolysis* describes protein hydrolysis; it is not a general name for every reason fermented dough becomes slack.
 
@@ -129,7 +131,7 @@ blocks:
     markdown: |
       Protein percentage is useful but incomplete. Two flours with the same percentage can differ in glutenin composition, milling damage, enzyme activity, and mixing tolerance. Strong bread flour usually tolerates higher hydration or longer fermentation, but it can also produce dough that requires more water or rest to become comfortably extensible.
 
-      More water allows proteins to move and the dough to expand easily, but it also dilutes the gluten network and makes strength less obvious at the surface. A [study comparing flour doughs at different mixing times and hydration levels](https://www.sciencedirect.com/science/article/pii/S0268005X23007609) found that hydration significantly affected both rheology and the microscopic structure of the gluten network. Hydration should therefore be judged relative to the specific flour rather than treated as a universal percentage.
+      More water allows proteins to move and the dough to expand easily, but it also dilutes the gluten network and makes strength less obvious at the surface. In a [study comparing four flours at different mixing times and hydration levels](https://www.sciencedirect.com/science/article/pii/S0268005X23007609), hydration changed measured dough consistency and gluten-network structure more than mixing time did. This is why extra mixing may not make an overhydrated dough feel like a lower-hydration one. When testing an unfamiliar flour, hold back a small portion of the water until the dough is cohesive, then add it only while the dough continues to gather and recover between additions.
 
       Bran and germ complicate the system. They compete for water, introduce additional enzymes and reducing compounds, and interrupt the continuous gluten phase. Whole-grain dough may need more water to hydrate fully while still retaining less gas than a refined-flour dough with the same listed protein content.
 
@@ -144,7 +146,7 @@ blocks:
 
   - type: markdown
     markdown: |
-      Salt changes dough structure as well as taste. It reduces electrostatic repulsion among gluten proteins and promotes closer protein association, so salted dough usually feels tighter and more cohesive than unsalted dough. In a [study of hard-wheat dough](https://pubmed.ncbi.nlm.nih.gov/30724234/), higher salt levels increased elastic and viscous moduli, elongational viscosity, and gluten-protein aggregation.
+      Salt changes dough structure as well as taste. It promotes closer association among gluten proteins, so salted dough usually feels tighter and more cohesive than unsalted dough. In a [study of hard-wheat dough](https://pubmed.ncbi.nlm.nih.gov/30724234/), doughs at the higher tested salt levels were more elastic, more resistant to stretching, and showed more gluten-protein aggregation. At the bench, the change is usually felt as a dough that spreads less and pushes back more after the salt is fully incorporated.
 
       Salt also slows yeast activity and changes water availability. A dough mixed without salt may ferment faster while feeling looser, which can look like rapid structural deterioration even when several effects are overlapping. Adding the forgotten salt later can tighten the dough, but it must be dissolved or incorporated evenly; dry crystals folded into developed dough can leave streaks and tears.
 
