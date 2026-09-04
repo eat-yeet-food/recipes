@@ -57,6 +57,13 @@ Use headings for real topic boundaries. A parent topic is an H2; alternatives wi
 
 ## Evidence, Timing, and Technical Detail
 
+- In an explanatory article, use the first one or two paragraphs to give the reader a compact map of the main mechanisms, the outcomes they create, and the variables that shift the result. Keep it concise enough to orient rather than pre-empt the article.
+- Make research earn its space. State the relevant comparison and actual finding, then explain what it changes in the reader's expectations, choices, or troubleshooting. Do not cite a study merely to say that differences were measurable or that a variable matters.
+- Translate chemical or technical findings into likely sensory or observable effects when the evidence supports that connection. Distinguish a demonstrated result from a reasonable expectation, and do not invent a specific taste, aroma, or recommendation that the source did not test.
+- Explain interacting variables together. When discussing time and temperature, for example, make clear which condition produced which result, what was held comparable, and why the comparison matters. Avoid joining separate findings in a sentence that implies a relationship the study did not establish.
+- Preserve detail that conveys magnitude, mechanism, a useful boundary, or the design of a comparison. Remove exact values and compound names when they add cognitive load without changing what the reader understands or does. A plain-language summary can retain nuance without reproducing the study's vocabulary.
+- Give useful expectations for named methods or formulas when readers will naturally compare them. Present the common tendency first, describe the likely sensory or practical result, and then name the conditions that can change it. Do not replace guidance with a blanket “results vary” disclaimer.
+- When a paragraph is technically accurate but yields no action or clearer expectation, condense it or add the practical implication. Useful implications include what to adjust, what to compare, what to observe, and which tradeoff prevents simply maximizing the variable.
 - For procedures, give the reader a plan from information available before starting. Name the material or formula, tools and workspace, temperature, and schedule when they affect the method. Observations during the process confirm progress and completion; they do not replace advance planning.
 - Explain the need before introducing a tactic. Show the relevant behavior first, then name and define the technical term when it becomes useful.
 - Prefer observable evidence over detached definitions. Describe what changes, what the reader should look for, and what that change means.

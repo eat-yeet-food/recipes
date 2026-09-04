@@ -15,9 +15,9 @@ description: Learn how enzymes, microorganisms, time, temperature, and baking wo
 blocks:
   - type: markdown
     markdown: |
-      Fermentation does more than make dough rise. From the moment flour is hydrated, enzymes in the flour and microorganisms in the dough begin changing the raw ingredients. Some of those changes create aroma directly. Others change the supply of sugars, amino acids, and related compounds that microorganisms or oven heat may transform into aroma and flavor.
+      Fermentation does more than make dough rise. Flour enzymes release sugars and amino acids, while yeast and bacteria consume and transform them into acids, alcohols, esters, and other aroma compounds. In the oven, the compounds that remain fuel browning reactions and help create bread's toasted, nutty, malty, and savory character.
 
-      During fermentation, enzymes and microorganisms increase and alter the compounds available in the dough. In the oven, heat drives new reactions among those compounds, creating much of the toasted, nutty, malty, savory, and deeply browned character we recognize as bread.
+      Time and temperature shift the balance rather than simply adding more flavor. Flour, culture, acidity, preferments, malt, added sugar or enzymes, and the bake all change the result, while fermenting too long can exhaust sugars and weaken the dough. The goal is a schedule that develops the flavor you want while preserving enough structure and browning potential for the oven.
 
       ## Dough Chemistry During Fermentation
 
@@ -36,9 +36,9 @@ blocks:
     markdown: |
       Flour contains a small amount of available sugar, but most of its carbohydrate is locked in starch. Yeast cannot consume an intact starch granule directly. Amylase enzymes in the flour act on accessible starch, especially starch damaged during milling, and release smaller carbohydrates such as maltose. Other enzymes free glucose and fructose from compounds already present in the flour.
 
-      The available sugar pool is always changing. Enzymes release sugars while yeast consumes them. A [study of wheat-dough fermentation](https://pubmed.ncbi.nlm.nih.gov/27719961/) found that sugars released from fructans and sucrose were especially important early in fermentation, while amylase-generated sugars became more important later. This is why fermentation should not be reduced to a single pathway from starch to maltose.
+      The available sugar pool is always changing. Enzymes release sugars while yeast consumes them. A [study of wheat-dough fermentation](https://pubmed.ncbi.nlm.nih.gov/27719961/) found that sugars released from fructans and sucrose were especially important early in fermentation, while amylase-generated sugars became more important later. In practice, a longer fermentation does not simply keep adding sugar; it changes where that sugar comes from and gives yeast more time to consume it.
 
-      Yeast uses part of this sugar to produce carbon dioxide, ethanol, and other fermentation compounds. Sugars that remain when the dough enters the oven can contribute to crust browning. The goal is therefore not to create the most sugar possible, but to maintain enough sugar production for fermentation while preserving some browning potential for the bake.
+      Yeast uses part of this sugar to produce carbon dioxide, ethanol, and other fermentation compounds. Sugars that remain when the dough enters the oven can contribute to crust browning. A well-timed fermentation keeps the yeast supplied without letting it consume so much sugar that the crust struggles to brown.
 
   - type: markdown
     markdown: |
@@ -55,7 +55,7 @@ blocks:
 
       Flour supplies its own proteolytic enzymes. In sourdough, acidification and the enzyme systems of lactic-acid bacteria can extend the process. In one [controlled sourdough study](https://pmc.ncbi.nlm.nih.gov/articles/PMC126681/), fermentation with selected bacteria produced more free amino acids than acidification alone, showing that acidity and microbial activity both matter.
 
-      These changes also affect dough structure. Cutting proteins can make dough more extensible, but excessive proteolysis weakens the gluten network. Released amino acids may feed microbial metabolism and, if they remain when the dough is baked, participate in Maillard and Strecker reactions. In a [controlled wheat-bread study](https://www.sciencedirect.com/science/article/pii/S0023643823011118), added peptidase increased free amino acids and produced sensory differences in both crumb and crust. That does not mean the natural proteolysis in every long-fermented dough will create an obvious flavor difference. Its contribution depends on how much of each amino acid is released, what the microorganisms consume or transform, the available sugars, and the conditions of the bake.
+      These changes also affect dough structure. Cutting proteins can make dough more extensible, but excessive proteolysis weakens the gluten network. Released amino acids may feed microbial metabolism and, if they remain when the dough is baked, participate in Maillard and Strecker reactions. In a [controlled wheat-bread study](https://www.sciencedirect.com/science/article/pii/S0023643823011118), adding a commercial peptidase roughly doubled the dough's free amino acids. Compared with bread made without the added enzyme, tasters found stronger cheesy and alcoholic aromas in the crumb and stronger caramel, toasted, and nutty aromas in the crust. This was a difference in intensity, not a distinct “proteolysis flavor,” and the concentrated enzyme treatment does not show that simply fermenting a dough longer will produce the same result. The outcome still depends on which amino acids are released, what the microorganisms consume or transform, the available sugars, and the conditions of the bake.
 
   - type: markdown
     markdown: |
@@ -70,7 +70,7 @@ blocks:
     markdown: |
       Yeast metabolism is most visible when carbon dioxide expands the dough, but gas production is only one result. Yeast also produces ethanol and smaller amounts of alcohols, esters, aldehydes, organic acids, and other volatile compounds. Some contribute aroma in the fermented dough, some evaporate during baking, and others take part in reactions that create the finished bread's aroma.
 
-      The mixture depends on the yeast strain, flour, temperature, acidity, nutrients, and fermentation time. A [study of flour-based yeast fermentation](https://pubmed.ncbi.nlm.nih.gov/35033716/) found measurable differences among yeast strains and showed that changing time and temperature changed which volatile compounds accumulated. Two doughs can reach the same volume without developing the same aroma profile.
+      The mixture depends on the yeast strain, flour, temperature, acidity, nutrients, and fermentation time. A [study of flour-based yeast fermentation](https://pubmed.ncbi.nlm.nih.gov/35033716/) screened many yeast strains and found that one produced more bread-aroma compounds and a balance tasters preferred. Follow-up tests showed that time and temperature work together: warmer fermentation brought some alcohol- and fruit-like aromas forward sooner, while cooler fermentation took longer and favored a different balance. These were controlled preferment experiments, not recommended proofing schedules, but they show why two doughs can reach the same volume without developing the same aroma.
 
       Sourdough adds lactic-acid bacteria to this system. They produce lactic acid, acetic acid, and other metabolites while also changing which nutrients remain available to the yeast. The result is not simply more acidity. It is a different fermentation environment, with a different balance of acids, alcohols, esters, aldehydes, and other aroma compounds.
 
@@ -87,9 +87,13 @@ blocks:
     markdown: |
       Fermentation changes what is available in the dough, but baking creates another set of reactions. The wet crumb remains comparatively cool, while the drying surface becomes hot enough for rapid browning. This is why the crust and crumb of the same loaf smell and taste different.
 
-      The Maillard reaction begins when reducing sugars react with amino compounds under heat. It is not a single reaction but a branching sequence that produces brown pigments and many aroma compounds. Strecker degradation occurs within this larger network when amino acids react with carbonyl compounds, producing aroma-active aldehydes. A classic [bread-fermentation and baking study](https://www.cerealsgrains.org/publications/cc/backissues/1970/Documents/chem47_247.pdf) found that free amino acids declined markedly in the crust during baking, consistent with their participation in browning reactions.
+      When the surface of bread becomes hot and dry, reducing sugars react with amino compounds through a branching network known as the Maillard reaction. These reactions create brown pigments and many of the crust's toasted, nutty, and savory aromas. One branch, called Strecker degradation, turns individual amino acids into especially aromatic compounds.
 
-      Caramelization is different. It is the thermal breakdown of sugars without amino compounds. Both processes can contribute to a browned crust, but bread aroma should not be described as caramelization alone. The available sugars and amino compounds, surface temperature, moisture loss, dough acidity, and baking time all affect the final result.
+      Proteolysis matters because breaking proteins into smaller peptides and free amino acids can supply more material for those reactions. In the peptidase study above, extra protein breakdown increased Maillard-derived aroma compounds and gave the crust stronger caramel, toasted, and nutty notes. A classic [bread-fermentation and baking study](https://www.cerealsgrains.org/publications/cc/backissues/1970/Documents/chem47_247.pdf) also found that free amino acids declined sharply in the crust during baking, a sign that they were being used as the crust formed.
+
+      More protein breakdown does not guarantee more flavor. Yeast and bacteria may consume or transform those amino acids before baking, and the particular amino acids left influence which aromas can form. Excessive proteolysis can also weaken the dough before any potential flavor benefit pays off.
+
+      Caramelization is a separate process in which heat breaks down sugars without amino compounds. Both caramelization and Maillard reactions can brown a crust, but they create different mixtures of aromas. This matters when troubleshooting: adding sugar may make a crust sweeter and darker, but it cannot replace the amino compounds needed for Maillard browning. A pale or mild crust can reflect the balance of sugars and amino compounds, dough acidity, or a surface that never became hot and dry enough—not just too little sugar.
 
       Fermentation aromas also continue changing in the oven. Some volatile compounds escape with steam, some remain in the crumb, and some become reactants for new compounds. A dough can smell strongly alcoholic before baking without producing an alcoholic-tasting loaf because much of its ethanol evaporates.
 
@@ -110,19 +114,13 @@ blocks:
 
       Temperature changes that balance. Warmer dough generally speeds yeast metabolism, bacterial metabolism, and flour-enzyme activity within normal fermentation temperatures. Cooler dough slows them, but it does not necessarily slow every pathway by the same amount. The result can be a different mixture of compounds rather than merely a delayed version of warm fermentation.
 
-      In a [study of whole-wheat bread](https://pubmed.ncbi.nlm.nih.gov/27211683/), doughs fermented at 8°C, 16°C, and 32°C produced different crust-volatile profiles even though fermentation time was adjusted so the loaves reached a comparable height. Other flour-based fermentation research found that extending time increased the accumulation of some alcohols and esters. These results explain why two doughs can rise equally yet produce different aromas.
-
-      This does not establish one ideal temperature for flavor. The organism, flour, hydration, acidity, inoculation, and total schedule change the outcome. When comparing temperatures at home, adjust the amount of yeast or starter so the doughs reach a similar fermentation endpoint; otherwise, differences caused by temperature become mixed with simple under- or over-fermentation.
+      Equal rise does not mean equal flavor. A [whole-wheat bread study](https://pubmed.ncbi.nlm.nih.gov/27211683/) found that warm and cool doughs developed different crust aromas even when they reached a comparable height. To test temperature at home, keep the formula and bake the same, adjust the yeast or starter so both doughs finish at the same rise, and compare the crust and crumb. Choose the schedule that gives you the aroma you prefer without weakening the dough.
 
   - type: markdown
     markdown: |
-      ## Preferments and Sourdough
+      ## Preferments
 
-      Preferments and sourdough both introduce flour and water that have already fermented, but their microorganisms, hydration, acidity, maturity, and share of the final flour determine what they contribute.
-
-  - type: markdown
-    markdown: |
-      ### Preferments
+      Preferments introduce flour and water that have already fermented, but their hydration, maturity, and share of the final flour determine what they contribute.
 
   - type: callout
     tone: tip
@@ -135,24 +133,9 @@ blocks:
 
       The remaining flour has not undergone the same history. A dough containing 20% prefermented flour is a mixture of extensively fermented flour and fresh flour; it is not chemically identical to a dough in which all the flour fermented together for the same number of hours. The preferment still influences the whole dough, but it does so by adding concentrated fermented material rather than by aging every starch granule and protein chain equally.
 
-      Poolish, biga, and pâte fermentée also differ from one another. Their hydration, yeast level, and salt content change enzyme activity, microbial growth, acidity, and which compounds remain at maturity. Descriptions such as “poolish is always sweeter” or “biga is always nuttier” are too broad without the formula and fermentation conditions.
+      Poolish, biga, and pâte fermentée also differ from one another. As a starting point, a ripe poolish often contributes a gently sweet, nutty aroma and makes dough more extensible. A typical stiff biga ferments more slowly, tends toward a wheaty, nutty flavor, and contributes more dough strength. Salted pâte fermentée usually brings the rounded, lightly tangy flavor of mature bread dough.
 
-  - type: markdown
-    markdown: |
-      ### Sourdough
-
-  - type: callout
-    tone: tip
-    title: Sourdough Cultures Shape Acidity and Aroma
-    markdown: Sourdough flavor comes from the particular yeast-and-bacteria community and the conditions under which it ferments, not from acidity alone.
-
-  - type: markdown
-    markdown: |
-      Sourdough combines yeasts with lactic-acid bacteria. The yeasts produce carbon dioxide and a range of fermentation volatiles. The bacteria produce lactic acid, acetic acid, and other metabolites, while acidity changes flour-enzyme activity and the nutrients available to the community.
-
-      Sourness is only one result. In a [study of twelve wholemeal sourdough cultures](https://pubmed.ncbi.nlm.nih.gov/36192996/), different microbial communities produced distinct groups of volatile compounds and organic acids in the resulting breads. Some cultures were associated with more ethanol, higher alcohols, and acetaldehyde; others with acetic acid and acetate esters. The word *sourdough* therefore describes a fermentation system, not one fixed flavor.
-
-      Starter flour, refreshment ratio, maturity, hydration, temperature, and fermentation time all shape that system. Changing one of those variables can shift acidity, aroma, and fermentation speed together. If a sourdough tastes harsher or flatter than expected, the answer is not automatically a longer fermentation; the culture and its conditions may need to change.
+      Treat these as tendencies, not guarantees. The flour, hydration, yeast level, salt, temperature, ripeness, and amount used in the final dough can make the differences subtle or push the flavor in another direction.
 
   - type: markdown
     markdown: |
@@ -172,6 +155,29 @@ blocks:
       Commercial amylases, proteases, and peptidases can accelerate particular reactions. That selectivity is useful in commercial baking, but it also exposes the tradeoffs. Too much amylase can leave insufficient intact starch to set a normal crumb, while too much broad protease can weaken gluten. Many bread flours already contain malted barley flour or added enzymes, so an additional dose may solve a problem the flour does not have.
 
       If malt or an enzyme is used, follow a flour- or product-specific dosage and change one variable at a time. More activity does not reproduce the full network of a longer fermentation; it pushes one part of that network faster.
+
+  - type: markdown
+    markdown: |
+      ## Sourdough
+
+  - type: callout
+    tone: tip
+    title: Sourdough Cultures Shape Acidity and Aroma
+    markdown: Sourdough flavor comes from the particular yeast-and-bacteria community and the conditions under which it ferments, not from acidity alone.
+
+  - type: markdown
+    markdown: |
+      Sourdough combines yeasts with lactic-acid bacteria. The yeasts produce carbon dioxide and a range of fermentation volatiles. The bacteria produce lactic acid, acetic acid, and other metabolites, while acidity changes flour-enzyme activity and the nutrients available to the community.
+
+      Sourness is only one result. In a [study of twelve wholemeal sourdough cultures](https://pubmed.ncbi.nlm.nih.gov/36192996/), some cultures leaned toward yeast-driven aromas and lactic acid, giving the bread a more alcoholic, buttery, and softly tangy character. Others produced more acetic acid and fruity esters, suggesting a sharper, more vinegar-like tang with a different aroma. The word *sourdough* therefore describes a fermentation system, not one fixed flavor.
+
+      The schedule changes what you are likely to taste. A short, warm bulk fermentation usually reaches its target rise before much acid accumulates, so expect cleaner wheat and yeast flavors. If sourness becomes noticeable, warmer conditions tend to favor the rounder, yogurt-like character of lactic acid. A longer, cooler fermentation gives enzymes and microorganisms more time and can develop a broader fermented aroma, fruitier notes, and a sharper acetic edge. A refrigerator slows all of this dramatically, so the result depends on the dough's temperature going in, how quickly it cools, and which microorganisms are present.
+
+      This is why a same-day dough made with malt and baked dark can have strong crust flavor without tasting deeply fermented. Diastatic malt releases more sugar for fermentation and browning, while non-diastatic malt contributes malty flavor and color directly. Expect a darker, maltier, more toasted crust over a comparatively clean crumb. An overnight cold-fermented dough may develop a broader mixture of alcohol, ester, and acid aromas through the crumb, but it can still brown poorly if fermentation consumes too much of the available sugar.
+
+      Starter consistency nudges the profile too. A stiff starter, especially when kept cool through repeated feedings, often favors relatively more acetic acid and a sharper, vinegar-like tang. A 100%-hydration starter generally favors relatively more lactic acid and yeast-derived aromas, giving a rounder, yogurt-like tang with fruitier notes. A [study that switched mature starters between firm and liquid maintenance](https://journals.asm.org/doi/10.1128/AEM.00309-14) found that hydration changed both the microbial community and the resulting acids and aromas over time.
+
+      These are tendencies, not guarantees. Flour, refreshment ratio, maturity, temperature, and the amount of starter in the final dough all matter, and changing hydration for a single feeding may not produce a noticeable difference. For a useful comparison, maintain each starter consistently through several feedings, keep the final dough formula and bake the same, and compare the breads at the same rise.
 
   - type: markdown
     markdown: |
