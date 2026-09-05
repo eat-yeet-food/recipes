@@ -1,0 +1,81 @@
+slug: banh-mi-dough
+title: Bánh Mì Dough
+order: 5
+description: 'Light, crisp sandwich rolls made with egg, dough improver, and an overnight cold ferment.'
+category: savory
+prepMinutes: 45
+cookMinutes: 18
+totalMinutes: 830
+yieldAmount: 4
+yieldUnit: sandwich rolls
+image: banh-mi-dough.jpg
+courses:
+  - sides
+cuisines:
+  - asian
+methods:
+  - baking
+restrictions:
+  - vegetarian
+occasions:
+  - everyday
+ingredientTypes:
+  - eggs
+  - fats_and_oils
+created: '2026-09-04'
+learning:
+  mixing:
+    defaultMethod: planetary
+    allowedMethods:
+      - hand
+      - planetary
+    targetDevelopment: moderate-gluten
+    article: mixing-dough-and-gluten-development
+blocks:
+  - type: recipe
+    equipment:
+      - title: ''
+        items:
+          - Kitchen scale
+          - Large mixing bowl or planetary mixer with dough hook
+          - Instant-read thermometer
+          - Bench scraper
+          - Parchment-lined baking sheet
+          - Lame or sharp knife
+          - Metal pan for steam
+          - Wire rack
+    ingredients:
+      - title: Dough
+        items:
+          - '450g [Kirkland Signature organic all-purpose flour](https://www.costco.com/p/-/kirkland-signature-organic-unbleached-all-purpose-flour-10-lbs-2-count/4000063331)'
+          - 260g water
+          - '1 large egg, about 50g out of the shell'
+          - 8g fine sea salt
+          - '11g [dough improver](https://www.amazon.com/dp/B00BF0E7CQ)'
+          - 10g canola oil
+          - '7g [SAF red instant yeast](https://www.amazon.com/LeSaffre-LEAVENING_AGENT/dp/B0CFDPMWWC)'
+    steps:
+      - title: Mix and cold ferment
+        items:
+          - 'Choose the water temperature so the finished dough will be 72°F. Add the water, egg, and canola oil to a large bowl or the mixer bowl, then add the flour, dough improver, salt, and instant yeast.'
+          - 'Planetary mixer: Mix with the dough hook on low until no dry flour remains, about 3 minutes. Increase to medium-low and mix until the dough is smooth, elastic, and able to stretch thinly before tearing, about 5-8 minutes more. Stop when the dough reaches 72°F.'
+          - 'By hand: Mix until no dry flour remains, then knead on a clean counter until the dough is smooth, elastic, and able to stretch thinly before tearing, about 10-12 minutes. Stop when the dough reaches 72°F.'
+          - Round the dough into a tight ball, place it in a lightly oiled container, cover, and refrigerate promptly for 12-18 hours.
+      - title: Shape and proof
+        items:
+          - The next morning, divide the cold dough into 4 equal pieces, about 200g each. Gently press each piece into a rectangle and roll it into a loose cylinder. Cover and rest for 20 minutes.
+          - Shape each cylinder like a small baguette, tapering the ends slightly, and place seam-side down on the parchment-lined baking sheet. Cover loosely and proof at room temperature until noticeably puffy and a light press springs back slowly, about 45-75 minutes.
+      - title: Score and bake
+        items:
+          - While the rolls proof, place an empty metal pan on the oven floor or lowest rack and preheat the oven to 450°F for at least 30 minutes.
+          - Score each roll once lengthwise, holding the blade at a shallow angle and cutting about 1/4 inch deep.
+          - Load the rolls, carefully pour about 1 cup of boiling water into the hot metal pan, and close the oven immediately. Bake with steam for 8 minutes.
+          - Remove the steam pan or briefly vent the oven. Continue baking for 8-10 minutes, until the rolls are deeply golden and their centers register about 200°F.
+          - Transfer the rolls to a wire rack and cool for at least 30 minutes before slicing.
+    notes:
+      - The 260g added water plus the water in the egg puts this dough at approximately 65% effective hydration; the exact number varies with egg size.
+      - The 7g yeast is about 1.6% of the flour weight. Because that is a generous amount for an overnight dough, refrigerate it promptly after mixing and use it the next morning.
+      - The full formula makes about 796g of dough, or about 200g per roll.
+    tips:
+      - Aim for good gluten development rather than a perfectly transparent windowpane. The dough should be smooth, elastic, and strong enough to hold its shape.
+      - Steam keeps the crust flexible during the first part of the bake so the rolls can expand fully.
