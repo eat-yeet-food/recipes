@@ -9,7 +9,11 @@ import { createSharedPageBlockRegistry, PageBlocks } from './page-blocks'
 const blocks: PageBlock[] = [
   {
     type: 'markdown',
-    html: '<h2>Standard Text</h2><p>Markdown blocks render headings, paragraphs, lists, and <strong>inline emphasis</strong> without shipping a browser markdown parser.</p><ul><li>First note</li><li>Second note</li></ul>',
+    html: '<h2>Standard Text</h2>',
+  },
+  {
+    type: 'markdown',
+    html: '<p>Adjacent Markdown blocks continue the same prose flow, so authoring boundaries do not change spacing.</p><p>Markdown blocks render paragraphs, lists, and <strong>inline emphasis</strong> without shipping a browser markdown parser.</p><ul><li>First note</li><li>Second note</li></ul>',
   },
   {
     type: 'image',
@@ -65,6 +69,17 @@ const blocks: PageBlock[] = [
     columns: ['Planetary', 'Spiral'],
     rows: [
       { label: 'Heat', values: ['<p>Warms quickly.</p>', '<p>More efficient.</p>'] },
+    ],
+  },
+  {
+    type: 'footnotes',
+    title: 'Sources',
+    items: [
+      {
+        id: '1',
+        html: 'Example research supporting an article claim',
+        url: 'https://example.com/research',
+      },
     ],
   },
   { type: 'youtube', id: 'abc_123-xyz', title: 'Recipe video' },

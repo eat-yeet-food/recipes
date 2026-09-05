@@ -20,8 +20,6 @@ blocks:
 
       Use the three dough applications below as worked examples, not universal programs. Mixer percentages, batch engagement, friction, and mixing time vary by machine. Plan the ingredient order and final dough temperature before you start, then let the dough's cohesion, stretch, and temperature tell you when to stop.
 
-  - type: markdown
-    markdown: |
       ## Before You Mix
 
       Make sure the batch is large enough for your mixer to engage. The dough should be caught by the spiral, gathered around the breaker bar, and repeatedly folded as the bowl turns. As it develops, it may collect into the pleated “pumpkin” shape described in [Mixing and Developing Bread Dough](/learn/mixing-dough-and-gluten-development). If the dough only skates around the bowl or smears without folding, stop the machine, scrape the bowl and spiral, and check the mixer's batch guidance before increasing the speed.
@@ -74,22 +72,22 @@ blocks:
       - title: Hydrate the flour first
         markdown: >-
           For high-hydration sourdough, mix the flour with most of the water at 40% speed (Ooni Halo) just until no dry flour remains. Cover and autolyse according to the formula before adding the levain.
-      - title: 0:00 elapsed — Mix in the levain
+      - title: "0:00 elapsed: Mix in the levain"
         markdown: >-
           Add the ripe levain and mix for 5 minutes. Cover the dough and rest it at 70°F for 20 minutes. This staged addition lets the flour hydrate before fermentation begins and gives the dough another rest before salt tightens it.
-      - title: 0:30 elapsed — Add salt and develop
+      - title: "0:30 elapsed: Add salt and develop"
         markdown: >-
           Add the salt with the held-back water at 15% speed and mix for 1 minute. This late water addition is called bassinage. Increase the mixer to 40% and mix for about 5 minutes. Stop near 72°F when the dough is cohesive, elastic, and stronger than it was after the autolyse, but do not chase the full windowpane used for butter-enriched dough. Cover and rest at 70°F for 25 minutes.
-      - title: 1:00 elapsed — First coil fold
+      - title: "1:00 elapsed: First coil fold"
         markdown: >-
           Coil fold the dough, cover, and rest at 70°F for 25 minutes.
-      - title: 1:30 elapsed — Second coil fold
+      - title: "1:30 elapsed: Second coil fold"
         markdown: >-
           Coil fold the dough again, cover, and rest at 70°F for 25 minutes.
-      - title: 2:00 elapsed — Third coil fold
+      - title: "2:00 elapsed: Third coil fold"
         markdown: >-
           Complete the final coil fold, cover, and leave the dough undisturbed at 70°F for the remainder of bulk fermentation.
-      - title: 4:50 elapsed — End bulk
+      - title: "4:50 elapsed: End bulk"
         markdown: >-
           End bulk when the dough has risen approximately 100% in volume. Use the rise as the completion cue; the elapsed time is a checkpoint.
       - title: Preshape and rest

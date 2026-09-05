@@ -123,6 +123,61 @@ blocks:
     assert.doesNotMatch(recipe.blocks[0].html, /javascript:/)
   })
 
+  it('renders adjacent markdown blocks as one continuous prose flow', () => {
+    const article = parseArticle(`
+title: Dough Guide
+blocks:
+  - type: markdown
+    markdown: |
+      ## Fermentation
+  - type: markdown
+    markdown: |
+      The first paragraph follows the heading.
+  - type: image
+    src: dough.jpg
+    alt: Fermenting dough
+  - type: markdown
+    markdown: |
+      Text after media starts a new prose flow.
+`, 'dough-guide')
+
+    assert.equal(article.blocks.length, 3)
+    assert.deepEqual(article.blocks.map((block) => block.type), ['markdown', 'image', 'markdown'])
+    assert.match(article.blocks[0].html, /<h2>Fermentation<\/h2>\n<p>The first paragraph follows the heading.<\/p>/)
+  })
+
+  it('normalizes footnotes and renders linked references', () => {
+    const article = parseArticle(`
+title: Fermentation Guide
+blocks:
+  - type: markdown
+    markdown: Sugars change throughout fermentation.[1](#footnote-1)
+  - type: footnotes
+    title: Sources
+    items:
+      - id: 1
+        title: Sugar availability during wheat-dough fermentation
+        url: https://example.com/fermentation
+`, 'fermentation-guide')
+
+    assert.match(
+      article.blocks[0].html,
+      /<sup id="footnote-ref-1"><a href="#footnote-1" aria-label="Source 1">1<\/a><\/sup>/,
+    )
+    assert.deepEqual(article.blocks[1], {
+      type: 'footnotes',
+      title: 'Sources',
+      items: [
+        {
+          id: '1',
+          html: 'Sugar availability during wheat-dough fermentation',
+          url: 'https://example.com/fermentation',
+        },
+      ],
+    })
+    assert.equal(article.searchText.includes('sugar availability during wheat-dough fermentation'), true)
+  })
+
   it('normalizes image block layout and captions', () => {
     const recipe = parseRecipe(`
 title: Pizza

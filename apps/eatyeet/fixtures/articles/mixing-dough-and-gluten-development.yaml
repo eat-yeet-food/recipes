@@ -122,9 +122,6 @@ blocks:
 
       Enriched dough often needs a longer final mix, so cool butter helps keep the dough from getting too warm while it develops. The butter still needs to be pliable enough to incorporate cleanly. To get both, place very cold butter between sheets of parchment and beat it with a rolling pin until it flexes without cracking. It can stay cold while becoming workable enough to add gradually, helping the dough reach full development without climbing too far above its target temperature.
 
-  # TODO: Add a "What to Learn Next" section after this methods overview, guiding readers to the most useful next lesson for their dough and chosen method.
-  - type: markdown
-    markdown: |
       ## Methods at a Glance
 
       ### Hand mixing
@@ -138,3 +135,5 @@ blocks:
       ### Spiral mixer
 
       A spiral mixer develops gluten efficiently and is strong for pizza, bread, sourdough, and larger batches. As the dough develops, look for a pumpkin shape: a single pleated mass gathered around the spiral and breaker bar at the center of the bowl. That shows the mixer is engaging the dough rather than simply dragging it around the bowl. It usually reaches the desired development faster than the other methods, which is the benefit and the risk. Use the pumpkin as a visual cue, then confirm the dough's stretch and temperature before deciding it is ready.
+
+  # TODO: Add a "What to Learn Next" section after this methods overview, guiding readers to the most useful next lesson for their dough and chosen method.

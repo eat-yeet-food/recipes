@@ -5,6 +5,7 @@ export type PageBlock =
   | CalloutBlock
   | StepsBlock
   | ComparisonBlock
+  | FootnotesBlock
   | RecipeBlock
   | YouTubeBlock
 
@@ -65,6 +66,16 @@ export interface ComparisonBlock {
   rows: Array<{
     label: string
     values: string[]
+  }>
+}
+
+export interface FootnotesBlock {
+  type: 'footnotes'
+  title: string
+  items: Array<{
+    id: string
+    html: string
+    url: string
   }>
 }
 

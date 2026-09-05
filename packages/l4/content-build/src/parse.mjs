@@ -85,6 +85,11 @@ function renderInlineTokens(tokens = []) {
       case 'link': {
         const text = renderInlineTokens(token.tokens)
         if (!isSafeUrl(token.href)) return text
+        const footnote = token.href.match(/^#footnote-([\w-]+)$/)
+        if (footnote) {
+          const id = escapeHtml(footnote[1])
+          return `<sup id="footnote-ref-${id}"><a href="#footnote-${id}" aria-label="Source ${escapeHtml(stripTags(text))}">${text}</a></sup>`
+        }
         return `<a ${linkAttributes(token.href)}>${text}</a>`
       }
       case 'image':
@@ -275,6 +280,24 @@ function normalizeComparisonBlock(block) {
     : null
 }
 
+function normalizeFootnotesBlock(block) {
+  const seen = new Set()
+  const items = list(block.items)
+    .map((item) => {
+      const id = text(item?.id)
+      const html = renderMarkdown(item?.title ?? item?.text ?? '')
+      const url = text(item?.url)
+      if (!/^[\w-]+$/.test(id) || seen.has(id) || !html || !url || !isSafeUrl(url)) return null
+      seen.add(id)
+      return { id, html, url }
+    })
+    .filter(Boolean)
+
+  return items.length > 0
+    ? { type: 'footnotes', title: renderMarkdown(block.title) || 'Sources', items }
+    : null
+}
+
 function normalizeYouTubeId(value) {
   const text = String(value ?? '').trim()
   return /^[\w-]{6,}$/.test(text) ? text : ''
@@ -296,6 +319,8 @@ function normalizeBlock(block) {
       return normalizeStepsBlock(block)
     case 'comparison':
       return normalizeComparisonBlock(block)
+    case 'footnotes':
+      return normalizeFootnotesBlock(block)
     case 'recipe': {
       const body = normalizeRecipePayload(block)
       return body.equipment.length || body.ingredients.length || body.steps.length || body.notes.length || body.tips.length
@@ -312,8 +337,23 @@ function normalizeBlock(block) {
   }
 }
 
+function mergeAdjacentMarkdownBlocks(blocks) {
+  return blocks.reduce((merged, block) => {
+    const previous = merged.at(-1)
+    if (previous?.type === 'markdown' && block.type === 'markdown') {
+      merged[merged.length - 1] = {
+        type: 'markdown',
+        html: `${previous.html}\n${block.html}`,
+      }
+    } else {
+      merged.push(block)
+    }
+    return merged
+  }, [])
+}
+
 function normalizeNestedBlocks(value) {
-  return list(value).map(normalizeBlock).filter(Boolean)
+  return mergeAdjacentMarkdownBlocks(list(value).map(normalizeBlock).filter(Boolean))
 }
 
 function normalizeBlocks(value, slug) {
@@ -458,6 +498,8 @@ function searchTextForBlocks(blocks) {
           ...block.columns,
           ...block.rows.flatMap((row) => [row.label, ...row.values.map(stripTags)]),
         ]
+      case 'footnotes':
+        return [block.title, ...block.items.map((item) => stripTags(item.html))]
       case 'recipe':
         return [
           sectionText(block.ingredients),

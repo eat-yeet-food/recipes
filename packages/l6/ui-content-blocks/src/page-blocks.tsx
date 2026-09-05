@@ -1,8 +1,9 @@
-import type { ReactNode } from 'react'
+import { Fragment, type ReactNode } from 'react'
 
 import type {
   CalloutBlock,
   ComparisonBlock,
+  FootnotesBlock,
   ImageBlock,
   MarkdownBlock,
   PageBlock,
@@ -73,7 +74,7 @@ function blockImageUrl(image: { src: string; imageHash?: string }) {
 
 function MarkdownBlockView({ block }: { block: MarkdownBlock }) {
   return (
-    <section className="border-t border-[var(--yeet-border)] pt-[30px] text-base leading-[1.72] [&_blockquote]:border-l-4 [&_blockquote]:border-[var(--yeet-pink)] [&_blockquote]:pl-4 [&_blockquote]:text-[var(--yeet-gray)] [&_h2]:mb-4 [&_h2]:text-[34px] [&_h2]:font-bold [&_h2]:leading-none [&_h3]:mb-3 [&_h3]:text-[26px] [&_h3]:font-bold [&_h4]:mb-2.5 [&_h4]:text-[13px] [&_h4]:uppercase [&_h4]:text-[var(--yeet-tomato)] [&_hr]:my-7 [&_hr]:border-[var(--yeet-border)] [&_li]:mb-2 [&_ol]:mb-5 [&_ol]:list-decimal [&_ol]:pl-[22px] [&_p]:mb-5 [&_p:last-child]:mb-0 [&_ul]:mb-5 [&_ul]:list-disc [&_ul]:pl-[22px]">
+    <section className="text-base leading-[1.72] [&>div>*:first-child]:mt-0 [&_blockquote]:my-5 [&_blockquote]:border-l-4 [&_blockquote]:border-[var(--yeet-pink)] [&_blockquote]:pl-4 [&_blockquote]:text-[var(--yeet-gray)] [&_h2]:mb-4 [&_h2]:mt-12 [&_h2]:text-[34px] [&_h2]:font-bold [&_h2]:leading-none [&_h2+h3]:mt-4 [&_h3]:mb-3 [&_h3]:mt-9 [&_h3]:text-[26px] [&_h3]:font-bold [&_h4]:mb-2.5 [&_h4]:mt-7 [&_h4]:text-[13px] [&_h4]:uppercase [&_h4]:text-[var(--yeet-tomato)] [&_hr]:my-7 [&_hr]:border-[var(--yeet-border)] [&_li]:mb-2 [&_ol]:mb-5 [&_ol]:list-decimal [&_ol]:pl-[22px] [&_p]:mb-5 [&_p:last-child]:mb-0 [&_ul]:mb-5 [&_ul]:list-disc [&_ul]:pl-[22px]">
       <Html html={block.html} />
     </section>
   )
@@ -91,7 +92,7 @@ function ImageBlockView({ block }: { block: ImageBlock }) {
         : 'grid grid-cols-1 gap-4'
 
   return (
-    <section className="border-t border-[var(--yeet-border)] pt-[30px]">
+    <section className="my-8">
       <div className={layoutClass}>
         {block.images.map((image, index) => (
           <figure key={`${image.src}-${index}`} className="m-0 h-full">
@@ -134,12 +135,12 @@ function SectionBlockView<TContext>({
         : 'grid gap-7'
 
   return (
-    <section className="border-t border-[var(--yeet-border)] pt-[30px]">
+    <section className="my-8">
       <div className={layoutClass}>
         {block.columns.map((column, index) => (
           <div
             key={index}
-            className="[&>div:first-child>section]:border-t-0 [&>div:first-child>section]:pt-0"
+            className="min-w-0"
           >
             <PageBlocks blocks={column.blocks} registry={registry} context={context} />
           </div>
@@ -158,7 +159,7 @@ function CalloutBlockView({ block }: { block: CalloutBlock }) {
         : 'border-[var(--yeet-border)] bg-[var(--yeet-light-pink)]'
 
   return (
-    <section className="border-t border-[var(--yeet-border)] pt-[30px]">
+    <section className="my-8">
       <div className={`border-l-4 px-5 py-4 ${toneClass}`}>
         {block.title && (
           <h3 className="mb-2 text-[22px] font-bold leading-tight text-[var(--yeet-tomato-strong)]">
@@ -184,7 +185,7 @@ function StepsBlockView({ block }: { block: StepsBlock }) {
       : 'mb-5 text-[34px] font-bold leading-none text-[var(--yeet-gray)]'
 
   return (
-    <section className="border-t border-[var(--yeet-border)] pt-[30px]">
+    <section className="my-8">
       {block.title && (
         <Heading className={headingClass}>
           {block.title}
@@ -236,7 +237,7 @@ function StepsBlockView({ block }: { block: StepsBlock }) {
 
 function ComparisonBlockView({ block }: { block: ComparisonBlock }) {
   return (
-    <section className="border-t border-[var(--yeet-border)] pt-[30px]">
+    <section className="my-8">
       {block.title && (
         <h2 className="mb-5 text-[34px] font-bold leading-none text-[var(--yeet-gray)]">
           {block.title}
@@ -276,9 +277,45 @@ function ComparisonBlockView({ block }: { block: ComparisonBlock }) {
   )
 }
 
+function FootnotesBlockView({ block, index }: { block: FootnotesBlock; index: number }) {
+  const headingId = `footnotes-heading-${index}`
+
+  return (
+    <section
+      aria-labelledby={headingId}
+      className="mb-8 mt-12 border-t border-[var(--yeet-border)] pt-8 text-sm leading-relaxed text-[var(--yeet-gray)]"
+    >
+      <h2 id={headingId} className="mb-4 text-[26px] font-bold leading-tight">
+        {block.title}
+      </h2>
+      <ol className="list-decimal space-y-3 pl-[22px]">
+        {block.items.map((item) => (
+          <li key={item.id} id={`footnote-${item.id}`}>
+            <a
+              href={item.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[var(--yeet-tomato-strong)] underline underline-offset-2"
+            >
+              <Html as="span" html={item.html} />
+            </a>{' '}
+            <a
+              href={`#footnote-ref-${item.id}`}
+              aria-label={`Back to source ${item.id} reference`}
+              className="text-[var(--yeet-tomato-strong)] no-underline"
+            >
+              ↩
+            </a>
+          </li>
+        ))}
+      </ol>
+    </section>
+  )
+}
+
 function YouTubeBlockView({ block }: { block: YouTubeBlock }) {
   return (
-    <section className="border-t border-[var(--yeet-border)] pt-[30px]">
+    <section className="my-8">
       <div className="aspect-video overflow-hidden bg-[var(--yeet-light-pink)]">
         <iframe
           src={`https://www.youtube-nocookie.com/embed/${block.id}`}
@@ -303,11 +340,27 @@ export function registerSharedPageBlocks<TContext>(registry: PageBlockRegistry<T
     .register('callout', ({ block }) => <CalloutBlockView block={block} />)
     .register('steps', ({ block }) => <StepsBlockView block={block} />)
     .register('comparison', ({ block }) => <ComparisonBlockView block={block} />)
+    .register('footnotes', ({ block, index }) => <FootnotesBlockView block={block} index={index} />)
     .register('youtube', ({ block }) => <YouTubeBlockView block={block} />)
 }
 
 export function createSharedPageBlockRegistry<TContext = unknown>() {
   return registerSharedPageBlocks(createPageBlockRegistry<TContext>())
+}
+
+function mergeAdjacentMarkdownBlocks(blocks: PageBlock[]) {
+  return blocks.reduce<Array<{ block: PageBlock; index: number }>>((merged, block, index) => {
+    const previous = merged.at(-1)
+    if (previous?.block.type === 'markdown' && block.type === 'markdown') {
+      previous.block = {
+        type: 'markdown',
+        html: `${previous.block.html}\n${block.html}`,
+      }
+    } else {
+      merged.push({ block, index })
+    }
+    return merged
+  }, [])
 }
 
 export function PageBlocks<TContext>({
@@ -319,15 +372,17 @@ export function PageBlocks<TContext>({
   registry: PageBlockRegistry<TContext>
   context: TContext
 }) {
+  const mergedBlocks = mergeAdjacentMarkdownBlocks(blocks)
+
   return (
-    <>
-      {blocks.map((block, index) => {
+    <div className="[&>:first-child]:mt-0 [&>:last-child]:mb-0">
+      {mergedBlocks.map(({ block, index }) => {
         const renderer = registry.resolve(block)
         if (!renderer) {
           throw new Error(`No page block renderer registered for "${block.type}"`)
         }
-        return <div key={index}>{renderer({ block, index, context, registry })}</div>
+        return <Fragment key={index}>{renderer({ block, index, context, registry })}</Fragment>
       })}
-    </>
+    </div>
   )
 }
