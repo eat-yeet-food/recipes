@@ -42,7 +42,7 @@ export function RecipeArticleHeader({
 }) {
   return (
     <div className="@container">
-      <nav className="flex flex-wrap gap-1.5 mb-5 text-[var(--color-ink)] text-xs leading-[1.6] uppercase" aria-label="Breadcrumb">
+      <nav className="flex flex-wrap gap-1.5 mb-5 text-[var(--color-ink)] text-xs leading-[1.6] uppercase print:hidden" aria-label="Breadcrumb">
         <a href="/">Home</a>
         <span>&gt;</span>
         <a href="/recipes">Recipes</a>
@@ -52,9 +52,9 @@ export function RecipeArticleHeader({
       <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-2">
         <h1 className="col-span-2 m-0 min-w-0 max-w-[var(--layout-recipe-copy)] text-[34px] leading-[1.25] tracking-[1.2px] font-bold @min-[52rem]:col-span-1">{page.title}</h1>
         <div className="col-start-1 row-start-2 self-center text-xs uppercase text-[var(--color-primary)]">By Patrick Hogan</div>
-        <div className="col-start-2 row-start-2 self-center justify-self-end @min-[52rem]:row-span-2 @min-[52rem]:row-start-1"><CookModeSwitch variant="hero" label="Cooking view" checked={focusedCooking} onCheckedChange={toggleFocusedCooking} /></div>
+        <div className="col-start-2 row-start-2 self-center justify-self-end @min-[52rem]:row-span-2 @min-[52rem]:row-start-1 print:hidden"><CookModeSwitch variant="hero" label="Cooking view" checked={focusedCooking} onCheckedChange={toggleFocusedCooking} /></div>
       </div>
-      <div className="mb-6 mt-4 flex flex-wrap gap-3" role="group" aria-label="Page actions">
+      <div className="mb-6 mt-4 flex flex-wrap gap-3 print:hidden" role="group" aria-label="Page actions">
         <RecipeAction variant="hero" href={pinUrl.toString()} target="_blank" rel="noreferrer">
           <Share2 className="size-3.5" />
           Pin Recipe
@@ -189,7 +189,7 @@ export function RecipeArticle({
         'data-cook-mode': cookMode ? 'true' : undefined,
         'data-focused-cooking': focusedCooking ? 'true' : undefined,
       }}
-      headerClassName={focusedCooking ? 'pb-0' : undefined}
+      headerClassName={cn(focusedCooking && 'pb-0', 'print:block print:px-0 print:pt-0 print:pb-6')}
       header={(
         <RecipeArticleHeader
           page={page}
