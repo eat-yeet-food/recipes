@@ -179,7 +179,7 @@ export function RecipeArticle({
         'data-cook-mode': cookMode ? 'true' : undefined,
         'data-focused-cooking': focusedCooking ? 'true' : undefined,
       }}
-      headerClassName={cn(focusedCooking && 'pb-0', 'print:block print:px-0 print:pt-0 print:pb-6')}
+      headerClassName={cn(focusedCooking && 'pb-0 max-[640px]:pb-0', 'print:block print:px-0 print:pt-0 print:pb-6')}
       header={(
         <RecipeArticleHeader
           page={page}
@@ -194,7 +194,7 @@ export function RecipeArticle({
       mainClassName={cn(
         'pt-8 max-[640px]:pt-6 max-[1080px]:max-w-[1120px]',
         aside && 'grid-cols-[minmax(0,760px)_300px] gap-14 max-[1080px]:block',
-        focusedCooking && 'pt-6',
+        focusedCooking && 'pt-3 max-[640px]:pt-3',
       )}
       articleClassName={cn(
         'mt-0 max-w-[var(--layout-recipe-copy)] bg-white pt-0 pb-[38px] max-[640px]:pb-[30px]',

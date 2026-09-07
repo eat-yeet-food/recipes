@@ -71,7 +71,7 @@ The recipe header responds to its own available width. Below 52rem, the title oc
 
 Switching Cooking view on or off preserves the header width, recipe-column width, and horizontal position. It hides surrounding media/sidebar content without recentering the page; the configured sidebar column remains reserved at desktop widths. Vertical spacing may tighten when the surrounding content is hidden.
 
-The image-to-body gap is 32px on desktop and 24px on mobile. Recipe articles remove the shared shell’s additional top margin and inner top padding so these spaces do not accumulate above the stat tiles.
+The image-to-body gap is 32px on desktop and 24px on mobile. In Cooking view, which hides the image, use a 12px header-to-stats gap on both desktop and mobile. RecipeFacts has no top margin; the parent owns this spacing. Recipe articles remove the shared shell’s additional top margin and inner top padding so these spaces do not accumulate above the stat tiles.
 
 The recipe title and description appear once in the main page header, including print output; breadcrumbs and interactive header controls remain hidden in print. Below the image, the recipe body starts with facts and the adjustment summary; do not repeat a Recipe eyebrow, title, or description, including in Cooking view. Body sections use level-two headings and ingredient/instruction subsections use level three.
 

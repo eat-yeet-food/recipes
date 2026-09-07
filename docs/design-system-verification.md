@@ -4,6 +4,8 @@ Reviewed September 7, 2026. The approved usage contract is [design-system.md](de
 
 ## Subsequent September 7 refinements
 
+The remaining 28px RecipeFacts top margin is removed, and Cooking view explicitly clears mobile header padding and uses 12px main top padding at every viewport. This resolves spacing that the earlier parent-only adjustment left in place. Standalone visual checks remain paused.
+
 The user confirmed Apply already dismisses the drawer; the proposed dismissal-order change was reverted before deployment. The repeated Print, Pin, and Cook Mode row is removed from the recipe body, leaving the main header as the sole action location. Updated stories and route assertions reflect this structure; standalone checks remain paused.
 
 Recipe image-to-body spacing is now 32px on desktop and 24px on mobile, replacing stacked main padding, article margin, and article padding. Standalone visual checks remain paused.
