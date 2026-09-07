@@ -17,6 +17,15 @@ import { SITE_URL, STATIC_PATHS } from '#site-config'
 
 const ORIGIN = (process.argv[2] ?? SITE_URL).replace(/\/$/, '')
 
+function isAnalyticsBeacon(url) {
+  try {
+    const requestUrl = new URL(url)
+    return requestUrl.hostname === 'www.google-analytics.com' && requestUrl.pathname === '/g/collect'
+  } catch {
+    return false
+  }
+}
+
 let failures = 0
 function check(name, ok, detail = '') {
   console.log(`${ok ? 'ok  ' : 'FAIL'}  ${name}${detail ? ` :: ${detail}` : ''}`)
@@ -36,9 +45,11 @@ for (const path of STATIC_PATHS) {
   page.on('console', (message) => {
     if (message.type() === 'error') problems.push(`console: ${message.text()}`)
   })
-  page.on('requestfailed', (request) =>
-    problems.push(`requestfailed: ${request.url()} ${request.failure()?.errorText ?? ''}`),
-  )
+  page.on('requestfailed', (request) => {
+    if (!isAnalyticsBeacon(request.url())) {
+      problems.push(`requestfailed: ${request.url()} ${request.failure()?.errorText ?? ''}`)
+    }
+  })
   page.on('response', (response) => {
     if (response.status() >= 400) problems.push(`http ${response.status()}: ${response.url()}`)
     // The poisoned-cache signature: an asset answered with a document.
