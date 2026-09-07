@@ -208,9 +208,9 @@ export function resolveWorkbenchRecipe(recipe: RecipeContent, selection: DoughWo
 
 function Field({ label, value, onChange, suffix, step = '0.1', min = 0 }: { label: string; value: number; onChange: (value: number) => void; suffix?: string; step?: string; min?: number }) {
   return (
-    <label className="grid gap-1 text-xs font-extrabold uppercase tracking-[0.7px] text-[var(--yeet-gray)]">
+    <label className="grid min-w-0 gap-1 text-xs font-extrabold uppercase tracking-[0.7px] text-[var(--yeet-gray)]">
       {label}
-      <span className="flex items-center border border-[var(--yeet-border)] bg-white focus-within:border-[var(--yeet-tomato)]">
+      <span className="flex min-w-0 items-center border border-[var(--yeet-border)] bg-white focus-within:border-[var(--yeet-tomato)]">
         <input className="min-w-0 flex-1 bg-transparent px-3 py-2.5 text-base font-normal tracking-normal outline-none" type="number" inputMode="decimal" min={min} step={step} value={inputValue(value, suffix)} onChange={(event) => onChange(number(event.target.value))} />
         {suffix && <span className="pr-3 text-xs text-[var(--yeet-gray)]">{suffix}</span>}
       </span>
@@ -356,12 +356,12 @@ function DoughFormulaWorkbench({
 
   return (
       <Dialog open={open} onOpenChange={(next) => { onOpenChange(next); if (!next) setDraft(clone(selection)) }}>
-        <DialogContent overlayClassName="z-[var(--z-workbench)]" data-workbench-drawer="" aria-describedby="workbench-description" className="yeet top-0 right-0 bottom-0 left-auto z-[var(--z-workbench)] flex h-[100dvh] w-full !max-w-[600px] translate-x-0 translate-y-0 flex-col gap-0 rounded-none border-0 bg-white p-0 text-[var(--yeet-gray)] shadow-none ring-0 max-[640px]:!w-full max-[640px]:!max-w-none data-open:zoom-in-100 data-closed:zoom-out-100 data-open:slide-in-from-right data-closed:slide-out-to-right motion-reduce:transition-none">
+        <DialogContent overlayClassName="z-[var(--z-workbench)]" data-workbench-drawer="" aria-describedby="workbench-description" className="yeet top-0 right-0 bottom-0 left-auto z-[var(--z-workbench)] flex h-[100dvh] w-full !max-w-[600px] translate-x-0 translate-y-0 flex-col gap-0 overflow-x-hidden rounded-none border-0 bg-white p-0 text-[var(--yeet-gray)] shadow-none ring-0 max-[640px]:!w-full max-[640px]:!max-w-none data-open:zoom-in-100 data-closed:zoom-out-100 data-open:slide-in-from-right data-closed:slide-out-to-right motion-reduce:transition-none">
           <header className="shrink-0 border-b border-[var(--yeet-border)] px-6 py-5 pr-14 max-[640px]:px-[18px]">
             <DialogTitle className="text-[30px] leading-none font-bold">Adjust recipe</DialogTitle>
             <DialogDescription id="workbench-description" className="mt-2 text-sm text-[var(--yeet-gray)]">Build the batch you want, preview the weights, then apply it to the whole recipe.</DialogDescription>
           </header>
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 py-5 max-[640px]:px-[18px]">
+          <div data-workbench-scroll-region="" className="min-h-0 min-w-0 flex-1 touch-pan-y overflow-x-hidden overflow-y-auto overscroll-contain px-6 py-5 max-[640px]:px-[18px]">
             <Segmented value={mode} onChange={changeMode} />
 
             <section className="mt-6 grid gap-3 border-b border-[var(--yeet-border)] pb-6" aria-labelledby="presets-heading">

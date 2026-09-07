@@ -195,6 +195,19 @@ const phoneDrawer = await phone.getByRole('dialog', { name: 'Adjust recipe' }).e
   maxWidth: getComputedStyle(dialog).maxWidth,
 }))
 check('workbench fills phone viewport', Math.abs(phoneDrawer.width - phoneDrawer.viewport) < 2, JSON.stringify(phoneDrawer))
+const phoneScrollRegion = await phone.locator('[data-workbench-scroll-region]').evaluate((region) => ({
+  clientWidth: region.clientWidth,
+  scrollWidth: region.scrollWidth,
+  overflowX: getComputedStyle(region).overflowX,
+  touchAction: getComputedStyle(region).touchAction,
+}))
+check(
+  'workbench scroll region stays locked to vertical touch movement',
+  phoneScrollRegion.scrollWidth === phoneScrollRegion.clientWidth &&
+    phoneScrollRegion.overflowX === 'hidden' &&
+    phoneScrollRegion.touchAction === 'pan-y',
+  JSON.stringify(phoneScrollRegion),
+)
 await phone.getByRole('button', { name: 'Cancel' }).click()
 await phone.close()
 
