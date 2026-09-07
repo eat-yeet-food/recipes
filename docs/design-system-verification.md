@@ -4,6 +4,8 @@ Reviewed September 7, 2026. The approved usage contract is [design-system.md](de
 
 ## Subsequent September 7 refinements
 
+Saved formulas now starts collapsed behind a compact count-bearing disclosure. The existing save/load/edit/delete stories open that disclosure explicitly; hidden form state is retained when collapsed, and storage failures remain visible. Standalone interaction and visual checks remain paused at the user’s request.
+
 The follow-up precision contract is whole grams at 20g and above, at most one decimal for smaller weights and all percentages/ratios, and no trailing `.0`. It covers fields, previews, saved summaries, applied ingredients, and formula bindings. Typed buffers and raw calculations remain separate. Formatter, domain, and production-story assertions have been updated but not executed during the standalone-check pause.
 
 Sourdough now has family-specific name/help copy and one saved-formula workflow containing starter/levain settings and the modeled mixing/fold schedule. The domain validates whole-minute, ordered folds; the plugin carries them through saved/default/shared state and resolves bound recipe steps, equipment, learning method, and total time. Existing standalone starter records remain in storage without a second naming UI. Added domain and story regressions cover malformed timing, hand mixing, save/load, legacy shared state, and recipe projection. Standalone unit, Storybook, mobile, accessibility, screenshot, and Lighthouse checks remain paused at the user’s request; deployment build/smoke checks do not establish those results.

@@ -75,6 +75,8 @@ Recipe descriptions and the recipe body use the shared `layout-recipe-copy` meas
 
 ## Saved formulas
 
+Start collapsed on each workbench visit. A compact underlined Saved formulas disclosure shows the family’s saved count and a chevron; `aria-expanded` and `aria-controls` identify its state and panel. Opening reveals the existing ink panel with load/save/update/delete controls. Collapsing retains draft names and selections but removes the panel from layout and keyboard navigation. Storage errors remain visible even when collapsed.
+
 Save new and Update formula use native disabled buttons with the shared muted treatment whenever the name or formula is invalid, including duplicate names or values. Show a neutral name hint before interaction and associated validation feedback as the user edits or leaves the field; explain formula errors without requiring a click on a disabled action. Keep the submit-handler validation as a second guard.
 
 The app-owned `WorkbenchPanel` gives Saved formulas and Your dough the same ink surface, field radius, padding, yellow heading, and light text. A single saved-formula picker replaces repeated Load/Default/Delete rows. Load and Delete are available for the chosen entry without entering the editor; Delete removes its saved default references and leaves any other loaded formula intact. Focus returns to the picker or name field after deletion. The editor distinguishes creating a formula from updating the loaded one; Make default applies to that loaded formula. Input and Select use their `on-ink` surface. Internal dividers use `border-on-ink`; separators directly on the yellow sheet use `border-on-brand`.

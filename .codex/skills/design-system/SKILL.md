@@ -33,6 +33,8 @@ filled-button spacing or remove the visible clickable cue. Use a dedicated label
 switch for binary settings rather than a button-styled row. Saved-formula UI
 follows the **Saved formulas** contract and shares its panel with dough results;
 keep validation, persistence feedback, and corresponding stories together.
+Start that panel collapsed behind its compact saved-count disclosure so the
+calculator fields remain the primary use of workbench space.
 For numeric controls, follow **Numeric editing**: keep editable text separate
 from accepted values, preserve blank/partial entries and focus, and block saves
 while invalid. Reuse NumberField rather than coercing or formatting raw input

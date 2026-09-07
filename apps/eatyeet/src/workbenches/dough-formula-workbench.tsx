@@ -6,7 +6,7 @@ import { Input } from '@eat-yeet/l5-ui-primitives/primitives/input'
 import { Select } from '@eat-yeet/l5-ui-primitives/primitives/select'
 import { ChoiceGroup } from '@eat-yeet/l5-ui-primitives/primitives/choice-group'
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { Plus, Trash2 } from 'lucide-react'
+import { ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react'
 
 import {
   calculateFormula,
@@ -317,6 +317,7 @@ function DoughFormulaWorkbench({
   const [mode, setMode] = useState<InputMode>(config.defaultInputMode)
   const [store, setStore] = useState<WorkbenchStore>(EMPTY_STORE)
   const [storeError, setStoreError] = useState('')
+  const [presetsOpen, setPresetsOpen] = useState(false)
   const [presetName, setPresetName] = useState('')
   const [chosenPresetId, setChosenPresetId] = useState('')
   const [presetAttempted, setPresetAttempted] = useState(false)
@@ -381,6 +382,10 @@ function DoughFormulaWorkbench({
       if (preset) onApply({ ...selection, formula: completeFormula(clone(preset.formula), config.defaultSelection.formula) })
     }
   }, [storageKey, recipe.slug])
+
+  useEffect(() => {
+    if (!open) setPresetsOpen(false)
+  }, [open])
 
   useEffect(() => {
     if (!open) return
@@ -472,6 +477,14 @@ function DoughFormulaWorkbench({
           <div data-workbench-scroll-region="" className="min-h-0 min-w-0 flex-1 touch-pan-y overflow-x-hidden overflow-y-auto overscroll-contain px-6 py-5 max-[640px]:px-[18px]">
             <Segmented value={mode} onChange={changeMode} />
 
+            <div className="mt-4">
+              <Button variant="link" type="button" aria-expanded={presetsOpen} aria-controls="saved-formulas-panel" onClick={() => setPresetsOpen((current) => !current)}>
+                Saved formulas <span className="text-xs font-normal">({compatiblePresets.length})</span>
+                {presetsOpen ? <ChevronUp className="size-4" aria-hidden="true" /> : <ChevronDown className="size-4" aria-hidden="true" />}
+              </Button>
+              {!presetsOpen && storeError && <p role="status" className="mt-2 text-xs">{storeError}</p>}
+            </div>
+            <div id="saved-formulas-panel" hidden={!presetsOpen}>
             <WorkbenchPanel headingId="presets-heading" title="Saved formulas" summary={<span className="text-xs text-action-label">{compatiblePresets.length} saved</span>}>
               <div className="mt-3 grid gap-3">
               <p className="text-xs leading-relaxed text-action-label">{copy.saved}</p>
@@ -532,6 +545,7 @@ function DoughFormulaWorkbench({
               <p role="status" className="text-xs text-action-label empty:hidden">{storeError || presetNotice}</p>
               </div>
             </WorkbenchPanel>
+            </div>
 
             <section className="mt-6 grid gap-4" aria-labelledby="batch-heading">
               <h3 id="batch-heading" className="text-xl font-bold">Batch</h3>

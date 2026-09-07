@@ -61,7 +61,7 @@ function WorkbenchPreview({ target = false, pizza = false }: { target?: boolean;
 const meta = {
   title: 'Recipes/Dough workbench',
   component: WorkbenchPreview,
-  parameters: { layout: 'fullscreen', docs: { description: { component: 'Saved formulas use the same ink panel as the dough summary, with a single picker and a named create/update form. Names are required, limited to 80 characters, and unique within a dough family regardless of case or spacing. Exact formula copies are rejected. Errors remain next to the form; saving failures never report success.' } } },
+  parameters: { layout: 'fullscreen', docs: { description: { component: 'Saved formulas start collapsed behind a compact disclosure with a saved count. Opening it reveals the same ink panel as the dough summary, with a single picker and a named create/update form. Names are required, limited to 80 characters, and unique within a dough family regardless of case or spacing. Exact formula copies are rejected. Errors remain next to the form; saving failures never report success.' } } },
 } satisfies Meta<typeof WorkbenchPreview>
 
 export default meta
@@ -134,14 +134,21 @@ export const ApplyAndClose: Story = { play: async ({ canvasElement }) => { const
 export const SavedFormula: Story = { play: async ({ canvasElement }) => {
   const screen = within(canvasElement.ownerDocument.body)
   await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))
+  await expect(screen.queryByRole('textbox', { name: 'Formula preset name' })).not.toBeInTheDocument()
+  await userEvent.click(screen.getByRole('button', { name: /Saved formulas/ }))
   await userEvent.type(await screen.findByRole('textbox', { name: 'Formula preset name' }), 'Weekend batch')
   await userEvent.click(screen.getAllByRole('button', { name: 'Save new' })[0])
   await expect(screen.getByRole('button', { name: 'Load Weekend batch' })).toBeInTheDocument()
+  await userEvent.click(screen.getByRole('button', { name: /Saved formulas/ }))
+  await expect(screen.queryByRole('textbox', { name: 'Formula preset name' })).not.toBeInTheDocument()
+  await userEvent.click(screen.getByRole('button', { name: /Saved formulas/ }))
+  await expect(screen.getByRole('textbox', { name: 'Formula preset name' })).toHaveValue('Weekend batch')
 } }
 
 export const DuplicateFormulaName: Story = { play: async ({ canvasElement }) => {
   const screen = within(canvasElement.ownerDocument.body)
   await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))
+  await userEvent.click(screen.getByRole('button', { name: /Saved formulas/ }))
   const panel = within(screen.getByRole('region', { name: 'Saved formulas' }))
   const name = panel.getByRole('textbox', { name: 'Formula preset name' })
   await expect(panel.getByRole('button', { name: 'Save new' })).toBeDisabled()
@@ -159,6 +166,7 @@ export const DuplicateFormulaName: Story = { play: async ({ canvasElement }) => 
 export const DuplicateFormulaValues: Story = { play: async ({ canvasElement }) => {
   const screen = within(canvasElement.ownerDocument.body)
   await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))
+  await userEvent.click(screen.getByRole('button', { name: /Saved formulas/ }))
   const panel = within(screen.getByRole('region', { name: 'Saved formulas' }))
   const name = panel.getByRole('textbox', { name: 'Formula preset name' })
   await userEvent.type(name, 'Weekend batch')
@@ -173,6 +181,7 @@ export const DuplicateFormulaValues: Story = { play: async ({ canvasElement }) =
 export const RenameSavedFormula: Story = { play: async ({ canvasElement }) => {
   const screen = within(canvasElement.ownerDocument.body)
   await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))
+  await userEvent.click(screen.getByRole('button', { name: /Saved formulas/ }))
   const panel = within(screen.getByRole('region', { name: 'Saved formulas' }))
   const name = panel.getByRole('textbox', { name: 'Formula preset name' })
   await userEvent.type(name, 'Weekend batch')
@@ -188,6 +197,7 @@ export const RenameSavedFormula: Story = { play: async ({ canvasElement }) => {
 export const DeleteWithoutLoading: Story = { play: async ({ canvasElement }) => {
   const screen = within(canvasElement.ownerDocument.body)
   await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))
+  await userEvent.click(screen.getByRole('button', { name: /Saved formulas/ }))
   const panel = within(screen.getByRole('region', { name: 'Saved formulas' }))
   const name = panel.getByRole('textbox', { name: 'Formula preset name' })
   await userEvent.type(name, 'Weekend batch')
@@ -202,6 +212,7 @@ export const DeleteWithoutLoading: Story = { play: async ({ canvasElement }) => 
 export const SourdoughProcessAndSavedStarter: Story = { args: { target: true }, play: async ({ canvasElement }) => {
   const screen = within(canvasElement.ownerDocument.body)
   await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))
+  await userEvent.click(screen.getByRole('button', { name: /Saved formulas/ }))
   await expect(screen.getByRole('textbox', { name: 'Formula preset name' })).toHaveAttribute('placeholder', 'e.g. Everyday sourdough')
   await expect(screen.queryByRole('textbox', { name: 'Starter profile name' })).not.toBeInTheDocument()
   await userEvent.click(screen.getByRole('button', { name: 'By hand' }))
