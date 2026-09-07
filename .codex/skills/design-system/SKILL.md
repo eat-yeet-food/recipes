@@ -43,7 +43,8 @@ Choose display precision from the handbook’s field-role table. Round resting
 and blurred displays, not typed buffers or calculation state; never use a
 rounded display as the value to validate. Follow the current cap: whole grams
 at 20g and above, at most one decimal below 20g and for percentages/ratios,
-and no trailing `.0`. Keep family-specific copy in the workbench's typed copy
+except yeast permits two decimals for percentages and weights below 20g.
+Omit trailing zeros. Keep family-specific copy in the workbench's typed copy
 mapping. Starter and process settings belong to the saved formula, without a
 separate starter naming workflow. Sourdough process edits must update the
 domain model, plugin state/recipe projection, and production stories together.

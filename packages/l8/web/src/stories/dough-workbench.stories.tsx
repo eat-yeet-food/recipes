@@ -54,7 +54,7 @@ function WorkbenchPreview({ target = false, pizza = false }: { target?: boolean;
   const changeOpen = (next: boolean) => { setOpen(next); if (!next) requestAnimationFrame(() => trigger.current?.focus()) }
   const config = { defaultInputMode: target ? 'target' : 'weights', defaultSelection: selected, recommendedFormulas: {}, doughIngredientSectionId: 'dough', initialWaterPercent: 97 }
   const Drawer = (pizza ? recipeWorkbenchRegistry.get('pizza')! : plugin).Drawer
-  const initial = pizza ? { ...selected, batch: { ...selected.batch, pieceLabel: 'ball' }, formula: { ...selected.formula, family: 'pizza', levainPercent: 0, yeastPercent: 0.3 } } : selected
+  const initial = pizza ? { ...selected, batch: { ...selected.batch, pieceLabel: 'ball' }, formula: { ...selected.formula, family: 'pizza', levainPercent: 0, yeastPercent: 0.25 } } : selected
   return <div className="p-6"><Button ref={trigger} onClick={() => setOpen(true)}>Open workbench</Button><p role="status">{applied ? "Recipe updated" : "Preview your batch"}</p><Drawer recipe={recipe} config={{ ...config, defaultSelection: initial }} state={saved ?? initial} onApply={(next) => { setSaved(next); setApplied(true) }} hasSharedConfiguration={false} storageScope={scope} open={open} onOpenChange={changeOpen} /></div>
 }
 
@@ -82,7 +82,11 @@ export const IncompleteFlourBlend: Story = {
 }
 
 export const TargetBatch: Story = { args: { target: true } }
-export const Pizza: Story = { args: { pizza: true, target: true } }
+export const Pizza: Story = { args: { pizza: true, target: true }, play: async ({ canvasElement }) => {
+  const screen = within(canvasElement.ownerDocument.body)
+  await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))
+  await expect(screen.getByRole('textbox', { name: 'Instant yeast' })).toHaveValue('0.25')
+} }
 export const RoundedBatchAndPercentages: Story = { args: { target: true }, play: async ({ canvasElement }) => {
   const screen = within(canvasElement.ownerDocument.body)
   await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))

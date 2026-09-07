@@ -69,6 +69,8 @@ const clone = <T,>(value: T): T => JSON.parse(JSON.stringify(value))
 const pieceCountLabel = (count: number, label: 'loaf' | 'ball') => label === 'loaf' ? (count === 1 ? 'loaf' : 'loaves') : (count === 1 ? 'ball' : 'balls')
 const escapeHtml = (value: string) => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
 const formatWorkbenchGrams = (value: number) => Number.isFinite(value) ? `${formatNumberFieldValue(value, Math.abs(value) >= 20 ? 0 : 1)}g` : '—'
+const yeastGramPrecision = (value: number): NumberFieldPrecision => Math.abs(value) >= 20 ? 0 : 2
+const formatYeastGrams = (value: number) => Number.isFinite(value) ? `${formatNumberFieldValue(value, yeastGramPrecision(value))}g` : '—'
 const formatBatchGrams = (value: number) => Number.isFinite(value) ? `${formatNumberFieldValue(value, 0)}g` : '—'
 const formatAppliedGrams = (value: number) => {
   if (!Number.isFinite(value)) return '—'
@@ -97,7 +99,7 @@ function presetSummary(formula: DoughFormula) {
   const parts = [`${formatPercent(formula.hydrationPercent)} hydration`, `${formatPercent(formula.saltPercent)} salt`]
   if (formula.family === 'pizza') {
     if (formula.oilPercent > 0) parts.push(`${formatPercent(formula.oilPercent)} oil`)
-    if (formula.yeastPercent > 0) parts.push(`${formatNumberFieldValue(formula.yeastPercent, 1)}% yeast`)
+    if (formula.yeastPercent > 0) parts.push(`${formatNumberFieldValue(formula.yeastPercent, 2)}% yeast`)
   } else if (formula.levainPercent > 0) {
     parts.push(`${formatPercent(formula.levainPercent)} levain`)
   }
@@ -142,7 +144,7 @@ function dynamicDoughItems(selection: DoughWorkbenchState, formatWeight = format
   if (result.oilGrams > 0.005) items.push(`${formatWeight(result.oilGrams)} oil`)
   if (result.sugarGrams > 0.005) items.push(`${formatWeight(result.sugarGrams)} sugar`)
   if (result.maltGrams > 0.005) items.push(`${formatWeight(result.maltGrams)} malt powder`)
-  if (result.yeastGrams > 0.005) items.push(`${formatWeight(result.yeastGrams)} instant yeast`)
+  if (result.yeastGrams > 0.005) items.push(`${formatYeastGrams(result.yeastGrams)} instant yeast`)
   items.push(`${formatWeight(result.saltGrams)} salt`)
   return { result, items }
 }
@@ -566,7 +568,7 @@ function DoughFormulaWorkbench({
                 <div className="grid grid-cols-2 gap-3 max-[380px]:grid-cols-1">
                   <Field label="Hydration" suffix="%" value={draft.formula.hydrationPercent} onChange={(hydrationPercent) => updateFormula({ hydrationPercent })} />
                   <Field label="Salt" suffix="%" value={draft.formula.saltPercent} onChange={(saltPercent) => updateFormula({ saltPercent })} />
-                  {draft.formula.family === 'pizza' && <><Field label="Oil" suffix="%" value={draft.formula.oilPercent} onChange={(oilPercent) => updateFormula({ oilPercent })} /><Field label="Sugar" suffix="%" value={draft.formula.sugarPercent} onChange={(sugarPercent) => updateFormula({ sugarPercent })} /><Field label="Malt powder" suffix="%" value={draft.formula.maltPercent} onChange={(maltPercent) => updateFormula({ maltPercent })} /><Field label="Instant yeast" suffix="%" decimalPlaces={1} value={draft.formula.yeastPercent} onChange={(yeastPercent) => updateFormula({ yeastPercent })} /></>}
+                  {draft.formula.family === 'pizza' && <><Field label="Oil" suffix="%" value={draft.formula.oilPercent} onChange={(oilPercent) => updateFormula({ oilPercent })} /><Field label="Sugar" suffix="%" value={draft.formula.sugarPercent} onChange={(sugarPercent) => updateFormula({ sugarPercent })} /><Field label="Malt powder" suffix="%" value={draft.formula.maltPercent} onChange={(maltPercent) => updateFormula({ maltPercent })} /><Field label="Instant yeast" suffix="%" decimalPlaces={2} value={draft.formula.yeastPercent} onChange={(yeastPercent) => updateFormula({ yeastPercent })} /></>}
                   {draft.formula.family === 'sourdough' && <Field label="Ripe levain" suffix="% of flour" value={draft.formula.levainPercent} onChange={(levainPercent) => updateFormula({ levainPercent })} />}
                 </div>
               </section>
@@ -577,7 +579,7 @@ function DoughFormulaWorkbench({
                 <div className="grid grid-cols-2 gap-3 max-[380px]:grid-cols-1">
                   <Field label="Added water" suffix="g" value={weightInputs.addedWaterGrams ?? 0} onChange={(addedWaterGrams) => applyReverse({ addedWaterGrams })} />
                   <Field label="Salt" suffix="g" value={weightInputs.saltGrams ?? 0} onChange={(saltGrams) => applyReverse({ saltGrams })} />
-                  {draft.formula.family === 'pizza' && <><Field label="Oil" suffix="g" value={weightInputs.oilGrams ?? 0} onChange={(oilGrams) => applyReverse({ oilGrams })} /><Field label="Sugar" suffix="g" value={weightInputs.sugarGrams ?? 0} onChange={(sugarGrams) => applyReverse({ sugarGrams })} /><Field label="Malt powder" suffix="g" value={weightInputs.maltGrams ?? 0} onChange={(maltGrams) => applyReverse({ maltGrams })} /><Field label="Instant yeast" suffix="g" value={weightInputs.yeastGrams ?? 0} onChange={(yeastGrams) => applyReverse({ yeastGrams })} /></>}
+                  {draft.formula.family === 'pizza' && <><Field label="Oil" suffix="g" value={weightInputs.oilGrams ?? 0} onChange={(oilGrams) => applyReverse({ oilGrams })} /><Field label="Sugar" suffix="g" value={weightInputs.sugarGrams ?? 0} onChange={(sugarGrams) => applyReverse({ sugarGrams })} /><Field label="Malt powder" suffix="g" value={weightInputs.maltGrams ?? 0} onChange={(maltGrams) => applyReverse({ maltGrams })} /><Field label="Instant yeast" suffix="g" decimalPlaces={yeastGramPrecision(weightInputs.yeastGrams ?? 0)} value={weightInputs.yeastGrams ?? 0} onChange={(yeastGrams) => applyReverse({ yeastGrams })} /></>}
                 </div>
               </section>
             )}

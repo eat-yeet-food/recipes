@@ -100,7 +100,9 @@ Display precision is separate from calculation precision. Format initial, extern
 | Quantity | Integer; fractional entries remain invalid |
 | Piece weight and total dough weight | Whole grams |
 | Ingredient weights, flour rows, water, starter/levain weights and gram previews | Whole grams at 20g and above; at most 1 decimal below 20g |
-| All target percentages, including yeast, starter/seed blends and saved-formula summaries | At most 1 decimal |
+| Target percentages, starter/seed blends and saved-formula summaries, except yeast | At most 1 decimal |
+| Yeast percentage and its saved summary | At most 2 decimals |
+| Yeast gram field, preview and applied ingredient amount | At most 2 decimals below 20g; whole grams at 20g and above |
 | Seed-to-flour ratio and its readout | At most 1 decimal |
 | Autolyse, salt addition, bulk duration and fold times | Whole minutes |
 
