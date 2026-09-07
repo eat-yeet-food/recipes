@@ -20,6 +20,7 @@ export const DisabledTextAction: Story = { args: { variant: 'link', disabled: tr
 export const IconAction: Story = { args: { variant: 'ghost', size: 'icon', 'aria-label': 'Delete formula', children: <Trash2 /> } }
 export const Utility: Story = { args: { variant: 'utility', size: 'sm', children: 'Print Recipe' } }
 export const OnInk: Story = { decorators: [(Story) => <div className="rounded-field bg-ink p-6"><Story /></div>], args: { variant: 'on-ink', children: 'Save formula' } }
+export const DisabledOnInk: Story = { decorators: [(Story) => <div className="rounded-field bg-ink p-6"><Story /></div>], args: { variant: 'on-ink', disabled: true, children: 'Save new' } }
 export const QuietOnInk: Story = { decorators: [(Story) => <div className="rounded-field bg-ink p-6"><Story /></div>], args: { variant: 'quiet-on-ink', children: 'New formula' } }
 export const Destructive: Story = { args: { variant: 'danger', children: 'Delete saved formula' } }
 export const Disabled: Story = { args: { disabled: true, children: 'Apply recipe' } }

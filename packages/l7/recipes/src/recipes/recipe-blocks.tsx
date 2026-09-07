@@ -125,7 +125,7 @@ function RecipeBlockView({
           {context.workbenchSummary && context.onOpenWorkbench && (
             <div className="mb-6 flex items-start justify-between gap-4 rounded-field bg-brand px-4 py-3 print:border print:bg-white">
               <div>
-                <div className="text-[11px] font-extrabold uppercase tracking-[0.8px] text-[var(--color-primary)]">Your recipe</div>
+                <div className="font-action text-[11px] font-bold uppercase tracking-[0.8px] text-[var(--color-primary)]">Your recipe</div>
                 <div className="mt-1 text-sm font-bold">{context.workbenchSummary}</div>
               </div>
               <AdjustRecipeButton compact onClick={context.onOpenWorkbench} />

@@ -320,6 +320,8 @@ function DoughFormulaWorkbench({
     : duplicateFormula
       ? `This formula is already saved as “${duplicateFormula.name}”. Load it to update it, or change the formula before saving a new one.`
       : ''
+  const showPresetNameError = Boolean(presetNameError) && (presetAttempted || presetName.length > 0)
+  const presetNameDescription = showPresetNameError ? 'formula-preset-name-error' : !normalizedPresetName ? 'formula-preset-name-hint' : undefined
 
   useEffect(() => {
     const { store: saved, error } = readStore(storageKey)
@@ -449,12 +451,13 @@ function DoughFormulaWorkbench({
                 </div>
                 <div className="grid gap-1.5">
                   <label htmlFor="formula-preset-name" className="text-xs font-semibold">Formula name</label>
-                  <Input surface="on-ink" ref={presetNameInput} id="formula-preset-name" aria-label="Formula preset name" required aria-invalid={presetAttempted && Boolean(presetNameError)} aria-describedby={presetAttempted && presetNameError ? 'formula-preset-name-error' : undefined} placeholder="e.g. Weekend pizza" value={presetName} onChange={(event) => { setPresetName(event.target.value); setPresetNotice('') }} />
-                  {presetAttempted && presetNameError && <p id="formula-preset-name-error" role="alert" className="rounded-field bg-danger-soft p-3 text-xs text-danger">{presetNameError}</p>}
+                  <Input surface="on-ink" ref={presetNameInput} id="formula-preset-name" aria-label="Formula preset name" required aria-invalid={showPresetNameError} aria-describedby={presetNameDescription} placeholder="e.g. Weekend pizza" value={presetName} onBlur={() => setPresetAttempted(true)} onChange={(event) => { setPresetName(event.target.value); setPresetNotice('') }} />
+                  {showPresetNameError && <p id="formula-preset-name-error" role="alert" className="rounded-field bg-danger-soft p-3 text-xs text-danger">{presetNameError}</p>}
+                  {!showPresetNameError && !normalizedPresetName && <p id="formula-preset-name-hint" className="text-xs text-action-label">Enter a name to save this formula.</p>}
                 </div>
-                {presetAttempted && !presetNameError && presetFormulaError && <p role="alert" className="break-words rounded-field bg-danger-soft p-3 text-xs text-danger">{presetFormulaError}</p>}
+                {!presetNameError && presetFormulaError && <p id="formula-preset-error" role="alert" className="break-words rounded-field bg-danger-soft p-3 text-xs text-danger">{presetFormulaError}</p>}
                 <div className="flex flex-wrap items-center gap-2">
-                  <Button variant="on-ink" type="submit" size="sm">{selectedPreset ? 'Update formula' : 'Save new'}</Button>
+                  <Button variant="on-ink" type="submit" size="sm" disabled={Boolean(presetNameError || presetFormulaError)} aria-describedby={presetNameError ? presetNameDescription : presetFormulaError ? 'formula-preset-error' : undefined}>{selectedPreset ? 'Update formula' : 'Save new'}</Button>
                   {selectedPreset && <Button variant="quiet-on-ink" type="button" size="sm" onClick={() => {
                     setSelectedPresetId('')
                     setPresetName('')
