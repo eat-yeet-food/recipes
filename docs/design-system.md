@@ -37,7 +37,7 @@ Text fields use a flat ink fill, light values/placeholders, and inset keyboard f
 
 Buttons have a single flat fill: no offset shadows, decorative outlines, translation on press, or underlined labels in any state. Keyboard focus is a single inset indicator. Icons need a visible boundary when focused too; forced colors retain the system focus indicator. Real prose links remain underlined. A quiet button still uses button semantics and does not become a link merely because it is visually quiet.
 
-The wordmark component owns all sizes and light/dark contexts. App-bar navigation uses the text lockup alone; the doughnut remains available for the favicon and larger brand contexts. The home hero uses the pizza-led “Big dough energy” composition without the “Made by you” badge. The approved favicon is the existing bitten doughnut recolored with **yellow icing and golden-orange dough**. Pink and chocolate studies are not approved assets. Preserve the bite, crumbs, and sprinkle silhouette. Favicon colors are self-contained SVG values because browser icons do not inherit page CSS.
+The wordmark component owns all sizes and light/dark contexts. App-bar navigation and the footer use the text lockup alone; the doughnut remains available for the favicon and larger brand contexts. The home hero uses the pizza-led “Big dough energy” composition without the “Made by you” badge. The approved favicon is the existing bitten doughnut recolored with **yellow icing and golden-orange dough**. Pink and chocolate studies are not approved assets. Preserve the bite, crumbs, and sprinkle silhouette. Favicon colors are self-contained SVG values because browser icons do not inherit page CSS.
 
 ## Control contracts
 

@@ -169,22 +169,18 @@ export function SearchPage({
 
   return (
     <div className="mx-auto max-w-[var(--max-width)] px-6 pt-8 pb-20 md:px-8">
-      <div className="mb-8">
-        <h1 className="font-display text-[clamp(28px,4vw,40px)] font-extrabold text-ink">
+      <div className="mb-8 flex items-center justify-between gap-4">
+        <h1 className="min-w-0 font-display text-[clamp(28px,4vw,40px)] font-extrabold text-ink">
           Search Recipes
         </h1>
-      </div>
-
-      {/* The desktop sidebar is hidden below lg, so the same filter content is
-          reachable on phones through a disclosure. */}
-      <div className="mb-6 lg:hidden">
+        {/* The desktop sidebar is hidden below lg; phones use this disclosure. */}
         <button
           type="button"
           data-mobile-filters
           aria-expanded={mobileOpen}
           aria-controls="mobile-filters"
           onClick={() => setMobileOpen((open) => !open)}
-          className={`${TOGGLE_BASE} ${TOGGLE_OFF} inline-flex min-h-[44px] items-center gap-2`}
+          className={`${TOGGLE_BASE} ${TOGGLE_OFF} inline-flex shrink-0 items-center gap-2 lg:hidden`}
         >
           Filters
           {active > 0 && <span className="text-muted-foreground">{active}</span>}
@@ -192,16 +188,14 @@ export function SearchPage({
             className={`size-4 transition-transform duration-200 ${mobileOpen ? 'rotate-180' : ''}`}
           />
         </button>
-        {/* Mounted only while open. Rendering it alongside the desktop rail
-            would put two copies of every checkbox and category radio in the
-            document at all times — duplicated controls for assistive tech, and
-            duplicated markup in every prerendered page. */}
-        {mobileOpen && (
-          <div id="mobile-filters" className="mt-4 space-y-1">
-            <Filters recipes={recipes} state={state} onToggle={toggle} onCategory={setCategory} />
-          </div>
-        )}
       </div>
+      {/* Mount the mobile controls only while open to avoid duplicate controls
+          and markup alongside the desktop rail in prerendered pages. */}
+      {mobileOpen && (
+        <div id="mobile-filters" className="mb-6 space-y-1 lg:hidden">
+          <Filters recipes={recipes} state={state} onToggle={toggle} onCategory={setCategory} />
+        </div>
+      )}
 
       <div className="flex gap-10">
         <aside className="space-y-1 hidden w-[260px] shrink-0 lg:block">

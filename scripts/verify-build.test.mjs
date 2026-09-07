@@ -76,7 +76,7 @@ check('every page has a 5-minute TTL', pageTtlMissing.length === 0, pageTtlMissi
 
 const notFoundHtml = tryReadOut('/404.html')
 check('404 page is themed and offers a way out', notFoundHtml.includes('Page Not Found') && notFoundHtml.includes('All Recipes'))
-check('home contains app root content', home.includes(APP_COPY.hero.tagline))
+check('home contains app root content', home.includes(APP_COPY.hero.headline.split('\n')[0]))
 check(
   'footer links point to real pages',
   !/<a[^>]*>(About|Privacy|Terms)<\/a>/.test(home) &&

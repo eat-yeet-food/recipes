@@ -8,7 +8,7 @@ export type WordmarkCopy = { first: string; second: string }
 export function Wordmark({ copy, size, onPhoto = false, className = '' }: { copy: WordmarkCopy; size: keyof typeof SIZES; onPhoto?: boolean; className?: string }) {
   const style = SIZES[size]
   return <span data-site-wordmark="" data-wordmark-size={size} className={`inline-flex items-center font-hero leading-none whitespace-nowrap ${style.root} ${className}`}>
-    {size !== 'nav' && <img src="/donut-icon.svg" alt="" className={`${style.icon} shrink-0`} width="48" height="48" />}
+    {size === 'hero' && <img src="/donut-icon.svg" alt="" className={`${style.icon} shrink-0`} width="48" height="48" />}
     <span className={onPhoto ? 'text-white' : 'text-ink'}>{copy.first}</span>
     <span aria-hidden="true" className={`shrink-0 rounded-full ${style.dot} ${onPhoto ? 'bg-white' : 'bg-muted-foreground'}`} />
     <span className="-rotate-3 rounded-[40%_35%_40%_25%] bg-brand px-2 py-2 text-ink">{copy.second}</span>

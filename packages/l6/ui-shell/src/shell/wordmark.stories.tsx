@@ -32,6 +32,7 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Sizes: Story = {
+  parameters: { docs: { description: { story: 'Navigation and footer use text-only lockups. The hero size includes the doughnut illustration.' } } },
   render: () => (
     <StoryCanvas>
       <StorySection title="Wordmark Sizes">
