@@ -4,6 +4,8 @@ Reviewed September 7, 2026. The approved usage contract is [design-system.md](de
 
 ## Subsequent September 7 refinements
 
+Recipe image-to-body spacing is now 32px on desktop and 24px on mobile, replacing stacked main padding, article margin, and article padding. Standalone visual checks remain paused.
+
 The recipe body no longer repeats the Recipe eyebrow, title, and description below the image or in Cooking view. The main page header is the single owner of that introduction; body sections now use level-two headings with level-three subsections. Standalone visual/accessibility checks remain paused.
 
 Yeast now has an explicit two-decimal exception for its percentage, saved summary, gram field, preview, and applied ingredient amount. The whole-gram rule still applies at 20g and above, and trailing zeros are omitted. Existing production stories include a 0.25% example; standalone checks remain paused.

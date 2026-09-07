@@ -202,13 +202,13 @@ export function RecipeArticle({
       media={photo ? <img src={photo} alt={heroAlt} className="w-full max-h-[690px] rounded-surface object-cover" /> : undefined}
       mediaClassName={focusedCooking ? 'hidden' : undefined}
       mainClassName={cn(
-        'max-[1080px]:max-w-[1120px]',
+        'pt-8 max-[640px]:pt-6 max-[1080px]:max-w-[1120px]',
         aside && 'grid-cols-[minmax(0,760px)_300px] gap-14 max-[1080px]:block',
         focusedCooking && 'pt-6',
       )}
       articleClassName={cn(
-        'max-w-[var(--layout-recipe-copy)] bg-white pb-[38px] pt-[34px] max-[640px]:pb-[30px] max-[640px]:pt-[26px]',
-        focusedCooking && 'mt-0 shadow-none',
+        'mt-0 max-w-[var(--layout-recipe-copy)] bg-white pt-0 pb-[38px] max-[640px]:pb-[30px]',
+        focusedCooking && 'shadow-none',
       )}
       aside={aside?.({ page, focusedCooking })}
     />
