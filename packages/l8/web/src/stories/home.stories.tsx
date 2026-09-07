@@ -8,7 +8,7 @@ const meta = {
   args: { copy: APP_CONFIG.copy },
   parameters: {
     layout: 'fullscreen',
-    docs: { description: { component: 'App-configured production hero: featured food, expressive heading, one clear action. The photo caption identifies the recipe; decorative shapes carry no meaning.' } },
+    docs: { description: { component: 'App-configured production hero: featured food, expressive heading, uppercase kicker, regular-weight motto, and one clear action. The current app omits the former supporting tagline. Copy comes from the active app config. The photo caption identifies the recipe; decorative shapes carry no meaning.' } },
   },
 } satisfies Meta<typeof HomeHero>
 export default meta

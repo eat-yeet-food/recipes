@@ -40,7 +40,7 @@ export const app = {
       imageAlt: 'New York style pizza with a charred golden crust',
       imageCaption: 'New York Style Pizza',
       headline: 'BIG\nDOUGH\nENERGY.',
-      kicker: 'Eat / Yeet · Cook around and find out.',
+      kicker: 'Eat / Yeet · Savory, Sweet, or Yeet!',
       motto: "Eat the best, yeet the rest",
       cta: "Let’s eat",
     },

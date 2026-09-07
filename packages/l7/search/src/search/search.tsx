@@ -25,7 +25,7 @@ const TOGGLE_ON = 'bg-ink text-white'
 const TOGGLE_OFF = 'bg-brand text-ink hover:bg-ink hover:text-white'
 
 /** faceted-filter-group.tsx — collapsible, open by default. */
-function FacetGroup({
+export function FacetGroup({
   facet,
   selected,
   onToggle,
@@ -43,7 +43,7 @@ function FacetGroup({
         data-facet-toggle
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
-        className="control-focus flex min-h-11 w-full items-center justify-between py-2 font-body text-xs font-semibold uppercase tracking-[2px] text-ink/70 hover:text-ink"
+        className="control-focus flex w-full items-center justify-between py-2 font-body text-xs font-semibold uppercase tracking-[2px] text-ink/70 hover:text-ink"
       >
         <span>{facet.label}</span>
         <ChevronDown
@@ -52,21 +52,21 @@ function FacetGroup({
       </button>
       <div data-facet-body hidden={!open}>
         <div className="flex flex-col gap-2 pb-3 pt-1">
-          {facet.values.map(({ value, count }) => (
+          {facet.values.map(({ value }) => (
             <label
               key={value}
               data-facet={facet.key}
               data-value={value}
-              className="flex cursor-pointer items-center gap-2.5 min-h-11 rounded-field px-1 py-0.5 hover:bg-ink/3"
+              className="flex min-h-filter-row cursor-pointer items-center gap-2.5 rounded-filter px-1 py-0.5 hover:bg-ink/3"
             >
               <Checkbox
+                size="compact"
                 checked={selected.includes(value)}
                 aria-label={labelize(value)}
                 onCheckedChange={() => onToggle(value)}
               />
               <span className="font-body text-sm text-ink/70">
                 {labelize(value)}
-                <span className="ml-1 text-ink/65">{count}</span>
               </span>
             </label>
           ))}

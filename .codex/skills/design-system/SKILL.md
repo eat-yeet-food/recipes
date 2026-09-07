@@ -18,6 +18,16 @@ Reuse the production component and semantic role. Update its colocated stories
 when its behavior or supported appearance changes. Storybook must render the
 same component without wrapper CSS restyling its controls or headings.
 
+For hero and shell edits, follow the handbook’s **Hero and shell** contract;
+keep app-owned copy in the app config and stories on that same source. For
+search edits, read **Search layout** and the compact faceted-filter contract
+before applying generic action sizing. Preserve the distinction between
+clickable target size and visible checkbox size, and between active-filter
+indicators and result totals. Expose new reusable tokens in the token handbook.
+
+When recording refinements, distinguish implemented changes from proposed
+designs and historical verification from evidence for the current changes.
+
 For a new pattern, record purpose, owner, supported states, keyboard semantics,
 responsive behavior and adoption status in the handbook. Explicitly record
 untested states; don't label a token swap or story build a completed system.

@@ -66,7 +66,7 @@ export function HomeHero({ copy }: { copy: HomeCopy }) {
           {hero.kicker && <p className="mb-7 max-w-[80%] text-xs font-bold uppercase tracking-widest">{hero.kicker}</p>}
           <h1 className="m-0 whitespace-pre-line font-hero text-[clamp(48px,7vw,104px)] leading-none tracking-tight">{hero.headline ?? `${wordmark.first} / ${wordmark.second}`}</h1>
           <p className="mt-8 whitespace-pre-line text-lg leading-relaxed">{hero.tagline}</p>
-          {hero.motto && <p className="mt-4 text-lg font-bold">{hero.motto}</p>}
+          {hero.motto && <p className="mt-4 text-lg">{hero.motto}</p>}
           <Button asChild size="lg" className="mt-7"><Link to="/search">{hero.cta}<ArrowRight aria-hidden="true" className="size-6 -rotate-45" /></Link></Button>
           <span aria-hidden="true" className="absolute -bottom-28 -right-28 -z-10 h-72 w-80 -rotate-12 rounded-full bg-brand-alt" />
         </div>

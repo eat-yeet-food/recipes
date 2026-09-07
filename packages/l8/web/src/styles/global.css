@@ -83,6 +83,9 @@
   --color-sidebar-ring: var(--color-ink);
   --radius-control: 999px;
   --radius-field: 18px;
+  --radius-filter: 4px;
+  --spacing-filter-row: 24px;
+  --spacing-checkbox-compact: 16px;
   --radius-surface: 28px;
   --radius-choice: 24px;
   --spacing-choice-inset: 6px;

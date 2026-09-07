@@ -33,11 +33,25 @@ Use one strong yellow field per brand moment, with white space for long reading.
 
 Standalone actions are pills. Fields use `radius-field`; cards and callouts use `radius-surface`. A full-height viewport sheet has square corners on every edge; use DialogContent’s `sheet` variant instead of inheriting floating-dialog rounding. Selection controls use `radius-choice` outside, `spacing-choice-inset` for padding/gap, and **outer radius minus inset** for the selected item. Never choose the two radii independently. Wrapped labels keep the same inset and inner radius.
 
+Faceted filter lists use a compact reading rhythm on desktop and mobile: 14px Avenir labels (`text-sm`), 12px group headings (`text-xs`), 8px between rows, and 10px between checkbox and label. Omit per-option counts and count badges; show the matching recipe total above the results instead. Use Checkbox’s `compact` size (16px visible box) within a fully clickable label row of at least 24px (`spacing-filter-row`), with `radius-filter` corners. Rows grow for wrapped labels. The checkbox hit area is 24px and must not overlap adjacent rows. Group disclosures retain their expanded state and keyboard focus. Do not apply the standalone action’s 44px minimum height or field radius to every filter row. `FacetGroup` in `packages/l7/search` owns this treatment; the desktop sidebar and mobile disclosure share it. Search/Page stories cover unchecked, selected, long-label, and collapsible groups.
+
 Text fields use a flat ink fill, light values/placeholders, and inset keyboard focus; no bottom rule, shadow, or underline. Visible external labels distinguish editing from actions.
 
 Buttons have a single flat fill: no offset shadows, decorative outlines, translation on press, or underlined labels in any state. Keyboard focus is a single inset indicator. Icons need a visible boundary when focused too; forced colors retain the system focus indicator. Real prose links remain underlined. A quiet button still uses button semantics and does not become a link merely because it is visually quiet.
 
 The wordmark component owns all sizes and light/dark contexts. App-bar navigation and the footer use the text lockup alone; the doughnut remains available for the favicon and larger brand contexts. The home hero uses the pizza-led “Big dough energy” composition without the “Made by you” badge. The approved favicon is the existing bitten doughnut recolored with **yellow icing and golden-orange dough**. Pink and chocolate studies are not approved assets. Preserve the bite, crumbs, and sprinkle silhouette. Favicon colors are self-contained SVG values because browser icons do not inherit page CSS.
+
+## Hero and shell
+
+`HomeHero` in `packages/l7/home` renders the active app’s copy from `apps/<app>/app.config.mjs`. Eat / Yeet’s current kicker is “Eat / Yeet · Savory, Sweet, or Yeet!” in the existing small uppercase treatment. The headline remains “Big dough energy”; the motto “Eat the best, yeet the rest” uses regular-weight body text, not bold. The former supporting tagline is removed. The Home/Brand Hero story consumes the same app config, so copy is not duplicated in story fixtures.
+
+Navigation and footer retain their respective wordmark sizes, separator, and yellow Yeet treatment. Both omit the doughnut illustration. `Wordmark` in `packages/l6/ui-shell` owns this distinction; Shell/Wordmark and Shell/Layout render the production variants.
+
+## Search layout
+
+`SearchPage` in `packages/l7/search` places the title and mobile Filters button in one flex row with centered alignment and space between. The button does not shrink and retains its 44px action target; the title may wrap at narrow widths. Below the `lg` breakpoint, expanded filters appear beneath that row and are mounted only while open. At `lg` and above, filters use the desktop sidebar and the mobile trigger is hidden. Both presentations reuse `FacetGroup` and its compact filter-list contract.
+
+The Filters button may indicate the number of active filters; individual options omit recipe counts. The matching recipe total sits above the result grid. These are distinct quantities and must not be mixed into option labels.
 
 ## Control contracts
 
@@ -46,7 +60,9 @@ The wordmark component owns all sizes and light/dark contexts. App-bar navigatio
 | Button | Primary, secondary, ghost, quiet (`link` variant), danger, disabled, long label, on-yellow | Native button; `asChild` with a real anchor for navigation; 44px default target; inset focus; `outline` is a compatibility alias for filled secondary |
 | ChoiceGroup | Exclusive selection, short/wrapped labels; dark group, saturated yellow selected item | Named group of native pressed buttons; Tab, Enter, Space; all options reachable; selected state via `aria-pressed` |
 | Input / Select / Textarea | Filled/empty, invalid, disabled, read-only; native select for platform behavior | Always a visible associated label; error association via `aria-describedby`; `aria-invalid` on affected field; never replace numeric semantics with styled text |
-| Checkbox / cook switch | Checked, unchecked, disabled, focus | Native/Radix behavior, accessible name, explicit checked state; visible check or moving thumb beyond color alone |
+| Checkbox / cook switch | Checked, unchecked, disabled, focus; Checkbox has default and compact sizes, with compact reserved for labeled filter rows | Native/Radix behavior, accessible name, explicit checked state; visible check or moving thumb beyond color alone |
+| Faceted filter list | Compact unchecked/selected rows, text-only labels without counts, wrapped labels, open/closed groups; white reading surface | Whole label toggles checkbox; at least 24px targets; Tab and Space operate checkboxes; Enter/Space operate group disclosure with `aria-expanded` |
+| Mobile filter disclosure | Title and trigger share a row; active-filter indicator, closed/open, narrow title wrapping | Button exposes `aria-expanded` and `aria-controls`; expanded controls follow the header in reading order; desktop uses the sidebar |
 | Dialog / workbench | Open, close, cancel, apply, invalid formula, weights/target, pizza/sourdough, saved formulas, shared state | Named dialog, Escape, contained focus, return to trigger, reachable mobile footer; formula behavior remains domain-owned |
 | RecipeFacts | One saturated yellow fact panel, bold values, quieter labels; no individual pale tiles | Passive definition list, no hover or pressed affordance; wraps long durations and yields |
 | Dough summary | Ink result panel, yellow totals, ingredient labels left and tabular weights right | Definition lists; preserve units and all formula data; explicit error messages |
@@ -56,7 +72,7 @@ The wordmark component owns all sizes and light/dark contexts. App-bar navigatio
 
 Stories live beside their owner. The web workbench story composes the app registry and exercises the real drawer. Storybook wrapper styles target only wrapper nodes, never descendant buttons, fields, or specimen headings. Component docs have ownership metadata and live API controls where appropriate.
 
-Current handbook areas: pizza hero, recipe facts, search palette, foundations, action states, fields, selection states, wordmark sizes and on-photo treatment, recipe/article/browse cards, empty results, content block composition, error states, and stateful dough-workbench variants. Workbench stories use isolated storage scope and working close/apply callbacks. Route tests cover persistence, shared configuration, restoration, and real recipe integration that a small canvas does not reproduce.
+Current handbook areas: pizza hero and app-owned copy, recipe facts, search palette, mobile search header and compact filter groups, foundations, action states, fields, selection states, text-only navigation/footer wordmarks and larger on-photo treatment, recipe/article/browse cards, empty results, content block composition, error states, and stateful dough-workbench variants. Workbench stories use isolated storage scope and working close/apply callbacks. Route tests cover persistence, shared configuration, restoration, and real recipe integration that a small canvas does not reproduce.
 
 When adding a component, document purpose, anatomy, variants, token roles, keyboard/ARIA behavior, long labels, narrow layouts, owner, and adoption status. Include real states and usage; do not maintain a parallel story-only component or palette. New patterns must identify any untested state explicitly.
 
