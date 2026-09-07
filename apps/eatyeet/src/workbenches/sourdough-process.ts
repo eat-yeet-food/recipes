@@ -7,17 +7,37 @@ export interface SourdoughProcessSections {
   levain: string
 }
 
+export interface SpiralMixerProfile {
+  name: string
+  initialRpm: number
+  initialMinutes: [number, number]
+  targetTemperatureF: number
+  saltRpm: number
+  saltMinutes: number
+  finishRpm: number
+  finishMinutes: number
+}
+
 /** The plugin replaces explicitly bound sections; it never guesses from prose. */
-export function resolveSourdoughSteps(sections: Section[], bindings: SourdoughProcessSections, process: SourdoughProcess, levainIngredients?: string): Section[] {
+export function resolveSourdoughSteps(sections: Section[], bindings: SourdoughProcessSections, process: SourdoughProcess, levainIngredients?: string, mixer?: SpiralMixerProfile): Section[] {
   const hand = process.mixingMethod === 'hand'
   const timeline = sourdoughTimeline(process)
+  const initialMix = hand ? 'by hand until no dry flour remains.' : mixer
+    ? `using cool water in the ${mixer.name} at ${mixer.initialRpm} RPM for about ${mixer.initialMinutes[0]}–${mixer.initialMinutes[1]} min, until the dough reaches ${mixer.targetTemperatureF}°F.`
+    : 'in a spiral mixer until no dry flour remains.'
+  const levainMix = hand ? 'by hand, squeezing and folding until evenly incorporated' : mixer
+    ? `in the ${mixer.name} at ${mixer.initialRpm} RPM until evenly incorporated`
+    : 'in a spiral mixer until evenly incorporated'
+  const saltMix = hand ? 'Pinch and fold by hand until incorporated and the dough starts to gain strength.' : mixer
+    ? `Mix at ${mixer.saltRpm} RPM for ${mixer.saltMinutes} min while the salt incorporates, then increase to ${mixer.finishRpm} RPM for about ${mixer.finishMinutes} min.`
+    : 'Mix to incorporate, then continue until the dough gains moderate strength.'
   return sections.map((section) => {
     if (section.id === bindings.levain && levainIngredients) return {
       ...section, items: [`Mix ${levainIngredients}.`, ...section.items.slice(1)],
     }
     if (section.id === bindings.autolyse) return {
       ...section, title: 'Autolyse', itemIds: ['autolyse-water'],
-      items: [`Mix flour and the first portion of water ({{initialWaterGrams}}) ${hand ? 'by hand' : 'in a spiral mixer on low speed'} until no dry flour remains. ${process.autolyseMinutes ? `Cover and rest for ${process.autolyseMinutes} min before starting bulk fermentation.` : 'Continue directly to mixing in the levain.'}`],
+      items: [`Mix flour and the first portion of water ({{initialWaterGrams}}) ${initialMix} ${process.autolyseMinutes ? `Cover and rest for ${process.autolyseMinutes} min before starting bulk fermentation.` : 'Continue directly to mixing in the levain.'}`],
     }
     if (section.id !== bindings.bulk) return section
     return {
@@ -26,8 +46,8 @@ export function resolveSourdoughSteps(sections: Section[], bindings: SourdoughPr
         const stamp = `<strong>[${event.atMinutes} min elapsed]</strong>`
         const next = timeline[index + 1]
         const rest = next ? ` Cover until the next step at ${next.atMinutes} min elapsed.` : ''
-        if (event.kind === 'mix') return `${stamp} Mix in the ripe levain ${hand ? 'by hand, squeezing and folding until evenly incorporated' : 'in a spiral mixer on low speed until evenly incorporated'}.${rest}`
-        if (event.kind === 'salt') return `${stamp} Add salt and the remaining water ({{remainingWaterGrams}}). ${hand ? 'Pinch and fold by hand until incorporated and the dough starts to gain strength.' : 'Mix on low speed to incorporate, then medium speed until the dough gains moderate strength.'}${rest}`
+        if (event.kind === 'mix') return `${stamp} Mix in the ripe levain ${levainMix}.${rest}`
+        if (event.kind === 'salt') return `${stamp} Add salt and the remaining water ({{remainingWaterGrams}}). ${saltMix}${rest}`
         if (event.kind === 'fold') return `${stamp} Perform one set of ${process.foldMethod === 'coil-fold' ? 'coil folds' : 'stretch and folds'}, working gently around the dough.${rest}`
         return `${stamp} Check the dough for the recipe’s target rise (approximately doubled), aeration, and strength. This is your planned end of bulk fermentation; extend or shorten the rest according to the dough, then continue to shaping.`
       }),

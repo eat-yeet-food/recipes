@@ -235,7 +235,7 @@ export const SourdoughProcessAndSavedStarter: Story = { args: { target: true }, 
 
 export const PluginProcessProjection: Story = { play: async () => {
   const initial = JSON.parse(JSON.stringify(state))
-  const config = { defaultInputMode: 'target', defaultSelection: initial, recommendedFormulas: {}, processSections: { autolyse: 'autolyse', bulk: 'bulk', levain: 'levain' } }
+  const config = { defaultInputMode: 'target', defaultSelection: initial, recommendedFormulas: {}, processSections: { autolyse: 'autolyse', bulk: 'bulk', levain: 'levain' }, spiralMixer: { name: 'Ooni Halo Pro', initialRpm: 165, initialMinutes: [4, 5], targetTemperatureF: 70, saltRpm: 90, saltMinutes: 1, finishRpm: 165, finishMinutes: 4 } }
   const block = { type: 'recipe' as const, equipment: [{ id: 'tools', title: '', items: ['Spiral mixer', 'Bowl'], itemIds: ['mixer', 'bowl'] }], ingredients: [], steps: [
     { id: 'autolyse', title: 'Autolyse', items: ['Original autolyse'], itemIds: ['old-autolyse'] },
     { id: 'bulk', title: 'Bulk', items: ['Original fold schedule'], itemIds: ['old-bulk'] },
@@ -263,4 +263,14 @@ export const PluginProcessProjection: Story = { play: async () => {
   await expect(resolved.totalMinutes).toBe((recipe.totalMinutes ?? 0) + 30)
   legacy.formula.process.folds[1].atMinutes = 60
   await expect(plugin.decodeState(legacy, config, source)).toBeNull()
+  legacy.formula.process.folds[1].atMinutes = 95
+  legacy.formula.process.mixingMethod = 'spiral'
+  const spiral = plugin.resolveRecipe(source, config, legacy).blocks.find((item) => item.type === 'recipe')!
+  if (spiral.type !== 'recipe') throw new Error('Missing spiral instructions')
+  const spiralText = spiral.steps.flatMap((section) => section.items).join(' ')
+  await expect(spiralText).toContain('165 RPM for about 4–5 min')
+  await expect(spiralText).toContain('70°F')
+  await expect(spiralText).toContain('cool water')
+  await expect(spiralText).toContain('90 RPM for 1 min')
+  await expect(spiralText).toContain('165 RPM for about 4 min')
 } }

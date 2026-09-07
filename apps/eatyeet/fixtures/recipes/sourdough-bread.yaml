@@ -39,6 +39,15 @@ workbench:
       - starter-maintenance
       - levain-build
     initialWaterPercent: 97.16
+    spiralMixer:
+      name: Ooni Halo Pro
+      initialRpm: 165
+      initialMinutes: [4, 5]
+      targetTemperatureF: 70
+      saltRpm: 90
+      saltMinutes: 1
+      finishRpm: 165
+      finishMinutes: 4
     processSections:
       autolyse: autolyse
       bulk: bulk-fermentation
@@ -105,7 +114,7 @@ blocks:
       - title: ''
         items:
           - Kitchen scale
-          - Spiral mixer
+          - Ooni Halo Pro spiral mixer
           - Large mixing bowl
           - Bench scraper
           - Proofing basket (banneton)
@@ -134,7 +143,7 @@ blocks:
         items:
           - '765g [bread flour](https://www.walmart.com/ip/King-Arthur-Unbleached-Flour-5-lbs/10535108?wmlspartner=wlpa&selectedSellerId=0&wmlspartner=wlpa&cn=FY26-ENTP-PMAX_CVP_cnv_dps_dsn_dis_ad_entp_e_n&gclsrc=aw.ds&adid=2222222229710535108_0000000000_22488309517&wl0=&wl1=x&wl2=c&wl3=&wl4=&wl5=9009731&wl6=&wl7=&wl8=&wl9=pla&wl10=8175035&wl11=online&wl12=10535108&veh=sem&gad_source=1&gad_campaignid=22488321244&gbraid=0AAAAADmfBIpnwbCRCx-Lh8QmClJX7tCPp&gclid=Cj0KCQjw8KrFBhDUARIsAMvIApZAbILLGSMWrz1ABKhWgrRQmpk_e3aTcFm7hEG-wrTvuiJNb6qf1jAaAhBoEALw_wcB)'
           - '150g [whole wheat flour](https://www.target.com/p/bob-39-s-red-mill-organic-whole-wheat-flour-5lbs/-/A-92889638?sid=&TCID=PDS-22806998596&gclsrc=aw.ds&gad_source=1&gad_campaignid=22803279746&gbraid=0AAAAAD-5dfZBxwL-BLt-ymR8_PLhoa3xI&gclid=Cj0KCQjw8KrFBhDUARIsAMvIApZsBV2zeEfCYO1LqrfoeLFww5kNUKvm8kiJL8-RcQ-4-qacCOa4VkEaAjIPEALw_wcB)'
-          - '685g + 20g water, room temperature (divided)'
+          - '685g + 20g cool water (divided)'
           - 175g peak levain
           - '20g [salt](https://www.amazon.com/Diamond-Crystal-Baking-Kosher-8-5oz/dp/B0CHVLXM7R/ref=sr_1_6_pp?dib=eyJ2IjoiMSJ9.jc2WdEi1A5_iFEyZqDRiS5lOXcnLhPFL6wkhy3hAZVLJcTsU2sHs_J-AWzySX_HAuS2qp4iHJ-HErpaB5ETMOlhDG6toZVxC0T5EeFgS7A1mBDPeKeJgLsWIDa8ZfTRmxJyQT909kOGia7EGIudysRhLVA2FL_3NBEW9YliE6P81pHovQbK93WdQ1HuPUMvj0sRSNb23UHdpTZC4TiSrmWwVD3IkMIz7hH06xvhXw6u7dU1lvPT2aGsObUyIBb3MSo3QerQ3qLpcmKi8lcO2Y99_pYRXg0uLprCqGVnm_78.n6BzmLiS5vxRRSy05TXIxdTI2LHInGK3rND8pkGUcVg&dib_tag=se&keywords=baking+salt&qid=1756039494&sr=8-6)'
     steps:
@@ -147,13 +156,13 @@ blocks:
         title: Autolyse (3h before bulk)
         items:
           - id: autolyse-water
-            text: Mix flour and the first portion of water ({{initialWaterGrams}}) in a spiral mixer at 40% until integrated and no lumps. Cover and rest at 70°F for 3h.
+            text: Mix flour and the first portion of water ({{initialWaterGrams}}) using cool water in the Ooni Halo Pro at 165 RPM for about 4-5m until the dough reaches 70°F. Cover and rest at 70°F for 3h.
       - id: bulk-fermentation
         title: Bulk Fermentation
         items:
-          - '**[0m elapsed]** Mix in levain in a spiral mixer for 5m + cover and rest at 70°F for 20m.'
+          - '**[0m elapsed]** Mix in levain in the Ooni Halo Pro at 165 RPM until evenly incorporated + cover and rest at 70°F for 20m.'
           - id: add-salt-and-water
-            text: '**[30m elapsed]** Mix in salt + remainder of water ({{remainingWaterGrams}}) at 15% speed for 1m. Turn speed up to 40% and mix for about 5m. Cover and rest at 70°F for 25m. Internal dough temp should be about 72°F.'
+            text: '**[30m elapsed]** Mix in salt + remainder of water ({{remainingWaterGrams}}) at 90 RPM for 1m. Increase to 165 RPM and mix for about 4m. Cover and rest at 70°F for 25m. Internal dough temp should be about 72°F.'
           - '**[1h elapsed]** Coil fold + cover and rest at 70°F for 25m'
           - '**[1:30h elapsed]** Coil fold + cover and rest at 70°F for 25m'
           - '**[2:00h elapsed]** Coil fold + cover and rest at 70°F for 2:50h.'

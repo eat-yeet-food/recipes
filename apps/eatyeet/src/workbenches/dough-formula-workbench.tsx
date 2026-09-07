@@ -1,5 +1,5 @@
 import { DEFAULT_SOURDOUGH_PROCESS, isSourdoughProcess, type SourdoughProcess } from '@eat-yeet/l2-recipe-domain/sourdough-process'
-import { resolveSourdoughSteps, type SourdoughProcessSections } from './sourdough-process'
+import { resolveSourdoughSteps, type SourdoughProcessSections, type SpiralMixerProfile } from './sourdough-process'
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
 import { NumberField, formatNumberFieldValue, type NumberFieldPrecision, type NumberFieldValidation } from '@eat-yeet/l5-ui-primitives/primitives/number-field'
 import { Input } from '@eat-yeet/l5-ui-primitives/primitives/input'
@@ -39,6 +39,7 @@ interface DoughWorkbenchState {
 }
 
 interface DoughWorkbenchConfig {
+  spiralMixer?: SpiralMixerProfile
   processSections?: SourdoughProcessSections
   defaultInputMode: InputMode
   defaultSelection: DoughWorkbenchState
@@ -209,7 +210,7 @@ export function resolveWorkbenchRecipe(recipe: RecipeContent, selection: DoughWo
         }),
       }
     })]
-    const processSteps = process && config.processSections ? resolveSourdoughSteps(block.steps, config.processSections, process, levainIngredients) : block.steps
+    const processSteps = process && config.processSections ? resolveSourdoughSteps(block.steps, config.processSections, process, levainIngredients, config.spiralMixer) : block.steps
     const steps = processSteps.map((section) => ({
       ...section,
       items: section.items.map((item) => renderFormulaBindings(item, selection, config)),
@@ -672,9 +673,11 @@ function isDoughState(value: unknown): value is DoughWorkbenchState {
 function isDoughConfig(value: unknown): value is DoughWorkbenchConfig {
   if (!value || typeof value !== 'object') return false
   const config = value as Partial<DoughWorkbenchConfig>
+  const mixer = config.spiralMixer
   return (
     (config.defaultInputMode === 'weights' || config.defaultInputMode === 'target') &&
     isDoughState(config.defaultSelection) &&
+    (mixer === undefined || Boolean(mixer && typeof mixer.name === 'string' && [mixer.initialRpm, mixer.targetTemperatureF, mixer.saltRpm, mixer.saltMinutes, mixer.finishRpm, mixer.finishMinutes].every((number) => Number.isFinite(number) && number > 0) && Array.isArray(mixer.initialMinutes) && mixer.initialMinutes.length === 2 && mixer.initialMinutes.every((number) => Number.isFinite(number) && number > 0) && mixer.initialMinutes[0] <= mixer.initialMinutes[1])) &&
     (config.processSections === undefined || Boolean(config.processSections && ['autolyse', 'bulk', 'levain'].every((key) => typeof config.processSections?.[key as keyof SourdoughProcessSections] === 'string'))) &&
     Boolean(config.recommendedFormulas && typeof config.recommendedFormulas === 'object' && Object.values(config.recommendedFormulas).every(isDoughFormula))
   )

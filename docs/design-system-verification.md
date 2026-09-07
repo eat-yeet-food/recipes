@@ -4,6 +4,8 @@ Reviewed September 7, 2026. The approved usage contract is [design-system.md](de
 
 ## Subsequent September 7 refinements
 
+The sourdough plugin now uses the author’s Ooni Halo Pro process: cool water, initial 165 RPM for about 4–5 minutes to 70°F, salt incorporation at 90 RPM for 1 minute, then 165 RPM for about 4 minutes. RPM mappings are supported by Ooni’s [40% / 165 RPM example](https://ooni.com/blogs/recipes/fluffy-marshmallows-using-ooni-halo-pro) and [15% / 90 RPM dough recipe](https://nz.ooni.com/blogs/recipes/ooni-neapolitan-style-pizza-dough). Recipe configuration owns the machine profile; hand-mixing instructions remain separate. Standalone checks remain paused.
+
 Saved formulas now starts collapsed behind a compact count-bearing disclosure. The existing save/load/edit/delete stories open that disclosure explicitly; hidden form state is retained when collapsed, and storage failures remain visible. Standalone interaction and visual checks remain paused at the user’s request.
 
 The follow-up precision contract is whole grams at 20g and above, at most one decimal for smaller weights and all percentages/ratios, and no trailing `.0`. It covers fields, previews, saved summaries, applied ingredients, and formula bindings. Typed buffers and raw calculations remain separate. Formatter, domain, and production-story assertions have been updated but not executed during the standalone-check pause.
