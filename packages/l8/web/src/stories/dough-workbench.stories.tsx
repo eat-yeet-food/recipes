@@ -204,7 +204,7 @@ export const SourdoughProcessAndSavedStarter: Story = { args: { target: true }, 
   await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))
   await expect(screen.getByRole('textbox', { name: 'Formula preset name' })).toHaveAttribute('placeholder', 'e.g. Everyday sourdough')
   await expect(screen.queryByRole('textbox', { name: 'Starter profile name' })).not.toBeInTheDocument()
-  await userEvent.click(screen.getByRole('button', { name: 'By hand', exact: true }))
+  await userEvent.click(screen.getByRole('button', { name: 'By hand' }))
   const fold = screen.getByRole('textbox', { name: 'Fold 2 at' })
   await userEvent.clear(fold)
   await userEvent.type(fold, '60')
@@ -215,10 +215,10 @@ export const SourdoughProcessAndSavedStarter: Story = { args: { target: true }, 
   await userEvent.tab()
   await expect(screen.getByRole('button', { name: 'Apply to recipe' })).toBeEnabled()
   await userEvent.type(screen.getByRole('textbox', { name: 'Formula preset name' }), 'Hand mixed loaf')
-  await userEvent.click(screen.getByRole('button', { name: 'Save new', exact: true }))
-  await userEvent.click(screen.getByRole('button', { name: 'Spiral mixer', exact: true }))
+  await userEvent.click(screen.getByRole('button', { name: 'Save new' }))
+  await userEvent.click(screen.getByRole('button', { name: 'Spiral mixer' }))
   await userEvent.click(screen.getByRole('button', { name: 'Load Hand mixed loaf' }))
-  await expect(screen.getByRole('button', { name: 'By hand', exact: true })).toHaveAttribute('aria-pressed', 'true')
+  await expect(screen.getByRole('button', { name: 'By hand' })).toHaveAttribute('aria-pressed', 'true')
   await expect(screen.getByRole('textbox', { name: 'Fold 2 at' })).toHaveValue('95')
 } }
 
@@ -249,7 +249,7 @@ export const PluginProcessProjection: Story = { play: async () => {
   await expect(instructions).not.toContain('Spiral mixer')
   await expect(result.steps.find((section) => section.id === 'bake')?.items).toEqual(['Bake as authored.'])
   await expect(result.equipment[0].items).toEqual(['Bowl'])
-  await expect(resolved.totalMinutes).toBe(recipe.totalMinutes + 30)
+  await expect(resolved.totalMinutes).toBe((recipe.totalMinutes ?? 0) + 30)
   legacy.formula.process.folds[1].atMinutes = 60
   await expect(plugin.decodeState(legacy, config, source)).toBeNull()
 } }

@@ -229,7 +229,7 @@ export function resolveWorkbenchRecipe(recipe: RecipeContent, selection: DoughWo
     ...selected,
     blocks,
     ...(process && config.processSections ? {
-      totalMinutes: Math.max(0, selected.totalMinutes + process.autolyseMinutes + process.bulkMinutes - (config.defaultSelection.formula.process ?? DEFAULT_SOURDOUGH_PROCESS).autolyseMinutes - (config.defaultSelection.formula.process ?? DEFAULT_SOURDOUGH_PROCESS).bulkMinutes),
+      totalMinutes: selected.totalMinutes === null ? null : Math.max(0, selected.totalMinutes + process.autolyseMinutes + process.bulkMinutes - (config.defaultSelection.formula.process ?? DEFAULT_SOURDOUGH_PROCESS).autolyseMinutes - (config.defaultSelection.formula.process ?? DEFAULT_SOURDOUGH_PROCESS).bulkMinutes),
       learning: selected.learning?.mixing ? { ...selected.learning, mixing: { ...selected.learning.mixing, defaultMethod: process.mixingMethod } } : selected.learning,
     } : {}),
     yieldAmount: count,
