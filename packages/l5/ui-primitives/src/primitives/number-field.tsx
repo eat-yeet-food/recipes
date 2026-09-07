@@ -61,7 +61,7 @@ export function NumberField({ label, value, onValueChange, suffix, min = 0, inte
           const next = event.target.value
           setEdit({ text: next, revision: resetKey })
           const result = parseNumber(next, min, integer, positive)
-          if (result.value !== undefined) onValueChange(result.value)
+          if (result.error === null) onValueChange(result.value)
         }}
         onBlur={() => { setFocused(false); if (!error) setEdit(null) }}
         onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); event.currentTarget.blur() } }}
