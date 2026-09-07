@@ -110,6 +110,8 @@ Display precision is separate from calculation precision. Format initial, extern
 | Seed-to-flour ratio and its readout | At most 1 decimal |
 | Autolyse, salt addition, bulk duration and fold times | Whole minutes |
 
+Apply captures the valid draft and commits drawer dismissal before triggering recipe/URL updates. Closing restores focus to the adjustment trigger; invalid drafts remain open with their errors.
+
 The workbench registers incomplete/invalid fields and disables formula saves and Apply until they are resolved. Previews use the last valid numbers and explain that state. Quantity, piece weight, and total dough weight are linked; total weight changes the piece weight without changing the count. Ingredient-weight drafts remain independent of the percentage conversion so temporarily invalid flour totals cannot erase the other weights. Explicit preset loads and reopening reset text drafts to the selected values. Switching calculator modes replaces that mode’s numeric fields. Flour row identities stay stable when names are edited, preserving focus and starter ingredient identity.
 
 The production field and workbench stories cover clearing/replacing every numeric field, decimal commas and precision, invalid integer counts, direct total-weight edits, and flour-name focus. Real-device keyboard behavior still requires coordinated mobile review; do not infer it from a desktop build.

@@ -1,3 +1,4 @@
+import { flushSync } from 'react-dom'
 import { DEFAULT_SOURDOUGH_PROCESS, isSourdoughProcess, type SourdoughProcess } from '@eat-yeet/l2-recipe-domain/sourdough-process'
 import { resolveSourdoughSteps, type SourdoughProcessSections, type SpiralMixerProfile } from './sourdough-process'
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
@@ -466,6 +467,13 @@ function DoughFormulaWorkbench({
     if (compatiblePresets.length > 1) presetPicker.current?.focus()
     else presetNameInput.current?.focus()
   }
+  const applyToRecipe = () => {
+    if (errors.length) return
+    const next = clone(draft)
+    // Commit dismissal before applying starts router navigation or replaces state.
+    flushSync(() => onOpenChange(false))
+    onApply(next)
+  }
   const updateProcess = (changes: Partial<SourdoughProcess>) => { if (process) updateFormula({ process: { ...process, ...changes } }) }
   const updateSeed = (next: StarterProfile) => updateFormula({ levainBuild: { seed: next, flourPerSeed: seedRatio } })
 
@@ -636,7 +644,7 @@ function DoughFormulaWorkbench({
 
           </div>
           <footer className="shrink-0 bg-brand px-6 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] max-[640px]:px-[18px]">
-            <div className="flex items-center justify-end gap-4"><Button variant="link" type="button" onClick={() => onOpenChange(false)}>Cancel</Button><Button variant="default" type="button" disabled={errors.length > 0} onClick={() => { if (errors.length) return; onApply(clone(draft)); onOpenChange(false) }}>Apply to recipe</Button></div>
+            <div className="flex items-center justify-end gap-4"><Button variant="link" type="button" onClick={() => onOpenChange(false)}>Cancel</Button><Button variant="default" type="button" disabled={errors.length > 0} onClick={applyToRecipe}>Apply to recipe</Button></div>
           </footer>
         </DialogContent>
       </Dialog>
