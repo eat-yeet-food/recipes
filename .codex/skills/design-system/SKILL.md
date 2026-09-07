@@ -27,7 +27,9 @@ indicators and result totals. Expose new reusable tokens in the token handbook.
 
 Select actions, fields, and dividers for their parent surface using the
 handbook’s context-specific variants. A mismatch in the article header does
-not justify changing the approved recipe-card actions. Use a dedicated labeled
+not justify changing the approved recipe-card actions. For borderless text
+actions, use the handbook’s shared unpadded, underlined treatment; do not borrow
+filled-button spacing or remove the visible clickable cue. Use a dedicated labeled
 switch for binary settings rather than a button-styled row. Saved-formula UI
 follows the **Saved formulas** contract and shares its panel with dough results;
 keep validation, persistence feedback, and corresponding stories together.
@@ -47,5 +49,5 @@ Classify the surface before styling it: action, editable field, passive facts, r
 Verify actual text/fill pairings, keyboard focus, selected/error/disabled states,
 long labels and narrow layouts. Run the CLAUDE checks, review rendered story/app
 screenshots, and investigate axe incomplete results. Never auto-accept visual
-baselines merely to pass a check. Plain button labels, coordinated nested radii,
+baselines merely to pass a check. Context-appropriate action affordances, coordinated nested radii,
 and the approved favicon belong to the contract, not local exceptions.

@@ -188,7 +188,8 @@ project.
 `docs/design-system.md` is the approved Yellow + ink usage contract. Read
 `.codex/skills/design-system/SKILL.md` for branded UI or handbook changes. Keep
 app controls and colocated stories in sync; never add a second feature palette.
-Button labels stay plain in all states, including focus. Selection radii derive
+Filled and outlined button labels stay plain. Borderless text actions use the
+shared unpadded, underlined treatment in every interactive state. Selection radii derive
 from one outer radius and inset. The approved favicon has yellow icing and
 golden-orange dough.
 

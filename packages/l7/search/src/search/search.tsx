@@ -8,6 +8,7 @@ import { useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { RecipeGrid } from '@eat-yeet/l6-ui-catalog/cards'
 import { Checkbox } from '@eat-yeet/l5-ui-primitives/primitives/checkbox'
+import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
 import { labelize } from '@eat-yeet/l2-recipe-domain/format'
 import {
   FACET_KEYS,
@@ -210,14 +211,16 @@ export function SearchPage({
               {`${results.length} ${results.length === 1 ? 'recipe' : 'recipes'}`}
             </p>
             {active > 0 && (
-              <button
+              <Button
                 id="clear-filters"
+                variant="link"
+                size="xs"
                 type="button"
                 onClick={() => onChange(emptySearch())}
-                className="text-xs font-semibold uppercase tracking-[1.5px] text-ink transition-colors hover:text-ink"
+                className="font-semibold uppercase tracking-[1.5px]"
               >
                 Clear all
-              </button>
+              </Button>
             )}
           </div>
           <RecipeGrid recipes={results} />

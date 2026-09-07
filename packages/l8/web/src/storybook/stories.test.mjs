@@ -35,11 +35,15 @@ try {
         const audit = await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']).analyze()
         if (story.id.startsWith('controls-button--') || story.id.startsWith('controls-choice-group--')) {
           for (const control of await page.locator('[data-slot=button]:not(:disabled), [data-slot=choice-group] button:not(:disabled)').all()) {
-            for (const state of ['hover','keyboard']) {
+            for (const state of ['rest','hover','keyboard']) {
               if (state === 'hover') await control.hover()
-              else { await page.mouse.move(0,0);await control.focus();await page.keyboard.press('Tab');await page.keyboard.press('Shift+Tab') }
-              const style = await control.evaluate(el => { const s=getComputedStyle(el);return {underline:s.textDecorationLine.includes('underline'),focus:el.matches(':focus-visible'),outline:s.outlineStyle} })
-              if (style.underline || (state === 'keyboard' && (!style.focus || style.outline === 'none'))) errors.push(`${state}: plain label or visible focus contract failed`)
+              else if (state === 'keyboard') { await page.mouse.move(0,0);await control.focus();await page.keyboard.press('Tab');await page.keyboard.press('Shift+Tab') }
+              const style = await control.evaluate(el => {
+                const s=getComputedStyle(el)
+                const textAction=['link','ghost','quiet-on-ink'].includes(el.dataset.variant) && !el.dataset.size?.startsWith('icon')
+                return {textAction,underline:s.textDecorationLine.includes('underline'),padding:[s.paddingTop,s.paddingRight,s.paddingBottom,s.paddingLeft].some(value=>parseFloat(value)!==0),background:s.backgroundColor,focus:el.matches(':focus-visible'),outline:s.outlineStyle}
+              })
+              if (style.underline !== style.textAction || (style.textAction && (style.padding || style.background !== 'rgba(0, 0, 0, 0)')) || (state === 'keyboard' && (!style.focus || style.outline === 'none'))) errors.push(`${state}: action affordance, padding or visible focus contract failed`)
             }
           }
           const group = page.locator('[data-slot=choice-group]')
