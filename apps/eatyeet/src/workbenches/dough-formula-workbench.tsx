@@ -1,8 +1,9 @@
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
+import { NumberField, type NumberFieldValidation } from '@eat-yeet/l5-ui-primitives/primitives/number-field'
 import { Input } from '@eat-yeet/l5-ui-primitives/primitives/input'
 import { Select } from '@eat-yeet/l5-ui-primitives/primitives/select'
 import { ChoiceGroup } from '@eat-yeet/l5-ui-primitives/primitives/choice-group'
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Plus, Trash2 } from 'lucide-react'
 
 import {
@@ -15,6 +16,7 @@ import {
   type DoughFormula,
   type FlourComponent,
   type StarterProfile,
+  type ReverseFormulaInput,
 } from '@eat-yeet/l2-recipe-domain/formula'
 import type { RecipeBlock, RecipeContent, RecipeContentMethod } from '@eat-yeet/l4-content-model/recipes'
 import { recipeWithSelectedMethod, selectedRecipeMethod } from '@eat-yeet/l4-content-model/recipes'
@@ -61,8 +63,6 @@ type WorkbenchStore = {
 
 const EMPTY_STORE: WorkbenchStore = { modes: {}, presets: [], starterProfiles: [], defaults: {} }
 const clone = <T,>(value: T): T => JSON.parse(JSON.stringify(value))
-const number = (value: string) => Number.isFinite(Number(value)) ? Number(value) : 0
-const slugId = (value: string) => value.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || `flour-${Date.now()}`
 const pieceCountLabel = (count: number, label: 'loaf' | 'ball') => label === 'loaf' ? (count === 1 ? 'loaf' : 'loaves') : (count === 1 ? 'ball' : 'balls')
 const escapeHtml = (value: string) => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
 const inputValue = (value: number, unit?: string) => {
@@ -212,33 +212,24 @@ export function resolveWorkbenchRecipe(recipe: RecipeContent, selection: DoughWo
   }
 }
 
-function Field({ label, value, onChange, suffix, step = '0.1', min = 0 }: { label: string; value: number; onChange: (value: number) => void; suffix?: string; step?: string; min?: number }) {
-  return (
-    <label className="grid min-w-0 gap-1 text-xs font-bold text-[var(--color-ink)]">
-      {label}
-      <span className="flex min-w-0 items-center rounded-field border-0 bg-ink text-action-label focus-within:outline-2 focus-within:outline-current focus-within:-outline-offset-4">
-        <input className="min-w-0 flex-1 bg-transparent px-3 py-2.5 text-base font-normal tracking-normal outline-none" type="number" inputMode="decimal" min={min} step={step} value={inputValue(value, suffix)} onChange={(event) => onChange(number(event.target.value))} />
-        {suffix && <span className="pr-3 text-xs text-action-label">{suffix}</span>}
-      </span>
-    </label>
-  )
+const NumericFields = createContext<{ report: NumberFieldValidation; resetKey: number } | null>(null)
+
+function Field({ label, value, onChange, suffix, step, min = 0, positive = false, hideLabel = false }: { label: string; value: number; onChange: (value: number) => void; suffix?: string; step?: string; min?: number; positive?: boolean; hideLabel?: boolean }) {
+  const fields = useContext(NumericFields)
+  return <NumberField label={label} value={value} onValueChange={onChange} suffix={suffix} min={min} integer={step === '1'} positive={positive} hideLabel={hideLabel} onValidationChange={fields?.report} resetKey={fields?.resetKey} />
 }
 
 function FlourEditor({ value, onChange, unit = '%' }: { value: FlourComponent[]; onChange: (value: FlourComponent[]) => void; unit?: '%' | 'g' }) {
   return (
     <div className="grid gap-2">
       {value.map((part, index) => (
-        <div key={`${part.id}-${index}`} className="grid grid-cols-[minmax(0,1fr)_100px_44px] gap-2">
-          <Input aria-label={`Flour ${index + 1} name`} className="px-3" value={part.name} onChange={(event) => onChange(value.map((item, itemIndex) => itemIndex === index ? { ...item, name: event.target.value, id: slugId(event.target.value) } : item))} />
-          <label className="flex items-center rounded-field border-0 bg-ink text-action-label focus-within:outline-2 focus-within:outline-current focus-within:-outline-offset-4">
-            <span className="sr-only">{part.name || `Flour ${index + 1}`} {unit === '%' ? 'percentage' : 'grams'}</span>
-            <input className="min-w-0 flex-1 bg-transparent px-2 py-2 text-right outline-none" type="number" inputMode="decimal" min="0" step="0.1" value={inputValue(part.percent, unit)} onChange={(event) => onChange(value.map((item, itemIndex) => itemIndex === index ? { ...item, percent: number(event.target.value) } : item))} />
-            <span className="pr-2 text-xs">{unit}</span>
-          </label>
+        <div key={part.id} className="grid grid-cols-[minmax(0,1fr)_100px_44px] items-start gap-2">
+          <Input aria-label={`Flour ${index + 1} name`} className="px-3" value={part.name} onChange={(event) => onChange(value.map((item, itemIndex) => itemIndex === index ? { ...item, name: event.target.value } : item))} />
+          <Field hideLabel label={`${part.name || `Flour ${index + 1}`} ${unit === '%' ? 'percentage' : 'grams'}`} suffix={unit} value={part.percent} onChange={(percent) => onChange(value.map((item, itemIndex) => itemIndex === index ? { ...item, percent } : item))} />
           <Button variant="ghost" size="icon" type="button" disabled={value.length === 1} aria-label={`Remove ${part.name || 'flour'}`} onClick={() => onChange(value.filter((_, itemIndex) => itemIndex !== index))}><Trash2 className="mx-auto size-4" /></Button>
         </div>
       ))}
-      <Button variant="link" type="button" className="gap-1" onClick={() => onChange([...value, { id: `flour-${Date.now()}`, name: '', percent: 0 }])}><Plus className="size-4" /> Add flour</Button>
+      <Button variant="link" type="button" className="gap-1" onClick={() => onChange([...value, { id: `flour-${crypto.randomUUID()}`, name: '', percent: 0 }])}><Plus className="size-4" /> Add flour</Button>
     </div>
   )
 }
@@ -281,6 +272,19 @@ function DoughFormulaWorkbench({
   onOpenChange: (open: boolean) => void
 }) {
   const [draft, setDraft] = useState(() => clone(selection))
+  const [weightDraft, setWeightDraft] = useState<ReverseFormulaInput | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+  const [fieldResetKey, setFieldResetKey] = useState(0)
+  const reportFieldError = useCallback<NumberFieldValidation>((id, error) => {
+    setFieldErrors((current) => {
+      if ((current[id] ?? null) === error) return current
+      const next = { ...current }
+      if (error) next[id] = error
+      else delete next[id]
+      return next
+    })
+  }, [])
+  const numericFields = useMemo(() => ({ report: reportFieldError, resetKey: fieldResetKey }), [reportFieldError, fieldResetKey])
   const [mode, setMode] = useState<InputMode>(config.defaultInputMode)
   const [store, setStore] = useState<WorkbenchStore>(EMPTY_STORE)
   const [storeError, setStoreError] = useState('')
@@ -298,10 +302,24 @@ function DoughFormulaWorkbench({
   const [seed, setSeed] = useState(() => starterFrom(selection.formula))
   const storageKey = `${storageScope}:recipe-workbench:v1`
   const result = useMemo(() => calculateFormula(draft.formula, draft.batch), [draft])
-  const reverseRows = result.freshFlour.map((part) => ({ ...part, percent: part.grams }))
+  const weightInputs: ReverseFormulaInput = weightDraft ?? {
+    family: draft.formula.family,
+    freshFlour: result.freshFlour,
+    addedWaterGrams: result.addedWaterGrams,
+    saltGrams: result.saltGrams,
+    oilGrams: result.oilGrams,
+    sugarGrams: result.sugarGrams,
+    maltGrams: result.maltGrams,
+    yeastGrams: result.yeastGrams,
+    levainGrams: result.levainGrams,
+    starter: draft.formula.starter,
+  }
+  const editableStarter = mode === 'weights' ? weightInputs.starter : draft.formula.starter
+  const reverseRows = weightInputs.freshFlour.map((part) => ({ ...part, percent: part.grams }))
+  const reverseErrors = weightDraft ? reverseFormula(weightDraft).errors : []
   const method = selectedRecipeMethod(recipe, draft.methodId)
   const build = draft.formula.starter && result.levainGrams > 0 ? calculateLevainBuild(result.levainGrams, draft.formula.starter, seed, seedRatio) : null
-  const errors = [...result.errors, ...(buildOpen && build ? build.errors : [])]
+  const errors = [...new Set([...Object.values(fieldErrors), ...reverseErrors, ...result.errors, ...(buildOpen && build ? build.errors : [])])]
   const compatiblePresets = store.presets.filter((preset) => preset.formula.family === draft.formula.family)
   const activePresetId = compatiblePresets.find((preset) => preset.id === selectedPresetId && formulasMatch(preset.formula, draft.formula))?.id ?? ''
   const selectedPreset = compatiblePresets.find((preset) => preset.id === selectedPresetId)
@@ -338,6 +356,8 @@ function DoughFormulaWorkbench({
   useEffect(() => {
     if (!open) return
     setDraft(clone(selection))
+    setWeightDraft(null)
+    setFieldResetKey((current) => current + 1)
     setSeed(starterFrom(selection.formula))
     document.body.dataset.workbenchOpen = 'true'
     return () => { delete document.body.dataset.workbenchOpen }
@@ -352,13 +372,21 @@ function DoughFormulaWorkbench({
   }
   const changeMode = (next: InputMode) => {
     setMode(next)
+    setWeightDraft(null)
     persist({ ...store, modes: { ...store.modes, [recipe.slug]: next } })
   }
-  const updateFormula = (changes: Partial<DoughFormula>) => setDraft((current) => ({ ...current, formula: { ...current.formula, ...changes } }))
+  const updateBatch = (changes: Partial<DoughBatch>) => {
+    setWeightDraft(null)
+    setDraft((current) => ({ ...current, batch: { ...current.batch, ...changes } }))
+  }
+  const updateFormula = (changes: Partial<DoughFormula>) => {
+    setWeightDraft(null)
+    setDraft((current) => ({ ...current, formula: { ...current.formula, ...changes } }))
+  }
   const applyReverse = (changes: Partial<{ freshFlour: FlourComponent[]; addedWaterGrams: number; saltGrams: number; oilGrams: number; sugarGrams: number; maltGrams: number; yeastGrams: number; levainGrams: number; starter: StarterProfile }>) => {
-    const current = calculateFormula(draft.formula, draft.batch)
+    const current = weightInputs
     const nextRows = changes.freshFlour ?? current.freshFlour.map((part) => ({ ...part, percent: part.grams }))
-    const reversed = reverseFormula({
+    const next: ReverseFormulaInput = {
       family: draft.formula.family,
       freshFlour: nextRows.map((part) => ({ id: part.id, name: part.name, grams: part.percent })),
       addedWaterGrams: changes.addedWaterGrams ?? current.addedWaterGrams,
@@ -368,8 +396,11 @@ function DoughFormulaWorkbench({
       maltGrams: changes.maltGrams ?? current.maltGrams,
       yeastGrams: changes.yeastGrams ?? current.yeastGrams,
       levainGrams: changes.levainGrams ?? current.levainGrams,
-      starter: draft.formula.family === 'sourdough' ? changes.starter ?? starterFrom(draft.formula) : undefined,
-    })
+      starter: draft.formula.family === 'sourdough' ? changes.starter ?? current.starter ?? starterFrom(draft.formula) : undefined,
+    }
+    setWeightDraft(next)
+    const reversed = reverseFormula(next)
+    if (reversed.errors.length) return
     setDraft((currentDraft) => ({ ...currentDraft, formula: reversed.formula, batch: { ...currentDraft.batch, pieceWeightGrams: reversed.totalDoughGrams / currentDraft.batch.count } }))
   }
   const savePreset = () => {
@@ -410,6 +441,7 @@ function DoughFormulaWorkbench({
   }
 
   return (
+      <NumericFields.Provider value={numericFields}>
       <Dialog open={open} onOpenChange={(next) => { onOpenChange(next); if (!next) setDraft(clone(selection)) }}>
         <DialogContent variant="sheet" overlayClassName="z-[var(--z-workbench)]" data-workbench-drawer="" aria-describedby={errors.length ? "workbench-description workbench-errors" : "workbench-description"} className="top-0 right-0 bottom-0 left-auto z-[var(--z-workbench)] flex h-[100dvh] w-full !max-w-[600px] translate-x-0 translate-y-0 flex-col gap-0 overflow-x-hidden rounded-none border-0 bg-brand p-0 text-[var(--color-ink)] shadow-none ring-0 max-[640px]:!w-full max-[640px]:!max-w-none data-open:zoom-in-100 data-closed:zoom-out-100 data-open:slide-in-from-right data-closed:slide-out-to-right motion-reduce:transition-none">
           <header className="shrink-0 px-6 py-5 pr-14 max-[640px]:px-[18px]">
@@ -431,6 +463,8 @@ function DoughFormulaWorkbench({
                     </Select>
                     <Button variant="on-ink" type="button" size="sm" aria-label={`Load ${chosenPreset.name}`} onClick={() => {
                       setDraft((current) => ({ ...current, formula: clone(chosenPreset.formula) }))
+                      setWeightDraft(null)
+                      setFieldResetKey((current) => current + 1)
                       setSelectedPresetId(chosenPreset.id)
                       setPresetName(chosenPreset.name)
                       setPresetAttempted(false)
@@ -481,15 +515,16 @@ function DoughFormulaWorkbench({
             <section className="mt-6 grid gap-4" aria-labelledby="batch-heading">
               <h3 id="batch-heading" className="text-xl font-bold">Batch</h3>
               <div className="grid grid-cols-2 gap-3 max-[380px]:grid-cols-1">
-                <Field label={pieceCountLabel(2, draft.batch.pieceLabel)} value={draft.batch.count} min={1} step="1" onChange={(count) => setDraft((current) => ({ ...current, batch: { ...current.batch, count: Math.max(1, Math.round(count)) } }))} />
-                <Field label={`${draft.batch.pieceLabel} weight`} suffix="g" value={draft.batch.pieceWeightGrams} onChange={(pieceWeightGrams) => setDraft((current) => ({ ...current, batch: { ...current.batch, pieceWeightGrams } }))} />
+                <Field label={pieceCountLabel(2, draft.batch.pieceLabel)} value={draft.batch.count} min={1} step="1" onChange={(count) => updateBatch({ count })} />
+                <Field label={`${draft.batch.pieceLabel} weight`} suffix="g" positive value={draft.batch.pieceWeightGrams} onChange={(pieceWeightGrams) => updateBatch({ pieceWeightGrams })} />
               </div>
+              <Field label="Total dough weight" suffix="g" positive value={draft.batch.count * draft.batch.pieceWeightGrams} onChange={(total) => updateBatch({ pieceWeightGrams: total / draft.batch.count })} />
               {recipe.methodOptions.length > 1 && <label className="grid gap-1 text-xs font-bold">Oven method<Select className="font-normal" value={draft.methodId} onChange={(event) => setDraft((current) => ({ ...current, methodId: event.target.value }))}>{recipe.methodOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}</Select></label>}
-              {config.recommendedFormulas[draft.methodId] && !formulasMatch(config.recommendedFormulas[draft.methodId], draft.formula) && <Button variant="link" type="button" className="justify-self-start" onClick={() => { setSelectedPresetId(''); setPresetName(''); setPresetAttempted(false); setPresetNotice(''); updateFormula(clone(config.recommendedFormulas[draft.methodId])) }}>Use recommended formula for {method?.label ?? 'this method'}</Button>}
+              {config.recommendedFormulas[draft.methodId] && !formulasMatch(config.recommendedFormulas[draft.methodId], draft.formula) && <Button variant="link" type="button" className="justify-self-start" onClick={() => { setSelectedPresetId(''); setPresetName(''); setPresetAttempted(false); setPresetNotice(''); setFieldResetKey((current) => current + 1); updateFormula(clone(config.recommendedFormulas[draft.methodId])) }}>Use recommended formula for {method?.label ?? 'this method'}</Button>}
             </section>
 
             {mode === 'target' ? (
-              <section className="mt-7 grid gap-4" aria-labelledby="formula-heading">
+              <section key="target" className="mt-7 grid gap-4" aria-labelledby="formula-heading">
                 <h3 id="formula-heading" className="text-xl font-bold">Formula</h3>
                 <FlourEditor value={draft.formula.flour} onChange={(flour) => updateFormula({ flour })} />
                 <div className="grid grid-cols-2 gap-3 max-[380px]:grid-cols-1">
@@ -500,31 +535,32 @@ function DoughFormulaWorkbench({
                 </div>
               </section>
             ) : (
-              <section className="mt-7 grid gap-4" aria-labelledby="weights-heading">
+              <section key="weights" className="mt-7 grid gap-4" aria-labelledby="weights-heading">
                 <h3 id="weights-heading" className="text-xl font-bold">Ingredient weights</h3>
                 <FlourEditor value={reverseRows} unit="g" onChange={(freshFlour) => applyReverse({ freshFlour })} />
                 <div className="grid grid-cols-2 gap-3 max-[380px]:grid-cols-1">
-                  <Field label="Added water" suffix="g" value={result.addedWaterGrams} onChange={(addedWaterGrams) => applyReverse({ addedWaterGrams })} />
-                  <Field label="Salt" suffix="g" value={result.saltGrams} onChange={(saltGrams) => applyReverse({ saltGrams })} />
-                  {draft.formula.family === 'pizza' && <><Field label="Oil" suffix="g" value={result.oilGrams} onChange={(oilGrams) => applyReverse({ oilGrams })} /><Field label="Sugar" suffix="g" value={result.sugarGrams} onChange={(sugarGrams) => applyReverse({ sugarGrams })} /><Field label="Malt powder" suffix="g" value={result.maltGrams} onChange={(maltGrams) => applyReverse({ maltGrams })} /><Field label="Instant yeast" suffix="g" value={result.yeastGrams} onChange={(yeastGrams) => applyReverse({ yeastGrams })} /></>}
+                  <Field label="Added water" suffix="g" value={weightInputs.addedWaterGrams ?? 0} onChange={(addedWaterGrams) => applyReverse({ addedWaterGrams })} />
+                  <Field label="Salt" suffix="g" value={weightInputs.saltGrams ?? 0} onChange={(saltGrams) => applyReverse({ saltGrams })} />
+                  {draft.formula.family === 'pizza' && <><Field label="Oil" suffix="g" value={weightInputs.oilGrams ?? 0} onChange={(oilGrams) => applyReverse({ oilGrams })} /><Field label="Sugar" suffix="g" value={weightInputs.sugarGrams ?? 0} onChange={(sugarGrams) => applyReverse({ sugarGrams })} /><Field label="Malt powder" suffix="g" value={weightInputs.maltGrams ?? 0} onChange={(maltGrams) => applyReverse({ maltGrams })} /><Field label="Instant yeast" suffix="g" value={weightInputs.yeastGrams ?? 0} onChange={(yeastGrams) => applyReverse({ yeastGrams })} /></>}
                 </div>
               </section>
             )}
 
-            {draft.formula.family === 'sourdough' && draft.formula.starter && (
+            {draft.formula.family === 'sourdough' && editableStarter && (
               <section className="mt-7 grid gap-4 border-t border-border-on-brand pt-6" aria-labelledby="starter-heading">
                 <div><h3 id="starter-heading" className="text-xl font-bold">Ripe starter / levain</h3><p className="mt-1 text-sm">Weight, hydration, and flour composition stay together in both calculator views.</p></div>
-                {mode === 'weights' && <Field label="Ripe starter weight" suffix="g" value={result.levainGrams} onChange={(levainGrams) => applyReverse({ levainGrams })} />}
-                <Field label="Starter hydration" suffix="%" value={draft.formula.starter.hydrationPercent} onChange={(hydrationPercent) => mode === 'weights' ? applyReverse({ starter: { ...draft.formula.starter!, hydrationPercent } }) : updateFormula({ starter: { ...draft.formula.starter!, hydrationPercent } })} />
-                <FlourEditor value={draft.formula.starter.flour} onChange={(flour) => mode === 'weights' ? applyReverse({ starter: { ...draft.formula.starter!, flour } }) : updateFormula({ starter: { ...draft.formula.starter!, flour } })} />
+                {mode === 'weights' && <Field label="Ripe starter weight" suffix="g" value={weightInputs.levainGrams ?? 0} onChange={(levainGrams) => applyReverse({ levainGrams })} />}
+                <Field label="Starter hydration" positive suffix="%" value={editableStarter.hydrationPercent} onChange={(hydrationPercent) => mode === 'weights' ? applyReverse({ starter: { ...editableStarter!, hydrationPercent } }) : updateFormula({ starter: { ...editableStarter!, hydrationPercent } })} />
+                <FlourEditor value={editableStarter.flour} onChange={(flour) => mode === 'weights' ? applyReverse({ starter: { ...editableStarter!, flour } }) : updateFormula({ starter: { ...editableStarter!, flour } })} />
                 <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2"><Input aria-label="Starter profile name" placeholder="Starter profile name" className="px-3" value={starterName} onChange={(event) => setStarterName(event.target.value)} /><Button variant="secondary" type="button" size="sm" disabled={!starterName.trim() || errors.length > 0} onClick={() => saveStarterProfile()}>Save new</Button></div>
-                {store.starterProfiles.length > 0 && <div className="grid grid-cols-[minmax(0,1fr)_auto_auto] gap-2"><Select aria-label="Saved starter profiles" className="min-w-0" value={selectedStarterId} onChange={(event) => { const saved = store.starterProfiles.find((profile) => profile.id === event.target.value); setSelectedStarterId(event.target.value); if (saved) { updateFormula({ starter: clone(saved.profile) }); setStarterName(saved.name) } }}><option value="">Load a starter profile…</option>{store.starterProfiles.map((profile) => <option key={profile.id} value={profile.id}>{profile.name}</option>)}</Select><Button variant="link" type="button" className="text-xs font-bold disabled:opacity-40" disabled={!selectedStarterId || !starterName.trim() || errors.length > 0} onClick={() => saveStarterProfile(selectedStarterId)}>Replace</Button><Button variant="ghost" size="icon" type="button" aria-label="Delete selected starter profile" disabled={!selectedStarterId} onClick={() => { persist({ ...store, starterProfiles: store.starterProfiles.filter((item) => item.id !== selectedStarterId) }); setSelectedStarterId(''); setStarterName('') }}><Trash2 className="size-4" /></Button></div>}
+                {store.starterProfiles.length > 0 && <div className="grid grid-cols-[minmax(0,1fr)_auto_auto] gap-2"><Select aria-label="Saved starter profiles" className="min-w-0" value={selectedStarterId} onChange={(event) => { const saved = store.starterProfiles.find((profile) => profile.id === event.target.value); setSelectedStarterId(event.target.value); if (saved) { setFieldResetKey((current) => current + 1); updateFormula({ starter: clone(saved.profile) }); setStarterName(saved.name) } }}><option value="">Load a starter profile…</option>{store.starterProfiles.map((profile) => <option key={profile.id} value={profile.id}>{profile.name}</option>)}</Select><Button variant="link" type="button" className="text-xs font-bold disabled:opacity-40" disabled={!selectedStarterId || !starterName.trim() || errors.length > 0} onClick={() => saveStarterProfile(selectedStarterId)}>Replace</Button><Button variant="ghost" size="icon" type="button" aria-label="Delete selected starter profile" disabled={!selectedStarterId} onClick={() => { persist({ ...store, starterProfiles: store.starterProfiles.filter((item) => item.id !== selectedStarterId) }); setSelectedStarterId(''); setStarterName('') }}><Trash2 className="size-4" /></Button></div>}
                 <Button variant="link" type="button" className="justify-self-start" aria-expanded={buildOpen} onClick={() => setBuildOpen((value) => !value)}>{buildOpen ? 'Hide levain build' : 'Build this levain'}</Button>
-                {buildOpen && build && <div className="grid gap-3 rounded-field bg-tint p-4"><Field label="Fresh flour per 1 part seed" suffix="parts" value={seedRatio} onChange={setSeedRatio} /><Field label="Seed hydration" suffix="%" value={seed.hydrationPercent} onChange={(hydrationPercent) => setSeed({ ...seed, hydrationPercent })} /><FlourEditor value={seed.flour} onChange={(flour) => setSeed({ ...seed, flour })} /><p className="text-sm"><strong>1:{inputValue(seedRatio)}</strong> seed-to-fresh-flour ratio</p><p className="text-sm"><strong>{formatGrams(build.seedStarterGrams)}</strong> seed starter + {build.freshFlour.map((part) => `${formatGrams(part.grams)} ${part.name}`).join(' + ')} + <strong>{formatGrams(build.addedWaterGrams)}</strong> water</p></div>}
+                {buildOpen && build && <div className="grid gap-3 rounded-field bg-tint p-4"><Field label="Fresh flour per 1 part seed" positive suffix="parts" value={seedRatio} onChange={setSeedRatio} /><Field label="Seed hydration" suffix="%" value={seed.hydrationPercent} onChange={(hydrationPercent) => setSeed({ ...seed, hydrationPercent })} /><FlourEditor value={seed.flour} onChange={(flour) => setSeed({ ...seed, flour })} /><p className="text-sm"><strong>1:{inputValue(seedRatio)}</strong> seed-to-fresh-flour ratio</p><p className="text-sm"><strong>{formatGrams(build.seedStarterGrams)}</strong> seed starter + {build.freshFlour.map((part) => `${formatGrams(part.grams)} ${part.name}`).join(' + ')} + <strong>{formatGrams(build.addedWaterGrams)}</strong> water</p></div>}
               </section>
             )}
 
             <WorkbenchPanel headingId="preview-heading" title="Your dough">
+              {(Object.keys(fieldErrors).length > 0 || reverseErrors.length > 0) && <p className="mt-2 text-xs text-action-label">Finish the incomplete fields before saving or applying. This preview uses the last valid numbers.</p>}
               <p className="mt-2 text-sm leading-relaxed">{selectionSummary(draft, method)}</p>
               <dl className="my-5 grid grid-cols-2 gap-4">
                 <div><dt className="text-xs">Total flour</dt><dd className="mt-1 text-xl font-bold tabular-nums text-brand">{formatGrams(result.totalFlourGrams)}</dd></div>
@@ -540,10 +576,11 @@ function DoughFormulaWorkbench({
 
           </div>
           <footer className="shrink-0 bg-brand px-6 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] max-[640px]:px-[18px]">
-            <div className="flex items-center justify-end gap-4"><Button variant="link" type="button" onClick={() => onOpenChange(false)}>Cancel</Button><Button variant="default" type="button" disabled={errors.length > 0} onClick={() => { onApply(clone(draft)); onOpenChange(false) }}>Apply to recipe</Button></div>
+            <div className="flex items-center justify-end gap-4"><Button variant="link" type="button" onClick={() => onOpenChange(false)}>Cancel</Button><Button variant="default" type="button" disabled={errors.length > 0} onClick={() => { if (errors.length) return; onApply(clone(draft)); onOpenChange(false) }}>Apply to recipe</Button></div>
           </footer>
         </DialogContent>
       </Dialog>
+      </NumericFields.Provider>
   )
 }
 

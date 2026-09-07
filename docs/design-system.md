@@ -81,6 +81,14 @@ The app-owned `WorkbenchPanel` gives Saved formulas and Your dough the same ink 
 
 Saved names are required, normalized for Unicode and whitespace, limited to 80 characters, and unique within each dough family without regard to case. Creating or updating cannot duplicate another saved formula’s exact values. Updating a formula excludes its own ID from uniqueness checks. Existing saved entries are preserved until explicitly edited or deleted. Invalid calculator values block saving with an explanation. Name errors appear beside the input with `aria-invalid`, `aria-describedby`, and focus returned to the field; formula errors appear at the form. Save/update confirmation is announced only after browser storage succeeds. Batch size and oven remain outside the saved formula.
 
+## Numeric editing
+
+`NumberField` owns editable numeric text separately from accepted numeric values. Never coerce an empty input to zero, clamp it to one, or reformat it on each keystroke. Preserve partial decimals, cursor placement, and pasted text; accept decimal points and commas. Use a text input with numeric input mode for integer counts and decimal input mode for weights/percentages, a 16px input font, a 44px minimum target, and an external label with associated units. Enter/Done finishes editing. Keep invalid text visible on blur with an associated error; never silently round fractional quantities.
+
+The workbench registers incomplete/invalid fields and disables formula saves, starter saves, and Apply until they are resolved. Previews use the last valid numbers and explain that state. Quantity, piece weight, and total dough weight are linked; total weight changes the piece weight without changing the count. Ingredient-weight drafts remain independent of the percentage conversion so temporarily invalid flour totals cannot erase the other weights. Explicit preset loads and reopening reset text drafts to the selected values. Switching calculator modes replaces that mode’s numeric fields. Flour row identities stay stable when names are edited, preserving focus and starter ingredient identity.
+
+The production field and workbench stories cover clearing/replacing every numeric field, decimal commas and precision, invalid integer counts, direct total-weight edits, and flour-name focus. Real-device keyboard behavior still requires coordinated mobile review; do not infer it from a desktop build.
+
 ## Control contracts
 
 | Component | Use and states | Keyboard / semantics |
@@ -89,6 +97,7 @@ Saved names are required, normalized for Unicode and whitespace, limited to 80 c
 | ChoiceGroup | Exclusive selection, short/wrapped labels; dark group, saturated yellow selected item | Named group of native pressed buttons; Tab, Enter, Space; all options reachable; selected state via `aria-pressed` |
 | Input / Select / Textarea | Filled/empty, invalid, disabled, read-only; Input/Select support default and on-ink surfaces | Always a visible associated label; error association via `aria-describedby`; `aria-invalid` on affected field; never replace numeric semantics with styled text |
 | Checkbox | Checked, unchecked, disabled, focus; default and compact sizes, with compact reserved for labeled filter rows | Native/Radix behavior, accessible name, explicit checked state; visible check beyond color alone |
+| NumberField | Blank/partial, integer, decimal, comma decimal, invalid, external reset | Text input with appropriate mobile keypad; live valid values; retained edit text and inline errors; owner blocks invalid saves |
 | Switch | On/off, disabled, keyboard focus, on white/yellow; external label with no surrounding hover/selected fill | Radix switch semantics, `aria-checked`, associated label, Space toggles, track focus indicator and 44px hit area |
 | Faceted filter list | Compact unchecked/selected rows, text-only labels without counts, wrapped labels, open/closed groups; white reading surface | Whole label toggles checkbox; at least 24px targets; Tab and Space operate checkboxes; Enter/Space operate group disclosure with `aria-expanded` |
 | Mobile filter disclosure | Title and trigger share a row; active-filter indicator, closed/open, narrow title wrapping | Button exposes `aria-expanded` and `aria-controls`; expanded controls follow the header in reading order; desktop uses the sidebar |

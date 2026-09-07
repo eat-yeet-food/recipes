@@ -33,6 +33,10 @@ filled-button spacing or remove the visible clickable cue. Use a dedicated label
 switch for binary settings rather than a button-styled row. Saved-formula UI
 follows the **Saved formulas** contract and shares its panel with dough results;
 keep validation, persistence feedback, and corresponding stories together.
+For numeric controls, follow **Numeric editing**: keep editable text separate
+from accepted values, preserve blank/partial entries and focus, and block saves
+while invalid. Reuse NumberField rather than coercing or formatting raw input
+on every keystroke. Preserve stable identities for editable list rows.
 For recipe layout changes, follow **Recipe layout**: use the shared description
 and body measure, preserve the title-row switch placement, and keep a switch’s
 label attached to its track rather than stretching them across the parent.

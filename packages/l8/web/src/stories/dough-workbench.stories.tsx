@@ -73,7 +73,7 @@ export const IncompleteFlourBlend: Story = {
   play: async ({ canvasElement }) => {
     const screen = within(canvasElement.ownerDocument.body)
   await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))
-    const field = await screen.findByRole('spinbutton', { name: /High-protein.*percentage/ })
+    const field = await screen.findByRole('textbox', { name: /High-protein.*percentage/ })
     await userEvent.clear(field)
     await userEvent.type(field, '60')
     await expect(screen.getByRole('alert')).toHaveTextContent('100')
@@ -83,6 +83,43 @@ export const IncompleteFlourBlend: Story = {
 
 export const TargetBatch: Story = { args: { target: true } }
 export const Pizza: Story = { args: { pizza: true, target: true } }
+
+async function editEveryNumber(canvasElement: HTMLElement) {
+  const screen = within(canvasElement.ownerDocument.body)
+  await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))
+  await userEvent.click(screen.getByRole('button', { name: 'Build this levain' }))
+  const fields = screen.getByRole('dialog').querySelectorAll<HTMLInputElement>('[data-slot="number-field"] input')
+  for (const field of fields) {
+    const original = field.value
+    await userEvent.clear(field)
+    await expect(field).toHaveValue('')
+    await expect(screen.getByRole('button', { name: 'Apply to recipe' })).toBeDisabled()
+    await userEvent.type(field, original)
+    await expect(field).toHaveValue(original)
+    await userEvent.tab()
+  }
+  const name = screen.getAllByRole('textbox', { name: 'Flour 1 name' })[0]
+  await userEvent.clear(name)
+  await userEvent.type(name, 'Bread flour')
+  await expect(name).toHaveFocus()
+  await expect(name).toHaveValue('Bread flour')
+}
+export const EditableTargetFields: Story = { args: { target: true }, play: async ({ canvasElement }) => editEveryNumber(canvasElement) }
+export const EditableWeightFields: Story = { play: async ({ canvasElement }) => editEveryNumber(canvasElement) }
+export const EditQuantityAndTotal: Story = { args: { pizza: true, target: true }, play: async ({ canvasElement }) => {
+  const screen = within(canvasElement.ownerDocument.body)
+  await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))
+  const count = screen.getByRole('textbox', { name: 'loaves' })
+  await userEvent.clear(count)
+  await expect(count).toHaveValue('')
+  await expect(screen.getByRole('button', { name: 'Apply to recipe' })).toBeDisabled()
+  await userEvent.type(count, '4')
+  const total = screen.getByRole('textbox', { name: 'Total dough weight' })
+  await userEvent.clear(total)
+  await userEvent.type(total, '2000')
+  await expect(screen.getByRole('textbox', { name: 'loaf weight' })).toHaveValue('500')
+  await expect(screen.getByRole('button', { name: 'Apply to recipe' })).toBeEnabled()
+} }
 export const ApplyAndClose: Story = { play: async ({ canvasElement }) => { const screen = within(canvasElement.ownerDocument.body); await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto')); await userEvent.click(await screen.findByRole('button', { name: 'Apply to recipe' })); await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument()); await expect(screen.getByRole('status')).toHaveTextContent('Recipe updated') } }
 
 export const SavedFormula: Story = { play: async ({ canvasElement }) => {

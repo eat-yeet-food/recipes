@@ -4,6 +4,8 @@ Reviewed September 7, 2026. The approved usage contract is [design-system.md](de
 
 ## Subsequent September 7 refinements
 
+The numeric-editing repair replaces coercion/clamping on every keystroke with shared editable text buffers, decimal/numeric mobile keypads, retained invalid text, and Save/Apply gating. Total dough weight is now directly editable; independent ingredient-weight drafts preserve values during invalid conversions. Flour-name edits keep stable identities and focus. New primitive and whole-workbench interaction stories cover clear/replace, comma decimals, integer errors, total-weight edits, and all visible numeric fields. These standalone stories, mobile Safari/Chrome keyboard behavior, and physical-device focus/scroll behavior remain unverified during the user-requested check pause; deployment build and production smoke verification do not establish those results.
+
 Cook Mode now aligns to the recipe action grid’s right edge, matching the Your recipe box below, including stacked mobile rows. Its label spacing is unchanged. The card story uses the same grid arrangement; standalone checks remain paused.
 
 Responsive recipe headers now reserve the entire narrow row for the title and place Cooking view beside the byline; wide headers retain the switch beside the title. Pin/Print no longer grow across the mobile row, and their icons remain visible. Phone, intermediate-width, and long-title stories render the production header. Standalone visual checks remain paused; these layouts have not received new screenshot baseline approval.

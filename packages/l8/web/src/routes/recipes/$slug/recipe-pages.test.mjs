@@ -162,15 +162,15 @@ const sourdoughDialog = sourdough.getByRole('dialog', { name: 'Adjust recipe' })
 check('sourdough starts in ingredient weights', await sourdough.getByRole('button', { name: 'Weights' }).getAttribute('aria-pressed') === 'true')
 check('sourdough defaults to 77 percent starter hydration', await sourdough.getByLabel('Starter hydration').inputValue() === '77')
 check('sourdough migration weights survive display rounding',
-  await sourdough.getByLabel('Bread flour grams').first().inputValue() === '765.0' &&
-  await sourdough.getByLabel('Whole wheat flour grams').first().inputValue() === '150.0' &&
-  await sourdough.getByLabel('Added water').inputValue() === '705.0' &&
-  await sourdough.getByLabel('Ripe starter weight').inputValue() === '175.0')
+  Math.abs(Number(await sourdough.getByLabel('Bread flour grams').first().inputValue()) - 765) < 0.01 &&
+  Math.abs(Number(await sourdough.getByLabel('Whole wheat flour grams').first().inputValue()) - 150) < 0.01 &&
+  Math.abs(Number(await sourdough.getByLabel('Added water').inputValue()) - 705) < 0.01 &&
+  Math.abs(Number(await sourdough.getByLabel('Ripe starter weight').inputValue()) - 175) < 0.01)
 await sourdough.getByRole('button', { name: 'Target batch' }).click()
 check('target formula uses readable rounded percentages',
-  await sourdough.getByRole('spinbutton', { name: 'Hydration %', exact: true }).inputValue() === '77.04' &&
-  await sourdough.getByLabel('Salt').inputValue() === '1.97' &&
-  await sourdough.getByLabel('Ripe levain').inputValue() === '17.26')
+  Math.abs(Number(await sourdough.getByRole('textbox', { name: 'Hydration', exact: true }).inputValue()) - 77.04) < 0.01 &&
+  Math.abs(Number(await sourdough.getByLabel('Salt').inputValue()) - 1.97) < 0.01 &&
+  Math.abs(Number(await sourdough.getByLabel('Ripe levain').inputValue()) - 17.26) < 0.01)
 await sourdough.getByRole('button', { name: 'Add flour' }).first().click()
 await sourdough.getByLabel('Flour 3 name').fill('Rye')
 await sourdough.getByLabel('Rye percentage').fill('10')
