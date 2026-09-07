@@ -54,7 +54,7 @@ function WorkbenchPreview({ target = false, pizza = false }: { target?: boolean;
   const changeOpen = (next: boolean) => { setOpen(next); if (!next) requestAnimationFrame(() => trigger.current?.focus()) }
   const config = { defaultInputMode: target ? 'target' : 'weights', defaultSelection: selected, recommendedFormulas: {}, doughIngredientSectionId: 'dough', initialWaterPercent: 97 }
   const Drawer = (pizza ? recipeWorkbenchRegistry.get('pizza')! : plugin).Drawer
-  const initial = pizza ? { ...selected, formula: { ...selected.formula, family: 'pizza', levainPercent: 0, yeastPercent: 0.3 } } : selected
+  const initial = pizza ? { ...selected, batch: { ...selected.batch, pieceLabel: 'ball' }, formula: { ...selected.formula, family: 'pizza', levainPercent: 0, yeastPercent: 0.3 } } : selected
   return <div className="p-6"><Button ref={trigger} onClick={() => setOpen(true)}>Open workbench</Button><p role="status">{applied ? "Recipe updated" : "Preview your batch"}</p><Drawer recipe={recipe} config={{ ...config, defaultSelection: initial }} state={saved ?? initial} onApply={(next) => { setSaved(next); setApplied(true) }} hasSharedConfiguration={false} storageScope={scope} open={open} onOpenChange={changeOpen} /></div>
 }
 
@@ -88,8 +88,8 @@ export const RoundedBatchAndPercentages: Story = { args: { target: true }, play:
   await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))
   await expect(screen.getByRole('textbox', { name: 'loaf weight' })).toHaveValue('908')
   await expect(screen.getByRole('textbox', { name: 'Total dough weight' })).toHaveValue('1815')
-  await expect(screen.getByRole('textbox', { name: 'Hydration' })).toHaveValue('77.04')
-  await expect(screen.getByRole('textbox', { name: 'Salt' })).toHaveValue('1.97')
+  await expect(screen.getByRole('textbox', { name: 'Hydration' })).toHaveValue('77')
+  await expect(screen.getByRole('textbox', { name: 'Salt' })).toHaveValue('2')
 } }
 
 async function editEveryNumber(canvasElement: HTMLElement) {
@@ -118,7 +118,7 @@ export const EditableWeightFields: Story = { play: async ({ canvasElement }) => 
 export const EditQuantityAndTotal: Story = { args: { pizza: true, target: true }, play: async ({ canvasElement }) => {
   const screen = within(canvasElement.ownerDocument.body)
   await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))
-  const count = screen.getByRole('textbox', { name: 'loaves' })
+  const count = screen.getByRole('textbox', { name: 'balls' })
   await userEvent.clear(count)
   await expect(count).toHaveValue('')
   await expect(screen.getByRole('button', { name: 'Apply to recipe' })).toBeDisabled()
@@ -126,7 +126,7 @@ export const EditQuantityAndTotal: Story = { args: { pizza: true, target: true }
   const total = screen.getByRole('textbox', { name: 'Total dough weight' })
   await userEvent.clear(total)
   await userEvent.type(total, '2000')
-  await expect(screen.getByRole('textbox', { name: 'loaf weight' })).toHaveValue('500')
+  await expect(screen.getByRole('textbox', { name: 'ball weight' })).toHaveValue('500')
   await expect(screen.getByRole('button', { name: 'Apply to recipe' })).toBeEnabled()
 } }
 export const ApplyAndClose: Story = { play: async ({ canvasElement }) => { const screen = within(canvasElement.ownerDocument.body); await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto')); await userEvent.click(await screen.findByRole('button', { name: 'Apply to recipe' })); await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument()); await expect(screen.getByRole('status')).toHaveTextContent('Recipe updated') } }
@@ -197,4 +197,59 @@ export const DeleteWithoutLoading: Story = { play: async ({ canvasElement }) => 
   await expect(panel.queryByRole('option')).not.toBeInTheDocument()
   await expect(panel.getByRole('status')).toHaveTextContent('Deleted “Weekend batch”.')
   await expect(name).toHaveFocus()
+} }
+
+export const SourdoughProcessAndSavedStarter: Story = { args: { target: true }, play: async ({ canvasElement }) => {
+  const screen = within(canvasElement.ownerDocument.body)
+  await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))
+  await expect(screen.getByRole('textbox', { name: 'Formula preset name' })).toHaveAttribute('placeholder', 'e.g. Everyday sourdough')
+  await expect(screen.queryByRole('textbox', { name: 'Starter profile name' })).not.toBeInTheDocument()
+  await userEvent.click(screen.getByRole('button', { name: 'By hand', exact: true }))
+  const fold = screen.getByRole('textbox', { name: 'Fold 2 at' })
+  await userEvent.clear(fold)
+  await userEvent.type(fold, '60')
+  await userEvent.tab()
+  await expect(screen.getByRole('button', { name: 'Apply to recipe' })).toBeDisabled()
+  await userEvent.clear(fold)
+  await userEvent.type(fold, '95')
+  await userEvent.tab()
+  await expect(screen.getByRole('button', { name: 'Apply to recipe' })).toBeEnabled()
+  await userEvent.type(screen.getByRole('textbox', { name: 'Formula preset name' }), 'Hand mixed loaf')
+  await userEvent.click(screen.getByRole('button', { name: 'Save new', exact: true }))
+  await userEvent.click(screen.getByRole('button', { name: 'Spiral mixer', exact: true }))
+  await userEvent.click(screen.getByRole('button', { name: 'Load Hand mixed loaf' }))
+  await expect(screen.getByRole('button', { name: 'By hand', exact: true })).toHaveAttribute('aria-pressed', 'true')
+  await expect(screen.getByRole('textbox', { name: 'Fold 2 at' })).toHaveValue('95')
+} }
+
+export const PluginProcessProjection: Story = { play: async () => {
+  const initial = JSON.parse(JSON.stringify(state))
+  const config = { defaultInputMode: 'target', defaultSelection: initial, recommendedFormulas: {}, processSections: { autolyse: 'autolyse', bulk: 'bulk', levain: 'levain' } }
+  const block = { type: 'recipe' as const, equipment: [{ id: 'tools', title: '', items: ['Spiral mixer', 'Bowl'], itemIds: ['mixer', 'bowl'] }], ingredients: [], steps: [
+    { id: 'autolyse', title: 'Autolyse', items: ['Original autolyse'], itemIds: ['old-autolyse'] },
+    { id: 'bulk', title: 'Bulk', items: ['Original fold schedule'], itemIds: ['old-bulk'] },
+    { id: 'levain', title: 'Levain', items: ['Original build', 'Rest until ripe.'], itemIds: ['build', 'rest'] },
+    { id: 'bake', title: 'Bake', items: ['Bake as authored.'], itemIds: ['bake-step'] },
+  ], notes: [], tips: [] }
+  const source: RecipeContent = { ...recipe, workbench: { id: 'sourdough', config }, methodOptions: recipe.methodOptions.map((method) => ({ ...method, blocks: [block] })), blocks: [block] }
+  const legacy = plugin.decodeState(initial, config, source) as typeof initial
+  await expect(legacy.formula.process.folds.map((fold: { atMinutes: number }) => fold.atMinutes)).toEqual([60, 90, 120])
+  legacy.formula.process.mixingMethod = 'hand'
+  legacy.formula.process.bulkMinutes = 320
+  legacy.formula.process.folds[1].atMinutes = 95
+  const shared = plugin.decodeState(JSON.parse(JSON.stringify(legacy)), config, source)
+  await expect(shared).not.toBeNull()
+  const resolved = plugin.resolveRecipe(source, config, shared)
+  const result = resolved.blocks.find((item) => item.type === 'recipe')!
+  if (result.type !== 'recipe') throw new Error('Missing recipe block')
+  const instructions = result.steps.flatMap((section) => section.items).join(' ')
+  await expect(instructions).toContain('[95 min elapsed]')
+  await expect(instructions).toContain('by hand')
+  await expect(instructions).not.toContain('Original fold schedule')
+  await expect(instructions).not.toContain('Spiral mixer')
+  await expect(result.steps.find((section) => section.id === 'bake')?.items).toEqual(['Bake as authored.'])
+  await expect(result.equipment[0].items).toEqual(['Bowl'])
+  await expect(resolved.totalMinutes).toBe(recipe.totalMinutes + 30)
+  legacy.formula.process.folds[1].atMinutes = 60
+  await expect(plugin.decodeState(legacy, config, source)).toBeNull()
 } }

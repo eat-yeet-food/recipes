@@ -98,7 +98,7 @@ await desktop.getByRole('button', { name: 'Apply to recipe' }).click()
 await desktop.waitForURL('**/recipes/new-york-style-pizza?config=*')
 const indoorFacts = await desktop.evaluate(() => document.body.textContent ?? '')
 check('applied configuration updates URL', desktop.url().includes('?config='), desktop.url())
-check('indoor method applies calculated dough formula', indoorFacts.includes('851g All-purpose flour') && indoorFacts.includes('17.0g oil'))
+check('indoor method applies calculated dough formula', indoorFacts.includes('851g All-purpose flour') && indoorFacts.includes('17g oil'))
 check('indoor mixing includes configured oil', indoorFacts.includes('Add the water, flour, oil, salt, and yeast to the spiral mixer'))
 check('indoor method shows baking steel equipment', indoorFacts.includes('16&quot; x 16&quot; baking steel') || indoorFacts.includes('16" x 16" baking steel'))
 await desktop.goBack()
@@ -155,7 +155,7 @@ const sourdough = await newPage()
 await sourdough.goto(`${BASE}/recipes/sourdough-bread`, { waitUntil: 'networkidle' })
 const sourdoughRecipeText = await sourdough.locator('#recipe-card').textContent()
 check('resolved sourdough removes fixed starter maintenance quantities', !sourdoughRecipeText.includes('6g starter') && !sourdoughRecipeText.includes('50g starter'))
-check('instruction bindings agree with applied recipe rounding', sourdoughRecipeText.includes('first portion of water (685g)') && sourdoughRecipeText.includes('remainder of water (20g)'))
+check('instruction bindings agree with applied recipe rounding', sourdoughRecipeText.includes('first portion of water (685g)') && sourdoughRecipeText.includes('remaining water (20g)'))
 const adjustSourdough = sourdough.getByRole('button', { name: 'Adjust Recipe' }).first()
 await adjustSourdough.click()
 const sourdoughDialog = sourdough.getByRole('dialog', { name: 'Adjust recipe' })
@@ -168,9 +168,9 @@ check('sourdough migration weights survive display rounding',
   Math.abs(Number(await sourdough.getByLabel('Ripe starter weight').inputValue()) - 175) < 0.01)
 await sourdough.getByRole('button', { name: 'Target batch' }).click()
 check('target formula uses readable rounded percentages',
-  Math.abs(Number(await sourdough.getByRole('textbox', { name: 'Hydration', exact: true }).inputValue()) - 77.04) < 0.01 &&
-  Math.abs(Number(await sourdough.getByLabel('Salt').inputValue()) - 1.97) < 0.01 &&
-  Math.abs(Number(await sourdough.getByLabel('Ripe levain').inputValue()) - 17.26) < 0.01)
+  Math.abs(Number(await sourdough.getByRole('textbox', { name: 'Hydration', exact: true }).inputValue()) - 77) < 0.01 &&
+  Math.abs(Number(await sourdough.getByLabel('Salt').inputValue()) - 2) < 0.01 &&
+  Math.abs(Number(await sourdough.getByLabel('Ripe levain').inputValue()) - 17.3) < 0.01)
 await sourdough.getByRole('button', { name: 'Add flour' }).first().click()
 await sourdough.getByLabel('Flour 3 name').fill('Rye')
 await sourdough.getByLabel('Rye percentage').fill('10')

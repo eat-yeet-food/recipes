@@ -9,19 +9,18 @@ describe('numeric field display precision', () => {
   })
 
   it('uses practical ingredient, percentage, and ratio precision', () => {
-    assert.equal(formatNumberFieldValue(1846.824275, 1), '1846.8')
-    assert.equal(formatNumberFieldValue(4.824275, 2), '4.82')
-    assert.equal(formatNumberFieldValue(0.025275, 3), '0.025')
-    assert.equal(formatNumberFieldValue(77.0438125, 2), '77.04')
-    assert.equal(formatNumberFieldValue(2.333333333333, 2), '2.33')
+    assert.equal(formatNumberFieldValue(1846.824275, 0), '1847')
+    assert.equal(formatNumberFieldValue(4.824275, 1), '4.8')
+    assert.equal(formatNumberFieldValue(0.25275, 1), '0.3')
+    assert.equal(formatNumberFieldValue(77.0438125, 1), '77')
+    assert.equal(formatNumberFieldValue(2.333333333333, 1), '2.3')
     assert.equal(formatNumberFieldValue(10, 2), '10')
   })
 
-  it('does not display tiny nonzero quantities as zero', () => {
-    assert.equal(formatNumberFieldValue(0.000025275, 3), '0.000025')
-    assert.equal(formatNumberFieldValue(0.1, 0), '0.1')
-    assert.equal(formatNumberFieldValue(1e-8, 2), '0.00000001')
-    assert.equal(formatNumberFieldValue(-0.000025275, 3), '-0.000025')
+  it('honors the precision cap even for small quantities', () => {
+    assert.equal(formatNumberFieldValue(0.025275, 1), '0')
+    assert.equal(formatNumberFieldValue(0.1, 0), '0')
+    assert.equal(formatNumberFieldValue(1e-8, 1), '0')
   })
 
   it('removes insignificant zeros and handles nonfinite values', () => {

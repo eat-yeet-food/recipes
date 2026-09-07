@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, userEvent, within } from 'storybook/test'
 import { NumberField, type NumberFieldPrecision } from './number-field'
 
-function Example({ integer = false, initialValue = 1, decimalPlaces = 2 }: { integer?: boolean; initialValue?: number; decimalPlaces?: NumberFieldPrecision }) {
+function Example({ integer = false, initialValue = 1, decimalPlaces = 1 }: { integer?: boolean; initialValue?: number; decimalPlaces?: NumberFieldPrecision }) {
   const [value, setValue] = useState(initialValue)
   return <div className="max-w-80 bg-brand p-5">
     <NumberField label={integer ? 'Quantity' : 'Weight'} value={value} onValueChange={setValue} integer={integer} min={integer ? 1 : 0} suffix={integer ? undefined : 'g'} decimalPlaces={decimalPlaces} />
@@ -26,18 +26,18 @@ export const ClearAndReplace: Story = { args: { integer: true }, play: async ({ 
   await expect(input).toHaveValue('12')
   await expect(screen.getByRole('status')).toHaveTextContent('Accepted value: 12')
 } }
-export const DecimalCommaAndPrecision: Story = { args: { decimalPlaces: 3 }, play: async ({ canvasElement }) => {
+export const DecimalCommaAndPrecision: Story = { args: { decimalPlaces: 1 }, play: async ({ canvasElement }) => {
   const screen = within(canvasElement)
   const input = screen.getByRole('textbox', { name: 'Weight' })
   await userEvent.clear(input)
   await userEvent.type(input, '0,')
   await expect(input).toHaveValue('0,')
-  await userEvent.type(input, '025')
-  await expect(input).toHaveValue('0,025')
-  await expect(screen.getByRole('status')).toHaveTextContent('Accepted value: 0.025')
+  await userEvent.type(input, '25')
+  await expect(input).toHaveValue('0,25')
+  await expect(screen.getByRole('status')).toHaveTextContent('Accepted value: 0.25')
   await userEvent.keyboard('{Enter}')
   await expect(input).not.toHaveFocus()
-  await expect(input).toHaveValue('0.025')
+  await expect(input).toHaveValue('0.3')
 } }
 export const RoundedDoughWeight: Story = { args: { initialValue: 908.8242755752875, decimalPlaces: 0 }, play: async ({ canvasElement }) => {
   const screen = within(canvasElement)
@@ -53,7 +53,7 @@ export const RoundedDoughWeight: Story = { args: { initialValue: 908.82427557528
   await expect(input).toHaveValue('908')
   await expect(screen.getByRole('status')).toHaveTextContent('Accepted value: 907.625')
 } }
-export const TinyAmount: Story = { args: { initialValue: 0.000025, decimalPlaces: 3 } }
+export const TinyAmount: Story = { args: { initialValue: 0.25, decimalPlaces: 1 } }
 export const InvalidQuantity: Story = { args: { integer: true }, play: async ({ canvasElement }) => {
   const screen = within(canvasElement)
   const input = screen.getByRole('textbox', { name: 'Quantity' })

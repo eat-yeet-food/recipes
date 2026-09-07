@@ -1,3 +1,5 @@
+import { DEFAULT_SOURDOUGH_PROCESS, isSourdoughProcess, type SourdoughProcess } from '@eat-yeet/l2-recipe-domain/sourdough-process'
+import { resolveSourdoughSteps, type SourdoughProcessSections } from './sourdough-process'
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
 import { NumberField, formatNumberFieldValue, type NumberFieldPrecision, type NumberFieldValidation } from '@eat-yeet/l5-ui-primitives/primitives/number-field'
 import { Input } from '@eat-yeet/l5-ui-primitives/primitives/input'
@@ -37,6 +39,7 @@ interface DoughWorkbenchState {
 }
 
 interface DoughWorkbenchConfig {
+  processSections?: SourdoughProcessSections
   defaultInputMode: InputMode
   defaultSelection: DoughWorkbenchState
   recommendedFormulas: Record<string, DoughFormula>
@@ -64,14 +67,28 @@ const EMPTY_STORE: WorkbenchStore = { modes: {}, presets: [], starterProfiles: [
 const clone = <T,>(value: T): T => JSON.parse(JSON.stringify(value))
 const pieceCountLabel = (count: number, label: 'loaf' | 'ball') => label === 'loaf' ? (count === 1 ? 'loaf' : 'loaves') : (count === 1 ? 'ball' : 'balls')
 const escapeHtml = (value: string) => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
-const gramPrecision = (value: number): NumberFieldPrecision => Math.abs(value) < 1 ? 3 : Math.abs(value) < 10 ? 2 : 1
-const formatWorkbenchGrams = (value: number) => Number.isFinite(value) ? `${formatNumberFieldValue(value, gramPrecision(value))}g` : '—'
+const formatWorkbenchGrams = (value: number) => Number.isFinite(value) ? `${formatNumberFieldValue(value, Math.abs(value) >= 20 ? 0 : 1)}g` : '—'
 const formatBatchGrams = (value: number) => Number.isFinite(value) ? `${formatNumberFieldValue(value, 0)}g` : '—'
 const formatAppliedGrams = (value: number) => {
   if (!Number.isFinite(value)) return '—'
-  return `${value < 20 ? value.toFixed(1) : Math.round(value)}g`
+  return `${value < 20 ? Number(value.toFixed(1)) : Math.round(value)}g`
 }
-const formulasMatch = (left: DoughFormula, right: DoughFormula) => JSON.stringify(left) === JSON.stringify(right)
+const completeFormula = (formula: DoughFormula, fallback?: DoughFormula): DoughFormula => formula.family === 'sourdough' ? {
+  ...formula,
+  process: clone(formula.process ?? fallback?.process ?? DEFAULT_SOURDOUGH_PROCESS),
+  levainBuild: clone(formula.levainBuild ?? { seed: starterFrom(formula), flourPerSeed: 2 }),
+} : formula
+const formulaKey = (formula: DoughFormula) => {
+  const complete = completeFormula(formula)
+  const comparable = { ...complete, ...(complete.process ? { process: { ...complete.process, folds: complete.process.folds.map(({ atMinutes }) => atMinutes) } } : {}) }
+  return JSON.stringify(comparable, (_key, value) => value && typeof value === 'object' && !Array.isArray(value) ? Object.fromEntries(Object.entries(value).sort(([left], [right]) => left.localeCompare(right))) : value)
+}
+const formulasMatch = (left: DoughFormula, right: DoughFormula) => formulaKey(left) === formulaKey(right)
+const WORKBENCH_COPY = {
+  pizza: { placeholder: 'e.g. Weekend pizza', saved: 'Save your dough formula here. Batch size and oven stay with this recipe.' },
+  sourdough: { placeholder: 'e.g. Everyday sourdough', saved: 'Save your flour blend, starter, levain build, mixing method, and fold schedule together. Batch size stays with this recipe.' },
+}
+
 const cleanPresetName = (name: string) => name.normalize('NFKC').trim().replace(/\s+/g, ' ')
 const presetNameKey = (name: string) => cleanPresetName(name).toLowerCase()
 
@@ -79,10 +96,11 @@ function presetSummary(formula: DoughFormula) {
   const parts = [`${formatPercent(formula.hydrationPercent)} hydration`, `${formatPercent(formula.saltPercent)} salt`]
   if (formula.family === 'pizza') {
     if (formula.oilPercent > 0) parts.push(`${formatPercent(formula.oilPercent)} oil`)
-    if (formula.yeastPercent > 0) parts.push(`${formatNumberFieldValue(formula.yeastPercent, 3)}% yeast`)
+    if (formula.yeastPercent > 0) parts.push(`${formatNumberFieldValue(formula.yeastPercent, 1)}% yeast`)
   } else if (formula.levainPercent > 0) {
     parts.push(`${formatPercent(formula.levainPercent)} levain`)
   }
+  if (formula.process) parts.push(formula.process.mixingMethod === 'hand' ? 'Hand mixed' : 'Spiral mixer', `${formula.process.folds.length} folds`)
   return parts.join(' · ')
 }
 
@@ -92,7 +110,7 @@ function readStore(key: string): { store: WorkbenchStore; error: string } {
     if (!serialized) return { store: clone(EMPTY_STORE), error: '' }
     const value = JSON.parse(serialized)
     const store = value && typeof value === 'object'
-      ? { ...EMPTY_STORE, ...value, modes: value.modes ?? {}, defaults: value.defaults ?? {}, presets: value.presets ?? [], starterProfiles: value.starterProfiles ?? [] }
+      ? { ...EMPTY_STORE, ...value, modes: value.modes ?? {}, defaults: value.defaults ?? {}, presets: Array.isArray(value.presets) ? value.presets.filter((preset: FormulaPreset) => preset && typeof preset.id === 'string' && typeof preset.name === 'string' && isDoughFormula(preset.formula)) : [], starterProfiles: value.starterProfiles ?? [] }
       : clone(EMPTY_STORE)
     return { store, error: '' }
   } catch {
@@ -112,7 +130,7 @@ function saveStore(key: string, store: WorkbenchStore) {
 export function selectionSummary(selection: DoughWorkbenchState, method?: RecipeContentMethod | null, formatWeight = formatBatchGrams) {
   const { batch, formula } = selection
   const pieces = `${batch.count} ${pieceCountLabel(batch.count, batch.pieceLabel)} × ${formatWeight(batch.pieceWeightGrams)}`
-  return [pieces, method?.label, `${formatPercent(formula.hydrationPercent)} hydration`].filter(Boolean).join(' · ')
+  return [pieces, method?.label, `${formatPercent(formula.hydrationPercent)} hydration`, formula.process ? formula.process.mixingMethod === 'hand' ? 'Hand mixed' : 'Spiral mixer' : undefined].filter(Boolean).join(' · ')
 }
 
 function dynamicDoughItems(selection: DoughWorkbenchState, formatWeight = formatWorkbenchGrams) {
@@ -156,6 +174,11 @@ export function resolveWorkbenchRecipe(recipe: RecipeContent, selection: DoughWo
   const selected = recipeWithSelectedMethod(recipe, selection.methodId)
   if (!recipe.workbench) return selected
   const { result, items: rawItems } = dynamicDoughItems(selection, formatAppliedGrams)
+  const process = selection.formula.process
+  const seedBuild = selection.formula.levainBuild
+  const levain = seedBuild && selection.formula.starter && result.levainGrams > 0
+    ? calculateLevainBuild(result.levainGrams, selection.formula.starter, seedBuild.seed, seedBuild.flourPerSeed) : null
+  const levainIngredients = levain ? [`${formatWorkbenchGrams(levain.seedStarterGrams)} seed starter`, ...levain.freshFlour.map((part) => `${formatWorkbenchGrams(part.grams)} ${part.name}`), `${formatWorkbenchGrams(levain.addedWaterGrams)} water`].map(escapeHtml).join(' + ') : undefined
   const items = rawItems.map(escapeHtml)
   const blocks = selected.blocks.map((block) => {
     if (block.type !== 'recipe') return block
@@ -180,13 +203,14 @@ export function resolveWorkbenchRecipe(recipe: RecipeContent, selection: DoughWo
               const value = remainder === 0 ? String(whole) : `${whole > 0 ? `${whole} ` : ''}${fractions[remainder]}`
               return `${value} ${quantity.unit}`
             }
-            return `${Number(amount.toFixed(2))} ${quantity.unit}`
+            return `${Number(amount.toFixed(1))} ${quantity.unit}`
           }
           return `${display(quantity.quantity)} ${item} (${display(quantity.quantity * selection.batch.count)} total)`
         }),
       }
     })]
-    const steps = block.steps.map((section) => ({
+    const processSteps = process && config.processSections ? resolveSourdoughSteps(block.steps, config.processSections, process, levainIngredients) : block.steps
+    const steps = processSteps.map((section) => ({
       ...section,
       items: section.items.map((item) => renderFormulaBindings(item, selection, config)),
     }))
@@ -194,12 +218,20 @@ export function resolveWorkbenchRecipe(recipe: RecipeContent, selection: DoughWo
       ? `This dough is ${formatPercent(selection.formula.hydrationPercent)} hydration and makes ${selection.batch.count} × ${formatAppliedGrams(selection.batch.pieceWeightGrams)} balls (${formatAppliedGrams(result.totalDoughGrams)} total).`
       : `This dough is ${formatPercent(selection.formula.hydrationPercent)} hydration with ${formatPercent(result.prefermentedFlourPercent)} prefermented flour and makes ${selection.batch.count} × ${formatAppliedGrams(selection.batch.pieceWeightGrams)} ${pieceCountLabel(selection.batch.count, 'loaf')}.`
     const notes = [formulaNote, ...block.notes.filter((note) => !/formula uses|dough formula|lands around/i.test(note))]
-    return { ...block, ingredients, steps, notes }
+    const equipment = process?.mixingMethod === 'hand' ? block.equipment.map((section) => {
+      const keep = section.items.map((item, index) => ({ item, id: section.itemIds[index] })).filter(({ item }) => !/spiral mixer/i.test(item))
+      return { ...section, items: keep.map(({ item }) => item), itemIds: keep.map(({ id }) => id) }
+    }) : block.equipment
+    return { ...block, equipment, ingredients, steps, notes }
   })
   const count = selection.batch.count
   return {
     ...selected,
     blocks,
+    ...(process && config.processSections ? {
+      totalMinutes: Math.max(0, selected.totalMinutes + process.autolyseMinutes + process.bulkMinutes - (config.defaultSelection.formula.process ?? DEFAULT_SOURDOUGH_PROCESS).autolyseMinutes - (config.defaultSelection.formula.process ?? DEFAULT_SOURDOUGH_PROCESS).bulkMinutes),
+      learning: selected.learning?.mixing ? { ...selected.learning, mixing: { ...selected.learning.mixing, defaultMethod: process.mixingMethod } } : selected.learning,
+    } : {}),
     yieldAmount: count,
     yieldUnit: selection.formula.family === 'pizza' ? 'pizzas' : count === 1 ? 'loaf' : 'loaves',
     description: selection.formula.family === 'pizza'
@@ -212,7 +244,7 @@ const NumericFields = createContext<{ report: NumberFieldValidation; resetKey: n
 
 function Field({ label, value, onChange, suffix, step, min = 0, positive = false, hideLabel = false, decimalPlaces }: { label: string; value: number; onChange: (value: number) => void; suffix?: string; step?: string; min?: number; positive?: boolean; hideLabel?: boolean; decimalPlaces?: NumberFieldPrecision }) {
   const fields = useContext(NumericFields)
-  const precision = decimalPlaces ?? (suffix === 'g' ? gramPrecision(value) : 2)
+  const precision = decimalPlaces ?? (suffix === 'g' && Math.abs(value) >= 20 ? 0 : 1)
   return <NumberField decimalPlaces={precision} label={label} value={value} onValueChange={onChange} suffix={suffix} min={min} integer={step === '1'} positive={positive} hideLabel={hideLabel} onValidationChange={fields?.report} resetKey={fields?.resetKey} />
 }
 
@@ -291,12 +323,12 @@ function DoughFormulaWorkbench({
   const [presetNotice, setPresetNotice] = useState('')
   const presetNameInput = useRef<HTMLInputElement>(null)
   const presetPicker = useRef<HTMLSelectElement>(null)
-  const [starterName, setStarterName] = useState('')
   const [selectedPresetId, setSelectedPresetId] = useState('')
-  const [selectedStarterId, setSelectedStarterId] = useState('')
   const [buildOpen, setBuildOpen] = useState(false)
-  const [seedRatio, setSeedRatio] = useState(2)
-  const [seed, setSeed] = useState(() => starterFrom(selection.formula))
+  const seedRatio = draft.formula.levainBuild?.flourPerSeed ?? 2
+  const seed = draft.formula.levainBuild?.seed ?? starterFrom(draft.formula)
+  const process = draft.formula.process
+  const copy = WORKBENCH_COPY[draft.formula.family]
   const storageKey = `${storageScope}:recipe-workbench:v1`
   const result = useMemo(() => calculateFormula(draft.formula, draft.batch), [draft])
   const weightInputs: ReverseFormulaInput = weightDraft ?? {
@@ -316,7 +348,7 @@ function DoughFormulaWorkbench({
   const reverseErrors = weightDraft ? reverseFormula(weightDraft).errors : []
   const method = selectedRecipeMethod(recipe, draft.methodId)
   const build = draft.formula.starter && result.levainGrams > 0 ? calculateLevainBuild(result.levainGrams, draft.formula.starter, seed, seedRatio) : null
-  const errors = [...new Set([...Object.values(fieldErrors), ...reverseErrors, ...result.errors, ...(buildOpen && build ? build.errors : [])])]
+  const errors = [...new Set([...Object.values(fieldErrors), ...reverseErrors, ...result.errors, ...(build ? build.errors : [])])]
   const compatiblePresets = store.presets.filter((preset) => preset.formula.family === draft.formula.family)
   const activePresetId = compatiblePresets.find((preset) => preset.id === selectedPresetId && formulasMatch(preset.formula, draft.formula))?.id ?? ''
   const selectedPreset = compatiblePresets.find((preset) => preset.id === selectedPresetId)
@@ -346,7 +378,7 @@ function DoughFormulaWorkbench({
     if (!hasSharedConfiguration) {
       const defaultId = saved.defaults[recipe.slug]
       const preset = saved.presets.find((item) => item.id === defaultId && item.formula.family === selection.formula.family)
-      if (preset) onApply({ ...selection, formula: clone(preset.formula) })
+      if (preset) onApply({ ...selection, formula: completeFormula(clone(preset.formula), config.defaultSelection.formula) })
     }
   }, [storageKey, recipe.slug])
 
@@ -355,7 +387,6 @@ function DoughFormulaWorkbench({
     setDraft(clone(selection))
     setWeightDraft(null)
     setFieldResetKey((current) => current + 1)
-    setSeed(starterFrom(selection.formula))
     document.body.dataset.workbenchOpen = 'true'
     return () => { delete document.body.dataset.workbenchOpen }
   }, [open, selection])
@@ -398,7 +429,7 @@ function DoughFormulaWorkbench({
     setWeightDraft(next)
     const reversed = reverseFormula(next)
     if (reversed.errors.length) return
-    setDraft((currentDraft) => ({ ...currentDraft, formula: reversed.formula, batch: { ...currentDraft.batch, pieceWeightGrams: reversed.totalDoughGrams / currentDraft.batch.count } }))
+    setDraft((currentDraft) => ({ ...currentDraft, formula: { ...currentDraft.formula, ...reversed.formula }, batch: { ...currentDraft.batch, pieceWeightGrams: reversed.totalDoughGrams / currentDraft.batch.count } }))
   }
   const savePreset = () => {
     setPresetAttempted(true)
@@ -427,15 +458,8 @@ function DoughFormulaWorkbench({
     if (compatiblePresets.length > 1) presetPicker.current?.focus()
     else presetNameInput.current?.focus()
   }
-  const saveStarterProfile = (replaceId?: string) => {
-    const name = starterName.trim()
-    const profile = draft.formula.starter
-    if (!name || !profile || errors.length) return
-    const item = { id: replaceId ?? `${Date.now()}`, name, profile: clone(profile) }
-    if (!persist({ ...store, starterProfiles: replaceId ? store.starterProfiles.map((saved) => saved.id === replaceId ? item : saved) : [...store.starterProfiles, item] })) return
-    setSelectedStarterId(item.id)
-    setStarterName(item.name)
-  }
+  const updateProcess = (changes: Partial<SourdoughProcess>) => { if (process) updateFormula({ process: { ...process, ...changes } }) }
+  const updateSeed = (next: StarterProfile) => updateFormula({ levainBuild: { seed: next, flourPerSeed: seedRatio } })
 
   return (
       <NumericFields.Provider value={numericFields}>
@@ -450,7 +474,7 @@ function DoughFormulaWorkbench({
 
             <WorkbenchPanel headingId="presets-heading" title="Saved formulas" summary={<span className="text-xs text-action-label">{compatiblePresets.length} saved</span>}>
               <div className="mt-3 grid gap-3">
-              <p className="text-xs leading-relaxed text-action-label">Save your formula here. Batch size and oven stay with this recipe.</p>
+              <p className="text-xs leading-relaxed text-action-label">{copy.saved}</p>
               {chosenPreset ? (
                 <div className="grid gap-2">
                   <label htmlFor="saved-formula-picker" className="text-xs font-semibold">Load a saved formula</label>
@@ -459,7 +483,7 @@ function DoughFormulaWorkbench({
                       {compatiblePresets.map((preset) => <option key={preset.id} value={preset.id}>{preset.name}{store.defaults[recipe.slug] === preset.id ? ' (default)' : ''}</option>)}
                     </Select>
                     <Button variant="on-ink" type="button" size="sm" aria-label={`Load ${chosenPreset.name}`} onClick={() => {
-                      setDraft((current) => ({ ...current, formula: clone(chosenPreset.formula) }))
+                      setDraft((current) => ({ ...current, formula: completeFormula(clone(chosenPreset.formula), config.defaultSelection.formula) }))
                       setWeightDraft(null)
                       setFieldResetKey((current) => current + 1)
                       setSelectedPresetId(chosenPreset.id)
@@ -482,7 +506,7 @@ function DoughFormulaWorkbench({
                 </div>
                 <div className="grid gap-1.5">
                   <label htmlFor="formula-preset-name" className="text-xs font-semibold">Formula name</label>
-                  <Input surface="on-ink" ref={presetNameInput} id="formula-preset-name" aria-label="Formula preset name" required aria-invalid={showPresetNameError} aria-describedby={presetNameDescription} placeholder="e.g. Weekend pizza" value={presetName} onBlur={() => setPresetAttempted(true)} onChange={(event) => { setPresetName(event.target.value); setPresetNotice('') }} />
+                  <Input surface="on-ink" ref={presetNameInput} id="formula-preset-name" aria-label="Formula preset name" required aria-invalid={showPresetNameError} aria-describedby={presetNameDescription} placeholder={copy.placeholder} value={presetName} onBlur={() => setPresetAttempted(true)} onChange={(event) => { setPresetName(event.target.value); setPresetNotice('') }} />
                   {showPresetNameError && <p id="formula-preset-name-error" role="alert" className="rounded-field bg-danger-soft p-3 text-xs text-danger">{presetNameError}</p>}
                   {!showPresetNameError && !normalizedPresetName && <p id="formula-preset-name-hint" className="text-xs text-action-label">Enter a name to save this formula.</p>}
                 </div>
@@ -516,7 +540,7 @@ function DoughFormulaWorkbench({
                 <Field label={`${draft.batch.pieceLabel} weight`} suffix="g" positive decimalPlaces={0} value={draft.batch.pieceWeightGrams} onChange={(pieceWeightGrams) => updateBatch({ pieceWeightGrams })} />
               </div>
               <Field label="Total dough weight" suffix="g" positive decimalPlaces={0} value={draft.batch.count * draft.batch.pieceWeightGrams} onChange={(total) => updateBatch({ pieceWeightGrams: total / draft.batch.count })} />
-              {recipe.methodOptions.length > 1 && <label className="grid gap-1 text-xs font-bold">Oven method<Select className="font-normal" value={draft.methodId} onChange={(event) => setDraft((current) => ({ ...current, methodId: event.target.value }))}>{recipe.methodOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}</Select></label>}
+              {recipe.methodOptions.length > 1 && <label className="grid gap-1 text-xs font-bold">{draft.formula.family === 'pizza' ? 'Oven method' : 'Baking method'}<Select className="font-normal" value={draft.methodId} onChange={(event) => setDraft((current) => ({ ...current, methodId: event.target.value }))}>{recipe.methodOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}</Select></label>}
               {config.recommendedFormulas[draft.methodId] && !formulasMatch(config.recommendedFormulas[draft.methodId], draft.formula) && <Button variant="link" type="button" className="justify-self-start" onClick={() => { setSelectedPresetId(''); setPresetName(''); setPresetAttempted(false); setPresetNotice(''); setFieldResetKey((current) => current + 1); updateFormula(clone(config.recommendedFormulas[draft.methodId])) }}>Use recommended formula for {method?.label ?? 'this method'}</Button>}
             </section>
 
@@ -527,7 +551,7 @@ function DoughFormulaWorkbench({
                 <div className="grid grid-cols-2 gap-3 max-[380px]:grid-cols-1">
                   <Field label="Hydration" suffix="%" value={draft.formula.hydrationPercent} onChange={(hydrationPercent) => updateFormula({ hydrationPercent })} />
                   <Field label="Salt" suffix="%" value={draft.formula.saltPercent} onChange={(saltPercent) => updateFormula({ saltPercent })} />
-                  {draft.formula.family === 'pizza' && <><Field label="Oil" suffix="%" value={draft.formula.oilPercent} onChange={(oilPercent) => updateFormula({ oilPercent })} /><Field label="Sugar" suffix="%" value={draft.formula.sugarPercent} onChange={(sugarPercent) => updateFormula({ sugarPercent })} /><Field label="Malt powder" suffix="%" value={draft.formula.maltPercent} onChange={(maltPercent) => updateFormula({ maltPercent })} /><Field label="Instant yeast" suffix="%" decimalPlaces={3} value={draft.formula.yeastPercent} onChange={(yeastPercent) => updateFormula({ yeastPercent })} /></>}
+                  {draft.formula.family === 'pizza' && <><Field label="Oil" suffix="%" value={draft.formula.oilPercent} onChange={(oilPercent) => updateFormula({ oilPercent })} /><Field label="Sugar" suffix="%" value={draft.formula.sugarPercent} onChange={(sugarPercent) => updateFormula({ sugarPercent })} /><Field label="Malt powder" suffix="%" value={draft.formula.maltPercent} onChange={(maltPercent) => updateFormula({ maltPercent })} /><Field label="Instant yeast" suffix="%" decimalPlaces={1} value={draft.formula.yeastPercent} onChange={(yeastPercent) => updateFormula({ yeastPercent })} /></>}
                   {draft.formula.family === 'sourdough' && <Field label="Ripe levain" suffix="% of flour" value={draft.formula.levainPercent} onChange={(levainPercent) => updateFormula({ levainPercent })} />}
                 </div>
               </section>
@@ -545,14 +569,36 @@ function DoughFormulaWorkbench({
 
             {draft.formula.family === 'sourdough' && editableStarter && (
               <section className="mt-7 grid gap-4 border-t border-border-on-brand pt-6" aria-labelledby="starter-heading">
-                <div><h3 id="starter-heading" className="text-xl font-bold">Ripe starter / levain</h3><p className="mt-1 text-sm">Weight, hydration, and flour composition stay together in both calculator views.</p></div>
+                <div><h3 id="starter-heading" className="text-xl font-bold">Ripe starter / levain</h3><p className="mt-1 text-sm">Starter hydration, flour composition, and levain build are saved with your formula.</p></div>
                 {mode === 'weights' && <Field label="Ripe starter weight" suffix="g" value={weightInputs.levainGrams ?? 0} onChange={(levainGrams) => applyReverse({ levainGrams })} />}
                 <Field label="Starter hydration" positive suffix="%" value={editableStarter.hydrationPercent} onChange={(hydrationPercent) => mode === 'weights' ? applyReverse({ starter: { ...editableStarter!, hydrationPercent } }) : updateFormula({ starter: { ...editableStarter!, hydrationPercent } })} />
                 <FlourEditor value={editableStarter.flour} onChange={(flour) => mode === 'weights' ? applyReverse({ starter: { ...editableStarter!, flour } }) : updateFormula({ starter: { ...editableStarter!, flour } })} />
-                <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2"><Input aria-label="Starter profile name" placeholder="Starter profile name" className="px-3" value={starterName} onChange={(event) => setStarterName(event.target.value)} /><Button variant="secondary" type="button" size="sm" disabled={!starterName.trim() || errors.length > 0} onClick={() => saveStarterProfile()}>Save new</Button></div>
-                {store.starterProfiles.length > 0 && <div className="grid grid-cols-[minmax(0,1fr)_auto_auto] gap-2"><Select aria-label="Saved starter profiles" className="min-w-0" value={selectedStarterId} onChange={(event) => { const saved = store.starterProfiles.find((profile) => profile.id === event.target.value); setSelectedStarterId(event.target.value); if (saved) { setFieldResetKey((current) => current + 1); updateFormula({ starter: clone(saved.profile) }); setStarterName(saved.name) } }}><option value="">Load a starter profile…</option>{store.starterProfiles.map((profile) => <option key={profile.id} value={profile.id}>{profile.name}</option>)}</Select><Button variant="link" type="button" className="text-xs font-bold disabled:opacity-40" disabled={!selectedStarterId || !starterName.trim() || errors.length > 0} onClick={() => saveStarterProfile(selectedStarterId)}>Replace</Button><Button variant="ghost" size="icon" type="button" aria-label="Delete selected starter profile" disabled={!selectedStarterId} onClick={() => { persist({ ...store, starterProfiles: store.starterProfiles.filter((item) => item.id !== selectedStarterId) }); setSelectedStarterId(''); setStarterName('') }}><Trash2 className="size-4" /></Button></div>}
                 <Button variant="link" type="button" className="justify-self-start" aria-expanded={buildOpen} onClick={() => setBuildOpen((value) => !value)}>{buildOpen ? 'Hide levain build' : 'Build this levain'}</Button>
-                {buildOpen && build && <div className="grid gap-3 rounded-field bg-tint p-4"><Field label="Fresh flour per 1 part seed" positive suffix="parts" value={seedRatio} onChange={setSeedRatio} /><Field label="Seed hydration" suffix="%" value={seed.hydrationPercent} onChange={(hydrationPercent) => setSeed({ ...seed, hydrationPercent })} /><FlourEditor value={seed.flour} onChange={(flour) => setSeed({ ...seed, flour })} /><p className="text-sm"><strong>1:{formatNumberFieldValue(seedRatio, 2)}</strong> seed-to-fresh-flour ratio</p><p className="text-sm"><strong>{formatWorkbenchGrams(build.seedStarterGrams)}</strong> seed starter + {build.freshFlour.map((part) => `${formatWorkbenchGrams(part.grams)} ${part.name}`).join(' + ')} + <strong>{formatWorkbenchGrams(build.addedWaterGrams)}</strong> water</p></div>}
+                {buildOpen && build && <div className="grid gap-3 rounded-field bg-tint p-4"><Field label="Fresh flour per 1 part seed" positive suffix="parts" value={seedRatio} onChange={(flourPerSeed) => updateFormula({ levainBuild: { seed, flourPerSeed } })} /><Field label="Seed hydration" suffix="%" value={seed.hydrationPercent} onChange={(hydrationPercent) => updateSeed({ ...seed, hydrationPercent })} /><FlourEditor value={seed.flour} onChange={(flour) => updateSeed({ ...seed, flour })} /><p className="text-sm"><strong>1:{formatNumberFieldValue(seedRatio, 1)}</strong> seed-to-fresh-flour ratio</p><p className="text-sm"><strong>{formatWorkbenchGrams(build.seedStarterGrams)}</strong> seed starter + {build.freshFlour.map((part) => `${formatWorkbenchGrams(part.grams)} ${part.name}`).join(' + ')} + <strong>{formatWorkbenchGrams(build.addedWaterGrams)}</strong> water</p></div>}
+              </section>
+            )}
+
+            {process && (
+              <section className="mt-7 grid gap-4 border-t border-border-on-brand pt-6" aria-labelledby="process-heading">
+                <div><h3 id="process-heading" className="text-xl font-bold">Mixing and fermentation</h3><p className="mt-1 text-sm">Saved with your formula. Times below start when you mix in the levain; follow the dough’s rise as well as the clock.</p></div>
+                <ChoiceGroup label="Mixing method" value={process.mixingMethod} onChange={(mixingMethod) => updateProcess({ mixingMethod })} options={[{ value: 'hand', label: 'By hand' }, { value: 'spiral', label: 'Spiral mixer' }]} />
+                <div className="grid grid-cols-2 gap-3 max-[380px]:grid-cols-1">
+                  <Field label="Autolyse before bulk" suffix="min" step="1" value={process.autolyseMinutes} onChange={(autolyseMinutes) => updateProcess({ autolyseMinutes })} />
+                  <Field label="Add salt at" suffix="min" step="1" value={process.saltDelayMinutes} onChange={(saltDelayMinutes) => updateProcess({ saltDelayMinutes })} />
+                  <Field label="Planned end of bulk" suffix="min" step="1" min={1} value={process.bulkMinutes} onChange={(bulkMinutes) => updateProcess({ bulkMinutes })} />
+                </div>
+                <ChoiceGroup label="Folding method" value={process.foldMethod} onChange={(foldMethod) => updateProcess({ foldMethod })} options={[{ value: 'stretch-and-fold', label: 'Stretch and fold' }, { value: 'coil-fold', label: 'Coil fold' }]} />
+                <div className="grid gap-3">
+                  {process.folds.map((fold, index) => <div key={fold.id} className="grid grid-cols-[minmax(0,1fr)_44px] items-end gap-2">
+                    <Field label={`Fold ${index + 1} at`} suffix="min" step="1" min={1} value={fold.atMinutes} onChange={(atMinutes) => updateProcess({ folds: process.folds.map((item) => item.id === fold.id ? { ...item, atMinutes } : item) })} />
+                    <Button variant="ghost" size="icon" type="button" aria-label={`Remove fold ${index + 1}`} onClick={() => updateProcess({ folds: process.folds.filter((item) => item.id !== fold.id) })}><Trash2 className="size-4" /></Button>
+                  </div>)}
+                  {process.folds.length === 0 && <p className="text-sm">No folds scheduled.</p>}
+                  <Button variant="link" type="button" className="justify-self-start" onClick={() => {
+                    const atMinutes = (process.folds.at(-1)?.atMinutes ?? process.saltDelayMinutes) + 30
+                    updateProcess({ folds: [...process.folds, { id: `fold-${crypto.randomUUID()}`, atMinutes }], bulkMinutes: Math.max(process.bulkMinutes, atMinutes + 30) })
+                  }}><Plus className="size-4" />Add fold</Button>
+                </div>
               </section>
             )}
 
@@ -597,7 +643,9 @@ function isDoughFormula(value: unknown): value is DoughFormula {
     (formula.family === 'pizza' || formula.family === 'sourdough') &&
     percentages.every(Number.isFinite) &&
     isFlourBlend(formula.flour) &&
-    (formula.starter === undefined || isStarterProfile(formula.starter))
+    (formula.starter === undefined || isStarterProfile(formula.starter)) &&
+    (formula.process === undefined || (formula.family === 'sourdough' && isSourdoughProcess(formula.process))) &&
+    (formula.levainBuild === undefined || (formula.levainBuild !== null && typeof formula.levainBuild === 'object' && isStarterProfile(formula.levainBuild.seed) && Number.isFinite(formula.levainBuild.flourPerSeed) && formula.levainBuild.flourPerSeed > 0))
   )
 }
 
@@ -613,18 +661,23 @@ function isDoughConfig(value: unknown): value is DoughWorkbenchConfig {
   return (
     (config.defaultInputMode === 'weights' || config.defaultInputMode === 'target') &&
     isDoughState(config.defaultSelection) &&
+    (config.processSections === undefined || Boolean(config.processSections && ['autolyse', 'bulk', 'levain'].every((key) => typeof config.processSections?.[key as keyof SourdoughProcessSections] === 'string'))) &&
     Boolean(config.recommendedFormulas && typeof config.recommendedFormulas === 'object' && Object.values(config.recommendedFormulas).every(isDoughFormula))
   )
 }
 
 function decodeDoughState(value: unknown, config: DoughWorkbenchConfig, recipe: RecipeContent): DoughWorkbenchState | null {
   if (!isDoughState(value)) return null
-  const state = value
+  const state = { ...value, formula: completeFormula(value.formula, config.defaultSelection.formula) }
   if (
     state.formula.family !== config.defaultSelection.formula.family ||
     !recipe.methodOptions.some((method) => method.id === state.methodId)
   ) return null
-  return calculateFormula(state.formula, state.batch).errors.length === 0 ? state : null
+  const weights = calculateFormula(state.formula, state.batch)
+  const formulaErrors = weights.errors
+  const levainBuild = state.formula.levainBuild
+  const buildErrors = levainBuild && state.formula.starter && weights.levainGrams > 0 ? calculateLevainBuild(weights.levainGrams, state.formula.starter, levainBuild.seed, levainBuild.flourPerSeed).errors : []
+  return formulaErrors.length === 0 && buildErrors.length === 0 ? state : null
 }
 
 function DoughWorkbenchDrawer(props: RecipeWorkbenchDrawerProps, family: DoughFormula['family']) {
@@ -637,7 +690,7 @@ function DoughWorkbenchDrawer(props: RecipeWorkbenchDrawerProps, family: DoughFo
 function createDoughWorkbenchPlugin(id: string, family: DoughFormula['family']): RecipeWorkbenchPlugin {
   return {
     id,
-    defaultState: (config) => isDoughConfig(config) && config.defaultSelection.formula.family === family ? clone(config.defaultSelection) : null,
+    defaultState: (config) => isDoughConfig(config) && config.defaultSelection.formula.family === family ? { ...clone(config.defaultSelection), formula: completeFormula(clone(config.defaultSelection.formula)) } : null,
     decodeState: (value, config, recipe) => {
       const state = isDoughConfig(config) ? decodeDoughState(value, config, recipe) : null
       return state?.formula.family === family ? state : null

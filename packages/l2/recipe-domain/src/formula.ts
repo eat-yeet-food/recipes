@@ -1,3 +1,5 @@
+import { sourdoughProcessErrors, type SourdoughProcess } from './sourdough-process.ts'
+
 export interface FlourComponent {
   id: string
   name: string
@@ -20,6 +22,8 @@ export interface DoughFormula {
   levainPercent: number
   flour: FlourComponent[]
   starter?: StarterProfile
+  process?: SourdoughProcess
+  levainBuild?: { seed: StarterProfile; flourPerSeed: number }
 }
 
 export interface DoughBatch {
@@ -78,13 +82,14 @@ export function calculateFormula(formula: DoughFormula, batch: DoughBatch): Form
   const starter = formula.starter
   const errors = [
     ...flourBlendErrors(formula.flour),
+    ...(formula.process ? sourdoughProcessErrors(formula.process) : []),
     ...(starter ? flourBlendErrors(starter.flour, 'Starter flour blend') : []),
   ]
   const percentages = [formula.hydrationPercent, formula.saltPercent, formula.oilPercent, formula.sugarPercent, formula.maltPercent, formula.yeastPercent]
   if (!finiteNonNegative(total) || total <= 0) errors.push('Batch count and piece weight must produce a positive dough weight.')
   if (percentages.some((value) => !finiteNonNegative(value))) errors.push('Formula percentages must be zero or greater.')
   if (!finiteNonNegative(formula.levainPercent)) errors.push('Levain percentage must be zero or greater.')
-  if (formula.levainPercent > 0 && !starter) errors.push('A starter profile is required when levain is used.')
+  if (formula.levainPercent > 0 && !starter) errors.push('Starter hydration and flour are required when levain is used.')
   if (starter && (!finiteNonNegative(starter.hydrationPercent) || starter.hydrationPercent <= 0)) errors.push('Starter hydration must be greater than zero.')
 
   const totalFlour = total / (1 + ratio(sum(percentages)))
@@ -213,10 +218,10 @@ export function calculateLevainBuild(
 
 export function formatGrams(value: number) {
   if (!Number.isFinite(value)) return '—'
-  return `${value < 10 ? value.toFixed(2) : value.toFixed(1)}g`
+  return `${Math.abs(value) >= 20 ? Math.round(value) : Number(value.toFixed(1))}g`
 }
 
 export function formatPercent(value: number) {
   if (!Number.isFinite(value)) return '—'
-  return `${Number(value.toFixed(2))}%`
+  return `${Number(value.toFixed(1))}%`
 }

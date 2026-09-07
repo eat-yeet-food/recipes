@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 
-import { calculateFormula, calculateLevainBuild, reverseFormula, type DoughFormula } from './formula.ts'
+import { calculateFormula, calculateLevainBuild, reverseFormula, formatGrams, formatPercent, type DoughFormula } from './formula.ts'
 
 const sourdough: DoughFormula = {
   family: 'sourdough',
@@ -102,5 +102,17 @@ describe('dough formula calculations', () => {
   it('rejects hydration below the water already supplied by levain', () => {
     const result = calculateFormula({ ...sourdough, hydrationPercent: 2, levainPercent: 40 }, { count: 1, pieceWeightGrams: 800, pieceLabel: 'loaf' })
     assert.ok(result.errors.some((error) => error.includes('more water')))
+  })
+})
+
+describe('recipe display precision', () => {
+  it('uses whole grams at and above 20g and one decimal below', () => {
+    assert.equal(formatGrams(908.8242755752875), '909g')
+    assert.equal(formatGrams(20.8), '21g')
+    assert.equal(formatGrams(20), '20g')
+    assert.equal(formatGrams(19.24), '19.2g')
+    assert.equal(formatGrams(2), '2g')
+    assert.equal(formatPercent(77.04), '77%')
+    assert.equal(formatPercent(17.26), '17.3%')
   })
 })

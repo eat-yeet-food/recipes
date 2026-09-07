@@ -22,7 +22,7 @@ function validateNumber(value: number, min: number, integer: boolean, positive: 
 }
 
 /** Preserve editable text separately from the last accepted numeric value. */
-export function NumberField({ label, value, onValueChange, suffix, min = 0, integer = false, positive = false, hideLabel = false, onValidationChange, resetKey = 0, decimalPlaces = 2 }: {
+export function NumberField({ label, value, onValueChange, suffix, min = 0, integer = false, positive = false, hideLabel = false, onValidationChange, resetKey = 0, decimalPlaces = 1 }: {
   label: string
   value: number
   onValueChange: (value: number) => void
