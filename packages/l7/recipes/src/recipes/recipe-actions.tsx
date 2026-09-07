@@ -20,11 +20,10 @@ export function RecipeAction({
   onClick,
   children,
 }: RecipeActionProps) {
-  const className = variant === 'hero' ? 'max-[640px]:flex-1' : ''
   const buttonVariant = variant === 'hero' ? 'utility' : 'default'
   const size = variant === 'hero' ? 'sm' : 'default'
-  if (href) return <Button asChild variant={buttonVariant} size={size} className={className}><a href={href} target={target} rel={rel}>{children}</a></Button>
-  return <Button variant={buttonVariant} size={size} onClick={onClick} className={className}>{children}</Button>
+  if (href) return <Button asChild variant={buttonVariant} size={size}><a href={href} target={target} rel={rel}>{children}</a></Button>
+  return <Button variant={buttonVariant} size={size} onClick={onClick}>{children}</Button>
 }
 
 const SWITCH_SPACING = { hero: 'gap-3', card: 'gap-2' } as const

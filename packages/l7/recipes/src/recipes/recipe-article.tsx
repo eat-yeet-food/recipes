@@ -41,7 +41,7 @@ export function RecipeArticleHeader({
   toggleFocusedCooking: () => void
 }) {
   return (
-    <div>
+    <div className="@container">
       <nav className="flex flex-wrap gap-1.5 mb-5 text-[var(--color-ink)] text-xs leading-[1.6] uppercase" aria-label="Breadcrumb">
         <a href="/">Home</a>
         <span>&gt;</span>
@@ -49,18 +49,18 @@ export function RecipeArticleHeader({
         <span>&gt;</span>
         <span>{page.title}</span>
       </nav>
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="m-0 min-w-0 max-w-[var(--layout-recipe-copy)] flex-1 basis-64 text-[34px] leading-[1.25] tracking-[1.2px] font-bold">{page.title}</h1>
-        <div className="ml-auto shrink-0"><CookModeSwitch variant="hero" label="Cooking view" checked={focusedCooking} onCheckedChange={toggleFocusedCooking} /></div>
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-2">
+        <h1 className="col-span-2 m-0 min-w-0 max-w-[var(--layout-recipe-copy)] text-[34px] leading-[1.25] tracking-[1.2px] font-bold @min-[52rem]:col-span-1">{page.title}</h1>
+        <div className="col-start-1 row-start-2 self-center text-xs uppercase text-[var(--color-primary)]">By Patrick Hogan</div>
+        <div className="col-start-2 row-start-2 self-center justify-self-end @min-[52rem]:row-span-2 @min-[52rem]:row-start-1"><CookModeSwitch variant="hero" label="Cooking view" checked={focusedCooking} onCheckedChange={toggleFocusedCooking} /></div>
       </div>
-      <div className="mt-2 text-xs uppercase text-[var(--color-primary)]">By Patrick Hogan</div>
-      <div className="mb-6 mt-5 flex flex-wrap gap-3" role="group" aria-label="Page actions">
+      <div className="mb-6 mt-4 flex flex-wrap gap-3" role="group" aria-label="Page actions">
         <RecipeAction variant="hero" href={pinUrl.toString()} target="_blank" rel="noreferrer">
-          <Share2 className="size-3 max-[640px]:hidden" />
+          <Share2 className="size-3.5" />
           Pin Recipe
         </RecipeAction>
         <RecipeAction variant="hero" onClick={printPage}>
-          <Printer className="size-3 max-[640px]:hidden" />
+          <Printer className="size-3.5" />
           Print Recipe
         </RecipeAction>
       </div>

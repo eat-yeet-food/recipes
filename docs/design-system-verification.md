@@ -4,6 +4,8 @@ Reviewed September 7, 2026. The approved usage contract is [design-system.md](de
 
 ## Subsequent September 7 refinements
 
+Responsive recipe headers now reserve the entire narrow row for the title and place Cooking view beside the byline; wide headers retain the switch beside the title. Pin/Print no longer grow across the mobile row, and their icons remain visible. Phone, intermediate-width, and long-title stories render the production header. Standalone visual checks remain paused; these layouts have not received new screenshot baseline approval.
+
 The “Your recipe” label uses the actual bold action font. Formula Save/Update now exposes the shared disabled appearance while invalid, with inline reasons before submission. The duplicate-name/value stories and a disabled-on-ink specimen reflect this behavior; standalone verification remains paused.
 
 Borderless text actions now use zero padding, a persistent underline, no hover fill, and outward keyboard focus. Recipe adjustment, formula actions, error-page navigation, and Clear all share this treatment. Icon-only actions retain explicit target sizes; filled and outlined actions retain plain labels. Updated stories cover long labels on yellow, ink-panel actions, ghost text, disabled text, and icons; rendered assertions distinguish these contracts. Standalone checks remain paused at the user’s request; these new assertions and visual states have not been run or accepted as baselines.

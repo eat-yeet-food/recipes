@@ -65,7 +65,7 @@ The Filters button may indicate the number of active filters; individual options
 
 ## Recipe layout
 
-The recipe title and Cooking view switch share a flex row with space between, placing the switch at the far right of the header. Narrow layouts may wrap the switch onto its own right-aligned line instead of squeezing the title. Pin and Print form a separate row of compact outlined utility actions below the byline.
+The recipe header responds to its own available width. Below 52rem, the title occupies the full row; the byline and Cooking view share the next row, with the switch at the right. At 52rem and above, the switch sits beside the title/byline block. Do not let the switch squeeze a narrow title or split the title from its byline into disconnected rows. Pin and Print form a separate row of compact outlined utility actions: retain their icons and natural widths on mobile rather than stretching them into full-width pills.
 
 Switching Cooking view on or off preserves the header width, recipe-column width, and horizontal position. It hides surrounding media/sidebar content without recentering the page; the configured sidebar column remains reserved at desktop widths. Vertical spacing may tighten when the surrounding content is hidden.
 
