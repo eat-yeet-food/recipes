@@ -45,7 +45,7 @@ export function RecipeList({ sections, ordered = false }: { sections: Section[];
       {sections.map((section) => (
         <section key={section.id}>
           {section.title && (
-            <h4 className="mt-[22px] mb-2.5 text-[13px] font-bold uppercase text-[var(--color-primary)]">{section.title}</h4>
+            <h3 className="mt-[22px] mb-2.5 text-[13px] font-bold uppercase text-[var(--color-primary)]">{section.title}</h3>
           )}
           <List className={listClass}>
             {section.items.map((item, itemIndex) => (
@@ -97,11 +97,6 @@ function RecipeBlockView({
   return (
     <section id={id} className="scroll-mt-20">
       <div className="pb-2.5">
-        <p className="mb-[18px] text-[var(--color-primary)] text-xs uppercase">
-          Recipe
-        </p>
-        <h2 className="m-0 mb-5 text-[44px] leading-[0.98] font-bold max-[640px]:text-[34px]">{page.title}</h2>
-        {page.description && <p className="m-0 mb-6 text-base leading-[1.7]">{page.description}</p>}
         <MetaList page={page} />
         <div
           data-recipe-card-actions=""
@@ -131,36 +126,36 @@ function RecipeBlockView({
               <AdjustRecipeButton compact onClick={context.onOpenWorkbench} />
             </div>
           )}
-          <h3 className="m-0 pt-[30px] pb-3 border-t border-[var(--color-border)] text-[34px] leading-none font-bold">
+          <h2 className="m-0 pt-[30px] pb-3 border-t border-[var(--color-border)] text-[34px] leading-none font-bold">
             Ingredients
-          </h3>
+          </h2>
           <RecipeList sections={block.ingredients} />
         </section>
       )}
 
       {block.steps.length > 0 && (
         <section>
-          <h3 className="m-0 pt-[30px] pb-3 border-t border-[var(--color-border)] text-[34px] leading-none font-bold">
+          <h2 className="m-0 pt-[30px] pb-3 border-t border-[var(--color-border)] text-[34px] leading-none font-bold">
             Instructions
-          </h3>
+          </h2>
           <RecipeList sections={block.steps} ordered />
         </section>
       )}
 
       {block.equipment.length > 0 && (
         <section>
-          <h3 className="m-0 pt-[30px] pb-3 border-t border-[var(--color-border)] text-[34px] leading-none font-bold">
+          <h2 className="m-0 pt-[30px] pb-3 border-t border-[var(--color-border)] text-[34px] leading-none font-bold">
             Equipment
-          </h3>
+          </h2>
           <RecipeList sections={block.equipment} />
         </section>
       )}
 
       {(block.notes.length > 0 || block.tips.length > 0) && (
         <section>
-          <h3 className="m-0 pt-[30px] pb-3 border-t border-[var(--color-border)] text-[34px] leading-none font-bold">
+          <h2 className="m-0 pt-[30px] pb-3 border-t border-[var(--color-border)] text-[34px] leading-none font-bold">
             Notes
-          </h3>
+          </h2>
           <FlatList items={[...block.notes, ...block.tips]} />
         </section>
       )}

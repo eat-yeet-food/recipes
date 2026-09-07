@@ -71,6 +71,8 @@ The recipe header responds to its own available width. Below 52rem, the title oc
 
 Switching Cooking view on or off preserves the header width, recipe-column width, and horizontal position. It hides surrounding media/sidebar content without recentering the page; the configured sidebar column remains reserved at desktop widths. Vertical spacing may tighten when the surrounding content is hidden.
 
+The recipe title and description appear once in the main page header. Below the image, the recipe body starts with facts and actions; do not repeat a Recipe eyebrow, title, or description, including in Cooking view. Body sections use level-two headings and ingredient/instruction subsections use level three.
+
 Recipe descriptions and the recipe body use the shared `layout-recipe-copy` measure and matching outer page gutters. The unbordered recipe body has no extra horizontal card padding or rounded enclosure; its facts, ingredient lists, and instructions align with the description on desktop and mobile. Ingredient and instruction subsection headings, such as “Dough,” use bold 13px uppercase text. The “Your recipe” summary label uses the actual bold action font, rather than relying on a synthesized weight of the regular body face. Recipes/Actions and Recipes/Sections render the production owners for these treatments.
 
 ## Saved formulas

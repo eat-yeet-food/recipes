@@ -4,6 +4,8 @@ Reviewed September 7, 2026. The approved usage contract is [design-system.md](de
 
 ## Subsequent September 7 refinements
 
+The recipe body no longer repeats the Recipe eyebrow, title, and description below the image or in Cooking view. The main page header is the single owner of that introduction; body sections now use level-two headings with level-three subsections. Standalone visual/accessibility checks remain paused.
+
 Yeast now has an explicit two-decimal exception for its percentage, saved summary, gram field, preview, and applied ingredient amount. The whole-gram rule still applies at 20g and above, and trailing zeros are omitted. Existing production stories include a 0.25% example; standalone checks remain paused.
 
 The sourdough plugin now uses the author’s Ooni Halo Pro process: cool water, initial 165 RPM for about 4–5 minutes to 70°F, salt incorporation at 90 RPM for 1 minute, then 165 RPM for about 4 minutes. RPM mappings are supported by Ooni’s [40% / 165 RPM example](https://ooni.com/blogs/recipes/fluffy-marshmallows-using-ooni-halo-pro) and [15% / 90 RPM dough recipe](https://nz.ooni.com/blogs/recipes/ooni-neapolitan-style-pizza-dough). Recipe configuration owns the machine profile; hand-mixing instructions remain separate. Standalone checks remain paused.
