@@ -57,8 +57,8 @@ workbench:
         yeastPercent: 0.25
         levainPercent: 0
         flour:
-          - id: all-purpose
-            name: All-purpose flour
+          - id: kirkland-organic-all-purpose
+            name: Kirkland Organic All-Purpose Flour
             percent: 100
     recommendedFormulas:
       outdoor-oven:
@@ -71,8 +71,8 @@ workbench:
         yeastPercent: 0.25
         levainPercent: 0
         flour:
-          - id: all-purpose
-            name: All-purpose flour
+          - id: kirkland-organic-all-purpose
+            name: Kirkland Organic All-Purpose Flour
             percent: 100
       indoor-steel:
         family: pizza
@@ -84,8 +84,8 @@ workbench:
         yeastPercent: 0.25
         levainPercent: 0
         flour:
-          - id: all-purpose
-            name: All-purpose flour
+          - id: king-arthur-high-gluten
+            name: King Arthur High-Gluten Flour
             percent: 100
 learning:
   mixing:
@@ -139,7 +139,7 @@ methodOptions:
           - id: dough
             title: Dough
             items:
-              - '852g [Costco all-purpose flour](https://www.costco.com/p/-/kirkland-signature-organic-unbleached-all-purpose-flour-10-lbs-2-count/4000063331.)'
+              - '852g King Arthur High-Gluten Flour'
               - 554g cold water
               - 17g canola oil
               - '3/4 tsp [SAF red instant yeast](https://www.amazon.com/LeSaffre-LEAVENING_AGENT/dp/B0CFDPMWWC)'
@@ -199,7 +199,7 @@ methodOptions:
               - Transfer the pizza to a cutting board, slice, and return to the wire rack to keep crispy.
               - Serve hot.
         notes:
-          - This dough formula uses Costco all-purpose flour at 65% hydration with 2% canola oil and lands around 1,440g total dough, or about 480g per dough ball.
+          - This dough formula uses King Arthur High-Gluten Flour at 65% hydration with 2% canola oil and lands around 1,440g total dough, or about 480g per dough ball.
           - Trader Joe's whole milk low moisture mozzarella is a particularly good choice for this pizza. If the shredded cheese clumps or is difficult to distribute, freeze it briefly after shredding; this can help the strands separate.
           - The canola oil is here because this version bakes at home-oven temperatures. It helps browning and tenderness on a baking steel.
           - Great [article](https://www.richardeaglespoon.com/articles/how-to-pizza) with a lot info.
@@ -232,7 +232,7 @@ blocks:
       - id: dough
         title: Dough
         items:
-          - '847g [Costco all-purpose flour](https://www.costco.com/p/-/kirkland-signature-organic-unbleached-all-purpose-flour-10-lbs-2-count/4000063331.)'
+          - '847g [Kirkland Organic All-Purpose Flour](https://www.costco.com/p/-/kirkland-signature-organic-unbleached-all-purpose-flour-10-lbs-2-count/4000063331.)'
           - 576g cold water
           - '3/4 tsp [SAF red instant yeast](https://www.amazon.com/LeSaffre-LEAVENING_AGENT/dp/B0CFDPMWWC)'
           - '17g [Diamond Crystal Baking Salt](https://www.amazon.com/Diamond-Crystal-Baking-Kosher-8-5oz/dp/B0CHVLXM7R/) or fine sea salt'
@@ -291,7 +291,7 @@ blocks:
           - 'Transfer the pizza to a cutting board, slice, and return to the wire rack to keep crispy.'
           - Serve hot.
     notes:
-      - 'This dough formula uses Costco all-purpose flour at 68% hydration and lands around 1,440g total dough, or about 480g per dough ball.'
+      - 'This dough formula uses Kirkland Organic All-Purpose Flour at 68% hydration and lands around 1,440g total dough, or about 480g per dough ball.'
       - Trader Joe's whole milk low moisture mozzarella is a particularly good choice for this pizza. If the shredded cheese clumps or is difficult to distribute, freeze it briefly after shredding; this can help the strands separate.
       - Olive oil and sugar have been withheld from this recipe due to high temperatures of the pizza oven to prevent burning. These are often employed in lower temperature ovens to improve browning.
       - 'Great [article](https://www.richardeaglespoon.com/articles/how-to-pizza) with a lot info.'
