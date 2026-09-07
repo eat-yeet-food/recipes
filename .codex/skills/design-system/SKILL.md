@@ -37,6 +37,9 @@ For numeric controls, follow **Numeric editing**: keep editable text separate
 from accepted values, preserve blank/partial entries and focus, and block saves
 while invalid. Reuse NumberField rather than coercing or formatting raw input
 on every keystroke. Preserve stable identities for editable list rows.
+Choose display precision from the handbook’s field-role table. Round resting
+and blurred displays, not typed buffers or calculation state; never use a
+rounded display as the value to validate, or show a tiny nonzero amount as zero.
 For recipe layout changes, follow **Recipe layout**: use the shared description
 and body measure, preserve the title-row switch placement, and keep a switch’s
 label attached to its track rather than stretching them across the parent.

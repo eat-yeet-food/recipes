@@ -1,5 +1,5 @@
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
-import { NumberField, type NumberFieldValidation } from '@eat-yeet/l5-ui-primitives/primitives/number-field'
+import { NumberField, formatNumberFieldValue, type NumberFieldPrecision, type NumberFieldValidation } from '@eat-yeet/l5-ui-primitives/primitives/number-field'
 import { Input } from '@eat-yeet/l5-ui-primitives/primitives/input'
 import { Select } from '@eat-yeet/l5-ui-primitives/primitives/select'
 import { ChoiceGroup } from '@eat-yeet/l5-ui-primitives/primitives/choice-group'
@@ -9,7 +9,6 @@ import { Plus, Trash2 } from 'lucide-react'
 import {
   calculateFormula,
   calculateLevainBuild,
-  formatGrams,
   formatPercent,
   reverseFormula,
   type DoughBatch,
@@ -65,12 +64,9 @@ const EMPTY_STORE: WorkbenchStore = { modes: {}, presets: [], starterProfiles: [
 const clone = <T,>(value: T): T => JSON.parse(JSON.stringify(value))
 const pieceCountLabel = (count: number, label: 'loaf' | 'ball') => label === 'loaf' ? (count === 1 ? 'loaf' : 'loaves') : (count === 1 ? 'ball' : 'balls')
 const escapeHtml = (value: string) => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
-const inputValue = (value: number, unit?: string) => {
-  if (!Number.isFinite(value)) return ''
-  if (unit === 'g') return value < 10 ? value.toFixed(2) : value.toFixed(1)
-  if (unit === '%') return String(Number(value.toFixed(2)))
-  return String(value)
-}
+const gramPrecision = (value: number): NumberFieldPrecision => Math.abs(value) < 1 ? 3 : Math.abs(value) < 10 ? 2 : 1
+const formatWorkbenchGrams = (value: number) => Number.isFinite(value) ? `${formatNumberFieldValue(value, gramPrecision(value))}g` : '—'
+const formatBatchGrams = (value: number) => Number.isFinite(value) ? `${formatNumberFieldValue(value, 0)}g` : '—'
 const formatAppliedGrams = (value: number) => {
   if (!Number.isFinite(value)) return '—'
   return `${value < 20 ? value.toFixed(1) : Math.round(value)}g`
@@ -83,7 +79,7 @@ function presetSummary(formula: DoughFormula) {
   const parts = [`${formatPercent(formula.hydrationPercent)} hydration`, `${formatPercent(formula.saltPercent)} salt`]
   if (formula.family === 'pizza') {
     if (formula.oilPercent > 0) parts.push(`${formatPercent(formula.oilPercent)} oil`)
-    if (formula.yeastPercent > 0) parts.push(`${formatPercent(formula.yeastPercent)} yeast`)
+    if (formula.yeastPercent > 0) parts.push(`${formatNumberFieldValue(formula.yeastPercent, 3)}% yeast`)
   } else if (formula.levainPercent > 0) {
     parts.push(`${formatPercent(formula.levainPercent)} levain`)
   }
@@ -113,13 +109,13 @@ function saveStore(key: string, store: WorkbenchStore) {
   }
 }
 
-export function selectionSummary(selection: DoughWorkbenchState, method?: RecipeContentMethod | null, formatWeight = formatGrams) {
+export function selectionSummary(selection: DoughWorkbenchState, method?: RecipeContentMethod | null, formatWeight = formatBatchGrams) {
   const { batch, formula } = selection
   const pieces = `${batch.count} ${pieceCountLabel(batch.count, batch.pieceLabel)} × ${formatWeight(batch.pieceWeightGrams)}`
   return [pieces, method?.label, `${formatPercent(formula.hydrationPercent)} hydration`].filter(Boolean).join(' · ')
 }
 
-function dynamicDoughItems(selection: DoughWorkbenchState, formatWeight = formatGrams) {
+function dynamicDoughItems(selection: DoughWorkbenchState, formatWeight = formatWorkbenchGrams) {
   const result = calculateFormula(selection.formula, selection.batch)
   const items = result.freshFlour.filter((part) => part.grams > 0.005).map((part) => `${formatWeight(part.grams)} ${part.name}`)
   items.push(`${formatWeight(result.addedWaterGrams)} water`)
@@ -214,9 +210,10 @@ export function resolveWorkbenchRecipe(recipe: RecipeContent, selection: DoughWo
 
 const NumericFields = createContext<{ report: NumberFieldValidation; resetKey: number } | null>(null)
 
-function Field({ label, value, onChange, suffix, step, min = 0, positive = false, hideLabel = false }: { label: string; value: number; onChange: (value: number) => void; suffix?: string; step?: string; min?: number; positive?: boolean; hideLabel?: boolean }) {
+function Field({ label, value, onChange, suffix, step, min = 0, positive = false, hideLabel = false, decimalPlaces }: { label: string; value: number; onChange: (value: number) => void; suffix?: string; step?: string; min?: number; positive?: boolean; hideLabel?: boolean; decimalPlaces?: NumberFieldPrecision }) {
   const fields = useContext(NumericFields)
-  return <NumberField label={label} value={value} onValueChange={onChange} suffix={suffix} min={min} integer={step === '1'} positive={positive} hideLabel={hideLabel} onValidationChange={fields?.report} resetKey={fields?.resetKey} />
+  const precision = decimalPlaces ?? (suffix === 'g' ? gramPrecision(value) : 2)
+  return <NumberField decimalPlaces={precision} label={label} value={value} onValueChange={onChange} suffix={suffix} min={min} integer={step === '1'} positive={positive} hideLabel={hideLabel} onValidationChange={fields?.report} resetKey={fields?.resetKey} />
 }
 
 function FlourEditor({ value, onChange, unit = '%' }: { value: FlourComponent[]; onChange: (value: FlourComponent[]) => void; unit?: '%' | 'g' }) {
@@ -516,9 +513,9 @@ function DoughFormulaWorkbench({
               <h3 id="batch-heading" className="text-xl font-bold">Batch</h3>
               <div className="grid grid-cols-2 gap-3 max-[380px]:grid-cols-1">
                 <Field label={pieceCountLabel(2, draft.batch.pieceLabel)} value={draft.batch.count} min={1} step="1" onChange={(count) => updateBatch({ count })} />
-                <Field label={`${draft.batch.pieceLabel} weight`} suffix="g" positive value={draft.batch.pieceWeightGrams} onChange={(pieceWeightGrams) => updateBatch({ pieceWeightGrams })} />
+                <Field label={`${draft.batch.pieceLabel} weight`} suffix="g" positive decimalPlaces={0} value={draft.batch.pieceWeightGrams} onChange={(pieceWeightGrams) => updateBatch({ pieceWeightGrams })} />
               </div>
-              <Field label="Total dough weight" suffix="g" positive value={draft.batch.count * draft.batch.pieceWeightGrams} onChange={(total) => updateBatch({ pieceWeightGrams: total / draft.batch.count })} />
+              <Field label="Total dough weight" suffix="g" positive decimalPlaces={0} value={draft.batch.count * draft.batch.pieceWeightGrams} onChange={(total) => updateBatch({ pieceWeightGrams: total / draft.batch.count })} />
               {recipe.methodOptions.length > 1 && <label className="grid gap-1 text-xs font-bold">Oven method<Select className="font-normal" value={draft.methodId} onChange={(event) => setDraft((current) => ({ ...current, methodId: event.target.value }))}>{recipe.methodOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}</Select></label>}
               {config.recommendedFormulas[draft.methodId] && !formulasMatch(config.recommendedFormulas[draft.methodId], draft.formula) && <Button variant="link" type="button" className="justify-self-start" onClick={() => { setSelectedPresetId(''); setPresetName(''); setPresetAttempted(false); setPresetNotice(''); setFieldResetKey((current) => current + 1); updateFormula(clone(config.recommendedFormulas[draft.methodId])) }}>Use recommended formula for {method?.label ?? 'this method'}</Button>}
             </section>
@@ -530,7 +527,7 @@ function DoughFormulaWorkbench({
                 <div className="grid grid-cols-2 gap-3 max-[380px]:grid-cols-1">
                   <Field label="Hydration" suffix="%" value={draft.formula.hydrationPercent} onChange={(hydrationPercent) => updateFormula({ hydrationPercent })} />
                   <Field label="Salt" suffix="%" value={draft.formula.saltPercent} onChange={(saltPercent) => updateFormula({ saltPercent })} />
-                  {draft.formula.family === 'pizza' && <><Field label="Oil" suffix="%" value={draft.formula.oilPercent} onChange={(oilPercent) => updateFormula({ oilPercent })} /><Field label="Sugar" suffix="%" value={draft.formula.sugarPercent} onChange={(sugarPercent) => updateFormula({ sugarPercent })} /><Field label="Malt powder" suffix="%" value={draft.formula.maltPercent} onChange={(maltPercent) => updateFormula({ maltPercent })} /><Field label="Instant yeast" suffix="%" value={draft.formula.yeastPercent} onChange={(yeastPercent) => updateFormula({ yeastPercent })} /></>}
+                  {draft.formula.family === 'pizza' && <><Field label="Oil" suffix="%" value={draft.formula.oilPercent} onChange={(oilPercent) => updateFormula({ oilPercent })} /><Field label="Sugar" suffix="%" value={draft.formula.sugarPercent} onChange={(sugarPercent) => updateFormula({ sugarPercent })} /><Field label="Malt powder" suffix="%" value={draft.formula.maltPercent} onChange={(maltPercent) => updateFormula({ maltPercent })} /><Field label="Instant yeast" suffix="%" decimalPlaces={3} value={draft.formula.yeastPercent} onChange={(yeastPercent) => updateFormula({ yeastPercent })} /></>}
                   {draft.formula.family === 'sourdough' && <Field label="Ripe levain" suffix="% of flour" value={draft.formula.levainPercent} onChange={(levainPercent) => updateFormula({ levainPercent })} />}
                 </div>
               </section>
@@ -555,7 +552,7 @@ function DoughFormulaWorkbench({
                 <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2"><Input aria-label="Starter profile name" placeholder="Starter profile name" className="px-3" value={starterName} onChange={(event) => setStarterName(event.target.value)} /><Button variant="secondary" type="button" size="sm" disabled={!starterName.trim() || errors.length > 0} onClick={() => saveStarterProfile()}>Save new</Button></div>
                 {store.starterProfiles.length > 0 && <div className="grid grid-cols-[minmax(0,1fr)_auto_auto] gap-2"><Select aria-label="Saved starter profiles" className="min-w-0" value={selectedStarterId} onChange={(event) => { const saved = store.starterProfiles.find((profile) => profile.id === event.target.value); setSelectedStarterId(event.target.value); if (saved) { setFieldResetKey((current) => current + 1); updateFormula({ starter: clone(saved.profile) }); setStarterName(saved.name) } }}><option value="">Load a starter profile…</option>{store.starterProfiles.map((profile) => <option key={profile.id} value={profile.id}>{profile.name}</option>)}</Select><Button variant="link" type="button" className="text-xs font-bold disabled:opacity-40" disabled={!selectedStarterId || !starterName.trim() || errors.length > 0} onClick={() => saveStarterProfile(selectedStarterId)}>Replace</Button><Button variant="ghost" size="icon" type="button" aria-label="Delete selected starter profile" disabled={!selectedStarterId} onClick={() => { persist({ ...store, starterProfiles: store.starterProfiles.filter((item) => item.id !== selectedStarterId) }); setSelectedStarterId(''); setStarterName('') }}><Trash2 className="size-4" /></Button></div>}
                 <Button variant="link" type="button" className="justify-self-start" aria-expanded={buildOpen} onClick={() => setBuildOpen((value) => !value)}>{buildOpen ? 'Hide levain build' : 'Build this levain'}</Button>
-                {buildOpen && build && <div className="grid gap-3 rounded-field bg-tint p-4"><Field label="Fresh flour per 1 part seed" positive suffix="parts" value={seedRatio} onChange={setSeedRatio} /><Field label="Seed hydration" suffix="%" value={seed.hydrationPercent} onChange={(hydrationPercent) => setSeed({ ...seed, hydrationPercent })} /><FlourEditor value={seed.flour} onChange={(flour) => setSeed({ ...seed, flour })} /><p className="text-sm"><strong>1:{inputValue(seedRatio)}</strong> seed-to-fresh-flour ratio</p><p className="text-sm"><strong>{formatGrams(build.seedStarterGrams)}</strong> seed starter + {build.freshFlour.map((part) => `${formatGrams(part.grams)} ${part.name}`).join(' + ')} + <strong>{formatGrams(build.addedWaterGrams)}</strong> water</p></div>}
+                {buildOpen && build && <div className="grid gap-3 rounded-field bg-tint p-4"><Field label="Fresh flour per 1 part seed" positive suffix="parts" value={seedRatio} onChange={setSeedRatio} /><Field label="Seed hydration" suffix="%" value={seed.hydrationPercent} onChange={(hydrationPercent) => setSeed({ ...seed, hydrationPercent })} /><FlourEditor value={seed.flour} onChange={(flour) => setSeed({ ...seed, flour })} /><p className="text-sm"><strong>1:{formatNumberFieldValue(seedRatio, 2)}</strong> seed-to-fresh-flour ratio</p><p className="text-sm"><strong>{formatWorkbenchGrams(build.seedStarterGrams)}</strong> seed starter + {build.freshFlour.map((part) => `${formatWorkbenchGrams(part.grams)} ${part.name}`).join(' + ')} + <strong>{formatWorkbenchGrams(build.addedWaterGrams)}</strong> water</p></div>}
               </section>
             )}
 
@@ -563,8 +560,8 @@ function DoughFormulaWorkbench({
               {(Object.keys(fieldErrors).length > 0 || reverseErrors.length > 0) && <p className="mt-2 text-xs text-action-label">Finish the incomplete fields before saving or applying. This preview uses the last valid numbers.</p>}
               <p className="mt-2 text-sm leading-relaxed">{selectionSummary(draft, method)}</p>
               <dl className="my-5 grid grid-cols-2 gap-4">
-                <div><dt className="text-xs">Total flour</dt><dd className="mt-1 text-xl font-bold tabular-nums text-brand">{formatGrams(result.totalFlourGrams)}</dd></div>
-                <div><dt className="text-xs">Total water</dt><dd className="mt-1 text-xl font-bold tabular-nums text-brand">{formatGrams(result.totalWaterGrams)}</dd></div>
+                <div><dt className="text-xs">Total flour</dt><dd className="mt-1 text-xl font-bold tabular-nums text-brand">{formatWorkbenchGrams(result.totalFlourGrams)}</dd></div>
+                <div><dt className="text-xs">Total water</dt><dd className="mt-1 text-xl font-bold tabular-nums text-brand">{formatWorkbenchGrams(result.totalWaterGrams)}</dd></div>
               </dl>
               {draft.formula.family === 'sourdough' && <p className="mb-4 text-xs">{formatPercent(result.prefermentedFlourPercent)} prefermented flour</p>}
               <dl className="grid gap-3 text-sm">{dynamicDoughItems(draft).items.map((item) => {

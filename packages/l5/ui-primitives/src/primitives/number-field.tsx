@@ -1,5 +1,8 @@
 import { useEffect, useId, useState } from 'react'
 import { Input } from './input'
+import { formatNumberFieldValue, type NumberFieldPrecision } from './number-field-format'
+
+export { formatNumberFieldValue, type NumberFieldPrecision } from './number-field-format'
 
 export type NumberFieldValidation = (id: string, error: string | null) => void
 
@@ -7,7 +10,10 @@ function parseNumber(text: string, min: number, integer: boolean, positive: bool
   const trimmed = text.trim()
   if (!trimmed) return { error: 'Enter a value.' }
   if (!/^[+-]?(?:\d+(?:[.,]\d*)?|[.,]\d+)$/.test(trimmed)) return { error: 'Enter a number, using a decimal point or comma.' }
-  const value = Number(trimmed.replace(',', '.'))
+  return validateNumber(Number(trimmed.replace(',', '.')), min, integer, positive)
+}
+
+function validateNumber(value: number, min: number, integer: boolean, positive: boolean) {
   if (!Number.isFinite(value)) return { error: 'Enter a finite number.' }
   if (integer && !Number.isSafeInteger(value)) return { error: 'Enter a whole number.' }
   if (positive && value <= 0) return { error: 'Enter a value greater than zero.' }
@@ -15,12 +21,8 @@ function parseNumber(text: string, min: number, integer: boolean, positive: bool
   return { value, error: null }
 }
 
-const displayNumber = (value: number) => Number.isFinite(value)
-  ? new Intl.NumberFormat('en-US', { useGrouping: false, maximumSignificantDigits: 12 }).format(value)
-  : ''
-
 /** Preserve editable text separately from the last accepted numeric value. */
-export function NumberField({ label, value, onValueChange, suffix, min = 0, integer = false, positive = false, hideLabel = false, onValidationChange, resetKey = 0 }: {
+export function NumberField({ label, value, onValueChange, suffix, min = 0, integer = false, positive = false, hideLabel = false, onValidationChange, resetKey = 0, decimalPlaces = 2 }: {
   label: string
   value: number
   onValueChange: (value: number) => void
@@ -31,12 +33,14 @@ export function NumberField({ label, value, onValueChange, suffix, min = 0, inte
   hideLabel?: boolean
   onValidationChange?: NumberFieldValidation
   resetKey?: number
+  decimalPlaces?: NumberFieldPrecision
 }) {
   const id = useId()
   const [edit, setEdit] = useState<{ text: string; revision: number } | null>(null)
   const [focused, setFocused] = useState(false)
-  const text = edit?.revision === resetKey ? edit.text : displayNumber(value)
-  const parsed = parseNumber(text, min, integer, positive)
+  const editing = edit?.revision === resetKey ? edit : null
+  const parsed = editing ? parseNumber(editing.text, min, integer, positive) : validateNumber(value, min, integer, positive)
+  const text = editing ? editing.text : parsed.error && Number.isFinite(value) ? String(value) : formatNumberFieldValue(value, integer ? 0 : decimalPlaces)
   const error = parsed.error
   const showError = Boolean(error) && !focused
 

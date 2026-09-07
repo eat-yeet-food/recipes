@@ -85,6 +85,17 @@ Saved names are required, normalized for Unicode and whitespace, limited to 80 c
 
 `NumberField` owns editable numeric text separately from accepted numeric values. Never coerce an empty input to zero, clamp it to one, or reformat it on each keystroke. Preserve partial decimals, cursor placement, and pasted text; accept decimal points and commas. Use a text input with numeric input mode for integer counts and decimal input mode for weights/percentages, a 16px input font, a 44px minimum target, and an external label with associated units. Enter/Done finishes editing. Keep invalid text visible on blur with an associated error; never silently round fractional quantities.
 
+Display precision is separate from calculation precision. Format initial, externally updated, and blurred values by field role; retain typed text throughout editing. Formatting or simply focusing/blurring a field must never write a rounded value back to the model. Validate the actual value, not its rounded display. Drop unnecessary trailing zeros. If rounding would turn a nonzero quantity into zero, retain two significant digits instead.
+
+| Workbench values | Display precision |
+| --- | --- |
+| Quantity | Integer; fractional entries remain invalid |
+| Piece weight and total dough weight | Whole grams |
+| Ingredient weights, flour rows, water, starter/levain weights and gram previews | 1 decimal at 10g or more; 2 below 10g; 3 below 1g |
+| Hydration, salt, oil, sugar, malt, levain and flour percentages, including starter/seed blends | Up to 2 decimals |
+| Yeast percentage, including its saved-formula summary | Up to 3 decimals |
+| Seed-to-flour ratio and its readout | Up to 2 decimals |
+
 The workbench registers incomplete/invalid fields and disables formula saves, starter saves, and Apply until they are resolved. Previews use the last valid numbers and explain that state. Quantity, piece weight, and total dough weight are linked; total weight changes the piece weight without changing the count. Ingredient-weight drafts remain independent of the percentage conversion so temporarily invalid flour totals cannot erase the other weights. Explicit preset loads and reopening reset text drafts to the selected values. Switching calculator modes replaces that mode’s numeric fields. Flour row identities stay stable when names are edited, preserving focus and starter ingredient identity.
 
 The production field and workbench stories cover clearing/replacing every numeric field, decimal commas and precision, invalid integer counts, direct total-weight edits, and flour-name focus. Real-device keyboard behavior still requires coordinated mobile review; do not infer it from a desktop build.
@@ -95,7 +106,7 @@ The production field and workbench stories cover clearing/replacing every numeri
 | --- | --- | --- |
 | Button | Primary, secondary, utility, ghost, quiet (`link` variant), on-ink, quiet-on-ink, danger, disabled, long label | Native button; `asChild` with a real anchor for navigation; 44px filled/outlined target, 24px minimum unpadded text action; focus follows treatment; `outline` is a compatibility alias for filled secondary |
 | ChoiceGroup | Exclusive selection, short/wrapped labels; dark group, saturated yellow selected item | Named group of native pressed buttons; Tab, Enter, Space; all options reachable; selected state via `aria-pressed` |
-| Input / Select / Textarea | Filled/empty, invalid, disabled, read-only; Input/Select support default and on-ink surfaces | Always a visible associated label; error association via `aria-describedby`; `aria-invalid` on affected field; never replace numeric semantics with styled text |
+| Input / Select / Textarea | Filled/empty, invalid, disabled, read-only; Input/Select support default and on-ink surfaces | Always a visible associated label; error association via `aria-describedby`; `aria-invalid` on affected field; use NumberField for editable numeric values |
 | Checkbox | Checked, unchecked, disabled, focus; default and compact sizes, with compact reserved for labeled filter rows | Native/Radix behavior, accessible name, explicit checked state; visible check beyond color alone |
 | NumberField | Blank/partial, integer, decimal, comma decimal, invalid, external reset | Text input with appropriate mobile keypad; live valid values; retained edit text and inline errors; owner blocks invalid saves |
 | Switch | On/off, disabled, keyboard focus, on white/yellow; external label with no surrounding hover/selected fill | Radix switch semantics, `aria-checked`, associated label, Space toggles, track focus indicator and 44px hit area |

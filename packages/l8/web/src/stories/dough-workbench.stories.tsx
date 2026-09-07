@@ -83,6 +83,14 @@ export const IncompleteFlourBlend: Story = {
 
 export const TargetBatch: Story = { args: { target: true } }
 export const Pizza: Story = { args: { pizza: true, target: true } }
+export const RoundedBatchAndPercentages: Story = { args: { target: true }, play: async ({ canvasElement }) => {
+  const screen = within(canvasElement.ownerDocument.body)
+  await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))
+  await expect(screen.getByRole('textbox', { name: 'loaf weight' })).toHaveValue('908')
+  await expect(screen.getByRole('textbox', { name: 'Total dough weight' })).toHaveValue('1815')
+  await expect(screen.getByRole('textbox', { name: 'Hydration' })).toHaveValue('77.04')
+  await expect(screen.getByRole('textbox', { name: 'Salt' })).toHaveValue('1.97')
+} }
 
 async function editEveryNumber(canvasElement: HTMLElement) {
   const screen = within(canvasElement.ownerDocument.body)
