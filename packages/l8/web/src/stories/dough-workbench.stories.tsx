@@ -52,9 +52,9 @@ function WorkbenchPreview({ target = false, pizza = false }: { target?: boolean;
   const [saved, setSaved] = useState<unknown>(null)
   const trigger = useRef<HTMLButtonElement>(null)
   const changeOpen = (next: boolean) => { setOpen(next); if (!next) requestAnimationFrame(() => trigger.current?.focus()) }
-  const config = { defaultInputMode: target ? 'target' : 'weights', defaultSelection: selected, recommendedFormulas: {}, doughIngredientSectionId: 'dough', initialWaterPercent: 97 }
+  const config = { ...(pizza ? { pizzaSizing: { referenceDiameterInches: 16, referenceBallWeightGrams: 480, diametersInches: [10, 12, 14, 16] } } : {}), defaultInputMode: target ? 'target' : 'weights', defaultSelection: selected, recommendedFormulas: {}, doughIngredientSectionId: 'dough', initialWaterPercent: 97 }
   const Drawer = (pizza ? recipeWorkbenchRegistry.get('pizza')! : plugin).Drawer
-  const initial = pizza ? { ...selected, batch: { ...selected.batch, pieceLabel: 'ball' }, formula: { ...selected.formula, family: 'pizza', levainPercent: 0, yeastPercent: 0.25 } } : selected
+  const initial = pizza ? { ...selected, batch: { count: 3, pieceWeightGrams: 480, diameterInches: 16, pieceLabel: 'ball' }, formula: { ...selected.formula, family: 'pizza', levainPercent: 0, yeastPercent: 0.25 } } : selected
   return <div className="p-6"><Button ref={trigger} onClick={() => setOpen(true)}>Open workbench</Button><p role="status">{applied ? "Recipe updated" : "Preview your batch"}</p><Drawer recipe={recipe} config={{ ...config, defaultSelection: initial }} state={saved ?? initial} onApply={(next) => { setSaved(next); setApplied(true) }} hasSharedConfiguration={false} storageScope={scope} open={open} onOpenChange={changeOpen} /></div>
 }
 
@@ -277,4 +277,24 @@ export const PluginProcessProjection: Story = { play: async () => {
   await expect(spiralText).toContain('cool water')
   await expect(spiralText).toContain('90 RPM for 1 min')
   await expect(spiralText).toContain('165 RPM for about 4 min')
+} }
+
+export const PizzaSizeAndSugar: Story = { args: { pizza: true, target: true }, play: async ({ canvasElement }) => {
+  const screen = within(canvasElement.ownerDocument.body)
+  await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))
+  await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Pizza size' }), '12')
+  await expect(screen.getByRole('textbox', { name: 'ball weight' })).toHaveValue('270')
+  await expect(screen.getByRole('textbox', { name: 'Total dough weight' })).toHaveValue('810')
+  await userEvent.clear(screen.getByRole('textbox', { name: 'Sugar' }))
+  await userEvent.type(screen.getByRole('textbox', { name: 'Sugar' }), '1.5')
+  await userEvent.click(screen.getByRole('button', { name: 'Weights' }))
+  await expect(Number((screen.getByRole('textbox', { name: 'Sugar' }) as HTMLInputElement).value)).toBeGreaterThan(0)
+  await userEvent.click(screen.getByRole('button', { name: 'Apply to recipe' }))
+  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+  await userEvent.click(screen.getByRole('button', { name: 'Open workbench' }))
+  await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))
+  await expect(screen.getByRole('combobox', { name: 'Pizza size' })).toHaveValue('12')
+  await userEvent.clear(screen.getByRole('textbox', { name: 'ball weight' }))
+  await userEvent.type(screen.getByRole('textbox', { name: 'ball weight' }), '300')
+  await expect(screen.getByRole('combobox', { name: 'Pizza size' })).toHaveValue('')
 } }

@@ -1,3 +1,4 @@
+import { pizzaAreaScale, pizzaBallWeight, isPizzaSizing } from './pizza-sizing.ts'
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 
@@ -114,5 +115,18 @@ describe('recipe display precision', () => {
     assert.equal(formatGrams(2), '2g')
     assert.equal(formatPercent(77.04), '77%')
     assert.equal(formatPercent(17.26), '17.3%')
+  })
+})
+
+describe('pizza diameter presets', () => {
+  const sizing = { referenceDiameterInches: 16, referenceBallWeightGrams: 480, diametersInches: [10, 12, 14, 16] }
+  it('scales the authored ball weight by pizza area and rounds to whole grams', () => {
+    assert.deepEqual(sizing.diametersInches.map((diameter) => pizzaBallWeight(diameter, sizing)), [188, 270, 368, 480])
+    assert.equal(pizzaAreaScale(12, sizing), 0.5625)
+  })
+  it('rejects invalid sizing configuration', () => {
+    assert.equal(isPizzaSizing({ ...sizing, diametersInches: [12, 12] }), false)
+    assert.throws(() => pizzaBallWeight(0, sizing))
+    assert.throws(() => pizzaBallWeight(12, { ...sizing, referenceDiameterInches: 0 }))
   })
 })

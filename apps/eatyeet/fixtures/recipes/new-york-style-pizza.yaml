@@ -40,12 +40,17 @@ workbench:
       oregano:
         quantity: 0.125
         unit: tsp
+    pizzaSizing:
+      referenceDiameterInches: 16
+      referenceBallWeightGrams: 480
+      diametersInches: [10, 12, 14, 16]
     defaultSelection:
       version: 1
       methodId: outdoor-oven
       batch:
         count: 3
         pieceWeightGrams: 480
+        diameterInches: 16
         pieceLabel: ball
       formula:
         family: pizza
@@ -183,7 +188,7 @@ methodOptions:
               - Place the baking steel on the top rack and preheat the oven at its highest setting, ideally 550F, for at least 1 hour.
               - Place a parchment circle on your wooden peel.
               - Remove dough with your bench scraper and cover liberally with bench flour.
-              - Stretch dough to 16".
+              - Stretch dough to {{pizzaDiameter}}.
               - Place the dough on the parchment with the rough bottom side facing up.
               - Apply sauce to the pizza in a circular motion with a large spoon all the way to the raised portion that will become your crust.
               - Pinch dried oregano in your fingers to oxidize and spread over the top of the sauce.
@@ -275,7 +280,7 @@ blocks:
           - 'Preheat your oven on low for 30 minutes with rotation activated, then begin prepping the pizza.'
           - Place a parchment circle on your wooden peel.
           - Remove dough with your bench scraper and cover liberally with bench flour.
-          - 'Stretch dough to 16" ([video](https://www.youtube.com/watch?v=Entzcl8q7H4)).'
+          - 'Stretch dough to {{pizzaDiameter}} ([video](https://www.youtube.com/watch?v=Entzcl8q7H4)).'
           - Place the dough on the parchment with the rough bottom side facing up.
           - Apply sauce to the pizza in a circular motion with a large spoon all the way to the raised portion that will become your crust.
           - Pinch dried oregano in your fingers to oxidize and spread over the top of the sauce.

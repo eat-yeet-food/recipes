@@ -1,3 +1,4 @@
+import { isPizzaSizing, pizzaAreaScale, pizzaBallWeight, type PizzaSizing } from '@eat-yeet/l2-recipe-domain/pizza-sizing'
 import { DEFAULT_SOURDOUGH_PROCESS, isSourdoughProcess, type SourdoughProcess } from '@eat-yeet/l2-recipe-domain/sourdough-process'
 import { resolveSourdoughSteps, type SourdoughProcessSections, type SpiralMixerProfile } from './sourdough-process'
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
@@ -39,6 +40,7 @@ interface DoughWorkbenchState {
 }
 
 interface DoughWorkbenchConfig {
+  pizzaSizing?: PizzaSizing
   spiralMixer?: SpiralMixerProfile
   processSections?: SourdoughProcessSections
   defaultInputMode: InputMode
@@ -98,6 +100,7 @@ const presetNameKey = (name: string) => cleanPresetName(name).toLowerCase()
 function presetSummary(formula: DoughFormula) {
   const parts = [`${formatPercent(formula.hydrationPercent)} hydration`, `${formatPercent(formula.saltPercent)} salt`]
   if (formula.family === 'pizza') {
+    if (formula.sugarPercent > 0) parts.push(`${formatPercent(formula.sugarPercent)} sugar`)
     if (formula.oilPercent > 0) parts.push(`${formatPercent(formula.oilPercent)} oil`)
     if (formula.yeastPercent > 0) parts.push(`${formatNumberFieldValue(formula.yeastPercent, 2)}% yeast`)
   } else if (formula.levainPercent > 0) {
@@ -133,7 +136,7 @@ function saveStore(key: string, store: WorkbenchStore) {
 export function selectionSummary(selection: DoughWorkbenchState, method?: RecipeContentMethod | null, formatWeight = formatBatchGrams) {
   const { batch, formula } = selection
   const pieces = `${batch.count} ${pieceCountLabel(batch.count, batch.pieceLabel)} × ${formatWeight(batch.pieceWeightGrams)}`
-  return [pieces, method?.label, `${formatPercent(formula.hydrationPercent)} hydration`, formula.process ? formula.process.mixingMethod === 'hand' ? 'Hand mixed' : 'Spiral mixer' : undefined].filter(Boolean).join(' · ')
+  return [pieces, batch.diameterInches ? `${batch.diameterInches}-inch pizzas` : undefined, method?.label, `${formatPercent(formula.hydrationPercent)} hydration`, formula.process ? formula.process.mixingMethod === 'hand' ? 'Hand mixed' : 'Spiral mixer' : undefined].filter(Boolean).join(' · ')
 }
 
 function dynamicDoughItems(selection: DoughWorkbenchState, formatWeight = formatWorkbenchGrams) {
@@ -164,6 +167,7 @@ function renderFormulaBindings(value: string, selection: DoughWorkbenchState, co
   const bindings: Record<string, string> = {
     initialWaterGrams: formatAppliedGrams(initialWaterGrams),
     remainingWaterGrams: formatAppliedGrams(remainingWaterGrams),
+    pizzaDiameter: selection.batch.diameterInches ? `${selection.batch.diameterInches} inches` : 'your preferred size',
     pieceCount: String(selection.batch.count),
     pieceLabelPlural: plural,
     pieceWeightGrams: formatAppliedGrams(selection.batch.pieceWeightGrams),
@@ -182,6 +186,7 @@ export function resolveWorkbenchRecipe(recipe: RecipeContent, selection: DoughWo
   const levain = seedBuild && selection.formula.starter && result.levainGrams > 0
     ? calculateLevainBuild(result.levainGrams, selection.formula.starter, seedBuild.seed, seedBuild.flourPerSeed) : null
   const levainIngredients = levain ? [`${formatWorkbenchGrams(levain.seedStarterGrams)} seed starter`, ...levain.freshFlour.map((part) => `${formatWorkbenchGrams(part.grams)} ${part.name}`), `${formatWorkbenchGrams(levain.addedWaterGrams)} water`].map(escapeHtml).join(' + ') : undefined
+  const toppingScale = selection.batch.diameterInches && config.pizzaSizing ? pizzaAreaScale(selection.batch.diameterInches, config.pizzaSizing) : 1
   const items = rawItems.map(escapeHtml)
   const blocks = selected.blocks.map((block) => {
     if (block.type !== 'recipe') return block
@@ -198,6 +203,7 @@ export function resolveWorkbenchRecipe(recipe: RecipeContent, selection: DoughWo
           const quantity = config.perPieceIngredientQuantities?.[section.itemIds[index]]
           if (!quantity) return item
           const display = (amount: number) => {
+            if ((quantity.unit === 'tsp' || quantity.unit === 'tbsp') && amount > 0 && amount < 0.125) return `less than ⅛ ${quantity.unit}`
             const eighths = Math.round(amount * 8)
             if ((quantity.unit === 'tsp' || quantity.unit === 'tbsp') && Math.abs(amount * 8 - eighths) < 0.0001) {
               const whole = Math.floor(eighths / 8)
@@ -206,9 +212,9 @@ export function resolveWorkbenchRecipe(recipe: RecipeContent, selection: DoughWo
               const value = remainder === 0 ? String(whole) : `${whole > 0 ? `${whole} ` : ''}${fractions[remainder]}`
               return `${value} ${quantity.unit}`
             }
-            return `${Number(amount.toFixed(1))} ${quantity.unit}`
+            return `${quantity.unit === 'g' && amount >= 20 ? Math.round(amount) : Number(amount.toFixed(1))} ${quantity.unit}`
           }
-          return `${display(quantity.quantity)} ${item} (${display(quantity.quantity * selection.batch.count)} total)`
+          return `${display(quantity.quantity * toppingScale)} ${item} (${display(quantity.quantity * toppingScale * selection.batch.count)} total)`
         }),
       }
     })]
@@ -236,7 +242,7 @@ export function resolveWorkbenchRecipe(recipe: RecipeContent, selection: DoughWo
       learning: selected.learning?.mixing ? { ...selected.learning, mixing: { ...selected.learning.mixing, defaultMethod: process.mixingMethod } } : selected.learning,
     } : {}),
     yieldAmount: count,
-    yieldUnit: selection.formula.family === 'pizza' ? 'pizzas' : count === 1 ? 'loaf' : 'loaves',
+    yieldUnit: selection.formula.family === 'pizza' ? selection.batch.diameterInches ? `${selection.batch.diameterInches}-inch pizzas` : 'pizzas' : count === 1 ? 'loaf' : 'loaves',
     description: selection.formula.family === 'pizza'
       ? `${selected.description} The applied formula is ${formatPercent(selection.formula.hydrationPercent)} hydration and makes ${count} dough ball${count === 1 ? '' : 's'}.`
       : `${selected.description} The applied formula is ${formatPercent(selection.formula.hydrationPercent)} hydration and makes ${count} ${pieceCountLabel(count, 'loaf')}.`,
@@ -413,7 +419,7 @@ function DoughFormulaWorkbench({
   }
   const updateBatch = (changes: Partial<DoughBatch>) => {
     setWeightDraft(null)
-    setDraft((current) => ({ ...current, batch: { ...current.batch, ...changes } }))
+    setDraft((current) => ({ ...current, batch: { ...current.batch, ...('pieceWeightGrams' in changes ? { diameterInches: undefined } : {}), ...changes } }))
   }
   const updateFormula = (changes: Partial<DoughFormula>) => {
     setWeightDraft(null)
@@ -437,7 +443,7 @@ function DoughFormulaWorkbench({
     setWeightDraft(next)
     const reversed = reverseFormula(next)
     if (reversed.errors.length) return
-    setDraft((currentDraft) => ({ ...currentDraft, formula: { ...currentDraft.formula, ...reversed.formula }, batch: { ...currentDraft.batch, pieceWeightGrams: reversed.totalDoughGrams / currentDraft.batch.count } }))
+    setDraft((currentDraft) => ({ ...currentDraft, formula: { ...currentDraft.formula, ...reversed.formula }, batch: { ...currentDraft.batch, diameterInches: undefined, pieceWeightGrams: reversed.totalDoughGrams / currentDraft.batch.count } }))
   }
   const savePreset = () => {
     setPresetAttempted(true)
@@ -552,6 +558,19 @@ function DoughFormulaWorkbench({
 
             <section className="mt-6 grid gap-4" aria-labelledby="batch-heading">
               <h3 id="batch-heading" className="text-xl font-bold">Batch</h3>
+              {draft.formula.family === 'pizza' && config.pizzaSizing && <div className="grid gap-1">
+                <label htmlFor="pizza-size" className="text-xs font-bold">Pizza size</label>
+                <Select id="pizza-size" value={draft.batch.diameterInches ?? ''} onChange={(event) => {
+                  if (!event.target.value) { updateBatch({ diameterInches: undefined }); return }
+                  const diameterInches = Number(event.target.value)
+                  updateBatch({ diameterInches, pieceWeightGrams: pizzaBallWeight(diameterInches, config.pizzaSizing!) })
+                  setFieldResetKey((current) => current + 1)
+                }}>
+                  <option value="">Custom weight</option>
+                  {config.pizzaSizing.diametersInches.map((diameter) => <option key={diameter} value={diameter}>{diameter}-inch — {pizzaBallWeight(diameter, config.pizzaSizing!)}g per ball</option>)}
+                </Select>
+                <p className="text-xs">Choosing a size sets each ball’s weight. Edit the weight below for a custom batch.</p>
+              </div>}
               <div className="grid grid-cols-2 gap-3 max-[380px]:grid-cols-1">
                 <Field label={pieceCountLabel(2, draft.batch.pieceLabel)} value={draft.batch.count} min={1} step="1" onChange={(count) => updateBatch({ count })} />
                 <Field label={`${draft.batch.pieceLabel} weight`} suffix="g" positive decimalPlaces={0} value={draft.batch.pieceWeightGrams} onChange={(pieceWeightGrams) => updateBatch({ pieceWeightGrams })} />
@@ -669,7 +688,7 @@ function isDoughFormula(value: unknown): value is DoughFormula {
 function isDoughState(value: unknown): value is DoughWorkbenchState {
   if (!value || typeof value !== 'object') return false
   const state = value as DoughWorkbenchState
-  return state.version === 1 && isDoughFormula(state.formula) && Boolean(state.batch) && Number.isInteger(state.batch.count) && state.batch.count > 0 && Number.isFinite(state.batch.pieceWeightGrams) && state.batch.pieceWeightGrams > 0 && (state.batch.pieceLabel === 'loaf' || state.batch.pieceLabel === 'ball') && typeof state.methodId === 'string'
+  return state.version === 1 && isDoughFormula(state.formula) && (state.batch?.diameterInches === undefined || (state.formula.family === 'pizza' && Number.isFinite(state.batch.diameterInches) && state.batch.diameterInches > 0)) && Boolean(state.batch) && Number.isInteger(state.batch.count) && state.batch.count > 0 && Number.isFinite(state.batch.pieceWeightGrams) && state.batch.pieceWeightGrams > 0 && (state.batch.pieceLabel === 'loaf' || state.batch.pieceLabel === 'ball') && typeof state.methodId === 'string'
 }
 
 function isDoughConfig(value: unknown): value is DoughWorkbenchConfig {
@@ -677,6 +696,7 @@ function isDoughConfig(value: unknown): value is DoughWorkbenchConfig {
   const config = value as Partial<DoughWorkbenchConfig>
   const mixer = config.spiralMixer
   return (
+    (config.pizzaSizing === undefined || isPizzaSizing(config.pizzaSizing)) &&
     (config.defaultInputMode === 'weights' || config.defaultInputMode === 'target') &&
     isDoughState(config.defaultSelection) &&
     (mixer === undefined || Boolean(mixer && typeof mixer.name === 'string' && [mixer.initialRpm, mixer.targetTemperatureF, mixer.saltRpm, mixer.saltMinutes, mixer.finishRpm, mixer.finishMinutes].every((number) => Number.isFinite(number) && number > 0) && Array.isArray(mixer.initialMinutes) && mixer.initialMinutes.length === 2 && mixer.initialMinutes.every((number) => Number.isFinite(number) && number > 0) && mixer.initialMinutes[0] <= mixer.initialMinutes[1])) &&
@@ -687,11 +707,15 @@ function isDoughConfig(value: unknown): value is DoughWorkbenchConfig {
 
 function decodeDoughState(value: unknown, config: DoughWorkbenchConfig, recipe: RecipeContent): DoughWorkbenchState | null {
   if (!isDoughState(value)) return null
-  const state = { ...value, formula: completeFormula(value.formula, config.defaultSelection.formula) }
+  const state = { ...value, batch: { ...value.batch }, formula: completeFormula(value.formula, config.defaultSelection.formula) }
   if (
     state.formula.family !== config.defaultSelection.formula.family ||
     !recipe.methodOptions.some((method) => method.id === state.methodId)
   ) return null
+  if (state.formula.family === 'pizza' && config.pizzaSizing) {
+    if (state.batch.diameterInches !== undefined && !config.pizzaSizing.diametersInches.includes(state.batch.diameterInches)) return null
+    if (state.batch.diameterInches === undefined) state.batch.diameterInches = config.pizzaSizing.diametersInches.find((diameter) => pizzaBallWeight(diameter, config.pizzaSizing!) === state.batch.pieceWeightGrams)
+  }
   const weights = calculateFormula(state.formula, state.batch)
   const formulaErrors = weights.errors
   const levainBuild = state.formula.levainBuild

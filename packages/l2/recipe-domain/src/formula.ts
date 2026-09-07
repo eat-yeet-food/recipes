@@ -27,6 +27,7 @@ export interface DoughFormula {
 }
 
 export interface DoughBatch {
+  diameterInches?: number
   count: number
   pieceWeightGrams: number
   pieceLabel: 'loaf' | 'ball'

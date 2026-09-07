@@ -4,6 +4,8 @@ Reviewed September 7, 2026. The approved usage contract is [design-system.md](de
 
 ## Subsequent September 7 refinements
 
+Pizza size presets now scale the authored 16-inch / 480g dough by area to whole-gram weights, carrying diameter through recipe/shared state and updating toppings, yield, and stretching instructions. Custom weight entry remains available. Sugar already works in grams and percentages; saved summaries now include it. Added domain/story cases are unexecuted during the standalone-check pause.
+
 The remaining 28px RecipeFacts top margin is removed, and Cooking view explicitly clears mobile header padding and uses 12px main top padding at every viewport. This resolves spacing that the earlier parent-only adjustment left in place. Standalone visual checks remain paused.
 
 The user confirmed Apply already dismisses the drawer; the proposed dismissal-order change was reverted before deployment. The repeated Print, Pin, and Cook Mode row is removed from the recipe body, leaving the main header as the sole action location. Updated stories and route assertions reflect this structure; standalone checks remain paused.

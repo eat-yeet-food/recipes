@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "exports": {
+    "./pizza-sizing": "./src/pizza-sizing.ts",
     "./sourdough-process": "./src/sourdough-process.ts",
     "./formula": "./src/formula.ts",
     "./format": "./src/format.ts",
