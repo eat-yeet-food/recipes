@@ -1,6 +1,7 @@
 import { RecipeCard } from '@eat-yeet/l6-ui-catalog/cards'
 import type { PageBlockRegistry } from '@eat-yeet/l6-ui-content-blocks/page-blocks'
-import type { RecipeSummary, RecipeVariantSummary } from '@eat-yeet/l1-recipe-model/recipes'
+import type { RecipeSummary } from '@eat-yeet/l1-recipe-model/recipes'
+import type { ActiveRecipeWorkbench } from './workbench-registry'
 import type { RecipeContent as Recipe } from '@eat-yeet/l4-content-model/recipes'
 import { RecipeArticle } from './recipe-article'
 import type { RecipePageBlockContext } from './recipe-blocks'
@@ -39,30 +40,30 @@ export function RecipeDetail({
   browseRecipes,
   siteUrl,
   blockRegistry,
-  variantOptions,
-  selectedVariantId,
-  onVariantChange,
+  workbench,
+  onWorkbenchApply,
+  storageScope,
 }: {
   recipe: Recipe
   browseRecipes: RecipeSummary[]
   siteUrl: string
   blockRegistry: PageBlockRegistry<RecipePageBlockContext>
-  variantOptions?: RecipeVariantSummary[]
-  selectedVariantId?: string
-  onVariantChange?: (variantId: string) => void
+  workbench?: ActiveRecipeWorkbench | null
+  onWorkbenchApply?: (state: unknown) => void
+  storageScope?: string
 }) {
   return (
     <RecipeArticle
       page={recipe}
       siteUrl={siteUrl}
       blockRegistry={blockRegistry}
-      variantOptions={variantOptions}
-      selectedVariantId={selectedVariantId}
-      onVariantChange={onVariantChange}
-      aside={({ page, cookMode }) => {
+      workbench={workbench}
+      onWorkbenchApply={onWorkbenchApply}
+      storageScope={storageScope}
+      aside={({ page, focusedCooking }) => {
         const suggestions = getBrowseRecipeSuggestions(page, browseRecipes)
 
-        if (cookMode || suggestions.length === 0) return null
+        if (focusedCooking || suggestions.length === 0) return null
 
         return <BrowseRecipesAside suggestions={suggestions} />
       }}

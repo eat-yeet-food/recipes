@@ -1,4 +1,4 @@
-import type { RecipeSummary, RecipeVariantSummary } from '@eat-yeet/l1-recipe-model/recipes'
+import type { RecipeMethodSummary, RecipeSummary, RecipeWorkbenchAttachment } from '@eat-yeet/l1-recipe-model/recipes'
 import type { PageBlock } from './blocks'
 
 export type { PageBlock, RecipeBlock, Section } from './blocks'
@@ -45,39 +45,40 @@ export interface RecipeLearning {
   finalDoughTemperature?: RecipeFinalDoughTemperature
 }
 
-export interface RecipeContentVariant extends RecipeVariantSummary {
+export interface RecipeContentMethod extends RecipeMethodSummary {
   blocks: PageBlock[]
 }
 
 export interface RecipeContent extends RecipeSummary {
   blocks: PageBlock[]
-  variants: RecipeContentVariant[]
+  methodOptions: RecipeContentMethod[]
+  workbench?: RecipeWorkbenchAttachment
   learning?: RecipeLearning
 }
 
-export function selectedRecipeVariant(recipe: RecipeContent, variantId?: string) {
-  if (recipe.variants.length === 0) return null
+export function selectedRecipeMethod(recipe: RecipeContent, methodId?: string) {
+  if (recipe.methodOptions.length === 0) return null
 
   return (
-    recipe.variants.find((variant) => variant.id === variantId) ??
-    recipe.variants.find((variant) => variant.id === recipe.defaultVariant) ??
-    recipe.variants[0] ??
+    recipe.methodOptions.find((method) => method.id === methodId) ??
+    recipe.methodOptions.find((method) => method.id === recipe.defaultMethod) ??
+    recipe.methodOptions[0] ??
     null
   )
 }
 
-export function recipeWithSelectedVariant(recipe: RecipeContent, variantId?: string): RecipeContent {
-  const variant = selectedRecipeVariant(recipe, variantId)
-  if (!variant) return recipe
+export function recipeWithSelectedMethod(recipe: RecipeContent, methodId?: string): RecipeContent {
+  const method = selectedRecipeMethod(recipe, methodId)
+  if (!method) return recipe
 
   return {
     ...recipe,
-    description: variant.description || recipe.description,
-    prepMinutes: variant.prepMinutes,
-    cookMinutes: variant.cookMinutes,
-    totalMinutes: variant.totalMinutes,
-    yieldAmount: variant.yieldAmount,
-    yieldUnit: variant.yieldUnit,
-    blocks: variant.blocks,
+    description: method.description || recipe.description,
+    prepMinutes: method.prepMinutes,
+    cookMinutes: method.cookMinutes,
+    totalMinutes: method.totalMinutes,
+    yieldAmount: method.yieldAmount,
+    yieldUnit: method.yieldUnit,
+    blocks: method.blocks,
   }
 }

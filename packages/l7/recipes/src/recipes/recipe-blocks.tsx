@@ -1,10 +1,11 @@
-import { Book, Printer, Share2 } from 'lucide-react'
+import { Printer, Share2 } from 'lucide-react'
 
 import { formatYield, humanizeMinutes } from '@eat-yeet/l2-recipe-domain/format'
 import type { RecipeBlock, Section } from '@eat-yeet/l4-content-model/blocks'
 import type { RecipeContent } from '@eat-yeet/l4-content-model/recipes'
 import { createPageBlockRegistry, registerSharedPageBlocks, type PageBlockRegistry } from '@eat-yeet/l6-ui-content-blocks/page-blocks'
-import { RecipeAction } from './recipe-actions'
+import { CookModeSwitch, RecipeAction } from './recipe-actions'
+import { AdjustRecipeButton } from './recipe-workbench'
 
 const Html = ({ as: Tag = 'div', html, ...rest }: { as?: any; html: string } & Record<string, unknown>) => (
   <Tag {...rest} dangerouslySetInnerHTML={{ __html: html }} />
@@ -18,6 +19,8 @@ export type RecipePageBlockContext = {
   printPage: () => void
   pinUrl: URL
   onToggleCookMode: () => void
+  workbenchSummary?: string
+  onOpenWorkbench?: () => void
 }
 
 function MetaList({ page }: { page: RecipeContent }) {
@@ -47,15 +50,15 @@ function RecipeList({ sections, ordered = false }: { sections: Section[]; ordere
 
   return (
     <div className="[&>section+section]:mt-[18px]">
-      {sections.map((section, index) => (
-        <section key={index}>
+      {sections.map((section) => (
+        <section key={section.id}>
           {section.title && (
             <h4 className="mt-[22px] mb-2.5 text-[13px] uppercase text-[var(--yeet-tomato)]">{section.title}</h4>
           )}
           <List className={listClass}>
             {section.items.map((item, itemIndex) => (
               <li
-                key={itemIndex}
+                key={section.itemIds[itemIndex] ?? itemIndex}
                 className="mb-[13px] pl-1.5 text-base leading-[1.72] marker:font-[family-name:var(--yeet-sans)] marker:text-base marker:font-extrabold marker:text-[var(--yeet-gray)]"
               >
                 <Html as="span" html={item} />
@@ -110,7 +113,7 @@ function RecipeBlockView({
         <MetaList page={page} />
         <div
           data-recipe-card-actions=""
-          className={`grid grid-cols-3 gap-3 mt-6 mb-1 max-[640px]:grid-cols-1 print:hidden ${cookMode ? 'sticky top-3 z-[var(--z-recipe-actions)] bg-white pb-3' : ''}`}
+          className={`grid grid-cols-3 gap-3 mt-6 mb-1 max-[640px]:grid-cols-1 print:hidden ${cookMode ? 'sticky top-3 z-[var(--z-recipe-actions)] bg-white' : ''}`}
           aria-label="Recipe card actions"
         >
           <RecipeAction variant="card" onClick={printPage}>
@@ -121,19 +124,21 @@ function RecipeBlockView({
             <Share2 className="size-3.5 max-[640px]:hidden" />
             Pin Recipe
           </RecipeAction>
-          <RecipeAction
-            variant="card"
-            pressed={cookMode}
-            onClick={onToggleCookMode}
-          >
-            <Book className="size-3.5 max-[640px]:hidden" />
-            Cook Mode
-          </RecipeAction>
+          <CookModeSwitch checked={cookMode} onCheckedChange={onToggleCookMode} />
         </div>
       </div>
 
       {block.ingredients.length > 0 && (
         <section>
+          {context.workbenchSummary && context.onOpenWorkbench && (
+            <div className="mb-6 flex items-start justify-between gap-4 border-y border-[var(--yeet-border)] bg-[var(--yeet-light-pink)] px-4 py-3 print:border print:bg-white">
+              <div>
+                <div className="text-[11px] font-extrabold uppercase tracking-[0.8px] text-[var(--yeet-tomato)]">Your recipe</div>
+                <div className="mt-1 text-sm font-bold">{context.workbenchSummary}</div>
+              </div>
+              <AdjustRecipeButton compact onClick={context.onOpenWorkbench} />
+            </div>
+          )}
           <h3 className="m-0 pt-[30px] pb-3 border-t border-[var(--yeet-border)] text-[34px] leading-none font-bold">
             Ingredients
           </h3>

@@ -1,7 +1,7 @@
 slug: new-york-style-pizza
 title: New York Style Pizza
 order: 3
-description: 'Cold-fermented New York-style pizza dough with outdoor-oven and indoor-steel variants.'
+description: 'Cold-fermented New York-style pizza dough for an outdoor pizza oven or an indoor baking steel.'
 category: savory
 prepMinutes: 4590
 cookMinutes: 6
@@ -21,6 +21,72 @@ occasions:
 ingredientTypes:
   - cheese
 created: '2025-01-15'
+workbench:
+  id: pizza
+  config:
+    defaultInputMode: target
+    doughIngredientSectionId: dough
+    perPieceIngredientLabel: pizza
+    perPieceIngredientQuantities:
+      pizza-sauce:
+        quantity: 6
+        unit: oz
+      mozzarella:
+        quantity: 6
+        unit: oz
+      pecorino:
+        quantity: 28
+        unit: g
+      oregano:
+        quantity: 0.125
+        unit: tsp
+    defaultSelection:
+      version: 1
+      methodId: outdoor-oven
+      batch:
+        count: 3
+        pieceWeightGrams: 480
+        pieceLabel: ball
+      formula:
+        family: pizza
+        hydrationPercent: 68
+        saltPercent: 2
+        oilPercent: 0
+        sugarPercent: 0
+        maltPercent: 0
+        yeastPercent: 0.25
+        levainPercent: 0
+        flour:
+          - id: all-purpose
+            name: All-purpose flour
+            percent: 100
+    recommendedFormulas:
+      outdoor-oven:
+        family: pizza
+        hydrationPercent: 68
+        saltPercent: 2
+        oilPercent: 0
+        sugarPercent: 0
+        maltPercent: 0
+        yeastPercent: 0.25
+        levainPercent: 0
+        flour:
+          - id: all-purpose
+            name: All-purpose flour
+            percent: 100
+      indoor-steel:
+        family: pizza
+        hydrationPercent: 65
+        saltPercent: 2
+        oilPercent: 2
+        sugarPercent: 0
+        maltPercent: 0
+        yeastPercent: 0.25
+        levainPercent: 0
+        flour:
+          - id: all-purpose
+            name: All-purpose flour
+            percent: 100
 learning:
   mixing:
     defaultMethod: spiral
@@ -32,11 +98,11 @@ learning:
     article: mixing-dough-and-gluten-development
     methodArticles:
       spiral: mixing-dough-in-a-spiral-mixer
-defaultVariant: outdoor-oven
-variants:
+defaultMethod: outdoor-oven
+methodOptions:
   - id: outdoor-oven
     label: Outdoor Oven
-    description: 'A high-hydration New York-style pizza dough mixed cold, fermented for 2-3 days, and baked hot with tomato sauce, frozen provolone, pecorino romano, and oregano.'
+    description: 'A high-hydration New York-style pizza dough mixed cold, fermented for 2-3 days, and baked hot with tomato sauce, Trader Joe''s low moisture whole milk mozzarella, pecorino romano, and oregano.'
     prepMinutes: 4590
     cookMinutes: 6
     totalMinutes: 4596
@@ -44,7 +110,7 @@ variants:
     yieldUnit: 16-inch pizzas
   - id: indoor-steel
     label: Indoor Steel
-    description: 'A home-oven New York-style pizza dough for a baking steel: 65% hydration, 2% canola oil, a 2-3 day cold ferment, tomato sauce, frozen provolone, pecorino romano, and oregano.'
+    description: 'A home-oven New York-style pizza dough for a baking steel: 65% hydration, 2% canola oil, a 2-3 day cold ferment, tomato sauce, Trader Joe''s low moisture whole milk mozzarella, pecorino romano, and oregano.'
     prepMinutes: 4590
     cookMinutes: 7
     totalMinutes: 4597
@@ -70,37 +136,46 @@ variants:
               - '[Large rotary cheese grater](https://www.amazon.com/Rotary-Cheese-Grater-Vegetable-Chopper/dp/B07VPZRWM5/ref=asc_df_B07VPZRWM5?mcid=741a8ff4834336dc8dad3cca408592c1&tag=hyprod-20&linkCode=df0&hvadid=693711673837&hvpos&hvnetw=g&hvrand=15500585928110911450&hvpone&hvptwo&hvqmt&hvdev=c&hvdvcmdl&hvlocint=&hvlocphy=9009731&hvtargid=pla-817676965110&hvocijid=15500585928110911450-B07VPZRWM5-&hvexpln=0&th=1)'
               - '[Fine rotary cheese grater](https://www.amazon.com/Cheese-Grater-Handheld-Vegetables-Chocolate/dp/B0B84HVRBK/ref=asc_df_B0B84HVRBK?mcid=49669e766c143f4b845f8f0eb6fd5c94&tag=hyprod-20&linkCode=df0&hvadid=693769995782&hvpos&hvnetw=g&hvrand=1564222352010975378&hvpone&hvptwo&hvqmt&hvdev=c&hvdvcmdl=&hvlocint=&hvlocphy=9009731&hvtargid=pla-1950528473268&psc=1&hvocijid=1564222352010975378-B0B84HVRBK-&hvexpln=0)'
         ingredients:
-          - title: Dough
+          - id: dough
+            title: Dough
             items:
               - '852g [Costco all-purpose flour](https://www.costco.com/p/-/kirkland-signature-organic-unbleached-all-purpose-flour-10-lbs-2-count/4000063331.)'
               - 554g cold water
               - 17g canola oil
               - '3/4 tsp [SAF red instant yeast](https://www.amazon.com/LeSaffre-LEAVENING_AGENT/dp/B0CFDPMWWC)'
               - '17g [Diamond Crystal Baking Salt](https://www.amazon.com/Diamond-Crystal-Baking-Kosher-8-5oz/dp/B0CHVLXM7R/) or fine sea salt'
-          - title: Pizza Sauce
+          - id: sauce-batch
+            title: Pizza Sauce
             items:
               - 1 can Bianco di Napoli whole peeled tomatoes
-          - title: Pizza
+          - id: pizza-toppings
+            title: Pizza
             items:
-              - 6 oz pizza sauce
-              - '6 oz shredded [mild provolone cheese](https://www.instacart.com/products/379755-belgioioso-provolone-cheese-mild-half-moon-wedge-8-oz?retailer_id=264&product_id=379755&region_id=9250594479&utm_medium=sem_shopping&utm_source=instacart_google&utm_campaign=ad_demand_shopping_lia_food_all-non-ca_evergreen&utm_content=accountid-8145171519_campaignid-19906608628_adgroupid-147863115739_device-c&utm_term=targetid-aud-1930465835203:pla-849568637689_locationid-9009731_adtype-pla_productchannel-local_merchantid-178347373_storecode-9250594479_productid-379755&gad_source=4&gad_campaignid=19906608628&gbraid=0AAAAADO98hacyUWxP7Sr6fRNqs-3bZG4k&gclid=CjwKCAjwmenCBhA4EiwAtVjzmtlNEoXkllue7BmUZWpFqtxW9C6dbkrOQP2dDQ86WH7LaS3vaeAu6BoCZMEQAvD_BwE), frozen'
-              - 20g pecorino romano
+              - id: pizza-sauce
+                text: pizza sauce
+              - id: mozzarella
+                text: "shredded [Trader Joe's whole milk low moisture mozzarella](https://www.traderjoes.com/home/search?q=whole%20milk%20low%20moisture%20mozzarella&section=products)"
+              - id: pecorino
+                text: pecorino romano
               - '[Olive oil](https://www.amazon.com/Graza-Sizzle-Extra-Virgin-Olive-Oil-Cooking-High-Polyphenol/dp/B09WV8DBPV/ref=asc_df_B09WV8DBPV?mcid=70ed972e0350313daddca3d5ee42bc1a&tag=hyprod-20&linkCode=df0&hvadid=693367302614&hvpos&hvnetw=g&hvrand=17371064147806287911&hvpone&hvptwo&hvqmt&hvdev=c&hvdvcmdl&hvlocint&hvlocphy=9009731&hvtargid=pla-2006470262336&psc=1&hvocijid=17371064147806287911-B09WV8DBPV-&hvexpln=0)'
               - '50g [Semolina flour](https://shop.kingarthurbaking.com/items/semolina-flour?utm_source=google&utm_medium=cpc&utm_term&utm_content=adtaxi&gad_source=1&gad_campaignid=22480904075&gbraid=0AAAAADiGhPK4w0ymJ2ZHxouS0qcChO-7Y&gclid=CjwKCAjwmenCBhA4EiwAtVjzmibHOPT_R4uMvXe44GRfVd6KqCijZEJnd1ENYHCiJnd1_Hctc8QaOBoC_80QAvD_BwE) + 50g [all purpose flour](https://www.wholefoodsmarket.com/product/365-by-whole-foods-market-all-purpose-flour-80-oz-b074jd6hhh) for dusting'
-              - 1/4 tsp dried oregano
+              - id: oregano
+                text: dried oregano
         steps:
           - title: Dough
             items:
               - Fill a pitcher with water and ice and let it chill down. Weigh out the water only; keep the ice out of the mixer bowl.
-              - Add the water, flour, canola oil, salt, and yeast to the spiral mixer all at once.
+              - id: combine-dough
+                text: Add the {{mixingIngredients}} to the spiral mixer all at once.
               - Mix at 40% speed until the dough reads 72F on your IR thermometer. Scrape the bowl and hook down with your bench scraper if dough climbs.
               - Transfer the dough to your bench. Knead shortly, guide dough with bench scraper into the form of a ball, place in a bowl, cover with saran wrap, and allow it to rest at room temperature for 1.5h.
-              - Divide and shape dough into 3 balls, shooting for about 480g each. The formula lands around 1,440g total dough after salt, oil, and yeast. Pull four times in gentle circles on your unfloured bench until smooth on the top. Pinch any bottom seam that remains.
+              - id: divide-dough
+                text: Divide and shape dough into {{pieceCount}} {{pieceLabelPlural}}, shooting for {{pieceWeightGrams}} each ({{totalDoughGrams}} total dough). Pull four times in gentle circles on your unfloured bench until smooth on the top. Pinch any bottom seam that remains.
               - Grease your proofing container with canola oil. Transfer the dough to the container with your bench scraper. After placing in a proofing container, lightly oil your hands and gently rub the top of the dough to make it less sticky and retain moisture. Cover and place in the refrigerator for 2-3 days.
           - title: Pre-Assembly
             items:
               - 'Pizza sauce: Drain off 1/4 cup of water from the can, then hand crush or mill the tomatoes to a smooth, easy-to-spread consistency. If desired, stir in 1 minced garlic clove just before using the sauce; if making only one pizza, use 1/4 minced garlic clove. Place sauce in a small bowl and cover with saran wrap. It is ok to freeze / refrigerate for a bit, but always bring to room temperature immediately before use to avoid gummy pizza.'
-              - 'Cheese: Grate provolone cheese in the rotary blender, place in a large sandwich bag and freeze at least 1 hour prior to baking. Grate romano cheese with a fine rotary grater and place in another small bowl.'
+              - 'Cheese: Grate the Trader Joe''s low moisture whole milk mozzarella with the large rotary cheese grater and place it in a large sandwich bag. Grate romano cheese with a fine rotary grater and place in another small bowl.'
               - 'Bench flour: Mix 50/50 semolina + all purpose flour in a small bowl and set aside.'
           - title: Pizza Assembly
             items:
@@ -113,7 +188,7 @@ variants:
               - Apply sauce to the pizza in a circular motion with a large spoon all the way to the raised portion that will become your crust.
               - Pinch dried oregano in your fingers to oxidize and spread over the top of the sauce.
               - Spread Romano cheese evenly over the entire pizza, covering as much of the sauce as possible.
-              - Scatter the frozen shredded provolone evenly over the top, straight from the freezer.
+              - Scatter the shredded mozzarella evenly over the top.
           - title: Launch / Bake
             items:
               - Launch the pizza, still on the parchment, directly onto the baking steel.
@@ -125,6 +200,7 @@ variants:
               - Serve hot.
         notes:
           - This dough formula uses Costco all-purpose flour at 65% hydration with 2% canola oil and lands around 1,440g total dough, or about 480g per dough ball.
+          - Trader Joe's whole milk low moisture mozzarella is a particularly good choice for this pizza. If the shredded cheese clumps or is difficult to distribute, freeze it briefly after shredding; this can help the strands separate.
           - The canola oil is here because this version bakes at home-oven temperatures. It helps browning and tenderness on a baking steel.
           - Great [article](https://www.richardeaglespoon.com/articles/how-to-pizza) with a lot info.
           - Good [video](https://www.youtube.com/watch?v=TQYApZ_-P24) with more info, not always reliable but pretty informative.
@@ -153,36 +229,45 @@ blocks:
           - '[Large rotary cheese grater](https://www.amazon.com/Rotary-Cheese-Grater-Vegetable-Chopper/dp/B07VPZRWM5/ref=asc_df_B07VPZRWM5?mcid=741a8ff4834336dc8dad3cca408592c1&tag=hyprod-20&linkCode=df0&hvadid=693711673837&hvpos&hvnetw=g&hvrand=15500585928110911450&hvpone&hvptwo&hvqmt&hvdev=c&hvdvcmdl&hvlocint=&hvlocphy=9009731&hvtargid=pla-817676965110&hvocijid=15500585928110911450-B07VPZRWM5-&hvexpln=0&th=1)'
           - '[Fine rotary cheese grater](https://www.amazon.com/Cheese-Grater-Handheld-Vegetables-Chocolate/dp/B0B84HVRBK/ref=asc_df_B0B84HVRBK?mcid=49669e766c143f4b845f8f0eb6fd5c94&tag=hyprod-20&linkCode=df0&hvadid=693769995782&hvpos&hvnetw=g&hvrand=1564222352010975378&hvpone&hvptwo&hvqmt&hvdev=c&hvdvcmdl=&hvlocint=&hvlocphy=9009731&hvtargid=pla-1950528473268&psc=1&hvocijid=1564222352010975378-B0B84HVRBK-&hvexpln=0)'
     ingredients:
-      - title: Dough
+      - id: dough
+        title: Dough
         items:
           - '847g [Costco all-purpose flour](https://www.costco.com/p/-/kirkland-signature-organic-unbleached-all-purpose-flour-10-lbs-2-count/4000063331.)'
           - 576g cold water
           - '3/4 tsp [SAF red instant yeast](https://www.amazon.com/LeSaffre-LEAVENING_AGENT/dp/B0CFDPMWWC)'
           - '17g [Diamond Crystal Baking Salt](https://www.amazon.com/Diamond-Crystal-Baking-Kosher-8-5oz/dp/B0CHVLXM7R/) or fine sea salt'
-      - title: Pizza Sauce
+      - id: sauce-batch
+        title: Pizza Sauce
         items:
           - 1 can Bianco di Napoli whole peeled tomatoes
-      - title: Pizza
+      - id: pizza-toppings
+        title: Pizza
         items:
-          - 6 oz pizza sauce
-          - '6 oz shredded [mild provolone cheese](https://www.instacart.com/products/379755-belgioioso-provolone-cheese-mild-half-moon-wedge-8-oz?retailer_id=264&product_id=379755&region_id=9250594479&utm_medium=sem_shopping&utm_source=instacart_google&utm_campaign=ad_demand_shopping_lia_food_all-non-ca_evergreen&utm_content=accountid-8145171519_campaignid-19906608628_adgroupid-147863115739_device-c&utm_term=targetid-aud-1930465835203:pla-849568637689_locationid-9009731_adtype-pla_productchannel-local_merchantid-178347373_storecode-9250594479_productid-379755&gad_source=4&gad_campaignid=19906608628&gbraid=0AAAAADO98hacyUWxP7Sr6fRNqs-3bZG4k&gclid=CjwKCAjwmenCBhA4EiwAtVjzmtlNEoXkllue7BmUZWpFqtxW9C6dbkrOQP2dDQ86WH7LaS3vaeAu6BoCZMEQAvD_BwE), frozen'
-          - 20g pecorino romano
+          - id: pizza-sauce
+            text: pizza sauce
+          - id: mozzarella
+            text: "shredded [Trader Joe's whole milk low moisture mozzarella](https://www.traderjoes.com/home/search?q=whole%20milk%20low%20moisture%20mozzarella&section=products)"
+          - id: pecorino
+            text: pecorino romano
           - '[Olive oil](https://www.amazon.com/Graza-Sizzle-Extra-Virgin-Olive-Oil-Cooking-High-Polyphenol/dp/B09WV8DBPV/ref=asc_df_B09WV8DBPV?mcid=70ed972e0350313daddca3d5ee42bc1a&tag=hyprod-20&linkCode=df0&hvadid=693367302614&hvpos&hvnetw=g&hvrand=17371064147806287911&hvpone&hvptwo&hvqmt&hvdev=c&hvdvcmdl&hvlocint&hvlocphy=9009731&hvtargid=pla-2006470262336&psc=1&hvocijid=17371064147806287911-B09WV8DBPV-&hvexpln=0)'
           - '50g [Semolina flour](https://shop.kingarthurbaking.com/items/semolina-flour?utm_source=google&utm_medium=cpc&utm_term&utm_content=adtaxi&gad_source=1&gad_campaignid=22480904075&gbraid=0AAAAADiGhPK4w0ymJ2ZHxouS0qcChO-7Y&gclid=CjwKCAjwmenCBhA4EiwAtVjzmibHOPT_R4uMvXe44GRfVd6KqCijZEJnd1ENYHCiJnd1_Hctc8QaOBoC_80QAvD_BwE) + 50g [all purpose flour](https://www.wholefoodsmarket.com/product/365-by-whole-foods-market-all-purpose-flour-80-oz-b074jd6hhh) for dusting'
-          - 1/4 tsp dried oregano
+          - id: oregano
+            text: dried oregano
     steps:
       - title: Dough
         items:
           - Fill a pitcher with water and ice and let it chill down. Weigh out the water only — keep the ice out of the mixer bowl.
-          - 'Add the water, flour, salt, and yeast to the spiral mixer all at once.'
+          - id: combine-dough
+            text: Add the {{mixingIngredients}} to the spiral mixer all at once.
           - Mix at 40% speed until the dough reads 72°F on your IR thermometer. Scrape the bowl and hook down with your bench scraper if dough climbs.
           - 'Transfer the dough to your bench. Knead shortly, guide dough with bench scraper into the form of a ball, place in a bowl, cover with saran wrap, and allow it to rest at room temperature for 1.5h.'
-          - "Divide and shape dough into 3 balls, shooting for about 480g each. The formula lands around 1,440g total dough after salt and yeast. Pull four times in gentle circles on your unfloured bench until smooth on the top. Pinch any bottom seam that remains. Circular dough balls make circular pizzas \U0001F642 ([video](https://www.youtube.com/watch?v=Vo5OW8Xkah4&t=9s))."
+          - id: divide-dough
+            text: "Divide and shape dough into {{pieceCount}} {{pieceLabelPlural}}, shooting for {{pieceWeightGrams}} each ({{totalDoughGrams}} total dough). Pull four times in gentle circles on your unfloured bench until smooth on the top. Pinch any bottom seam that remains. Circular dough balls make circular pizzas \U0001F642 ([video](https://www.youtube.com/watch?v=Vo5OW8Xkah4&t=9s))."
           - 'Grease your proofing container with canola oil. Transfer the dough to the container with your bench scraper. After placing in a proofing container, lightly oil your hands and gently rub the top of the dough to make it less sticky and retain moisture. Cover and place in the refrigerator for 2-3 days.'
       - title: Pre-Assembly
         items:
           - 'Pizza sauce: Drain off ¼ cup of water from the can, then hand crush or mill the tomatoes to a smooth, easy-to-spread consistency. If desired, stir in 1 minced garlic clove just before using the sauce; if making only one pizza, use ¼ minced garlic clove. Place sauce in a small bowl and cover with saran wrap. It''s ok to freeze / refrigerate for a bit, but always bring to room temperature immediately before use to avoid gummy pizza.'
-          - 'Cheese: Grate provolone cheese in the rotary blender, place in a large sandwich bag and freeze at least 1 hour prior to baking. Grate romano cheese with a fine rotary grater and place in another small bowl.'
+          - 'Cheese: Grate the Trader Joe''s low moisture whole milk mozzarella with the large rotary cheese grater and place it in a large sandwich bag. Grate romano cheese with a fine rotary grater and place in another small bowl.'
           - 'Bench flour: Mix 50/50 semolina + all purpose flour in a small bowl and set aside.'
       - title: Pizza Assembly
         items:
@@ -195,7 +280,7 @@ blocks:
           - Apply sauce to the pizza in a circular motion with a large spoon all the way to the raised portion that will become your crust.
           - Pinch dried oregano in your fingers to oxidize and spread over the top of the sauce.
           - 'Spread Romano cheese evenly over the entire pizza, covering as much of the sauce as possible.'
-          - 'Scatter the frozen shredded provolone evenly over the top, straight from the freezer.'
+          - 'Scatter the shredded mozzarella evenly over the top.'
       - title: Launch / Bake
         items:
           - 'Once the pizza is built, turn the oven off. Wait until the center of the stone reads 630°F on your IR thermometer.'
@@ -207,6 +292,7 @@ blocks:
           - Serve hot.
     notes:
       - 'This dough formula uses Costco all-purpose flour at 68% hydration and lands around 1,440g total dough, or about 480g per dough ball.'
+      - Trader Joe's whole milk low moisture mozzarella is a particularly good choice for this pizza. If the shredded cheese clumps or is difficult to distribute, freeze it briefly after shredding; this can help the strands separate.
       - Olive oil and sugar have been withheld from this recipe due to high temperatures of the pizza oven to prevent burning. These are often employed in lower temperature ovens to improve browning.
       - 'Great [article](https://www.richardeaglespoon.com/articles/how-to-pizza) with a lot info.'
       - 'Good [video](https://www.youtube.com/watch?v=TQYApZ_-P24) with more info, not always reliable but pretty informative.'

@@ -22,3 +22,9 @@ declare module '@app/page-blocks' {
 
   export const pageBlockRegistry: PageBlockRegistry<RecipePageBlockContext>
 }
+
+declare module '@app/recipe-workbenches' {
+  import type { RecipeWorkbenchRegistry } from '@eat-yeet/l7-recipes/recipes/workbench-registry'
+
+  export const recipeWorkbenchRegistry: RecipeWorkbenchRegistry
+}

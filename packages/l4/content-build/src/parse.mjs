@@ -162,16 +162,37 @@ function labelFromId(value) {
     .join(' ')
 }
 
-function normalizeSectioned(value) {
+function identifier(value, fallback) {
+  return text(value)
+    .toLowerCase()
+    .replace(/<[^>]+>/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '') || fallback
+}
+
+function normalizeSectioned(value, field) {
   return list(value)
-    .map((section) =>
-      typeof section === 'string'
-        ? { title: '', items: [renderMarkdown(section)].filter(Boolean) }
-        : {
-            title: renderMarkdown(section?.title),
-            items: list(section?.items).map(renderMarkdown).filter(Boolean),
-          },
-    )
+    .map((section, sectionIndex) => {
+      const title = typeof section === 'string' ? '' : renderMarkdown(section?.title)
+      const id = identifier(typeof section === 'string' ? '' : section?.id, `${field}-${sectionIndex + 1}`)
+      const rawItems = typeof section === 'string' ? [section] : list(section?.items)
+      const normalizedItems = rawItems
+        .map((item, itemIndex) => {
+          const source = typeof item === 'string' ? item : item?.text ?? item?.description ?? ''
+          const html = renderMarkdown(source)
+          return html ? {
+            id: identifier(typeof item === 'string' ? '' : item?.id, `${id}-item-${itemIndex + 1}`),
+            html,
+          } : null
+        })
+        .filter(Boolean)
+      return {
+        id,
+        title,
+        items: normalizedItems.map((item) => item.html),
+        itemIds: normalizedItems.map((item) => item.id),
+      }
+    })
     .filter((section) => section.title || section.items.length > 0)
 }
 
@@ -181,7 +202,7 @@ function normalizeFlat(value) {
 
 function normalizeRecipePayload(value = {}) {
   const sectioned = Object.fromEntries(
-    [...SECTIONED].map((field) => [field, normalizeSectioned(value[field])]),
+    [...SECTIONED].map((field) => [field, normalizeSectioned(value[field], field)]),
   )
   return {
     equipment: sectioned.equipment,
@@ -364,30 +385,37 @@ function normalizeBlocks(value, slug) {
   return blocks
 }
 
-function normalizeVariant(variant, data, baseBlocks, fallbackId) {
-  const id = text(variant?.id) || fallbackId
+function normalizeMethod(method, data, baseBlocks, fallbackId) {
+  const id = text(method?.id) || fallbackId
   if (!id) return null
 
-  const rawBlocks = Array.isArray(variant?.blocks) ? variant.blocks : null
-  const blocks = rawBlocks ? normalizeBlocks(rawBlocks, `${data.slug ?? fallbackId} variant ${id}`) : baseBlocks
+  const rawBlocks = Array.isArray(method?.blocks) ? method.blocks : null
+  const blocks = rawBlocks ? normalizeBlocks(rawBlocks, `${data.slug ?? fallbackId} method ${id}`) : baseBlocks
 
   return {
     id,
-    label: text(variant?.label) || labelFromId(id),
-    description: text(variant?.description) || (data.description ?? ''),
-    prepMinutes: num(variant?.prepMinutes) ?? num(data.prepMinutes),
-    cookMinutes: num(variant?.cookMinutes) ?? num(data.cookMinutes),
-    totalMinutes: num(variant?.totalMinutes) ?? num(data.totalMinutes),
-    yieldAmount: yieldAmount(variant?.yieldAmount) ?? yieldAmount(data.yieldAmount),
-    yieldUnit: variant?.yieldUnit ?? data.yieldUnit ?? '',
+    label: text(method?.label) || labelFromId(id),
+    description: text(method?.description) || (data.description ?? ''),
+    prepMinutes: num(method?.prepMinutes) ?? num(data.prepMinutes),
+    cookMinutes: num(method?.cookMinutes) ?? num(data.cookMinutes),
+    totalMinutes: num(method?.totalMinutes) ?? num(data.totalMinutes),
+    yieldAmount: yieldAmount(method?.yieldAmount) ?? yieldAmount(data.yieldAmount),
+    yieldUnit: method?.yieldUnit ?? data.yieldUnit ?? '',
     blocks,
   }
 }
 
-function normalizeVariants(value, data, baseBlocks, slug) {
+function normalizeMethods(value, data, baseBlocks, slug) {
   return list(value)
-    .map((variant, index) => normalizeVariant(variant, data, baseBlocks, `variant-${index + 1}`))
+    .map((method, index) => normalizeMethod(method, data, baseBlocks, `method-${index + 1}`))
     .filter(Boolean)
+}
+
+function normalizeWorkbench(value) {
+  if (!value || typeof value !== 'object') return undefined
+  const id = text(value.id)
+  const config = value.config && typeof value.config === 'object' && !Array.isArray(value.config) ? value.config : null
+  return id && config ? { id, config } : undefined
 }
 
 function oneOf(value, allowed, fallback = '') {
@@ -522,10 +550,10 @@ function searchTextFor(data) {
     data.title,
     data.description,
     searchTextForBlocks(data.blocks),
-    ...list(data.variants).flatMap((variant) => [
-      variant.label,
-      variant.description,
-      searchTextForBlocks(variant.blocks),
+    ...list(data.methodOptions).flatMap((method) => [
+      method.label,
+      method.description,
+      searchTextForBlocks(method.blocks),
     ]),
   ]
     .join(' ')
@@ -557,11 +585,11 @@ export function parseRecipe(source, fallbackSlug) {
   }
 
   const blocks = normalizeBlocks(data.blocks, slug)
-  const variants = normalizeVariants(data.variants, { ...data, slug }, blocks, slug)
-  const defaultVariant =
-    text(data.defaultVariant) && variants.some((variant) => variant.id === text(data.defaultVariant))
-      ? text(data.defaultVariant)
-      : variants[0]?.id ?? ''
+  const methodOptions = normalizeMethods(data.methodOptions, { ...data, slug }, blocks, slug)
+  const defaultMethod =
+    text(data.defaultMethod) && methodOptions.some((method) => method.id === text(data.defaultMethod))
+      ? text(data.defaultMethod)
+      : methodOptions[0]?.id ?? ''
 
   const recipe = {
     slug,
@@ -569,8 +597,9 @@ export function parseRecipe(source, fallbackSlug) {
     order: num(data.order),
     description: data.description ?? '',
     category: data.category ?? '',
-    defaultVariant,
-    variants,
+    defaultMethod,
+    methodOptions,
+    workbench: normalizeWorkbench(data.workbench),
     courses: list(data.courses),
     cuisines: list(data.cuisines),
     methods: list(data.methods),

@@ -19,6 +19,10 @@ import { APP_CONFIG } from '@/lib/app-config'
 import { recipeApi, recipeQueries } from '@/lib/api'
 
 const APP_COPY = APP_CONFIG.copy
+const GOOGLE_TAG_ID = APP_CONFIG.analytics?.googleTagId
+const GOOGLE_TAG_SETUP = GOOGLE_TAG_ID
+  ? `window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', ${JSON.stringify(GOOGLE_TAG_ID)});`
+  : ''
 
 /**
  * Head defaults: favicon, global styles, and display fonts that need to arrive
@@ -66,6 +70,7 @@ function RootLayout() {
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        if (document.body.dataset.workbenchOpen === 'true') return
         event.preventDefault()
         setPaletteOpen((open) => !open)
       } else if (event.key === 'Escape') {
@@ -112,6 +117,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
         <style dangerouslySetInnerHTML={{ __html: ROOT_VARS }} />
+        {GOOGLE_TAG_ID && <script async src={`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(GOOGLE_TAG_ID)}`} />}
+        {GOOGLE_TAG_SETUP && <script dangerouslySetInnerHTML={{ __html: GOOGLE_TAG_SETUP }} />}
       </head>
       <body>
         {children}

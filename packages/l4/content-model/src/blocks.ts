@@ -10,8 +10,10 @@ export type PageBlock =
   | YouTubeBlock
 
 export interface Section {
+  id: string
   title: string
   items: string[]
+  itemIds: string[]
 }
 
 export interface MarkdownBlock {

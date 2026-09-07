@@ -26,6 +26,7 @@ export const app = {
   label: 'Eat / Yeet',
   siteName: 'Eat / Yeet',
   siteUrl: 'https://eatyeet.com',
+  analytics: { googleTagId: 'G-44ZHQCCVG0' },
   cloudflareProject: 'eatyeet',
   doppler: { project: 'yeet', config: 'dev' },
   defaultOgImage: '/images/hero-donuts.jpg',

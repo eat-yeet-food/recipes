@@ -75,9 +75,9 @@ export function buildContent({ appId, appPaths }) {
       ...recipe,
       imageHash: recipe.image ? imageVersion(recipe.image) : '',
       blocks: versionBlockImages(recipe.blocks ?? []),
-      variants: (recipe.variants ?? []).map((variant) => ({
-        ...variant,
-        blocks: versionBlockImages(variant.blocks ?? []),
+      methodOptions: (recipe.methodOptions ?? []).map((method) => ({
+        ...method,
+        blocks: versionBlockImages(method.blocks ?? []),
       })),
     }
   }
@@ -96,8 +96,8 @@ export function buildContent({ appId, appPaths }) {
         .filter(([key]) => !bodyFields.includes(key))
         .map(([key, value]) => [
           key,
-          key === 'variants'
-            ? value.map(({ blocks: _blocks, ...variant }) => variant)
+          key === 'methodOptions'
+            ? value.map(({ blocks: _blocks, ...method }) => method)
             : value,
         ]),
     )

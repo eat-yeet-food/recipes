@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "exports": {
+    "./formula": "./src/formula.ts",
     "./format": "./src/format.ts",
     "./search": "./src/search.ts"
   }

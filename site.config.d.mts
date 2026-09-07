@@ -57,6 +57,9 @@ export interface RecipeApp {
   label: string
   siteName: string
   siteUrl: string
+  analytics?: {
+    googleTagId: string
+  }
   cloudflareProject: string
   doppler: {
     project: string

@@ -1,4 +1,9 @@
-export interface RecipeVariantSummary {
+export interface RecipeWorkbenchAttachment {
+  id: string
+  config: Record<string, unknown>
+}
+
+export interface RecipeMethodSummary {
   id: string
   label: string
   description: string
@@ -15,8 +20,9 @@ export interface RecipeSummary {
   order: number | null
   description: string
   category: string
-  defaultVariant: string
-  variants: RecipeVariantSummary[]
+  defaultMethod: string
+  methodOptions: RecipeMethodSummary[]
+  workbench?: RecipeWorkbenchAttachment
   courses: string[]
   cuisines: string[]
   methods: string[]

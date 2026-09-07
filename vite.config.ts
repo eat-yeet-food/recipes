@@ -13,11 +13,13 @@ const WEB_SRC = fileURLToPath(new URL('./packages/l8/web/src', import.meta.url))
 const ACTIVE_ARTICLE_MODULE = fileURLToPath(new URL(`./apps/${APP_ID}/src/articles.stub.ts`, import.meta.url))
 const ACTIVE_RECIPE_MODULE = fileURLToPath(new URL(`./apps/${APP_ID}/src/recipes.stub.ts`, import.meta.url))
 const ACTIVE_PAGE_BLOCKS_MODULE = fileURLToPath(new URL(`./apps/${APP_ID}/src/page-blocks.ts`, import.meta.url))
+const ACTIVE_RECIPE_WORKBENCHES_MODULE = fileURLToPath(new URL(`./apps/${APP_ID}/src/recipe-workbenches.ts`, import.meta.url))
 const PUBLIC_APP_CONFIG = {
   id: ACTIVE_APP.id,
   siteName: ACTIVE_APP.siteName,
   siteUrl: ACTIVE_APP.siteUrl,
   defaultOgImage: ACTIVE_APP.defaultOgImage,
+  analytics: ACTIVE_APP.analytics,
   copy: ACTIVE_APP.copy,
   categories: ACTIVE_APP.categories,
 }
@@ -72,6 +74,7 @@ export default defineConfig({
       { find: '@app/articles', replacement: ACTIVE_ARTICLE_MODULE },
       { find: '@app/recipes', replacement: ACTIVE_RECIPE_MODULE },
       { find: '@app/page-blocks', replacement: ACTIVE_PAGE_BLOCKS_MODULE },
+      { find: '@app/recipe-workbenches', replacement: ACTIVE_RECIPE_WORKBENCHES_MODULE },
       { find: '@', replacement: WEB_SRC },
     ],
   },

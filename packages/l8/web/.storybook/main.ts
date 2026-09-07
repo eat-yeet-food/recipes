@@ -8,12 +8,14 @@ const webSrc = fileURLToPath(new URL('../src', import.meta.url))
 const routerMock = fileURLToPath(new URL('../src/storybook/router-mock.tsx', import.meta.url))
 const activeRecipeModule = fileURLToPath(new URL(`../../../../apps/${APP_ID}/src/recipes.stub.ts`, import.meta.url))
 const activePageBlocksModule = fileURLToPath(new URL(`../../../../apps/${APP_ID}/src/page-blocks.ts`, import.meta.url))
+const activeRecipeWorkbenchesModule = fileURLToPath(new URL(`../../../../apps/${APP_ID}/src/recipe-workbenches.ts`, import.meta.url))
 const appOnlyPluginPattern = /(tanstack|nitro|suppress-module-directive)/i
 const publicAppConfig = {
   id: ACTIVE_APP.id,
   siteName: ACTIVE_APP.siteName,
   siteUrl: ACTIVE_APP.siteUrl,
   defaultOgImage: ACTIVE_APP.defaultOgImage,
+  analytics: ACTIVE_APP.analytics,
   copy: ACTIVE_APP.copy,
   categories: ACTIVE_APP.categories,
 }
@@ -53,6 +55,7 @@ const config: StorybookConfig = {
             { find: '@tanstack/react-router', replacement: routerMock },
             { find: '@app/recipes', replacement: activeRecipeModule },
             { find: '@app/page-blocks', replacement: activePageBlocksModule },
+            { find: '@app/recipe-workbenches', replacement: activeRecipeWorkbenchesModule },
             { find: '@', replacement: webSrc },
           ],
         },

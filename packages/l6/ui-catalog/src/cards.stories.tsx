@@ -14,8 +14,8 @@ const recipes: RecipeSummary[] = [
     order: null,
     description: 'Cold-fermented dough baked hot with tomato sauce and frozen cheese.',
     category: 'mains',
-    defaultVariant: 'outdoor-oven',
-    variants: [
+    defaultMethod: 'outdoor-oven',
+    methodOptions: [
       {
         id: 'outdoor-oven',
         label: 'Outdoor Oven',
@@ -59,8 +59,8 @@ const recipes: RecipeSummary[] = [
     order: null,
     description: 'Chewy cookies with nutty brown butter and crisp edges.',
     category: 'desserts',
-    defaultVariant: '',
-    variants: [],
+    defaultMethod: '',
+    methodOptions: [],
     courses: ['desserts'],
     cuisines: ['american'],
     methods: ['baking'],
@@ -83,8 +83,8 @@ const recipes: RecipeSummary[] = [
     order: null,
     description: 'Light yeast donuts finished with vanilla glaze.',
     category: 'desserts',
-    defaultVariant: '',
-    variants: [],
+    defaultMethod: '',
+    methodOptions: [],
     courses: ['breakfast', 'desserts'],
     cuisines: ['american'],
     methods: ['frying'],

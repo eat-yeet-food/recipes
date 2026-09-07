@@ -48,6 +48,9 @@ export interface PublicAppConfig {
   siteName: string
   siteUrl: string
   defaultOgImage: string
+  analytics?: {
+    googleTagId: string
+  }
   copy: AppCopy
   categories: Category[]
 }

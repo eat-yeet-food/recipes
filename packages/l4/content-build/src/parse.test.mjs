@@ -30,11 +30,11 @@ blocks:
 `, 'pizza'), /must define at least one valid block/)
   })
 
-  it('normalizes variants into searchable recipe metadata', () => {
+  it('normalizes methods into searchable recipe metadata', () => {
     const recipe = parseRecipe(`
 title: Pizza
-defaultVariant: outdoor
-variants:
+defaultMethod: outdoor
+methodOptions:
   - id: outdoor
     label: Outdoor Oven
   - id: indoor
@@ -53,14 +53,45 @@ blocks:
       - Flour
 `, 'pizza')
 
-    assert.equal(recipe.defaultVariant, 'outdoor')
-    assert.equal(recipe.variants.length, 2)
-    assert.equal(recipe.variants[0].label, 'Outdoor Oven')
-    assert.equal(recipe.variants[0].blocks, recipe.blocks)
-    assert.equal(recipe.variants[1].cookMinutes, 7)
+    assert.equal(recipe.defaultMethod, 'outdoor')
+    assert.equal(recipe.methodOptions.length, 2)
+    assert.equal(recipe.methodOptions[0].label, 'Outdoor Oven')
+    assert.equal(recipe.methodOptions[0].blocks, recipe.blocks)
+    assert.equal(recipe.methodOptions[1].cookMinutes, 7)
     assert.equal(recipe.searchText.includes('outdoor oven'), true)
     assert.equal(recipe.searchText.includes('indoor steel'), true)
     assert.equal(recipe.searchText.includes('baking steel'), true)
+  })
+
+  it('keeps workbench configuration opaque and assigns stable recipe row ids', () => {
+    const recipe = parseRecipe(`
+title: Dough
+workbench:
+  id: future-calculator
+  config:
+    domainSpecificValue:
+      hydrationPercent: 77
+blocks:
+  - type: recipe
+    ingredients:
+      - id: dough
+        title: Dough
+        items:
+          - id: flour
+            text: 500g flour
+          - Water
+`, 'dough')
+
+    assert.deepEqual(recipe.workbench, {
+      id: 'future-calculator',
+      config: { domainSpecificValue: { hydrationPercent: 77 } },
+    })
+    assert.deepEqual(recipe.blocks[0].ingredients[0], {
+      id: 'dough',
+      title: 'Dough',
+      items: ['500g flour', 'Water'],
+      itemIds: ['flour', 'dough-item-2'],
+    })
   })
 
   it('loads recipes by explicit order before falling back to created date', () => {

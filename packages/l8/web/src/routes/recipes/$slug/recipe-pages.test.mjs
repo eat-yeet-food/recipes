@@ -60,7 +60,7 @@ for (const recipe of INDEX) {
   check(`${recipe.slug} has matching h1`, facts.titleVisible, `${facts.h1} !== ${recipe.title}`)
   check(`${recipe.slug} renders recipe card`, facts.hasRecipeCard)
   check(`${recipe.slug} does not render duplicate side actions`, facts.shareRailCount === 0, JSON.stringify(facts))
-  check(`${recipe.slug} has print and cook controls`, facts.printButtons >= 2 && facts.cookButtons >= 2, JSON.stringify(facts))
+  check(`${recipe.slug} has print controls and one cook-mode switch`, facts.printButtons >= 2 && facts.cookButtons === 1, JSON.stringify(facts))
   check(`${recipe.slug} shows desktop browse sidebar`, facts.sidebarDisplay === 'block' && facts.browseCards === 4, JSON.stringify(facts))
 
   await page.close()
@@ -69,32 +69,70 @@ for (const recipe of INDEX) {
 const desktop = await newPage()
 await desktop.goto(`${BASE}/recipes/new-york-style-pizza`, { waitUntil: 'networkidle' })
 check(
-  'pizza variant selector renders',
-  await desktop.locator('[aria-label="Recipe variants"] button').count() === 2,
+  'variant selector is removed',
+  await desktop.locator('[aria-label="Recipe variants"]').count() === 0,
 )
-await desktop.locator('[aria-label="Recipe variants"] button:has-text("Indoor Steel")').click()
-await desktop.waitForURL('**/recipes/new-york-style-pizza?variant=indoor-steel')
+check('pizza shows applied configuration', (await desktop.locator('text=3 balls × 480g').count()) > 0)
+check('pizza uses the authored mozzarella', (await desktop.locator('#recipe-card').textContent()).includes("Trader Joe's whole milk low moisture mozzarella"))
+check('pizza no longer requires frozen provolone', !(await desktop.locator('#recipe-card').textContent()).toLowerCase().includes('provolone'))
+check('pizza links the recommended mozzarella', await desktop.locator('#recipe-card a[href*="traderjoes.com/home/search"]').count() === 1)
+check('pizza recommends the selected mozzarella', (await desktop.locator('#recipe-card').textContent()).includes('is a particularly good choice for this pizza'))
+check('jump to recipe is removed', await desktop.getByRole('link', { name: 'Jump to Recipe' }).count() === 0)
+check('adjust recipe appears only beside the recipe', await desktop.getByRole('button', { name: 'Adjust Recipe' }).count() === 1)
+check('cook mode is a switch beside the recipe', await desktop.getByRole('switch', { name: 'Cook Mode' }).getAttribute('aria-checked') === 'false')
+const authoredPizzaText = await desktop.locator('#recipe-card').textContent()
+check('pizza toppings show readable per-pizza and batch totals', authoredPizzaText.includes('6 oz pizza sauce (18 oz total)') && authoredPizzaText.includes('28 g pecorino romano (84 g total)') && authoredPizzaText.includes('⅛ tsp dried oregano (⅜ tsp total)'))
+check('outdoor mixing omits unused optional ingredients', authoredPizzaText.includes('Add the water, flour, salt, and yeast to the spiral mixer'))
+await desktop.getByRole('button', { name: 'Adjust Recipe' }).first().click()
+check('workbench opens as a dialog', await desktop.getByRole('dialog', { name: 'Adjust recipe' }).isVisible())
+check('target inputs pin percent units', (await desktop.getByText('%', { exact: true }).count()) >= 3)
+const workbenchEdge = await desktop.getByRole('dialog', { name: 'Adjust recipe' }).evaluate((drawer) => ({ borderLeft: getComputedStyle(drawer).borderLeftWidth, hasPinkOffsetShadow: drawer.className.includes('shadow-[-18px') }))
+check('workbench has no decorative pink edge or hard left border', workbenchEdge.borderLeft === '0px' && !workbenchEdge.hasPinkOffsetShadow, JSON.stringify(workbenchEdge))
+check('saved formula list is visible near the top', await desktop.getByRole('heading', { name: 'Saved formulas' }).isVisible())
+await desktop.getByLabel('Formula preset name').fill('Outdoor favorite')
+await desktop.getByRole('button', { name: 'Save new' }).click()
+check('saved formula has an explicit recall action', await desktop.getByRole('button', { name: 'Load Outdoor favorite' }).isVisible())
+check('saved formula reports when its exact values are loaded', await desktop.getByText('Loaded', { exact: true }).isVisible())
+await desktop.getByLabel('Oven method').selectOption('indoor-steel')
+await desktop.getByRole('button', { name: 'Use recommended formula for Indoor Steel' }).click()
+check('using a recommended formula clears the saved-formula identity', await desktop.getByText('Loaded', { exact: true }).count() === 0 && await desktop.getByText('Modified', { exact: true }).count() === 0)
+await desktop.getByRole('button', { name: 'Apply to recipe' }).click()
+await desktop.waitForURL('**/recipes/new-york-style-pizza?config=*')
 const indoorFacts = await desktop.evaluate(() => document.body.textContent ?? '')
-check('indoor variant updates URL', desktop.url().endsWith('/recipes/new-york-style-pizza?variant=indoor-steel'), desktop.url())
-check('indoor variant swaps dough formula', indoorFacts.includes('852g') && indoorFacts.includes('17g canola oil'))
-check('indoor variant shows baking steel equipment', indoorFacts.includes('16" x 16" baking steel'))
-await desktop.locator('[aria-label="Recipe variants"] button:has-text("Outdoor Oven")').click()
+check('applied configuration updates URL', desktop.url().includes('?config='), desktop.url())
+check('indoor method applies calculated dough formula', indoorFacts.includes('851g All-purpose flour') && indoorFacts.includes('17.0g oil'))
+check('indoor mixing includes configured oil', indoorFacts.includes('Add the water, flour, oil, salt, and yeast to the spiral mixer'))
+check('indoor method shows baking steel equipment', indoorFacts.includes('16&quot; x 16&quot; baking steel') || indoorFacts.includes('16" x 16" baking steel'))
+await desktop.goBack()
 await desktop.waitForURL('**/recipes/new-york-style-pizza')
 const outdoorFacts = await desktop.evaluate(() => document.body.textContent ?? '')
-check('default variant clears URL param', desktop.url().endsWith('/recipes/new-york-style-pizza'), desktop.url())
-check('outdoor variant restores dough formula', outdoorFacts.includes('847g') && outdoorFacts.includes('576g cold water'))
-await desktop.locator('[data-recipe-card-actions] button:has-text("Cook Mode")').click()
+check('browser Back restores authored formula', outdoorFacts.includes('846g All-purpose flour') && outdoorFacts.includes('575g water') && outdoorFacts.includes('2.1g instant yeast') && outdoorFacts.includes('16.9g salt'), outdoorFacts.slice(outdoorFacts.indexOf('Ingredients'), outdoorFacts.indexOf('Instructions')))
+await desktop.getByRole('button', { name: 'Adjust Recipe' }).first().click()
+await desktop.getByLabel('Hydration').fill('71')
+await desktop.getByRole('button', { name: 'Cancel' }).click()
+check('cancel discards draft', (await desktop.locator('text=68% hydration').count()) > 0)
+const cookActionsHeight = await desktop.locator('[data-recipe-card-actions]').evaluate((actions) => actions.getBoundingClientRect().height)
+await desktop.getByRole('switch', { name: 'Cook Mode' }).click()
 await desktop.waitForTimeout(200)
+const activeCookActionsHeight = await desktop.locator('[data-recipe-card-actions]').evaluate((actions) => actions.getBoundingClientRect().height)
+check('cook-mode switch does not change action-row padding', Math.abs(activeCookActionsHeight - cookActionsHeight) < 1, `${cookActionsHeight} -> ${activeCookActionsHeight}`)
 check(
-  'cook mode hides browse sidebar',
-  await desktop.locator('[data-yeet-browse]').count() === 0,
+  'recipe-card cook mode keeps surrounding content in place',
+  await desktop.locator('[data-yeet-browse]').count() === 1,
 )
 check(
   'cook mode marks article root',
   await desktop.locator('.yeet[data-cook-mode="true"]').count() === 1,
 )
+await desktop.getByRole('button', { name: 'Start Cooking' }).click()
+await desktop.waitForTimeout(200)
+check('start cooking enables cook mode', await desktop.getByRole('switch', { name: 'Cook Mode' }).getAttribute('aria-checked') === 'true')
+check('start cooking hides browse sidebar', await desktop.locator('[data-yeet-browse]').count() === 0)
+check('focused cooking offers a clear return action', await desktop.getByRole('button', { name: 'Back to Recipe' }).isVisible())
+const breadcrumbText = (await desktop.getByRole('navigation', { name: 'Breadcrumb' }).textContent()).replace(/\s+/g, '')
+check('recipe breadcrumb omits ambiguous course category', breadcrumbText === 'Home>Recipes>NewYorkStylePizza' && !breadcrumbText.includes('Mains'))
 check(
-  'cook mode centers recipe card with surrounding content',
+  'focused cooking centers recipe card with surrounding content',
   await desktop.evaluate(() => {
     const header = document.querySelector('.yeet > header')
     const card = document.querySelector('.yeet main > article')
@@ -110,12 +148,54 @@ check(
 )
 await desktop.close()
 
+const sourdough = await newPage()
+await sourdough.goto(`${BASE}/recipes/sourdough-bread`, { waitUntil: 'networkidle' })
+const sourdoughRecipeText = await sourdough.locator('#recipe-card').textContent()
+check('resolved sourdough removes fixed starter maintenance quantities', !sourdoughRecipeText.includes('6g starter') && !sourdoughRecipeText.includes('50g starter'))
+check('instruction bindings agree with applied recipe rounding', sourdoughRecipeText.includes('first portion of water (685g)') && sourdoughRecipeText.includes('remainder of water (20g)'))
+const adjustSourdough = sourdough.getByRole('button', { name: 'Adjust Recipe' }).first()
+await adjustSourdough.click()
+const sourdoughDialog = sourdough.getByRole('dialog', { name: 'Adjust recipe' })
+check('sourdough starts in ingredient weights', await sourdough.getByRole('button', { name: 'Ingredient weights' }).getAttribute('aria-pressed') === 'true')
+check('sourdough defaults to 77 percent starter hydration', await sourdough.getByLabel('Starter hydration').inputValue() === '77')
+check('sourdough migration weights survive display rounding',
+  await sourdough.getByLabel('Bread flour grams').first().inputValue() === '765.0' &&
+  await sourdough.getByLabel('Whole wheat flour grams').first().inputValue() === '150.0' &&
+  await sourdough.getByLabel('Added water').inputValue() === '705.0' &&
+  await sourdough.getByLabel('Ripe starter weight').inputValue() === '175.0')
+await sourdough.getByRole('button', { name: 'Target batch' }).click()
+check('target formula uses readable rounded percentages',
+  await sourdough.getByRole('spinbutton', { name: 'Hydration %', exact: true }).inputValue() === '77.04' &&
+  await sourdough.getByLabel('Salt').inputValue() === '1.97' &&
+  await sourdough.getByLabel('Ripe levain').inputValue() === '17.26')
+await sourdough.getByRole('button', { name: 'Add flour' }).first().click()
+await sourdough.getByLabel('Flour 3 name').fill('Rye')
+await sourdough.getByLabel('Rye percentage').fill('10')
+check('invalid flour blend disables apply', await sourdough.getByRole('button', { name: 'Apply to recipe' }).isDisabled())
+check('invalid flour blend explains its total', (await sourdoughDialog.getByRole('alert').textContent()).includes('must total 100%'))
+await sourdough.keyboard.press('Meta+k')
+check('search shortcut does not stack another modal', await sourdough.getByRole('dialog').count() === 1)
+await sourdough.keyboard.press('Escape')
+await sourdough.waitForTimeout(200)
+check('escape closes workbench and restores focus', await sourdoughDialog.isHidden() && await adjustSourdough.evaluate((button) => document.activeElement === button))
+await sourdough.close()
+
 const phone = await newPage({ width: 390, height: 900 })
 await phone.goto(`${BASE}/recipes/new-york-style-pizza`, { waitUntil: 'networkidle' })
 check(
   'recipe browse sidebar hidden on phone',
   await phone.locator('[data-yeet-browse]').evaluate((el) => getComputedStyle(el).display === 'none'),
 )
+await phone.getByRole('button', { name: 'Adjust Recipe' }).first().click()
+await phone.waitForTimeout(150)
+const phoneDrawer = await phone.getByRole('dialog', { name: 'Adjust recipe' }).evaluate((dialog) => ({
+  width: dialog.getBoundingClientRect().width,
+  left: dialog.getBoundingClientRect().left,
+  viewport: window.innerWidth,
+  maxWidth: getComputedStyle(dialog).maxWidth,
+}))
+check('workbench fills phone viewport', Math.abs(phoneDrawer.width - phoneDrawer.viewport) < 2, JSON.stringify(phoneDrawer))
+await phone.getByRole('button', { name: 'Cancel' }).click()
 await phone.close()
 
 await browser.close()

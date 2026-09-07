@@ -112,6 +112,7 @@
   --z-recipe-actions: 2;
   --z-nav: 50;
   --z-dialog: 50;
+  --z-workbench: 60;
   --z-skip-link: 100;
 
   /* shadcn's own convention for computing a nested control's radius relative

@@ -67,6 +67,25 @@ try {
       console.log(`FAIL  ${path} ${violation.id} [${violation.impact}] ${nodes}`)
     }
   }
+
+  const configurableRecipe = INDEX.find((recipe) => recipe.slug === 'sourdough-bread')
+  if (configurableRecipe) {
+    const path = `/recipes/${configurableRecipe.slug} (workbench open)`
+    await page.goto(new URL(`/recipes/${configurableRecipe.slug}`, server.url).href, { waitUntil: 'networkidle' })
+    await page.getByRole('button', { name: 'Adjust Recipe' }).first().click()
+    await page.waitForTimeout(200)
+    const result = await new AxeBuilder({ page })
+      .include('[data-workbench-drawer]')
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+      .analyze()
+    const violations = result.violations.filter((violation) => IMPACTS.includes(violation.impact ?? ''))
+    if (violations.length === 0) console.log(`ok    ${path}`)
+    for (const violation of violations) {
+      const nodes = violation.nodes.slice(0, 3).map((node) => node.target.join(' ')).join('; ')
+      failures.push(`${path} ${violation.id} [${violation.impact}] ${nodes}`)
+      console.log(`FAIL  ${path} ${violation.id} [${violation.impact}] ${nodes}`)
+    }
+  }
 } finally {
   await browser.close()
   await server.close()

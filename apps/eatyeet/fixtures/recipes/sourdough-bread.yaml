@@ -20,6 +20,58 @@ occasions:
   - everyday
 ingredientTypes: []
 created: '2025-02-10'
+defaultMethod: dutch-oven
+methodOptions:
+  - id: dutch-oven
+    label: Dutch Oven
+    description: 'Traditional sourdough bread, featuring a long fermentation process for complex flavor and perfect texture.'
+    prepMinutes: 60
+    cookMinutes: 40
+    totalMinutes: 1870
+    yieldAmount: 2
+    yieldUnit: loaves
+workbench:
+  id: sourdough
+  config:
+    defaultInputMode: weights
+    doughIngredientSectionId: dough
+    hiddenIngredientSectionIds:
+      - starter-maintenance
+      - levain-build
+    initialWaterPercent: 97.16
+    defaultSelection:
+      version: 1
+      methodId: dutch-oven
+      batch:
+        count: 2
+        pieceWeightGrams: 907.5
+        pieceLabel: loaf
+      formula:
+        family: sourdough
+        hydrationPercent: 77.04
+        saltPercent: 1.97
+        oilPercent: 0
+        sugarPercent: 0
+        maltPercent: 0
+        yeastPercent: 0
+        levainPercent: 17.26
+        flour:
+          - id: bread-flour
+            name: Bread flour
+            percent: 80.33
+          - id: whole-wheat
+            name: Whole wheat flour
+            percent: 19.67
+        starter:
+          hydrationPercent: 77
+          flour:
+            - id: bread-flour
+              name: Bread flour
+              percent: 50
+            - id: whole-wheat
+              name: Whole wheat flour
+              percent: 50
+    recommendedFormulas: {}
 learning:
   mixing:
     defaultMethod: spiral
@@ -46,19 +98,22 @@ blocks:
           - Wire cooling rack
           - Bread knife
     ingredients:
-      - title: Starter
+      - id: starter-maintenance
+        title: Starter
         items:
           - 6g starter
           - 15g whole wheat flour
           - 15g bread flour
           - 23g water
-      - title: Levain
+      - id: levain-build
+        title: Levain
         items:
           - 50g starter
           - 50g whole wheat flour
           - 50g bread flour
           - 77g water
-      - title: Bread
+      - id: dough
+        title: Bread
         items:
           - '765g [bread flour](https://www.walmart.com/ip/King-Arthur-Unbleached-Flour-5-lbs/10535108?wmlspartner=wlpa&selectedSellerId=0&wmlspartner=wlpa&cn=FY26-ENTP-PMAX_CVP_cnv_dps_dsn_dis_ad_entp_e_n&gclsrc=aw.ds&adid=2222222229710535108_0000000000_22488309517&wl0=&wl1=x&wl2=c&wl3=&wl4=&wl5=9009731&wl6=&wl7=&wl8=&wl9=pla&wl10=8175035&wl11=online&wl12=10535108&veh=sem&gad_source=1&gad_campaignid=22488321244&gbraid=0AAAAADmfBIpnwbCRCx-Lh8QmClJX7tCPp&gclid=Cj0KCQjw8KrFBhDUARIsAMvIApZAbILLGSMWrz1ABKhWgrRQmpk_e3aTcFm7hEG-wrTvuiJNb6qf1jAaAhBoEALw_wcB)'
           - '150g [whole wheat flour](https://www.target.com/p/bob-39-s-red-mill-organic-whole-wheat-flour-5lbs/-/A-92889638?sid=&TCID=PDS-22806998596&gclsrc=aw.ds&gad_source=1&gad_campaignid=22803279746&gbraid=0AAAAAD-5dfZBxwL-BLt-ymR8_PLhoa3xI&gclid=Cj0KCQjw8KrFBhDUARIsAMvIApZsBV2zeEfCYO1LqrfoeLFww5kNUKvm8kiJL8-RcQ-4-qacCOa4VkEaAjIPEALw_wcB)'
@@ -72,18 +127,21 @@ blocks:
           - 'Cover and rest at 70°F until peaked, 6h'
       - title: Autolyse (3h before bulk)
         items:
-          - Mix flour and the first portion of water (685g) in a spiral mixer at 40% until integrated and no lumps. Cover and rest at 70°F for 3h.
+          - id: autolyse-water
+            text: Mix flour and the first portion of water ({{initialWaterGrams}}) in a spiral mixer at 40% until integrated and no lumps. Cover and rest at 70°F for 3h.
       - title: Bulk Fermentation
         items:
           - '**[0m elapsed]** Mix in levain in a spiral mixer for 5m + cover and rest at 70°F for 20m.'
-          - '**[30m elapsed]** Mix in salt + remainder of water (20g) at 15% speed for 1m. Turn speed up to 40% and mix for about 5m. Cover and rest at 70°F for 25m. Internal dough temp should be about 72°F.'
+          - id: add-salt-and-water
+            text: '**[30m elapsed]** Mix in salt + remainder of water ({{remainingWaterGrams}}) at 15% speed for 1m. Turn speed up to 40% and mix for about 5m. Cover and rest at 70°F for 25m. Internal dough temp should be about 72°F.'
           - '**[1h elapsed]** Coil fold + cover and rest at 70°F for 25m'
           - '**[1:30h elapsed]** Coil fold + cover and rest at 70°F for 25m'
           - '**[2:00h elapsed]** Coil fold + cover and rest at 70°F for 2:50h.'
           - '**[4:50h elapsed]** End of bulk when risen approximately 100% in volume'
       - title: Shape
         items:
-          - Divide / Preshape and rest at 70°F for 30m.
+          - id: divide-dough
+            text: Divide into {{pieceCount}} {{pieceLabelPlural}} ({{pieceWeightGrams}} each), preshape, and rest at 70°F for 30m.
           - Shape and place in banneton. Rest at 70°F for 10m.
           - 'Stitch, cover and place in 37°F refrigerator for 12-18h'
       - title: Bake

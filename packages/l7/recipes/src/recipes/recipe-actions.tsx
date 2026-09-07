@@ -7,9 +7,9 @@ const ACTION_BASE =
 
 const ACTION_VARIANTS = {
   hero:
-    'inline-flex items-center justify-center gap-1.5 min-h-8 px-2.5 py-1.5 !bg-[var(--yeet-pink)] !text-[var(--yeet-gray)] leading-[20.8px] visited:!text-[var(--yeet-gray)] hover:!bg-[var(--yeet-gray)] hover:!text-white active:!bg-[var(--yeet-gray)] active:!text-white focus-visible:!bg-[var(--yeet-pink)] focus-visible:!text-[var(--yeet-gray)] aria-pressed:!bg-[var(--yeet-gray)] aria-pressed:!text-white max-[640px]:flex-[1_1_calc(50%-4px)]',
+    'inline-flex items-center justify-center gap-1.5 min-h-8 px-2.5 py-1.5 !bg-[var(--yeet-pink)] !text-[var(--yeet-gray)] leading-[20.8px] visited:!text-[var(--yeet-gray)] hover:!bg-[var(--yeet-gray)] hover:!text-white active:!bg-[var(--yeet-gray)] active:!text-white focus-visible:!bg-[var(--yeet-pink)] focus-visible:!text-[var(--yeet-gray)] max-[640px]:flex-[1_1_calc(50%-4px)]',
   card:
-    'inline-flex items-center justify-center gap-2 min-h-[42px] px-3.5 py-2.5 !bg-[var(--yeet-tomato)] !text-white leading-[1.25] visited:!text-white hover:!bg-[var(--yeet-gray)] hover:!text-white active:!bg-[var(--yeet-gray)] active:!text-white focus-visible:!bg-[var(--yeet-tomato)] focus-visible:!text-white aria-pressed:!bg-[var(--yeet-gray)] aria-pressed:!text-white',
+    'inline-flex items-center justify-center gap-2 min-h-[42px] px-3.5 py-2.5 !bg-[var(--yeet-tomato)] !text-white leading-[1.25] visited:!text-white hover:!bg-[var(--yeet-gray)] hover:!text-white active:!bg-[var(--yeet-gray)] active:!text-white focus-visible:!bg-[var(--yeet-tomato)] focus-visible:!text-white',
 }
 
 type RecipeActionProps = {
@@ -17,7 +17,6 @@ type RecipeActionProps = {
   href?: string
   target?: string
   rel?: string
-  pressed?: boolean
   onClick?: () => void
   children: ReactNode
 }
@@ -27,7 +26,6 @@ export function RecipeAction({
   href,
   target,
   rel,
-  pressed,
   onClick,
   children,
 }: RecipeActionProps) {
@@ -42,8 +40,28 @@ export function RecipeAction({
   }
 
   return (
-    <button type="button" aria-pressed={pressed} onClick={onClick} className={className}>
+    <button type="button" onClick={onClick} className={className}>
       {children}
+    </button>
+  )
+}
+
+export function CookModeSwitch({ checked, onCheckedChange }: { checked: boolean; onCheckedChange: () => void }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={onCheckedChange}
+      className="inline-flex min-h-[42px] cursor-pointer items-center justify-between gap-3 border border-[var(--yeet-border)] bg-[var(--yeet-light-pink)] px-3.5 py-2.5 font-[family-name:var(--font-action)] text-[13px] font-bold uppercase tracking-[1.95px] text-[var(--yeet-gray)] outline-none hover:border-[var(--yeet-gray)] focus-visible:ring-3 focus-visible:ring-[var(--yeet-tomato)]/25"
+    >
+      <span>Cook Mode</span>
+      <span
+        aria-hidden="true"
+        className={`relative h-6 w-11 shrink-0 rounded-full transition-colors motion-reduce:transition-none ${checked ? 'bg-[var(--yeet-tomato-strong)]' : 'bg-[var(--yeet-gray)]'}`}
+      >
+        <span className={`absolute top-1 left-1 size-4 rounded-full bg-white transition-transform motion-reduce:transition-none ${checked ? 'translate-x-5' : ''}`} />
+      </span>
     </button>
   )
 }

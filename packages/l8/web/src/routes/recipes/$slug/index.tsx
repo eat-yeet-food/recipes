@@ -5,27 +5,24 @@ import { isoDuration, formatYield, labelize, stripTags } from '@eat-yeet/l2-reci
 import { imageUrl } from '@eat-yeet/l1-recipe-model/recipes'
 import { ssrPrefetch } from '@eat-yeet/l3-api-query/prefetch'
 import { pageBlockRegistry } from '@app/page-blocks'
+import { recipeWorkbenchRegistry } from '@app/recipe-workbenches'
 import { APP_CONFIG } from '@/lib/app-config'
-import {
-  recipeWithSelectedVariant,
-  selectedRecipeVariant,
-  type RecipeBlock,
-  type RecipeContent as Recipe,
-} from '@eat-yeet/l4-content-model/recipes'
+import { type RecipeBlock, type RecipeContent as Recipe } from '@eat-yeet/l4-content-model/recipes'
+import { activateRecipeWorkbench } from '@eat-yeet/l7-recipes/recipes/workbench-registry'
 import { buildSeoMeta } from '@/lib/seo'
 import { recipeApi, recipeQueries } from '@/lib/api'
 
 const APP_COPY = APP_CONFIG.copy
 
 export interface RecipeUrl {
-  variant?: string
+  config?: string
 }
 
 const str = (value: unknown) => (typeof value === 'string' && value ? value : undefined)
 
 function validateSearch(search: Record<string, unknown>): RecipeUrl {
-  const variant = str(search.variant)
-  return variant ? { variant } : {}
+  const config = str(search.config)
+  return config && config.length < 12_000 ? { config } : {}
 }
 
 export const Route = createFileRoute('/recipes/$slug/')({
@@ -100,13 +97,15 @@ function RecipeRoute() {
   const search = Route.useSearch()
   const navigate = useNavigate({ from: Route.fullPath })
   const { data } = recipeApi.useList()
-  const selectedVariant = selectedRecipeVariant(recipe, search.variant)
-  const selectedRecipe = recipeWithSelectedVariant(recipe, search.variant)
-  const selectedVariantId = selectedVariant?.id ?? ''
+  const workbench = activateRecipeWorkbench(recipe, recipeWorkbenchRegistry, search.config)
+  const selectedRecipe = workbench
+    ? workbench.plugin.resolveRecipe(recipe, workbench.config, workbench.state)
+    : recipe
 
-  const setVariant = (variantId: string) => {
+  const applyWorkbench = (next: unknown) => {
     void navigate({
-      search: variantId === recipe.defaultVariant ? {} : { variant: variantId },
+      search: { config: JSON.stringify(next) },
+      replace: false,
     })
   }
 
@@ -118,9 +117,9 @@ function RecipeRoute() {
         browseRecipes={data?.recipes ?? []}
         siteUrl={APP_CONFIG.siteUrl}
         blockRegistry={pageBlockRegistry}
-        variantOptions={recipe.variants}
-        selectedVariantId={selectedVariantId}
-        onVariantChange={setVariant}
+        workbench={workbench}
+        onWorkbenchApply={applyWorkbench}
+        storageScope={new URL(APP_CONFIG.siteUrl).hostname}
       />
     </>
   )

@@ -22,6 +22,9 @@
       "path": "../../l4/content-model/tsconfig.json"
     },
     {
+      "path": "../../l5/ui-primitives/tsconfig.json"
+    },
+    {
       "path": "../../l6/ui-catalog/tsconfig.json"
     },
     {
