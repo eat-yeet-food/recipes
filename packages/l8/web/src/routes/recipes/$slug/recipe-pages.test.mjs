@@ -77,7 +77,7 @@ check('pizza links the recommended mozzarella', await desktop.locator('#recipe-c
 check('pizza recommends the selected mozzarella', (await desktop.locator('#recipe-card').textContent()).includes('is a particularly good choice for this pizza'))
 check('jump to recipe is removed', await desktop.getByRole('link', { name: 'Jump to Recipe' }).count() === 0)
 check('adjust recipe appears only beside the recipe', await desktop.getByRole('button', { name: 'Adjust Recipe' }).count() === 1)
-check('cook mode is a switch beside the recipe', await desktop.getByRole('switch', { name: 'Cook Mode' }).getAttribute('aria-checked') === 'false')
+check('recipe controls appear once in the header', await desktop.getByRole('switch', { name: 'Cooking view' }).count() === 1 && await desktop.getByRole('button', { name: 'Print Recipe' }).count() === 1 && await desktop.getByRole('link', { name: 'Pin Recipe' }).count() === 1 && await desktop.getByRole('switch', { name: 'Cook Mode' }).count() === 0)
 const authoredPizzaText = await desktop.locator('#recipe-card').textContent()
 check('pizza toppings show readable per-pizza and batch totals', authoredPizzaText.includes('6 oz pizza sauce (18 oz total)') && authoredPizzaText.includes('28 g pecorino romano (84 g total)') && authoredPizzaText.includes('⅛ tsp dried oregano (⅜ tsp total)'))
 check('outdoor mixing omits unused optional ingredients', authoredPizzaText.includes('Add the water, flour, salt, and yeast to the spiral mixer'))
@@ -97,7 +97,6 @@ await desktop.getByLabel('Oven method').selectOption('indoor-steel')
 await desktop.getByRole('button', { name: 'Use recommended formula for Indoor Steel' }).click()
 check('using a recommended formula clears the saved-formula identity', await desktop.getByText('Loaded', { exact: true }).count() === 0 && await desktop.getByText('Modified', { exact: true }).count() === 0)
 await desktop.getByRole('button', { name: 'Apply to recipe' }).click()
-await desktop.getByRole('dialog', { name: 'Adjust recipe' }).waitFor({ state: 'hidden' })
 await desktop.waitForURL('**/recipes/new-york-style-pizza?config=*')
 const indoorFacts = await desktop.evaluate(() => document.body.textContent ?? '')
 check('applied configuration updates URL', desktop.url().includes('?config='), desktop.url())
@@ -112,26 +111,13 @@ await desktop.getByRole('button', { name: 'Adjust Recipe' }).first().click()
 await desktop.getByLabel('Hydration').fill('71')
 await desktop.getByRole('button', { name: 'Cancel' }).click()
 check('cancel discards draft', (await desktop.locator('text=68% hydration').count()) > 0)
-const cookActionsHeight = await desktop.locator('[data-recipe-card-actions]').evaluate((actions) => actions.getBoundingClientRect().height)
-await desktop.getByRole('switch', { name: 'Cook Mode' }).click()
-await desktop.waitForTimeout(200)
-const activeCookActionsHeight = await desktop.locator('[data-recipe-card-actions]').evaluate((actions) => actions.getBoundingClientRect().height)
-check('cook-mode switch does not change action-row padding', Math.abs(activeCookActionsHeight - cookActionsHeight) < 1, `${cookActionsHeight} -> ${activeCookActionsHeight}`)
-check(
-  'recipe-card cook mode keeps surrounding content in place',
-  await desktop.locator('[data-yeet-browse]').count() === 1,
-)
-check(
-  'cook mode marks article root',
-  await desktop.locator('.yeet[data-cook-mode="true"]').count() === 1,
-)
 const readingLayout = await desktop.evaluate(() => ['.yeet > header', '.yeet main', '.yeet main > article'].map((selector) => {
   const rect = document.querySelector(selector).getBoundingClientRect()
   return { selector, left: rect.left, width: rect.width }
 }))
 await desktop.getByRole('switch', { name: 'Cooking view' }).click()
 await desktop.waitForTimeout(200)
-check('start cooking enables cook mode', await desktop.getByRole('switch', { name: 'Cook Mode' }).getAttribute('aria-checked') === 'true')
+check('cooking view enables cook mode', await desktop.locator('.yeet[data-cook-mode="true"]').count() === 1)
 check('start cooking hides browse sidebar', await desktop.locator('[data-yeet-browse]').count() === 0)
 check('focused cooking offers a switch back to the article', await desktop.getByRole('switch', { name: 'Cooking view' }).getAttribute('aria-checked') === 'true')
 check('Cooking view preserves horizontal page geometry', await desktop.evaluate((before) => before.every(({ selector, left, width }) => {

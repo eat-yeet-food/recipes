@@ -1,10 +1,7 @@
-import { Printer, Share2 } from 'lucide-react'
-
 import { formatYield, humanizeMinutes } from '@eat-yeet/l2-recipe-domain/format'
 import type { RecipeBlock, Section } from '@eat-yeet/l4-content-model/blocks'
 import type { RecipeContent } from '@eat-yeet/l4-content-model/recipes'
 import { createPageBlockRegistry, registerSharedPageBlocks, type PageBlockRegistry } from '@eat-yeet/l6-ui-content-blocks/page-blocks'
-import { CookModeSwitch, RecipeAction } from './recipe-actions'
 import { AdjustRecipeButton } from './recipe-workbench'
 import { RecipeFacts } from './recipe-facts'
 
@@ -15,11 +12,7 @@ const Html = ({ as: Tag = 'div', html, ...rest }: { as?: any; html: string } & R
 export type RecipePageBlockContext = {
   page: RecipeContent
   siteUrl: string
-  cookMode: boolean
   firstRecipeBlockIndex: number
-  printPage: () => void
-  pinUrl: URL
-  onToggleCookMode: () => void
   workbenchSummary?: string
   onOpenWorkbench?: () => void
 }
@@ -92,27 +85,12 @@ function RecipeBlockView({
   context: RecipePageBlockContext
 }) {
   const id = index === context.firstRecipeBlockIndex ? 'recipe-card' : undefined
-  const { page, cookMode, pinUrl, printPage, onToggleCookMode } = context
+  const { page } = context
 
   return (
     <section id={id} className="scroll-mt-20">
       <div className="pb-2.5">
         <MetaList page={page} />
-        <div
-          data-recipe-card-actions=""
-          className={`grid grid-cols-3 gap-3 mt-6 mb-1 max-[640px]:grid-cols-1 print:hidden ${cookMode ? 'sticky top-3 z-[var(--z-recipe-actions)] bg-white' : ''}`}
-          role="group" aria-label="Recipe card actions"
-        >
-          <RecipeAction variant="card" onClick={printPage}>
-            <Printer className="size-3.5 max-[640px]:hidden" />
-            Print Recipe
-          </RecipeAction>
-          <RecipeAction variant="card" href={pinUrl.toString()} target="_blank" rel="noreferrer">
-            <Share2 className="size-3.5 max-[640px]:hidden" />
-            Pin Recipe
-          </RecipeAction>
-          <CookModeSwitch checked={cookMode} onCheckedChange={onToggleCookMode} />
-        </div>
       </div>
 
       {block.ingredients.length > 0 && (

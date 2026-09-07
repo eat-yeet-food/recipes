@@ -100,12 +100,6 @@ export function RecipeArticle({
   const printPage = () => {
     window.print()
   }
-  const toggleCookMode = () => {
-    setCookMode((active) => {
-      if (active) setFocusedCooking(false)
-      return !active
-    })
-  }
   const toggleFocusedCooking = () => {
     setFocusedCooking((active) => {
       setCookMode(!active)
@@ -169,11 +163,7 @@ export function RecipeArticle({
   const blockContext: RecipePageBlockContext = {
     page,
     siteUrl,
-    cookMode,
     firstRecipeBlockIndex,
-    printPage,
-    pinUrl,
-    onToggleCookMode: toggleCookMode,
     workbenchSummary: workbench ? workbench.plugin.summary(page, workbench.config, workbench.state) : undefined,
     onOpenWorkbench: workbench ? openWorkbench : undefined,
   }

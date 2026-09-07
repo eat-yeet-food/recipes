@@ -51,6 +51,8 @@ domain model, plugin state/recipe projection, and production stories together.
 For recipe layout changes, follow **Recipe layout**: use the shared description
 and body measure, preserve the title-row switch placement, and keep a switch’s
 label attached to its track rather than stretching them across the parent.
+Keep Print, Pin, and Cooking view in the main header only; do not duplicate
+that action row or a Cook Mode switch in the recipe body.
 
 When recording refinements, distinguish implemented changes from proposed
 designs and historical verification from evidence for the current changes.

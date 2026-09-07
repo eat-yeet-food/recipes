@@ -4,7 +4,7 @@ Reviewed September 7, 2026. The approved usage contract is [design-system.md](de
 
 ## Subsequent September 7 refinements
 
-Apply now captures the valid draft and synchronously commits drawer closure before starting the recipe URL update. The route regression waits for the dialog to disappear after applying. Standalone interaction checks remain paused.
+The user confirmed Apply already dismisses the drawer; the proposed dismissal-order change was reverted before deployment. The repeated Print, Pin, and Cook Mode row is removed from the recipe body, leaving the main header as the sole action location. Updated stories and route assertions reflect this structure; standalone checks remain paused.
 
 Recipe image-to-body spacing is now 32px on desktop and 24px on mobile, replacing stacked main padding, article margin, and article padding. Standalone visual checks remain paused.
 
