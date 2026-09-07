@@ -31,7 +31,7 @@ function withoutAppOnlyPlugins(plugins: PluginOption[] = []): PluginOption[] {
 }
 
 const config: StorybookConfig = {
-  stories: ['../../../**/src/**/*.stories.@(ts|tsx)'],
+  stories: ['../../../**/src/**/*.stories.@(ts|tsx)', '../src/**/*.mdx'],
   addons: ['@storybook/addon-docs'],
   framework: {
     name: '@storybook/react-vite',

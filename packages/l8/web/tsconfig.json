@@ -8,7 +8,9 @@
     "emitDeclarationOnly": true,
     "outDir": "../../../.nx/types/packages/l8/web",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "./src/*"
+      ]
     }
   },
   "references": [
@@ -56,8 +58,15 @@
     },
     {
       "path": "../../l7/search/tsconfig.json"
+    },
+    {
+      "path": "../../l5/ui-primitives/tsconfig.json"
     }
   ],
-  "include": ["src"],
-  "exclude": ["src/**/*.test.mjs"]
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "src/**/*.test.mjs"
+  ]
 }

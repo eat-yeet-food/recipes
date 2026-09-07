@@ -1,3 +1,6 @@
+import { useId, useRef, useState } from 'react'
+import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
+import { expect, userEvent, within, waitFor } from 'storybook/test'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 
 import type { RecipeContent } from '@eat-yeet/l4-content-model/recipes'
@@ -41,13 +44,18 @@ const state = {
   },
 } as const
 
-function WorkbenchPreview({ invalid = false }: { invalid?: boolean }) {
-  const selected = invalid
-    ? { ...state, formula: { ...state.formula, flour: state.formula.flour.map((part, index) => index === 0 ? { ...part, percent: 60 } : part) } }
-    : state
-  const config = { defaultInputMode: 'weights', defaultSelection: selected, recommendedFormulas: {}, doughIngredientSectionId: 'dough', initialWaterPercent: 97 }
-  const Drawer = plugin.Drawer
-  return <Drawer recipe={recipe} config={config} state={selected} onApply={() => {}} hasSharedConfiguration={false} storageScope="storybook" open onOpenChange={() => {}} />
+function WorkbenchPreview({ target = false, pizza = false }: { target?: boolean; pizza?: boolean }) {
+  const scope = `storybook-${useId()}`
+  const [open, setOpen] = useState(true)
+  const [applied, setApplied] = useState(false)
+  const selected = state
+  const [saved, setSaved] = useState<unknown>(null)
+  const trigger = useRef<HTMLButtonElement>(null)
+  const changeOpen = (next: boolean) => { setOpen(next); if (!next) requestAnimationFrame(() => trigger.current?.focus()) }
+  const config = { defaultInputMode: target ? 'target' : 'weights', defaultSelection: selected, recommendedFormulas: {}, doughIngredientSectionId: 'dough', initialWaterPercent: 97 }
+  const Drawer = (pizza ? recipeWorkbenchRegistry.get('pizza')! : plugin).Drawer
+  const initial = pizza ? { ...selected, formula: { ...selected.formula, family: 'pizza', levainPercent: 0, yeastPercent: 0.3 } } : selected
+  return <div className="p-6"><Button ref={trigger} onClick={() => setOpen(true)}>Open workbench</Button><p role="status">{applied ? "Recipe updated" : "Preview your batch"}</p><Drawer recipe={recipe} config={{ ...config, defaultSelection: initial }} state={saved ?? initial} onApply={(next) => { setSaved(next); setApplied(true) }} hasSharedConfiguration={false} storageScope={scope} open={open} onOpenChange={changeOpen} /></div>
 }
 
 const meta = {
@@ -60,4 +68,27 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const SourdoughWeights: Story = {}
-export const IncompleteFlourBlend: Story = { args: { invalid: true } }
+export const IncompleteFlourBlend: Story = {
+  args: { target: true },
+  play: async ({ canvasElement }) => {
+    const screen = within(canvasElement.ownerDocument.body)
+  await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))
+    const field = await screen.findByRole('spinbutton', { name: /High-protein.*percentage/ })
+    await userEvent.clear(field)
+    await userEvent.type(field, '60')
+    await expect(screen.getByRole('alert')).toHaveTextContent('100')
+    await expect(screen.getByRole('button', { name: 'Apply to recipe' })).toBeDisabled()
+  },
+}
+
+export const TargetBatch: Story = { args: { target: true } }
+export const Pizza: Story = { args: { pizza: true, target: true } }
+export const ApplyAndClose: Story = { play: async ({ canvasElement }) => { const screen = within(canvasElement.ownerDocument.body); await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto')); await userEvent.click(await screen.findByRole('button', { name: 'Apply to recipe' })); await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument()); await expect(screen.getByRole('status')).toHaveTextContent('Recipe updated') } }
+
+export const SavedFormula: Story = { play: async ({ canvasElement }) => {
+  const screen = within(canvasElement.ownerDocument.body)
+  await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))
+  await userEvent.type(await screen.findByRole('textbox', { name: 'Formula preset name' }), 'Weekend batch')
+  await userEvent.click(screen.getAllByRole('button', { name: 'Save new' })[0])
+  await expect(screen.getByRole('button', { name: 'Load Weekend batch' })).toBeInTheDocument()
+} }

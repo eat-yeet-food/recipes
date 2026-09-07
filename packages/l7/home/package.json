@@ -4,5 +4,8 @@
   "type": "module",
   "exports": {
     "./home/*": "./src/home/*.tsx"
+  },
+  "dependencies": {
+    "@eat-yeet/l5-ui-primitives": "workspace:*"
   }
 }

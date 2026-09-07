@@ -1,3 +1,4 @@
+import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
 /**
  * Landing page feature composition.
  *
@@ -9,21 +10,10 @@ import { Link } from '@tanstack/react-router'
 
 import { ArrowRight } from 'lucide-react'
 import { BrowseCard, RecipeCard, SectionHeading } from '@eat-yeet/l6-ui-catalog/cards'
-import { Wordmark } from '@eat-yeet/l6-ui-shell/shell/wordmark'
 import type { FacetKey, SearchParams } from '@eat-yeet/l2-recipe-domain/search'
 import type { RecipeSummary } from '@eat-yeet/l1-recipe-model/recipes'
 
 const MAX_SECTION_SIZE = 6
-
-/** The scattered confetti dots behind the hero copy. */
-const DOTS = [
-  'top-[18%] left-[12%] size-3 bg-highlight/30',
-  'top-[30%] left-[25%] size-2 bg-brand/15',
-  'top-[72%] left-[8%] size-4 bg-brand/10',
-  'top-[80%] left-[35%] size-2.5 bg-highlight/20',
-  'top-[15%] right-[35%] size-3.5 bg-brand/[0.08]',
-  'top-[85%] right-[15%] size-1.5 bg-highlight/35',
-]
 
 /** Copy required by the home hero and catalog sections. */
 type WordmarkCopy = {
@@ -36,7 +26,11 @@ type HomeCopy = {
   hero: {
     image: string
     imageAlt: string
+    imageCaption?: string
+    headline?: string
+    kicker?: string
     tagline: string
+    motto?: string
     cta: string
   }
   wordmark: WordmarkCopy
@@ -57,60 +51,24 @@ export interface Category {
   featured?: boolean
 }
 
-function HomeHero({ copy }: { copy: HomeCopy }) {
+export function HomeHero({ copy }: { copy: HomeCopy }) {
   const { hero, wordmark } = copy
 
   return (
-    <section className="relative -mt-16 overflow-hidden bg-tint">
-      <div
-        className="absolute inset-0 hidden scale-105 bg-cover bg-center will-change-transform max-md:block"
-        style={{ backgroundImage: `url('${hero.image}')` }}
-      />
-      <div className="absolute inset-0 hidden max-md:block" data-hero-scrim />
-
-      <div className="relative mx-auto grid min-h-[85vh] min-h-[85svh] w-full max-w-[var(--layout-hero-max)] grid-cols-[1.2fr_1fr] items-center px-6 pt-16 max-md:grid-cols-1 md:px-10">
-        <div
-          className="pointer-events-none absolute top-1/2 right-0 -translate-y-1/2 select-none font-hero text-[clamp(180px,22vw,320px)] leading-[0.85] text-brand/[0.03] max-md:hidden"
-          aria-hidden="true"
-        >
-          {wordmark.background}
-        </div>
-
-        {DOTS.map((dot) => (
-          <div key={dot} className={`pointer-events-none absolute rounded-full max-md:hidden ${dot}`} />
-        ))}
-
-        <div className="relative z-10 max-w-[600px] py-20 max-md:mx-auto max-md:text-center">
-          <Wordmark copy={copy.wordmark} size="hero" onPhoto className="max-md:justify-center" />
-
-          <p className="mt-3 text-[19px] text-ink/70 max-md:text-white/90">
-            {hero.tagline}
-          </p>
-
-          <Link
-            to="/search"
-            className="mt-10 inline-flex items-center gap-2.5 rounded-full bg-brand-strong px-8 py-4 text-sm font-semibold uppercase tracking-[2px] text-white transition-all hover:-translate-y-0.5 hover:bg-ink"
-            data-cta
-          >
-            {hero.cta}
-            <ArrowRight className="size-4" />
-          </Link>
-        </div>
-
-        <div className="relative z-10 flex items-center justify-center max-md:hidden">
-          <div className="pointer-events-none absolute top-1/2 left-1/2 size-[440px] -translate-x-1/2 -translate-y-1/2 rounded-full" data-hero-glow />
-          <div
-            className="w-[min(400px,80%)] rotate-3 overflow-hidden rounded-3xl transition-transform duration-300 ease-out hover:rotate-0 hover:scale-[1.03]"
-            data-hero-media
-          >
-            <img
-              src={hero.image}
-              alt={hero.imageAlt}
-              className="aspect-[3/4] w-full object-cover"
-              loading="eager"
-              fetchPriority="high"
-            />
-          </div>
+    <section className="overflow-hidden bg-brand text-ink">
+      <div className="mx-auto grid max-w-[var(--layout-hero-max)] md:grid-cols-2">
+        <figure className="order-2 m-0 flex min-w-0 flex-col bg-ink p-6 md:order-1 md:py-10 md:pl-10 md:pr-0">
+          <img src={hero.image} alt={hero.imageAlt} className="aspect-[4/3] w-full flex-1 object-cover [clip-path:polygon(0_0,100%_0,100%_90%,0_100%)]" loading="eager" fetchPriority="high" />
+          {hero.imageCaption && <figcaption className="pt-5 text-sm font-bold text-white">{hero.imageCaption}</figcaption>}
+        </figure>
+        <div className="relative isolate order-1 overflow-hidden px-6 py-10 md:order-2 md:p-12 lg:p-14">
+          <div aria-hidden="true" className="brand-dots absolute right-5 top-6 -z-10 size-12 rotate-6" />
+          {hero.kicker && <p className="mb-7 max-w-[80%] text-xs font-bold uppercase tracking-widest">{hero.kicker}</p>}
+          <h1 className="m-0 whitespace-pre-line font-hero text-[clamp(48px,7vw,104px)] leading-none tracking-tight">{hero.headline ?? `${wordmark.first} / ${wordmark.second}`}</h1>
+          <p className="mt-8 whitespace-pre-line text-lg leading-relaxed">{hero.tagline}</p>
+          {hero.motto && <p className="mt-4 text-lg font-bold">{hero.motto}</p>}
+          <Button asChild size="lg" className="mt-7"><Link to="/search">{hero.cta}<ArrowRight aria-hidden="true" className="size-6 -rotate-45" /></Link></Button>
+          <span aria-hidden="true" className="absolute -bottom-28 -right-28 -z-10 h-72 w-80 -rotate-12 rounded-full bg-brand-alt" />
         </div>
       </div>
     </section>
@@ -128,7 +86,7 @@ export function ViewAll({ to, label, className }: { to: string; label: string; c
     <div className={`${className} text-center`}>
       <Link
         to={to}
-        className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[2px] text-brand-strong transition-colors hover:text-ink"
+        className="inline-flex items-center gap-2 min-h-11 text-sm font-bold text-brand-strong transition-colors hover:text-ink"
       >
         {label}
         <ArrowRight className="size-4" />

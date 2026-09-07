@@ -1,3 +1,7 @@
+import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
+import { Input } from '@eat-yeet/l5-ui-primitives/primitives/input'
+import { Select } from '@eat-yeet/l5-ui-primitives/primitives/select'
+import { ChoiceGroup } from '@eat-yeet/l5-ui-primitives/primitives/choice-group'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 
 import type { Meta, StoryObj } from '@storybook/react-vite'
@@ -7,25 +11,23 @@ import { APP_CONFIG } from '@/lib/app-config'
 type Token = { name: string; token: string; usage: string }
 
 const APP_TOKENS: Token[] = [
-  { name: 'Brand', token: '--color-brand', usage: 'CTAs, links, "Yeet"' },
-  { name: 'Brand Strong', token: '--color-brand-strong', usage: 'CTA hover' },
-  { name: 'Ink', token: '--color-ink', usage: 'Tailwind body text, nav and footer chrome' },
-  { name: 'Tint', token: '--color-tint', usage: 'home hero field' },
-  { name: 'Highlight', token: '--color-highlight', usage: 'warm accent' },
-  { name: 'Warm Deep', token: '--color-warm-deep', usage: 'secondary surface' },
-  { name: 'Support Strong', token: '--color-support-strong', usage: 'eyebrows' },
-]
-
-const RECIPE_TOKENS: Token[] = [
-  { name: 'Gray', token: '--yeet-gray', usage: 'recipe body ink' },
-  { name: 'Tomato', token: '--yeet-tomato', usage: 'kickers and markers' },
-  { name: 'Tomato Strong', token: '--yeet-tomato-strong', usage: 'small recipe metadata' },
-  { name: 'Pink', token: '--yeet-pink', usage: 'link underline, card shadow' },
-  { name: 'Light Pink', token: '--yeet-light-pink', usage: 'callout panels, metadata cells' },
-  { name: 'Cream', token: '--yeet-cream', usage: 'warm surface' },
+ { name: 'Sunshine', token: '--color-brand', usage: 'Expressive fields and brand mark; never small text on white' },
+ { name: 'Ink', token: '--color-ink', usage: 'Reading and primary controls' },
+ { name: 'Action label', token: '--color-action-label', usage: 'Cream text inside ink actions, including on yellow' },
+ { name: 'Action hover', token: '--color-action-hover', usage: 'Warm dark hover, with cream labels' },
+ { name: 'Golden orange', token: '--color-brand-alt', usage: 'Occasional graphic accent and dough illustration' },
+ { name: 'Quiet yellow', token: '--color-tint', usage: 'Occasional prose callouts only; not controls or facts' },
+ { name: 'Checkbox edge', token: '--color-input', usage: 'Functional checkbox boundary; text fields use a flat ink fill' },
+ { name: 'Muted ink', token: '--color-muted-foreground', usage: 'Secondary readable text, no opacity mixing' },
+ { name: 'Error', token: '--color-danger', usage: 'Genuine validation and destructive actions only' },
 ]
 
 const SYSTEM_TOKENS: Token[] = [
+ {name:'Group outer radius',token:'--radius-choice',usage:'Selection container'},
+ {name:'Group inset',token:'--spacing-choice-inset',usage:'Padding and gap'},
+ {name:'Inner radius',token:'--radius-choice-item',usage:'Outer radius minus inset; never independently rounded'},
+ {name:'Field radius',token:'--radius-field',usage:'Inputs and selects'},
+ {name:'Surface radius',token:'--radius-surface',usage:'Cards and callouts'},
   { name: 'Body Font', token: '--font-body', usage: 'body text' },
   { name: 'Display Font', token: '--font-display', usage: 'headings' },
   { name: 'Hero Font', token: '--font-hero', usage: 'hero lockup' },
@@ -114,7 +116,7 @@ function ColorTokenGrid() {
   return (
     <div data-storybook-stack="">
       <Swatches tokens={APP_TOKENS} />
-      <Swatches tokens={RECIPE_TOKENS} scope="yeet" />
+
     </div>
   )
 }
@@ -145,36 +147,18 @@ function TokenTable({ tokens }: { tokens: Token[] }) {
 }
 
 function FormStates() {
-  return (
-    <div data-storybook-form-row="">
-      <label>
-        <span>Search</span>
-        <input type="search" value="pizza" readOnly />
-      </label>
-      <label>
-        <span>Course</span>
-        <select defaultValue="mains">
-          <option value="mains">Mains</option>
-          <option value="desserts">Desserts</option>
-        </select>
-      </label>
-      <div data-storybook-chip-row="">
-        <button type="button" aria-pressed="true">
-          Mains
-        </button>
-        <button type="button" aria-pressed="false">
-          Vegetarian
-        </button>
-        <button type="button" disabled>
-          Unavailable
-        </button>
-      </div>
-    </div>
-  )
+  const [mode, setMode] = useState('weights')
+  return <div data-storybook-form-row="">
+    <label><span>Search</span><Input type="search" defaultValue="pizza" /></label>
+    <label><span>Course</span><Select defaultValue="mains"><option value="mains">Mains</option><option value="desserts">Desserts</option></Select></label>
+    <ChoiceGroup label="Input mode" value={mode} onChange={setMode} options={[{ value: 'weights', label: 'Weights' }, { value: 'target', label: 'Target batch' }]} />
+    <div data-storybook-chip-row=""><Button>Apply recipe</Button><Button disabled>Unavailable</Button></div>
+  </div>
 }
 
 const meta = {
-  title: 'Web/Design Tokens',
+  title: 'Foundations/Design Tokens',
+  component: ColorTokenGrid,
   parameters: {
     layout: 'fullscreen',
   },

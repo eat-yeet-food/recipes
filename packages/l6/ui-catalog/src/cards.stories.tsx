@@ -155,6 +155,7 @@ function StoryCanvas({ children }: { children: ReactNode }) {
 
 const meta = {
   title: 'Catalog/Cards',
+  subcomponents: { RecipeCard },
   parameters: {
     layout: 'fullscreen',
   },

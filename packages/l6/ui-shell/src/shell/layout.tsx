@@ -59,17 +59,17 @@ export function Nav({
   const onHeroPage = routeHasHero(pathname) && !scrolled
   const heroVisible = routeHasDarkHero(pathname) && !scrolled
   const navBg = onHeroPage
-    ? 'bg-transparent'
+    ? 'bg-white'
     : 'bg-white/92 backdrop-blur-[16px] shadow-[0_1px_0_color-mix(in_srgb,var(--color-ink)_8%,transparent)]'
 
   // <Wordmark> carries its own color, so only the over-photo shadow varies.
   const wordmarkClass = onHeroPage
-    ? 'transition-nav-icon max-md:drop-shadow-[0_2px_12px_color-mix(in_srgb,var(--color-black)_50%,transparent)]'
+    ? 'transition-nav-icon'
     : 'transition-nav-icon'
 
   const linkClass = heroVisible
-    ? 'font-nav text-sm font-[900] uppercase tracking-wider transition-nav-text text-white [text-shadow:0_1px_8px_color-mix(in_srgb,var(--color-black)_45%,transparent),0_0_16px_color-mix(in_srgb,var(--color-black)_20%,transparent)] hover:text-highlight'
-    : 'font-nav text-sm font-[900] uppercase tracking-wider transition-nav-text text-ink hover:text-ink/70'
+    ? 'min-h-11 inline-flex items-center font-nav text-sm font-bold transition-nav-text text-white [text-shadow:0_1px_8px_color-mix(in_srgb,var(--color-black)_45%,transparent),0_0_16px_color-mix(in_srgb,var(--color-black)_20%,transparent)] hover:text-highlight'
+    : 'min-h-11 inline-flex items-center font-nav text-sm font-bold transition-nav-text text-ink hover:text-ink/70'
 
   const searchBtnClass = heroVisible
     ? 'text-white/80 hover:bg-white/10 hover:text-white'
@@ -86,7 +86,7 @@ export function Nav({
       >
         <div className="flex items-center gap-2">
           <Link to="/" data-site-brand="" className="flex items-center gap-2" aria-label={`${siteName} home`}>
-            <Wordmark copy={wordmark} size="nav" onPhoto={onHeroPage} className={wordmarkClass} />
+            <Wordmark copy={wordmark} size="nav" onPhoto={false} className={wordmarkClass} />
           </Link>
         </div>
         <div className="ml-auto flex items-center gap-3">
@@ -102,7 +102,7 @@ export function Nav({
             <Button
               variant="ghost"
               size="icon"
-              className={cn('size-10', searchBtnClass)}
+              className={cn('size-11', searchBtnClass)}
               aria-label="Search recipes"
               data-palette-open=""
               onClick={onOpenPalette}
@@ -114,7 +114,7 @@ export function Nav({
             <Button
               variant="ghost"
               size="icon"
-              className={cn('size-10', onHeroPage ? 'md:hidden text-white hover:text-white/80' : 'md:hidden')}
+              className={cn('size-11', 'md:hidden text-ink')}
               aria-label="Search recipes"
               data-palette-open=""
               onClick={onOpenPalette}
@@ -125,8 +125,8 @@ export function Nav({
               variant="ghost"
               size="icon"
               className={cn(
-                'size-10',
-                onHeroPage ? 'max-md:text-white max-md:hover:text-white/80' : '',
+                'size-11',
+                '',
                 heroVisible ? 'text-white hover:text-white/80' : '',
               )}
               aria-label="Open menu"
@@ -144,21 +144,21 @@ export function Nav({
           <Link
             to="/search"
             onClick={() => setMenuOpen(false)}
-            className="rounded px-2 py-3 font-nav text-sm font-[900] uppercase tracking-wider text-ink hover:bg-ink/5"
+            className="rounded px-2 py-3 min-h-11 inline-flex items-center font-nav text-sm font-bold text-ink hover:bg-ink/5"
           >
             Recipes
           </Link>
           <Link
             to="/browse"
             onClick={() => setMenuOpen(false)}
-            className="rounded px-2 py-3 font-nav text-sm font-[900] uppercase tracking-wider text-ink hover:bg-ink/5"
+            className="rounded px-2 py-3 min-h-11 inline-flex items-center font-nav text-sm font-bold text-ink hover:bg-ink/5"
           >
             Browse
           </Link>
           <Link
             to="/learn"
             onClick={() => setMenuOpen(false)}
-            className="rounded px-2 py-3 font-nav text-sm font-[900] uppercase tracking-wider text-ink hover:bg-ink/5"
+            className="rounded px-2 py-3 min-h-11 inline-flex items-center font-nav text-sm font-bold text-ink hover:bg-ink/5"
           >
             Learn
           </Link>
@@ -171,7 +171,7 @@ export function Nav({
 /** footer.tsx */
 export function Footer({ siteName, wordmark }: { siteName: string; wordmark: WordmarkCopy }) {
   const linkClass =
-    'text-[13px] font-medium uppercase tracking-[1.5px] text-ink/40 transition-colors hover:text-brand'
+    'inline-flex min-h-11 items-center text-sm font-bold text-ink transition-colors hover:text-action-hover'
   const [year, setYear] = useState('2026')
 
   useEffect(() => {
@@ -184,7 +184,7 @@ export function Footer({ siteName, wordmark }: { siteName: string; wordmark: Wor
         <div data-site-footer-brand="" className="flex justify-center">
           <Wordmark copy={wordmark} size="footer" />
         </div>
-        <nav data-site-footer-links="" className="mt-4 flex justify-center gap-6" aria-label="Footer">
+        <nav data-site-footer-links="" className="mt-4 flex flex-wrap justify-center gap-x-6 gap-y-1" aria-label="Footer">
           <Link to="/" className={linkClass}>
             Home
           </Link>

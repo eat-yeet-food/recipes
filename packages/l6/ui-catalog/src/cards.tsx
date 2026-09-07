@@ -28,7 +28,7 @@ export function SectionHeading({ eyebrow, title }: { eyebrow: string; title: str
 }
 
 const CATALOG_CARD_LINK_CLASS =
-  'group flex flex-col overflow-hidden rounded-lg bg-white !text-ink no-underline !shadow-sm transition-card-hover will-change-[translate,box-shadow] hover:-translate-y-1 hover:!text-ink hover:no-underline hover:!shadow-card-hover'
+  'group flex flex-col overflow-hidden rounded-surface bg-white !text-ink no-underline !shadow-none transition-card-hover will-change-[translate,box-shadow]  hover:!text-ink hover:no-underline '
 
 const CATALOG_CARD_TITLE_CLASS = 'm-0 min-h-[2.12em] text-[22px] leading-[1.06] max-sm:text-[19px]'
 const CATALOG_CARD_DESCRIPTION_CLASS =
@@ -45,7 +45,8 @@ const CardFallback = ({ icon = 'recipe' }: { icon?: 'recipe' | 'article' }) => (
 )
 
 /** Recipe summary card. */
-export function RecipeCard({ recipe }: { recipe: RecipeSummary }) {
+export function RecipeCard({ recipe, headingLevel = 3 }: { recipe: RecipeSummary; headingLevel?: 2 | 3 }) {
+  const Heading = headingLevel === 2 ? 'h2' : 'h3'
   const src = imageUrl(recipe)
   const totalTime = humanizeMinutes(recipe.totalMinutes)
   const yields = formatYield(recipe.yieldAmount, recipe.yieldUnit)
@@ -73,11 +74,11 @@ export function RecipeCard({ recipe }: { recipe: RecipeSummary }) {
         )}
       </div>
       <div className="flex flex-1 flex-col p-6 max-sm:p-5">
-        <h3
+        <Heading
           className={cn('font-display font-extrabold text-ink', CATALOG_CARD_TITLE_CLASS)}
         >
           {recipe.title}
-        </h3>
+        </Heading>
         <div className="mt-2.5 flex-1">
           <p className={CATALOG_CARD_DESCRIPTION_CLASS}>
             {recipe.description}
@@ -169,7 +170,7 @@ export function BrowseCard({
     <Link
       to="/search"
       search={search}
-      className="group relative block aspect-[3/2] overflow-hidden rounded-lg transition-card-hover hover:-translate-y-1 hover:shadow-lg"
+      className="group relative block aspect-[3/2] overflow-hidden rounded-surface transition-card-hover  "
     >
       <div className="absolute inset-0 flex items-center justify-center bg-warm-deep">
         <UtensilsCrossed className="size-10 text-ink/15" strokeWidth="1.25" />
@@ -180,8 +181,7 @@ export function BrowseCard({
         loading="lazy"
         className="absolute inset-0 size-full object-cover transition-image-zoom group-hover:scale-[1.06] opacity-100"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-ink/70 to-transparent" />
-      <span className="absolute bottom-3 left-3 font-display text-base font-extrabold text-white drop-shadow-sm">
+      <span className="absolute bottom-2 inset-x-2 rounded-field bg-ink px-2 py-1 text-center font-action text-xs font-bold text-action-label">
         {label}
       </span>
     </Link>
@@ -203,7 +203,7 @@ export function RecipeGrid({ recipes }: { recipes: RecipeSummary[] }) {
   return (
     <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
       {recipes.map((recipe) => (
-        <RecipeCard key={recipe.slug} recipe={recipe} />
+        <RecipeCard key={recipe.slug} recipe={recipe} headingLevel={2} />
       ))}
     </div>
   )

@@ -42,7 +42,7 @@ function RecipeArticleHeader({
 }) {
   return (
     <div className="max-w-[690px]">
-      <nav className="yeet-crumbs flex flex-wrap gap-1.5 mb-5 text-[var(--yeet-gray)] text-xs leading-[1.6] uppercase" aria-label="Breadcrumb">
+      <nav className="flex flex-wrap gap-1.5 mb-5 text-[var(--color-ink)] text-xs leading-[1.6] uppercase" aria-label="Breadcrumb">
         <a href="/">Home</a>
         <span>&gt;</span>
         <a href="/recipes">Recipes</a>
@@ -50,8 +50,8 @@ function RecipeArticleHeader({
         <span>{page.title}</span>
       </nav>
       <h1 className="m-0 max-w-[690px] text-[34px] leading-[1.25] tracking-[1.2px] font-bold">{page.title}</h1>
-      <div className="yeet-byline mt-2 text-xs uppercase text-[var(--yeet-tomato)]">By Patrick Hogan</div>
-      <div className="flex flex-wrap gap-1 mt-7 mb-7" aria-label="Page actions">
+      <div className="mt-2 text-xs uppercase text-[var(--color-primary)]">By Patrick Hogan</div>
+      <div className="flex flex-wrap gap-1 mt-7 mb-7" role="group" aria-label="Page actions">
         <RecipeAction variant="hero" href={pinUrl.toString()} target="_blank" rel="noreferrer">
           <Share2 className="size-3 max-[640px]:hidden" />
           Pin Recipe
@@ -200,11 +200,11 @@ export function RecipeArticle({
           toggleFocusedCooking={toggleFocusedCooking}
         />
       )}
-      media={photo ? <img src={photo} alt={heroAlt} className="w-full max-h-[690px] object-cover" /> : undefined}
+      media={photo ? <img src={photo} alt={heroAlt} className="w-full max-h-[690px] rounded-surface object-cover" /> : undefined}
       mediaClassName={focusedCooking ? 'hidden' : undefined}
       mainClassName={focusedCooking ? 'grid-cols-1 max-w-[816px] pt-6' : undefined}
       articleClassName={cn(
-        'yeet-card bg-white border-2 border-[var(--yeet-gray)] px-9 pb-[38px] pt-[34px] shadow-[18px_18px_0_var(--yeet-pink)] max-[900px]:shadow-[10px_10px_0_var(--yeet-pink)] max-[640px]:px-[22px] max-[640px]:pb-[30px] max-[640px]:pt-[26px]',
+        'bg-white rounded-surface px-9 pb-[38px] pt-[34px]   max-[640px]:px-[22px] max-[640px]:pb-[30px] max-[640px]:pt-[26px]',
         focusedCooking && 'mt-0 shadow-none',
       )}
       aside={aside?.({ page, focusedCooking })}

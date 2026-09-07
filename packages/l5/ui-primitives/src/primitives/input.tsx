@@ -1,19 +1,9 @@
-import * as React from "react"
-
+import * as React from 'react'
 import { cn } from '@eat-yeet/l0-foundation/utils'
 
-function Input({ className, type, ...props }: React.ComponentProps<"input">) {
-  return (
-    <input
-      type={type}
-      data-slot="input"
-      className={cn(
-        "h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 aria-invalid:border-danger aria-invalid:ring-3 aria-invalid:ring-danger/20 md:text-sm dark:bg-input/30 dark:disabled:bg-input/80 dark:aria-invalid:border-danger/50 dark:aria-invalid:ring-danger/40",
-        className
-      )}
-      {...props}
-    />
-  )
-}
+export const fieldClassName = 'min-h-11 w-full min-w-0 rounded-field border-0 bg-ink px-4 py-3 font-body text-base text-action-label placeholder:text-action-label/80 focus-visible:outline-2 focus-visible:outline-current focus-visible:-outline-offset-4 disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed aria-invalid:bg-danger aria-invalid:text-white'
 
+function Input({ className, type, ...props }: React.ComponentProps<'input'>) {
+  return <input type={type} data-slot="input" className={cn(fieldClassName, className)} {...props} />
+}
 export { Input }

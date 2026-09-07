@@ -104,7 +104,7 @@ function StoryCanvas({ children }: { children: ReactNode }) {
 function BlockGallery() {
   return (
     <div className="yeet">
-      <article className="yeet-card max-w-[760px] bg-white border-2 border-[var(--yeet-gray)] px-9 py-[34px] shadow-[18px_18px_0_var(--yeet-pink)]">
+      <article className="max-w-[760px] bg-white rounded-surface px-9 py-[34px] ">
         <PageBlocks
           blocks={blocks}
           registry={registry}
@@ -117,6 +117,7 @@ function BlockGallery() {
 
 const meta = {
   title: 'Content Blocks/Page Blocks',
+  subcomponents: { PageBlocks },
   parameters: {
     layout: 'fullscreen',
   },
@@ -147,7 +148,7 @@ export const BlockPage: Story = {
             articleLabel="Example page content"
             header={(
               <div className="max-w-[690px]">
-                <nav className="yeet-crumbs flex flex-wrap gap-1.5 mb-5 text-[var(--yeet-gray)] text-xs leading-[1.6] uppercase" aria-label="Breadcrumb">
+                <nav className="flex flex-wrap gap-1.5 mb-5 text-[var(--color-ink)] text-xs leading-[1.6] uppercase" aria-label="Breadcrumb">
                   <a href="/">Home</a>
                   <span>&gt;</span>
                   <span>Guides</span>
@@ -160,7 +161,7 @@ export const BlockPage: Story = {
                 </p>
               </div>
             )}
-            media={<img src="/images/hero-donuts.jpg" alt="Pink glazed donuts with colorful sprinkles" className="w-full max-h-[690px] object-cover" />}
+            media={<img src="/images/hero-donuts.jpg" alt="Pink glazed donuts with colorful sprinkles" className="w-full max-h-[690px] rounded-surface object-cover" />}
           />
         </div>
       </StorySection>

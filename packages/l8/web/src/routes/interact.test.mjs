@@ -33,7 +33,7 @@ const navPaletteTrigger = () => page.locator('nav [data-palette-open]:visible').
 await page.goto(BASE + '/', { waitUntil: 'networkidle' })
 
 // --- prerendered content is present before any JS runs -------------------
-check('home prerenders its hero', await page.locator('text=Eat the best. Yeet the rest.').isVisible())
+check('home prerenders its hero', await page.getByRole('heading', { name: 'BIG DOUGH ENERGY.' }).isVisible())
 
 // --- palette opens from the nav button ---------------------------------
 check('palette starts hidden', await dialog().isHidden())

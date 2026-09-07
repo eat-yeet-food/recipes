@@ -207,15 +207,27 @@ importers:
 
   packages/l6/ui-shell: {}
 
-  packages/l7/home: {}
+  packages/l7/home:
+    dependencies:
+      '@eat-yeet/l5-ui-primitives':
+        specifier: workspace:*
+        version: link:../../l5/ui-primitives
 
   packages/l7/learn: {}
 
-  packages/l7/recipes: {}
+  packages/l7/recipes:
+    dependencies:
+      '@eat-yeet/l5-ui-primitives':
+        specifier: workspace:*
+        version: link:../../l5/ui-primitives
 
   packages/l7/search: {}
 
-  packages/l8/web: {}
+  packages/l8/web:
+    dependencies:
+      '@eat-yeet/l5-ui-primitives':
+        specifier: workspace:*
+        version: link:../../l5/ui-primitives
 
 packages:
 

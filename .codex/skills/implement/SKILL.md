@@ -15,3 +15,5 @@ policy skills:
 
 Use the policies while designing the change, not as an after-the-fact cleanup.
 If a policy cannot be followed, record the reason in the implementation notes.
+
+For branded UI and design-system stories/docs, also read `.codex/skills/design-system/SKILL.md`.

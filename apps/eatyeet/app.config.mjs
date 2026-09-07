@@ -29,17 +29,21 @@ export const app = {
   analytics: { googleTagId: 'G-44ZHQCCVG0' },
   cloudflareProject: 'eatyeet',
   doppler: { project: 'yeet', config: 'dev' },
-  defaultOgImage: '/images/hero-donuts.jpg',
+  defaultOgImage: '/images/charred-crust-pizza.jpg',
   categories: EAT_YEET_CATEGORIES,
   copy: {
     description:
       'A focused recipe archive for breads, pasta, donuts, weeknight mains, and baking projects.',
     wordmark: { first: 'Eat', second: 'Yeet', background: 'YEET' },
     hero: {
-      image: '/images/hero-donuts.jpg',
-      imageAlt: 'Pink glazed donuts with colorful sprinkles',
-      tagline: 'Eat the best. Yeet the rest.',
-      cta: "Let's Eat",
+      image: '/images/charred-crust-pizza.jpg',
+      imageAlt: 'New York style pizza with a charred golden crust',
+      imageCaption: 'New York Style Pizza',
+      headline: 'BIG\nDOUGH\nENERGY.',
+      kicker: 'Eat / Yeet · Worth the mess.',
+      tagline: 'Recipes worth making.\nSkills worth getting your hands into.',
+      motto: "Eat the best, yeet the rest",
+      cta: "Let’s eat",
     },
     home: {
       eyebrow: 'Top Eats',

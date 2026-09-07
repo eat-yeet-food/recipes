@@ -106,18 +106,18 @@ export function SearchPalette({
           placeholder="Search recipes..."
           value={query}
           onValueChange={setQuery}
-          wrapperClassName={showFooter ? 'max-sm:h-14 max-sm:border-b sm:border-b' : 'max-sm:h-14 max-sm:border-b'}
+          wrapperClassName={showFooter ? 'border-b border-border' : undefined}
           endAddon={
             <>
               <div className="hidden items-center gap-1.5 sm:flex">
-                <kbd className={KBD}>&#8984;K</kbd>
-                <kbd className={KBD}>ESC</kbd>
+                <kbd className="font-body text-[10px] text-action-label">&#8984;K</kbd>
+                <kbd className="font-body text-[10px] text-action-label">ESC</kbd>
               </div>
               <button
                 type="button"
                 data-palette-close
                 onClick={onClose}
-                className="font-body text-sm font-medium text-ink/65 transition-colors hover:text-ink sm:hidden"
+                className="control-focus min-h-11 rounded-control px-2 font-body text-sm font-bold text-action-label sm:hidden"
               >
                 Cancel
               </button>
@@ -152,8 +152,8 @@ export function SearchPalette({
                   >
                     <ResultImage recipe={recipe} />
                     <div className="min-w-0 flex-1">
-                      <p className="truncate font-body text-sm font-medium text-ink">{recipe.title}</p>
-                      <div className="mt-0.5 flex gap-3 text-xs text-ink/65">
+                      <p className="truncate font-body text-sm font-medium text-ink group-data-selected/command-item:text-action-label">{recipe.title}</p>
+                      <div className="mt-0.5 flex gap-3 text-xs text-ink/65 group-data-selected/command-item:text-action-label">
                         {time && (
                           <span className="flex items-center gap-1">
                             <Clock className="size-3" />
@@ -181,9 +181,9 @@ export function SearchPalette({
               every other result instead of a parallel onKeyDown branch. */}
           {showFooter && (
             <CommandGroup>
-              <CommandItem value="__view-all__" onSelect={openAll} data-palette-all className="px-4 py-2 text-xs font-medium text-ink/65">
+              <CommandItem value="__view-all__" onSelect={openAll} data-palette-all className="px-4 py-2 text-xs font-medium text-ink/65 data-selected:text-action-label">
                 View all results for &ldquo;{query}&rdquo;
-                <span className="ml-1 text-ink/65">&rarr;</span>
+                <span className="ml-1 text-ink/65 group-data-selected/command-item:text-action-label">&rarr;</span>
               </CommandItem>
             </CommandGroup>
           )}

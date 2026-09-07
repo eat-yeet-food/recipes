@@ -1,0 +1,30 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button';
+
+<Meta title="Foundations/Start Here" />
+
+# Eat / Yeet — Yellow + ink
+
+Sunshine fields, almost-black ink, real food, and plain playful controls. Avenir carries reading, Geller article headings, and Bowlby the brand. The canonical usage and release contract is **docs/design-system.md** in the repository.
+
+## Start with the job
+
+Use saturated yellow for brand moments, recipe facts, and unselected category buttons; white for long reading. Pale yellow is reserved for occasional prose callouts. Actions use ink with cream labels. Red means a genuine error or destructive action. Learn, recipes, and workbench share these roles.
+
+<Button>Make it yours</Button>
+
+## Choose a real control
+
+Open **Controls / Button**, **Fields**, and **Choice Group** for live variants, states, API controls, and interactions. These are production components. Press Tab to inspect the inset focus indicator. Button labels are never underlined. Prose links still are.
+
+Text fields use flat ink fills with light text and no bottom borders. Full-height sheets have square corners. Recipe facts share a strong yellow panel; dough summaries use ink with prominent yellow totals and aligned ingredient weights.
+
+Nested radii follow one rule: outer radius minus inset equals inner radius. Do not independently round a selected pill and its track. Do not add decorative drops, colored button undersides, or white pills on pale tracks.
+
+## Compose and verify
+
+Use **Catalog**, **Content Blocks**, and **Shell** for shared patterns. **Recipes / Dough workbench** includes weights, target batch, pizza, invalid flour blend, and apply/close behavior. Route-level tests cover real recipe persistence and configuration.
+
+Every adopted control needs default, hover, keyboard focus, selected/pressed where meaningful, disabled, error, long-label, and narrow-layout evidence. Test actual text/fill pairs, semantics and keyboard operation. `pnpm test:storybook` runs rendered stories and axe; it does not replace visual or screen-reader review.
+
+The approved favicon keeps the existing bite and sprinkles, with yellow icing and golden-orange dough. App-bar navigation uses the text lockup alone.

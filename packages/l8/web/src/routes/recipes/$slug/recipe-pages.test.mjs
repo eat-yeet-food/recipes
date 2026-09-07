@@ -156,7 +156,7 @@ check('instruction bindings agree with applied recipe rounding', sourdoughRecipe
 const adjustSourdough = sourdough.getByRole('button', { name: 'Adjust Recipe' }).first()
 await adjustSourdough.click()
 const sourdoughDialog = sourdough.getByRole('dialog', { name: 'Adjust recipe' })
-check('sourdough starts in ingredient weights', await sourdough.getByRole('button', { name: 'Ingredient weights' }).getAttribute('aria-pressed') === 'true')
+check('sourdough starts in ingredient weights', await sourdough.getByRole('button', { name: 'Weights' }).getAttribute('aria-pressed') === 'true')
 check('sourdough defaults to 77 percent starter hydration', await sourdough.getByLabel('Starter hydration').inputValue() === '77')
 check('sourdough migration weights survive display rounding',
   await sourdough.getByLabel('Bread flour grams').first().inputValue() === '765.0' &&

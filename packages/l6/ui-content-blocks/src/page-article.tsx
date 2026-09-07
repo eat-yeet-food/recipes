@@ -40,7 +40,7 @@ export function ContentPageArticle<TContext>({
   return (
     <div
       {...rootAttributes}
-      className={cn('yeet bg-white text-[var(--yeet-gray)] text-base leading-[1.6]', className)}
+      className={cn('yeet bg-white text-[var(--color-ink)] text-base leading-[1.6]', className)}
     >
       {header && (
         <header

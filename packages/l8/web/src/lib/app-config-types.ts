@@ -10,7 +10,11 @@ export interface AppCopy {
   hero: {
     image: string
     imageAlt: string
+    imageCaption?: string
+    headline?: string
+    kicker?: string
     tagline: string
+    motto?: string
     cta: string
   }
   home: {

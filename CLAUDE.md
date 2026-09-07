@@ -182,3 +182,20 @@ match `APP_ID`, `SITE_URL`, and the Cloudflare Pages project, and passes
 target the production Pages branch instead of a preview alias. This prevents
 build output for one app from being uploaded to another app's production
 project.
+
+## Design system
+
+`docs/design-system.md` is the approved Yellow + ink usage contract. Read
+`.codex/skills/design-system/SKILL.md` for branded UI or handbook changes. Keep
+app controls and colocated stories in sync; never add a second feature palette.
+Button labels stay plain in all states, including focus. Selection radii derive
+from one outer radius and inset. The approved favicon has yellow icing and
+golden-orange dough.
+
+`pnpm test` includes `test:design-system` and rendered Storybook checks with axe
+and play functions. Review `dist/storybook-a11y.json`, including incomplete
+findings, and `pnpm shots` desktop/mobile app output. For visual changes inspect
+old/new/diff, then deliberately update only reviewed baselines. Never update
+baselines merely to turn a test green. Run `pnpm parity` against the reviewed
+baseline before finalizing a visual release. Full app accessibility requires
+keyboard and visual review in addition to automated reports.

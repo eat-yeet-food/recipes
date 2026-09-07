@@ -1,3 +1,4 @@
+import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
 import { Settings2 } from 'lucide-react'
 
 import type { RecipeContent } from '@eat-yeet/l4-content-model/recipes'
@@ -23,5 +24,5 @@ export function RecipeWorkbenchHost({
 }
 
 export function AdjustRecipeButton({ onClick, compact = false }: { onClick: () => void; compact?: boolean }) {
-  return <button type="button" onClick={onClick} className={compact ? 'inline-flex items-center gap-1 font-extrabold text-[var(--yeet-tomato-strong)] underline underline-offset-4 print:hidden' : 'inline-flex min-h-9 items-center gap-1.5 border border-[var(--yeet-gray)] px-3 text-xs font-extrabold uppercase print:hidden'}><Settings2 className="size-4" />Adjust recipe</button>
+  return <Button onClick={onClick} variant={compact ? 'link' : 'default'} size={compact ? 'sm' : 'default'} className="print:hidden"><Settings2 className="size-4" />Adjust recipe</Button>
 }

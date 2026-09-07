@@ -20,6 +20,7 @@ function StoryCanvas({ children }: { children: ReactNode }) {
 
 const meta = {
   title: 'Shell/Error States',
+  subcomponents: { ErrorState },
   parameters: {
     layout: 'fullscreen',
   },

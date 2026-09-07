@@ -3,20 +3,17 @@ name: policy-theme-tokens
 description: Use when adding or changing styling, Tailwind classes, CSS, or visual design tokens in this repository.
 ---
 
-# Theme Token Policy
+# Theme token policy
 
-Use theme tokens instead of inline visual literals.
+Use `packages/l8/web/src/styles/global.css` for semantic colors, reusable
+geometry, typography, spacing, layers, and motion. Follow `docs/design-system.md`
+for role pairings. `site-overrides.css` owns fonts and generated-prose rules,
+not a separate feature palette. Retired editorial colors must not survive as
+aliases. Status colors retain their semantic purpose.
 
-For production UI, colors, typography, spacing scale, breakpoints, z-index, and
-motion should come from `src/styles/global.css` or a scoped surface token such
-as `.yeet` in `src/styles/site-overrides.css`. If a value is reused or
-art-directed, add a named token first and use `var(--token)` in classes or CSS.
+One-off art-directed geometry and structural third-party primitive internals
+may be local; raw component colors are not an exception. Favicon SVG colors
+are self-contained artwork and cannot inherit page CSS.
 
-Acceptable exceptions are one-off geometric measurements that describe a
-specific layout shape, third-party generated primitive internals, and comments
-that document historical source values. Raw colors in components are not an
-exception.
-
-Before finalizing a styling change, search for raw color literals and broad
-descendant selectors in touched files and either replace them with tokens or
-document why the exception is necessary.
+Search touched sources for raw colors, missing compiled utilities and broad
+selectors. Run `pnpm test:design-system` plus the required CLAUDE verification.

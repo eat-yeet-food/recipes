@@ -17,7 +17,7 @@ function BrowseRecipesAside({
       aria-label="Browse recipes"
       className="sticky top-24 block max-[1080px]:hidden"
     >
-      <div className="mb-[22px] text-[var(--yeet-gray)] font-[family-name:var(--yeet-serif)] text-[36px] font-bold tracking-[0.8px] leading-[1.05] text-center">
+      <div className="mb-[22px] text-[var(--color-ink)] font-[family-name:var(--font-display)] text-[36px] font-bold tracking-[0.8px] leading-[1.05] text-center">
         <span>Browse</span>
         {' '}
         <strong className="font-bold">Recipes</strong>

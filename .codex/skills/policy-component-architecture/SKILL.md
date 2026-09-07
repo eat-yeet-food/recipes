@@ -3,23 +3,19 @@ name: policy-component-architecture
 description: Use when adding or changing UI components, tests, stories, or project layout in this repository.
 ---
 
-# Component Architecture Policy
+# Component architecture policy
 
-Use the existing component layers deliberately:
+Use the owners and layer graph in `CLAUDE.md`: primitives in `packages/l5`,
+shared shell/catalog/content patterns in `packages/l6`, feature composition in
+`packages/l7`, routes/bootstrap in `packages/l8/web`, app registries and
+app-specific workbenches in `apps/<app>`. Do not create root `src/` files.
 
-- `src/components/primitives/`: generated or primitive shadcn/Radix-style controls.
-- `src/components/shell/`: site chrome, frame, wordmark, and global error states.
-- `src/components/catalog/`: reusable recipe/catalog cards, grids, and section headings.
-- `src/components/content-blocks/`: generic page-block renderers for markdown, image, and embedded media.
-- `src/components/home/`, `src/components/search/`, `src/components/recipes/`: composed domain surfaces.
-- `src/routes/`: route modules and route-level behavior tests.
-- `src/lib/`: shared pure logic, with unit tests beside the module.
+Colocate tests and stories with the module that owns behavior. Root `test/` is
+for shared server, screenshot/baseline and production verification infrastructure.
+Web stories may compose app registries through configured adapters, not import
+generated data directly. Story examples reuse production controls.
 
-Tests and stories for behavior owned by a source module live beside that module:
-`thing.test.ts`, `thing.test.mjs`, or `thing.stories.tsx`. The top-level
-`test/` directory is for shared harnesses, static servers, visual baselines,
-production verification, and visual parity checks that have no source-module
-owner.
-
-Do not add a global test file for behavior owned by a route, component, or lib
-module. Co-locate it first.
+Cross-package imports require the importing package's dependency and tsconfig
+reference. Run boundaries and TypeScript checks. Storybook wrapper styles must
+not alter specimen descendants. See `docs/design-system.md` for usage/state
+coverage and handbook ownership.

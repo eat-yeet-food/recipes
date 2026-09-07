@@ -25,7 +25,7 @@ function Command({
     <CommandPrimitive
       data-slot="command"
       className={cn(
-        "flex size-full flex-col overflow-hidden rounded-xl! bg-popover p-1 text-popover-foreground",
+        "flex size-full flex-col overflow-hidden rounded-surface! bg-popover p-1 text-popover-foreground",
         className
       )}
       {...props}
@@ -50,7 +50,7 @@ function CommandDialog({
     <Dialog {...props}>
       <DialogContent
         className={cn(
-          "top-1/3 translate-y-0 overflow-hidden rounded-xl! p-0",
+          "top-1/3 translate-y-0 overflow-hidden rounded-surface! p-0",
           className
         )}
         showCloseButton={showCloseButton}
@@ -76,15 +76,15 @@ function CommandInput({
   wrapperClassName?: string
 }) {
   return (
-    <div data-slot="command-input-wrapper" className={cn("flex items-center px-4", wrapperClassName)}>
-      <InputGroup className="h-12 border-0 bg-transparent shadow-none!">
-        <InputGroupAddon className="p-0 text-ink/50">
+    <div data-slot="command-input-wrapper" className={cn("flex items-center p-3", wrapperClassName)}>
+      <InputGroup className="h-12 border-0 px-3 shadow-none! focus-within:outline-2 focus-within:outline-current focus-within:-outline-offset-4">
+        <InputGroupAddon className="p-0 text-action-label">
           <SearchIcon className="size-4 shrink-0" />
         </InputGroupAddon>
         <CommandPrimitive.Input
           data-slot="command-input"
           className={cn(
-            "h-12 flex-1 bg-transparent px-3 font-body text-base text-ink outline-none placeholder:text-ink/50 disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm",
+            "h-12 flex-1 bg-transparent px-3 font-body text-base text-action-label outline-none placeholder:text-action-label/80 disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm",
             className
           )}
           {...props}
@@ -162,7 +162,7 @@ function CommandItem({
     <CommandPrimitive.Item
       data-slot="command-item"
       className={cn(
-        "group/command-item relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none in-data-[slot=dialog-content]:rounded-lg! data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 data-selected:bg-muted data-selected:text-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 data-selected:*:[svg]:text-foreground",
+        "group/command-item relative flex cursor-default items-center gap-2 rounded-field px-3 py-3 text-sm outline-hidden select-none in-data-[slot=dialog-content]:rounded-field! data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 data-selected:bg-ink data-selected:text-primary-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 data-selected:*:[svg]:text-primary-foreground",
         className
       )}
       {...props}

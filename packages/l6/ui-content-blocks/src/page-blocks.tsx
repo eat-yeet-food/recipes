@@ -13,7 +13,7 @@ import type {
 } from '@eat-yeet/l4-content-model/blocks'
 
 const Html = ({ as: Tag = 'div', html, ...rest }: { as?: any; html: string } & Record<string, unknown>) => (
-  <Tag {...rest} dangerouslySetInnerHTML={{ __html: html }} />
+  <Tag {...rest} data-prose="" dangerouslySetInnerHTML={{ __html: html }} />
 )
 
 function unwrapSingleParagraph(html: string) {
@@ -74,7 +74,7 @@ function blockImageUrl(image: { src: string; imageHash?: string }) {
 
 function MarkdownBlockView({ block }: { block: MarkdownBlock }) {
   return (
-    <section className="text-base leading-[1.72] [&>div>*:first-child]:mt-0 [&_blockquote]:my-5 [&_blockquote]:border-l-4 [&_blockquote]:border-[var(--yeet-pink)] [&_blockquote]:pl-4 [&_blockquote]:text-[var(--yeet-gray)] [&_h2]:mb-4 [&_h2]:mt-12 [&_h2]:text-[34px] [&_h2]:font-bold [&_h2]:leading-none [&_h2+h3]:mt-4 [&_h3]:mb-3 [&_h3]:mt-9 [&_h3]:text-[26px] [&_h3]:font-bold [&_h4]:mb-2.5 [&_h4]:mt-7 [&_h4]:text-[13px] [&_h4]:uppercase [&_h4]:text-[var(--yeet-tomato)] [&_hr]:my-7 [&_hr]:border-[var(--yeet-border)] [&_li]:mb-2 [&_ol]:mb-5 [&_ol]:list-decimal [&_ol]:pl-[22px] [&_p]:mb-5 [&_p:last-child]:mb-0 [&_ul]:mb-5 [&_ul]:list-disc [&_ul]:pl-[22px]">
+    <section className="text-base leading-[1.72] [&>div>*:first-child]:mt-0 [&_blockquote]:my-5 [&_blockquote]:border-l-4 [&_blockquote]:border-[var(--color-brand)] [&_blockquote]:pl-4 [&_blockquote]:text-[var(--color-ink)] [&_h2]:mb-4 [&_h2]:mt-12 [&_h2]:text-[34px] [&_h2]:font-bold [&_h2]:leading-none [&_h2+h3]:mt-4 [&_h3]:mb-3 [&_h3]:mt-9 [&_h3]:text-[26px] [&_h3]:font-bold [&_h4]:mb-2.5 [&_h4]:mt-7 [&_h4]:text-[13px] [&_h4]:uppercase [&_h4]:text-[var(--color-primary)] [&_hr]:my-7 [&_hr]:border-[var(--color-border)] [&_li]:mb-2 [&_ol]:mb-5 [&_ol]:list-decimal [&_ol]:pl-[22px] [&_p]:mb-5 [&_p:last-child]:mb-0 [&_ul]:mb-5 [&_ul]:list-disc [&_ul]:pl-[22px]">
       <Html html={block.html} />
     </section>
   )
@@ -96,7 +96,7 @@ function ImageBlockView({ block }: { block: ImageBlock }) {
       <div className={layoutClass}>
         {block.images.map((image, index) => (
           <figure key={`${image.src}-${index}`} className="m-0 h-full">
-            <div className={aspectClass ? 'overflow-hidden bg-[var(--yeet-light-pink)]' : undefined}>
+            <div className={aspectClass ? 'overflow-hidden bg-[var(--color-tint)]' : undefined}>
               <img
                 src={blockImageUrl(image)}
                 alt={image.alt}
@@ -108,7 +108,7 @@ function ImageBlockView({ block }: { block: ImageBlock }) {
               <Html
                 as="figcaption"
                 html={image.caption}
-                className="mt-2 text-sm leading-relaxed text-[var(--yeet-gray)]/75"
+                className="mt-2 text-sm leading-relaxed text-[var(--color-ink)]/75"
               />
             )}
           </figure>
@@ -153,23 +153,23 @@ function SectionBlockView<TContext>({
 function CalloutBlockView({ block }: { block: CalloutBlock }) {
   const toneClass =
     block.tone === 'warning'
-      ? 'border-[var(--yeet-tomato)] bg-[var(--yeet-light-pink)]'
+      ? 'bg-tint'
       : block.tone === 'tip'
-        ? 'border-[var(--color-brand-alt)] bg-[var(--color-warm)]'
-        : 'border-[var(--yeet-border)] bg-[var(--yeet-light-pink)]'
+        ? 'bg-warm'
+        : 'bg-tint'
 
   return (
     <section className="my-8">
-      <div className={`border-l-4 px-5 py-4 ${toneClass}`}>
+      <div className={`rounded-surface px-5 py-5 ${toneClass}`}>
         {block.title && (
-          <h3 className="mb-2 text-[22px] font-bold leading-tight text-[var(--yeet-tomato-strong)]">
+          <h3 className="mb-2 text-[22px] font-bold leading-tight text-[var(--color-action-hover)]">
             {block.title}
           </h3>
         )}
         {block.html && (
           <Html
             html={block.html}
-            className="text-base leading-relaxed text-[var(--yeet-gray)] [&_p]:mb-3 [&_p:last-child]:mb-0"
+            className="text-base leading-relaxed text-[var(--color-ink)] [&_p]:mb-3 [&_p:last-child]:mb-0"
           />
         )}
       </div>
@@ -181,8 +181,8 @@ function StepsBlockView({ block }: { block: StepsBlock }) {
   const Heading = block.headingLevel === 3 ? 'h3' : 'h2'
   const headingClass =
     block.headingLevel === 3
-      ? 'mb-5 text-[26px] font-bold leading-tight text-[var(--yeet-gray)]'
-      : 'mb-5 text-[34px] font-bold leading-none text-[var(--yeet-gray)]'
+      ? 'mb-5 text-[26px] font-bold leading-tight text-[var(--color-ink)]'
+      : 'mb-5 text-[34px] font-bold leading-none text-[var(--color-ink)]'
 
   return (
     <section className="my-8">
@@ -199,9 +199,9 @@ function StepsBlockView({ block }: { block: StepsBlock }) {
           return (
             <li
               key={index}
-              className="grid grid-cols-[40px_minmax(0,1fr)] gap-4 [counter-increment:step] before:grid before:size-10 before:place-items-center before:rounded-full before:bg-[var(--yeet-tomato)] before:text-sm before:font-extrabold before:text-white before:content-[counter(step)]"
+              className="grid grid-cols-[40px_minmax(0,1fr)] gap-4 [counter-increment:step] before:grid before:size-10 before:place-items-center before:rounded-full before:bg-[var(--color-primary)] before:text-sm before:font-extrabold before:text-white before:content-[counter(step)]"
             >
-              <div className="text-base leading-relaxed text-[var(--yeet-gray)]">
+              <div className="text-base leading-relaxed text-[var(--color-ink)]">
                 {item.title && inlineHtml !== null ? (
                   <p>
                     <strong className="font-semibold">
@@ -239,19 +239,19 @@ function ComparisonBlockView({ block }: { block: ComparisonBlock }) {
   return (
     <section className="my-8">
       {block.title && (
-        <h2 className="mb-5 text-[34px] font-bold leading-none text-[var(--yeet-gray)]">
+        <h2 className="mb-5 text-[34px] font-bold leading-none text-[var(--color-ink)]">
           {block.title}
         </h2>
       )}
-      <div className="overflow-x-auto border border-[var(--yeet-border)]">
+      <div role="region" aria-label={block.title || "Comparison table"} tabIndex={0} className="overflow-x-auto rounded-field border border-[var(--color-border)]">
         <table className="w-full min-w-[620px] border-collapse text-left text-sm leading-relaxed">
           <thead>
-            <tr className="bg-[var(--yeet-light-pink)]">
-              <th className="border-b border-[var(--yeet-border)] px-4 py-3 font-extrabold text-[var(--yeet-gray)]">
+            <tr className="bg-[var(--color-tint)]">
+              <th className="border-b border-[var(--color-border)] px-4 py-3 font-extrabold text-[var(--color-ink)]">
                 Factor
               </th>
               {block.columns.map((column) => (
-                <th key={column} className="border-b border-[var(--yeet-border)] px-4 py-3 font-extrabold text-[var(--yeet-gray)]">
+                <th key={column} className="border-b border-[var(--color-border)] px-4 py-3 font-extrabold text-[var(--color-ink)]">
                   {column}
                 </th>
               ))}
@@ -259,12 +259,12 @@ function ComparisonBlockView({ block }: { block: ComparisonBlock }) {
           </thead>
           <tbody>
             {block.rows.map((row) => (
-              <tr key={row.label} className="border-t border-[var(--yeet-border)] align-top">
-                <th className="px-4 py-3 font-extrabold text-[var(--yeet-gray)]">
+              <tr key={row.label} className="border-t border-[var(--color-border)] align-top">
+                <th className="px-4 py-3 font-extrabold text-[var(--color-ink)]">
                   {row.label}
                 </th>
                 {block.columns.map((column, index) => (
-                  <td key={`${row.label}-${column}`} className="px-4 py-3 text-[var(--yeet-gray)]/80">
+                  <td key={`${row.label}-${column}`} className="px-4 py-3 text-[var(--color-ink)]/80">
                     <Html html={row.values[index] ?? ''} className="[&_p]:mb-2 [&_p:last-child]:mb-0" />
                   </td>
                 ))}
@@ -283,7 +283,7 @@ function FootnotesBlockView({ block, index }: { block: FootnotesBlock; index: nu
   return (
     <section
       aria-labelledby={headingId}
-      className="mb-8 mt-12 border-t border-[var(--yeet-border)] pt-8 text-sm leading-relaxed text-[var(--yeet-gray)]"
+      className="mb-8 mt-12 border-t border-[var(--color-border)] pt-8 text-sm leading-relaxed text-[var(--color-ink)]"
     >
       <h2 id={headingId} className="mb-4 text-[26px] font-bold leading-tight">
         {block.title}
@@ -295,14 +295,14 @@ function FootnotesBlockView({ block, index }: { block: FootnotesBlock; index: nu
               href={item.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[var(--yeet-tomato-strong)] underline underline-offset-2"
+              className="text-[var(--color-action-hover)] underline underline-offset-2"
             >
               <Html as="span" html={item.html} />
             </a>{' '}
             <a
               href={`#footnote-ref-${item.id}`}
               aria-label={`Back to source ${item.id} reference`}
-              className="text-[var(--yeet-tomato-strong)] no-underline"
+              className="ml-1 inline-flex size-8 items-center justify-center rounded-control text-ink no-underline hover:bg-tint"
             >
               ↩
             </a>
@@ -316,7 +316,7 @@ function FootnotesBlockView({ block, index }: { block: FootnotesBlock; index: nu
 function YouTubeBlockView({ block }: { block: YouTubeBlock }) {
   return (
     <section className="my-8">
-      <div className="aspect-video overflow-hidden bg-[var(--yeet-light-pink)]">
+      <div className="aspect-video overflow-hidden bg-[var(--color-tint)]">
         <iframe
           src={`https://www.youtube-nocookie.com/embed/${block.id}`}
           title={block.title}

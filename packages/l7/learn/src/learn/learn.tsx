@@ -99,7 +99,7 @@ function MoreLearnSection({
   if (articles.length === 0) return null
 
   const heading = (
-    <div className="mb-[22px] text-center font-[family-name:var(--yeet-serif)] text-[36px] font-bold leading-[1.05] tracking-[0.8px] text-[var(--yeet-gray)]">
+    <div className="mb-[22px] text-center font-[family-name:var(--font-display)] text-[36px] font-bold leading-[1.05] tracking-[0.8px] text-[var(--color-ink)]">
       <span role="heading" aria-level={2}>
         Learn More
       </span>
@@ -120,7 +120,7 @@ function MoreLearnSection({
   }
 
   return (
-    <section className="mt-14 border-t border-[var(--yeet-border)] pt-8 min-[1081px]:hidden" aria-label="More to learn">
+    <section className="mt-14 border-t border-[var(--color-border)] pt-8 min-[1081px]:hidden" aria-label="More to learn">
       {heading}
       <div className="grid gap-8 sm:grid-cols-2">
         {articles.map((candidate) => (
@@ -163,21 +163,21 @@ export function ArticleDetailPage({
       )}
     >
       <div className="min-[901px]:pt-10 max-[900px]:px-8 max-[640px]:px-[15px]">
-        <nav className="yeet-crumbs mb-5 flex flex-wrap gap-1.5 text-xs uppercase leading-[1.6] text-[var(--yeet-gray)]" aria-label="Breadcrumb">
+        <nav className="mb-5 flex flex-wrap gap-1.5 text-xs uppercase leading-[1.6] text-[var(--color-ink)]" aria-label="Breadcrumb">
           <a href="/">Home</a>
           <span>&gt;</span>
           <a href="/learn">Learn</a>
           <span>&gt;</span>
           <span>{categoryLabel(article.category)}</span>
         </nav>
-        <p className="mb-4 text-xs font-semibold uppercase tracking-[2px] text-[var(--yeet-tomato)]">
+        <p className="mb-4 text-xs font-semibold uppercase tracking-[2px] text-[var(--color-primary)]">
           {ARTICLE_TYPE_LABELS[article.type]}
         </p>
         <h1 className="m-0 max-w-[560px] text-[46px] font-bold leading-[1.08] max-[640px]:text-[32px]">
           {article.title}
         </h1>
         {article.description && (
-          <p className="mt-5 max-w-[560px] text-xl leading-[1.45] text-[var(--yeet-gray)]/80 max-[640px]:text-lg">
+          <p className="mt-5 max-w-[560px] text-xl leading-[1.45] text-[var(--color-ink)]/80 max-[640px]:text-lg">
             {article.description}
           </p>
         )}
@@ -188,7 +188,7 @@ export function ArticleDetailPage({
           <img
             src={photo}
             alt={`${article.title} hero image`}
-            className="aspect-[3/2] w-full max-h-[520px] object-cover max-[900px]:max-h-none"
+            className="aspect-[3/2] w-full max-h-[520px] rounded-surface object-cover max-[900px]:max-h-none"
           />
         </figure>
       )}

@@ -179,3 +179,19 @@ manifest, and refuses to upload if the built artifact does not match the active
 app, origin, and Cloudflare Pages project. It also forces the Pages branch to
 `main`, so deploys from a separate worktree still update production rather than
 a preview deployment.
+
+## Design system and handbook
+
+Eat / Yeet uses the approved Yellow + ink contract in [docs/design-system.md](docs/design-system.md).
+It documents component owners, color roles, geometry, interaction, accessibility,
+and the review/verification workflow. Learn lives in `packages/l7/learn`, with
+article models and APIs in the corresponding lower layers.
+
+- `pnpm storybook`: interactive component handbook and API/state examples.
+- `pnpm test:storybook`: build, render each story at desktop/mobile widths,
+  run play functions, and check WCAG 2.2 A/AA with axe.
+- `pnpm test:design-system`: reject palette drift and story-style leakage.
+- `pnpm shots` / `pnpm parity`: app visual evidence and reviewed baseline checks.
+
+Keep component usage stories beside their owner. Fonts and artwork stay local.
+Read `CLAUDE.md` for the required pre-commit and deployment checks.

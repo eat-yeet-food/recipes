@@ -20,9 +20,9 @@ import {
 import type { RecipeSummary } from '@eat-yeet/l1-recipe-model/recipes'
 
 const TOGGLE_BASE =
-  'rounded-full px-4 py-1.5 font-body text-xs font-semibold tracking-wide transition-colors'
+  'control-focus min-h-11 rounded-control px-4 py-2 font-body text-xs font-semibold tracking-wide transition-colors'
 const TOGGLE_ON = 'bg-ink text-white'
-const TOGGLE_OFF = 'bg-ink/5 text-ink/70 hover:bg-ink/10'
+const TOGGLE_OFF = 'bg-brand text-ink hover:bg-ink hover:text-white'
 
 /** faceted-filter-group.tsx — collapsible, open by default. */
 function FacetGroup({
@@ -41,8 +41,9 @@ function FacetGroup({
       <button
         type="button"
         data-facet-toggle
+        aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center justify-between py-2 font-body text-xs font-semibold uppercase tracking-[2px] text-ink/70 hover:text-ink"
+        className="control-focus flex min-h-11 w-full items-center justify-between py-2 font-body text-xs font-semibold uppercase tracking-[2px] text-ink/70 hover:text-ink"
       >
         <span>{facet.label}</span>
         <ChevronDown
@@ -56,7 +57,7 @@ function FacetGroup({
               key={value}
               data-facet={facet.key}
               data-value={value}
-              className="flex cursor-pointer items-center gap-2.5 rounded px-1 py-0.5 hover:bg-ink/3"
+              className="flex cursor-pointer items-center gap-2.5 min-h-11 rounded-field px-1 py-0.5 hover:bg-ink/3"
             >
               <Checkbox
                 checked={selected.includes(value)}
@@ -186,7 +187,7 @@ export function SearchPage({
           className={`${TOGGLE_BASE} ${TOGGLE_OFF} inline-flex min-h-[44px] items-center gap-2`}
         >
           Filters
-          {active > 0 && <span className="text-ink/40">{active}</span>}
+          {active > 0 && <span className="text-muted-foreground">{active}</span>}
           <ChevronDown
             className={`size-4 transition-transform duration-200 ${mobileOpen ? 'rotate-180' : ''}`}
           />
@@ -219,7 +220,7 @@ export function SearchPage({
                 id="clear-filters"
                 type="button"
                 onClick={() => onChange(emptySearch())}
-                className="text-xs font-semibold uppercase tracking-[1.5px] text-brand transition-colors hover:text-brand-strong"
+                className="text-xs font-semibold uppercase tracking-[1.5px] text-ink transition-colors hover:text-ink"
               >
                 Clear all
               </button>

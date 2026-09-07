@@ -22,6 +22,7 @@ function StoryCanvas({ children }: { children: ReactNode }) {
 
 const meta = {
   title: 'Shell/Wordmark',
+  subcomponents: { Wordmark },
   parameters: {
     layout: 'fullscreen',
   },
@@ -50,7 +51,7 @@ export const OnPhoto: Story = {
   render: () => (
     <StoryCanvas>
       <StorySection title="Photo Treatment">
-        <div data-storybook-surface="" className="bg-ink p-8">
+        <div className="rounded-surface bg-ink p-8">
           <Wordmark copy={copy} size="hero" onPhoto />
         </div>
       </StorySection>

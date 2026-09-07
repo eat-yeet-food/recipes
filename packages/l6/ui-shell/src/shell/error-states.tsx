@@ -1,3 +1,4 @@
+import { buttonVariants } from '@eat-yeet/l5-ui-primitives/primitives/button'
 /**
  * The dead ends a visitor can reach, styled as one thing.
  *
@@ -35,14 +36,8 @@ function DeadEnd({
   )
 }
 
-/** The filled brand control, matching the hero's "Let's Eat". Its shadow is
-    token-driven and lives on `[data-cta]` in site-overrides.css. */
-const PRIMARY =
-  'inline-flex items-center gap-2.5 rounded-full bg-brand-strong px-8 py-4 text-sm font-semibold uppercase tracking-[2px] text-white transition-all hover:-translate-y-0.5 hover:bg-ink'
-
-/** The quiet text control, matching "View all categories". */
-const SECONDARY =
-  'inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[2px] text-brand-strong transition-colors hover:text-ink'
+const PRIMARY = buttonVariants({ size: 'lg' })
+const SECONDARY = buttonVariants({ variant: 'link' })
 
 /** Rendered for any path the router cannot match. */
 export function NotFound() {
