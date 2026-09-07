@@ -88,7 +88,8 @@ async function editEveryNumber(canvasElement: HTMLElement) {
   const screen = within(canvasElement.ownerDocument.body)
   await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))
   await userEvent.click(screen.getByRole('button', { name: 'Build this levain' }))
-  const fields = screen.getByRole('dialog').querySelectorAll<HTMLInputElement>('[data-slot="number-field"] input')
+  const fields = Array.from(screen.getByRole('dialog').querySelectorAll<HTMLInputElement>('input'))
+    .filter((field) => field.inputMode === 'numeric' || field.inputMode === 'decimal')
   for (const field of fields) {
     const original = field.value
     await userEvent.clear(field)
