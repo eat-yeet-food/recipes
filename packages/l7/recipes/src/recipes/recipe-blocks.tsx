@@ -35,7 +35,7 @@ function MetaList({ page }: { page: RecipeContent }) {
   return <RecipeFacts items={items} />
 }
 
-function RecipeList({ sections, ordered = false }: { sections: Section[]; ordered?: boolean }) {
+export function RecipeList({ sections, ordered = false }: { sections: Section[]; ordered?: boolean }) {
   if (sections.length === 0) return null
   const List = ordered ? 'ol' : 'ul'
   const listClass = `m-0 pl-[22px] ${ordered ? 'list-decimal' : 'list-disc'}`
@@ -45,7 +45,7 @@ function RecipeList({ sections, ordered = false }: { sections: Section[]; ordere
       {sections.map((section) => (
         <section key={section.id}>
           {section.title && (
-            <h4 className="mt-[22px] mb-2.5 text-[13px] uppercase text-[var(--color-primary)]">{section.title}</h4>
+            <h4 className="mt-[22px] mb-2.5 text-[13px] font-bold uppercase text-[var(--color-primary)]">{section.title}</h4>
           )}
           <List className={listClass}>
             {section.items.map((item, itemIndex) => (

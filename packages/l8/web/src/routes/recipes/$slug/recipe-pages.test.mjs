@@ -130,18 +130,15 @@ check('focused cooking offers a switch back to the article', await desktop.getBy
 const breadcrumbText = (await desktop.getByRole('navigation', { name: 'Breadcrumb' }).textContent()).replace(/\s+/g, '')
 check('recipe breadcrumb omits ambiguous course category', breadcrumbText === 'Home>Recipes>NewYorkStylePizza' && !breadcrumbText.includes('Mains'))
 check(
-  'focused cooking centers recipe card with surrounding content',
+  'focused cooking aligns the recipe body with its description',
   await desktop.evaluate(() => {
-    const header = document.querySelector('.yeet > header')
+    const description = document.querySelector('.yeet > header p')
     const card = document.querySelector('.yeet main > article')
-    if (!header || !card) return false
+    if (!description || !card) return false
 
-    const headerBox = header.getBoundingClientRect()
+    const descriptionBox = description.getBoundingClientRect()
     const cardBox = card.getBoundingClientRect()
-    const headerCenter = headerBox.left + headerBox.width / 2
-    const cardCenter = cardBox.left + cardBox.width / 2
-
-    return Math.abs(headerCenter - cardCenter) <= 2
+    return Math.abs(descriptionBox.left - cardBox.left) <= 2 && Math.abs(descriptionBox.right - cardBox.right) <= 2
   }),
 )
 await desktop.close()

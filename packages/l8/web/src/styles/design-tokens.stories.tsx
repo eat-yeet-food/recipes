@@ -39,6 +39,7 @@ const SYSTEM_TOKENS: Token[] = [
   { name: 'Hero Font', token: '--font-hero', usage: 'hero lockup' },
   { name: 'Action Font', token: '--font-action', usage: 'recipe controls' },
   { name: 'Site Width', token: '--layout-site-max', usage: 'page max width' },
+  { name: 'Recipe copy width', token: '--layout-recipe-copy', usage: 'Shared maximum width for recipe descriptions and body content' },
   { name: 'Page X', token: '--spacing-page-x', usage: 'default page gutters' },
   { name: 'Section Y', token: '--spacing-section-y', usage: 'vertical section rhythm' },
   { name: 'Mobile', token: '--breakpoint-mobile', usage: 'small layout switch' },

@@ -10,6 +10,8 @@ Recipe facts subsequently changed from a rounded yellow panel to an unfilled str
 
 Later refinements add the shared ink WorkbenchPanel for saved formulas and dough results, normalized-name and exact-formula duplicate prevention, explicit create/update forms, surface-specific dividers, article-header utility actions, and dedicated labeled switches. New stories cover name validation, duplicate formulas, renaming, both recipe action contexts, switch keyboard interaction, and fields/actions on ink. These stories and updated route assertions have not been executed during the requested pause; keyboard, narrow-layout, storage-failure, and visual review remain pending. Deployment’s build and production checks are separate from that outstanding review.
 
+The next layout refinement gives selects an inset caret, makes recipe subsection headings bold, adds a thin ink boundary to compact header actions, places Cooking view beside the title, tightens switch-label spacing, and removes the recipe body’s extra horizontal inset. Production stories and the handbook reflect these changes. Standalone visual and accessibility checks remain paused; no new baseline acceptance is implied.
+
 The automated evidence below describes the original Yellow + ink rollout, not full verification of these later refinements. Standalone checks were stopped at the user’s request because another agent was working in the same workspace. No new visual baselines were accepted. The later compact-filter changes and updated hero copy still need a coordinated screenshot, keyboard, narrow-layout, and accessibility review. The standard deployment command performs its own build and production verification; it does not replace that review.
 
 ## What was reviewed

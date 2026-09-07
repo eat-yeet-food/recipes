@@ -6,7 +6,7 @@ import { Switch } from './switch'
 function SwitchExample({ initialChecked = false, disabled = false }: { initialChecked?: boolean; disabled?: boolean }) {
   const id = useId()
   const [checked, setChecked] = useState(initialChecked)
-  return <div className="flex min-h-11 items-center gap-4"><label htmlFor={id} className="text-sm font-semibold text-ink">Cook Mode</label><Switch id={id} checked={checked} onCheckedChange={setChecked} disabled={disabled} /></div>
+  return <div className="flex min-h-11 items-center gap-2"><label htmlFor={id} className="text-sm font-semibold text-ink">Cook Mode</label><Switch id={id} checked={checked} onCheckedChange={setChecked} disabled={disabled} /></div>
 }
 
 const meta = {

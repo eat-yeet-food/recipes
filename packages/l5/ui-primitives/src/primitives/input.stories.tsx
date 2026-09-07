@@ -21,6 +21,7 @@ export const Default: Story = {}
 export const Invalid: Story = { args: { invalid: true } }
 export const Disabled: Story = { args: { disabled: true } }
 export const ReadOnly: Story = { args: { readOnly: true } }
+export const SelectLongValue: Story = { render: () => <label className="grid max-w-xs gap-2">Oven method<Select><option>Indoor oven with a preheated baking steel</option><option>Outdoor oven</option></Select></label> }
 export const OnInk: Story = { render: () => <div className="grid max-w-lg gap-4 rounded-field bg-ink p-6 text-action-label">
   <label className="grid gap-2">Formula name<Input surface="on-ink" placeholder="Weekend pizza" /></label>
   <label className="grid gap-2">Saved formula<Select surface="on-ink"><option>Weekend pizza</option><option>Weeknight pizza</option></Select></label>

@@ -27,21 +27,21 @@ type RecipeArticleAsideProps = {
   focusedCooking: boolean
 }
 
-function RecipeArticleHeader({
+export function RecipeArticleHeader({
   page,
   pinUrl,
   printPage,
   focusedCooking,
   toggleFocusedCooking,
 }: {
-  page: RecipeContent
+  page: Pick<RecipeContent, 'title' | 'description'>
   pinUrl: URL
   printPage: () => void
   focusedCooking: boolean
   toggleFocusedCooking: () => void
 }) {
   return (
-    <div className="max-w-[690px]">
+    <div>
       <nav className="flex flex-wrap gap-1.5 mb-5 text-[var(--color-ink)] text-xs leading-[1.6] uppercase" aria-label="Breadcrumb">
         <a href="/">Home</a>
         <span>&gt;</span>
@@ -49,9 +49,12 @@ function RecipeArticleHeader({
         <span>&gt;</span>
         <span>{page.title}</span>
       </nav>
-      <h1 className="m-0 max-w-[690px] text-[34px] leading-[1.25] tracking-[1.2px] font-bold">{page.title}</h1>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <h1 className="m-0 min-w-0 max-w-[var(--layout-recipe-copy)] flex-1 basis-64 text-[34px] leading-[1.25] tracking-[1.2px] font-bold">{page.title}</h1>
+        <div className="ml-auto shrink-0"><CookModeSwitch label="Cooking view" checked={focusedCooking} onCheckedChange={toggleFocusedCooking} /></div>
+      </div>
       <div className="mt-2 text-xs uppercase text-[var(--color-primary)]">By Patrick Hogan</div>
-      <div className="flex flex-wrap gap-1 mt-7 mb-7" role="group" aria-label="Page actions">
+      <div className="mb-6 mt-5 flex flex-wrap gap-3" role="group" aria-label="Page actions">
         <RecipeAction variant="hero" href={pinUrl.toString()} target="_blank" rel="noreferrer">
           <Share2 className="size-3 max-[640px]:hidden" />
           Pin Recipe
@@ -60,9 +63,8 @@ function RecipeArticleHeader({
           <Printer className="size-3 max-[640px]:hidden" />
           Print Recipe
         </RecipeAction>
-        <CookModeSwitch label="Cooking view" checked={focusedCooking} onCheckedChange={toggleFocusedCooking} />
       </div>
-      {page.description && <p className="max-w-[690px] m-0 text-base leading-[1.625]">{page.description}</p>}
+      {page.description && <p className="max-w-[var(--layout-recipe-copy)] m-0 text-base leading-[1.625]">{page.description}</p>}
     </div>
   )
 }
@@ -199,9 +201,9 @@ export function RecipeArticle({
       )}
       media={photo ? <img src={photo} alt={heroAlt} className="w-full max-h-[690px] rounded-surface object-cover" /> : undefined}
       mediaClassName={focusedCooking ? 'hidden' : undefined}
-      mainClassName={focusedCooking ? 'grid-cols-1 max-w-[816px] pt-6' : undefined}
+      mainClassName={focusedCooking ? 'grid-cols-1 max-w-[760px] pt-6' : 'max-[1080px]:max-w-[1120px]'}
       articleClassName={cn(
-        'bg-white rounded-surface px-9 pb-[38px] pt-[34px]   max-[640px]:px-[22px] max-[640px]:pb-[30px] max-[640px]:pt-[26px]',
+        'max-w-[var(--layout-recipe-copy)] bg-white pb-[38px] pt-[34px] max-[640px]:pb-[30px] max-[640px]:pt-[26px]',
         focusedCooking && 'mt-0 shadow-none',
       )}
       aside={aside?.({ page, focusedCooking })}

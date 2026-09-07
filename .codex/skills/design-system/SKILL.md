@@ -31,6 +31,9 @@ not justify changing the approved recipe-card actions. Use a dedicated labeled
 switch for binary settings rather than a button-styled row. Saved-formula UI
 follows the **Saved formulas** contract and shares its panel with dough results;
 keep validation, persistence feedback, and corresponding stories together.
+For recipe layout changes, follow **Recipe layout**: use the shared description
+and body measure, preserve the title-row switch placement, and keep a switch’s
+label attached to its track rather than stretching them across the parent.
 
 When recording refinements, distinguish implemented changes from proposed
 designs and historical verification from evidence for the current changes.
