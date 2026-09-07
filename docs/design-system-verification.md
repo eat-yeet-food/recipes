@@ -12,6 +12,8 @@ Later refinements add the shared ink WorkbenchPanel for saved formulas and dough
 
 The next layout refinement gives selects an inset caret, makes recipe subsection headings bold, adds a thin ink boundary to compact header actions, places Cooking view beside the title, tightens switch-label spacing, and removes the recipe body’s extra horizontal inset. Production stories and the handbook reflect these changes. Standalone visual and accessibility checks remain paused; no new baseline acceptance is implied.
 
+Follow-up changes keep horizontal geometry stable when Cooking view toggles, give its header label a 12px gap while retaining 8px in the recipe card, and expose Delete directly for the saved-formula picker’s chosen entry. Regression assertions and a delete-without-loading story describe the intended behavior; they remain unexecuted during the standalone-check pause.
+
 The automated evidence below describes the original Yellow + ink rollout, not full verification of these later refinements. Standalone checks were stopped at the user’s request because another agent was working in the same workspace. No new visual baselines were accepted. The later compact-filter changes and updated hero copy still need a coordinated screenshot, keyboard, narrow-layout, and accessibility review. The standard deployment command performs its own build and production verification; it does not replace that review.
 
 ## What was reviewed

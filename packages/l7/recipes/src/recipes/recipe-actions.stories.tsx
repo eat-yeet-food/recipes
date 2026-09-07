@@ -20,7 +20,7 @@ function ActionsExample({ placement = 'hero' }: { placement?: 'hero' | 'card' })
   </div>
 }
 
-const meta = { title: 'Recipes/Actions', component: ActionsExample, subcomponents: { RecipeArticleHeader, RecipeAction, CookModeSwitch }, parameters: { docs: { description: { component: 'The production article header places Cooking view at the right of the title row and uses compact, thin ink-bordered utility actions below. Narrow layouts let the switch wrap right without squeezing the title. The recipe-card row retains filled ink actions with cream labels. Switch labels sit 8px from their tracks without surrounding button fill.' } } } } satisfies Meta<typeof ActionsExample>
+const meta = { title: 'Recipes/Actions', component: ActionsExample, subcomponents: { RecipeArticleHeader, RecipeAction, CookModeSwitch }, parameters: { docs: { description: { component: 'The production article header places Cooking view at the right of the title row and uses compact, thin ink-bordered utility actions below. Narrow layouts let the switch wrap right without squeezing the title. The recipe-card row retains filled ink actions with cream labels. Switch labels sit 12px from their tracks in the header and 8px beside the recipe, without surrounding button fill.' } } } } satisfies Meta<typeof ActionsExample>
 export default meta
 export const Header: StoryObj<typeof meta> = {}
 export const RecipeCard: StoryObj<typeof meta> = { args: { placement: 'card' } }

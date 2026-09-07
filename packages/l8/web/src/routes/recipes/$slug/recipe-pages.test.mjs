@@ -122,11 +122,19 @@ check(
   'cook mode marks article root',
   await desktop.locator('.yeet[data-cook-mode="true"]').count() === 1,
 )
+const readingLayout = await desktop.evaluate(() => ['.yeet > header', '.yeet main', '.yeet main > article'].map((selector) => {
+  const rect = document.querySelector(selector).getBoundingClientRect()
+  return { selector, left: rect.left, width: rect.width }
+}))
 await desktop.getByRole('switch', { name: 'Cooking view' }).click()
 await desktop.waitForTimeout(200)
 check('start cooking enables cook mode', await desktop.getByRole('switch', { name: 'Cook Mode' }).getAttribute('aria-checked') === 'true')
 check('start cooking hides browse sidebar', await desktop.locator('[data-yeet-browse]').count() === 0)
 check('focused cooking offers a switch back to the article', await desktop.getByRole('switch', { name: 'Cooking view' }).getAttribute('aria-checked') === 'true')
+check('Cooking view preserves horizontal page geometry', await desktop.evaluate((before) => before.every(({ selector, left, width }) => {
+  const rect = document.querySelector(selector).getBoundingClientRect()
+  return Math.abs(rect.left - left) <= 1 && Math.abs(rect.width - width) <= 1
+}), readingLayout))
 const breadcrumbText = (await desktop.getByRole('navigation', { name: 'Breadcrumb' }).textContent()).replace(/\s+/g, '')
 check('recipe breadcrumb omits ambiguous course category', breadcrumbText === 'Home>Recipes>NewYorkStylePizza' && !breadcrumbText.includes('Mains'))
 check(

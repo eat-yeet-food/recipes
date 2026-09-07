@@ -51,7 +51,7 @@ export function RecipeArticleHeader({
       </nav>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="m-0 min-w-0 max-w-[var(--layout-recipe-copy)] flex-1 basis-64 text-[34px] leading-[1.25] tracking-[1.2px] font-bold">{page.title}</h1>
-        <div className="ml-auto shrink-0"><CookModeSwitch label="Cooking view" checked={focusedCooking} onCheckedChange={toggleFocusedCooking} /></div>
+        <div className="ml-auto shrink-0"><CookModeSwitch variant="hero" label="Cooking view" checked={focusedCooking} onCheckedChange={toggleFocusedCooking} /></div>
       </div>
       <div className="mt-2 text-xs uppercase text-[var(--color-primary)]">By Patrick Hogan</div>
       <div className="mb-6 mt-5 flex flex-wrap gap-3" role="group" aria-label="Page actions">
@@ -189,7 +189,7 @@ export function RecipeArticle({
         'data-cook-mode': cookMode ? 'true' : undefined,
         'data-focused-cooking': focusedCooking ? 'true' : undefined,
       }}
-      headerClassName={focusedCooking ? 'max-w-[760px] pb-0' : undefined}
+      headerClassName={focusedCooking ? 'pb-0' : undefined}
       header={(
         <RecipeArticleHeader
           page={page}
@@ -201,7 +201,11 @@ export function RecipeArticle({
       )}
       media={photo ? <img src={photo} alt={heroAlt} className="w-full max-h-[690px] rounded-surface object-cover" /> : undefined}
       mediaClassName={focusedCooking ? 'hidden' : undefined}
-      mainClassName={focusedCooking ? 'grid-cols-1 max-w-[760px] pt-6' : 'max-[1080px]:max-w-[1120px]'}
+      mainClassName={cn(
+        'max-[1080px]:max-w-[1120px]',
+        aside && 'grid-cols-[minmax(0,760px)_300px] gap-14 max-[1080px]:block',
+        focusedCooking && 'pt-6',
+      )}
       articleClassName={cn(
         'max-w-[var(--layout-recipe-copy)] bg-white pb-[38px] pt-[34px] max-[640px]:pb-[30px] max-[640px]:pt-[26px]',
         focusedCooking && 'mt-0 shadow-none',

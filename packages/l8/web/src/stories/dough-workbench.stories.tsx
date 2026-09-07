@@ -138,3 +138,17 @@ export const RenameSavedFormula: Story = { play: async ({ canvasElement }) => {
   await expect(panel.getByRole('option', { name: 'Sunday bread' })).toBeInTheDocument()
   await expect(panel.getByRole('status')).toHaveTextContent('Formula updated.')
 } }
+
+export const DeleteWithoutLoading: Story = { play: async ({ canvasElement }) => {
+  const screen = within(canvasElement.ownerDocument.body)
+  await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))
+  const panel = within(screen.getByRole('region', { name: 'Saved formulas' }))
+  const name = panel.getByRole('textbox', { name: 'Formula preset name' })
+  await userEvent.type(name, 'Weekend batch')
+  await userEvent.click(panel.getByRole('button', { name: 'Save new' }))
+  await userEvent.click(panel.getByRole('button', { name: 'New formula' }))
+  await userEvent.click(panel.getByRole('button', { name: 'Delete Weekend batch' }))
+  await expect(panel.queryByRole('option')).not.toBeInTheDocument()
+  await expect(panel.getByRole('status')).toHaveTextContent('Deleted “Weekend batch”.')
+  await expect(name).toHaveFocus()
+} }

@@ -289,6 +289,7 @@ function DoughFormulaWorkbench({
   const [presetAttempted, setPresetAttempted] = useState(false)
   const [presetNotice, setPresetNotice] = useState('')
   const presetNameInput = useRef<HTMLInputElement>(null)
+  const presetPicker = useRef<HTMLSelectElement>(null)
   const [starterName, setStarterName] = useState('')
   const [selectedPresetId, setSelectedPresetId] = useState('')
   const [selectedStarterId, setSelectedStarterId] = useState('')
@@ -384,6 +385,18 @@ function DoughFormulaWorkbench({
     setPresetAttempted(false)
     setPresetNotice(selectedPreset ? 'Formula updated.' : 'Formula saved.')
   }
+  const deletePreset = (preset: FormulaPreset) => {
+    if (!persist({ ...store, presets: store.presets.filter((item) => item.id !== preset.id), defaults: Object.fromEntries(Object.entries(store.defaults).filter(([, id]) => id !== preset.id)) })) return
+    if (selectedPresetId === preset.id) {
+      setSelectedPresetId('')
+      setPresetName('')
+      setPresetAttempted(false)
+    }
+    setChosenPresetId('')
+    setPresetNotice(`Deleted “${preset.name}”.`)
+    if (compatiblePresets.length > 1) presetPicker.current?.focus()
+    else presetNameInput.current?.focus()
+  }
   const saveStarterProfile = (replaceId?: string) => {
     const name = starterName.trim()
     const profile = draft.formula.starter
@@ -411,7 +424,7 @@ function DoughFormulaWorkbench({
                 <div className="grid gap-2">
                   <label htmlFor="saved-formula-picker" className="text-xs font-semibold">Load a saved formula</label>
                   <div className="flex items-start gap-2">
-                    <Select surface="on-ink" id="saved-formula-picker" className="min-w-0 flex-1" value={chosenPreset.id} onChange={(event) => setChosenPresetId(event.target.value)}>
+                    <Select ref={presetPicker} surface="on-ink" id="saved-formula-picker" className="min-w-0 flex-1" value={chosenPreset.id} onChange={(event) => setChosenPresetId(event.target.value)}>
                       {compatiblePresets.map((preset) => <option key={preset.id} value={preset.id}>{preset.name}{store.defaults[recipe.slug] === preset.id ? ' (default)' : ''}</option>)}
                     </Select>
                     <Button variant="on-ink" type="button" size="sm" aria-label={`Load ${chosenPreset.name}`} onClick={() => {
@@ -422,7 +435,10 @@ function DoughFormulaWorkbench({
                       setPresetNotice('Formula loaded. Apply to recipe when ready.')
                     }}>Load</Button>
                   </div>
-                  <p className="text-xs leading-relaxed text-action-label">{presetSummary(chosenPreset.formula)}</p>
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="min-w-0 text-xs leading-relaxed text-action-label">{presetSummary(chosenPreset.formula)}</p>
+                    <Button variant="quiet-on-ink" type="button" size="sm" aria-label={`Delete ${chosenPreset.name}`} onClick={() => deletePreset(chosenPreset)}><Trash2 className="size-4" aria-hidden="true" />Delete</Button>
+                  </div>
                 </div>
               ) : <p className="text-sm text-action-label">No saved formulas yet.</p>}
 
@@ -453,15 +469,6 @@ function DoughFormulaWorkbench({
                   <Button variant="quiet-on-ink" type="button" size="sm" disabled={store.defaults[recipe.slug] === selectedPreset.id} onClick={() => {
                     if (persist({ ...store, defaults: { ...store.defaults, [recipe.slug]: selectedPreset.id } })) setPresetNotice('Default formula updated.')
                   }}>{store.defaults[recipe.slug] === selectedPreset.id ? 'Default for this recipe' : 'Make default'}</Button>
-                  <Button variant="quiet-on-ink" type="button" size="sm" aria-label={`Delete ${selectedPreset.name}`} onClick={() => {
-                    if (!persist({ ...store, presets: store.presets.filter((item) => item.id !== selectedPreset.id), defaults: Object.fromEntries(Object.entries(store.defaults).filter(([, id]) => id !== selectedPreset.id)) })) return
-                    setSelectedPresetId('')
-                    setChosenPresetId('')
-                    setPresetName('')
-                    setPresetAttempted(false)
-                    setPresetNotice('Formula deleted.')
-                    presetNameInput.current?.focus()
-                  }}><Trash2 className="size-4" aria-hidden="true" />Delete</Button>
                 </div>
               )}
               <p role="status" className="text-xs text-action-label empty:hidden">{storeError || presetNotice}</p>
