@@ -18,6 +18,9 @@ const APP_TOKENS: Token[] = [
  { name: 'Golden orange', token: '--color-brand-alt', usage: 'Occasional graphic accent and dough illustration' },
  { name: 'Quiet yellow', token: '--color-tint', usage: 'Occasional prose callouts only; not controls or facts' },
  { name: 'Checkbox edge', token: '--color-input', usage: 'Functional checkbox boundary; text fields use a flat ink fill' },
+ { name: 'Reading divider', token: '--color-border', usage: 'Rules on white reading surfaces' },
+ { name: 'Yellow divider', token: '--color-border-on-brand', usage: 'Ink-based rules directly on yellow surfaces' },
+ { name: 'Ink divider', token: '--color-border-on-ink', usage: 'Light rules inside ink workbench panels' },
  { name: 'Muted ink', token: '--color-muted-foreground', usage: 'Secondary readable text, no opacity mixing' },
  { name: 'Error', token: '--color-danger', usage: 'Genuine validation and destructive actions only' },
 ]

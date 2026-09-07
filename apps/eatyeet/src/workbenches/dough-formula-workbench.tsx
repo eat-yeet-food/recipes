@@ -2,7 +2,7 @@ import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
 import { Input } from '@eat-yeet/l5-ui-primitives/primitives/input'
 import { Select } from '@eat-yeet/l5-ui-primitives/primitives/select'
 import { ChoiceGroup } from '@eat-yeet/l5-ui-primitives/primitives/choice-group'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Plus, Trash2 } from 'lucide-react'
 
 import {
@@ -76,6 +76,8 @@ const formatAppliedGrams = (value: number) => {
   return `${value < 20 ? value.toFixed(1) : Math.round(value)}g`
 }
 const formulasMatch = (left: DoughFormula, right: DoughFormula) => JSON.stringify(left) === JSON.stringify(right)
+const cleanPresetName = (name: string) => name.normalize('NFKC').trim().replace(/\s+/g, ' ')
+const presetNameKey = (name: string) => cleanPresetName(name).toLowerCase()
 
 function presetSummary(formula: DoughFormula) {
   const parts = [`${formatPercent(formula.hydrationPercent)} hydration`, `${formatPercent(formula.saltPercent)} salt`]
@@ -249,6 +251,16 @@ function starterFrom(formula: DoughFormula): StarterProfile {
   return clone(formula.starter ?? { hydrationPercent: 77, flour: formula.flour })
 }
 
+function WorkbenchPanel({ headingId, title, summary, children }: { headingId: string; title: string; summary?: ReactNode; children: ReactNode }) {
+  return <section className="mt-7 rounded-field bg-ink p-5 text-action-label" aria-labelledby={headingId}>
+    <div className="flex items-baseline justify-between gap-3">
+      <h3 id={headingId} className="text-2xl font-bold text-brand">{title}</h3>
+      {summary}
+    </div>
+    {children}
+  </section>
+}
+
 function DoughFormulaWorkbench({
   recipe,
   config,
@@ -273,6 +285,10 @@ function DoughFormulaWorkbench({
   const [store, setStore] = useState<WorkbenchStore>(EMPTY_STORE)
   const [storeError, setStoreError] = useState('')
   const [presetName, setPresetName] = useState('')
+  const [chosenPresetId, setChosenPresetId] = useState('')
+  const [presetAttempted, setPresetAttempted] = useState(false)
+  const [presetNotice, setPresetNotice] = useState('')
+  const presetNameInput = useRef<HTMLInputElement>(null)
   const [starterName, setStarterName] = useState('')
   const [selectedPresetId, setSelectedPresetId] = useState('')
   const [selectedStarterId, setSelectedStarterId] = useState('')
@@ -287,6 +303,22 @@ function DoughFormulaWorkbench({
   const errors = [...result.errors, ...(buildOpen && build ? build.errors : [])]
   const compatiblePresets = store.presets.filter((preset) => preset.formula.family === draft.formula.family)
   const activePresetId = compatiblePresets.find((preset) => preset.id === selectedPresetId && formulasMatch(preset.formula, draft.formula))?.id ?? ''
+  const selectedPreset = compatiblePresets.find((preset) => preset.id === selectedPresetId)
+  const chosenPreset = compatiblePresets.find((preset) => preset.id === chosenPresetId) ?? selectedPreset ?? compatiblePresets[0]
+  const normalizedPresetName = cleanPresetName(presetName)
+  const presetNameError = !normalizedPresetName
+    ? 'Enter a name for this formula.'
+    : normalizedPresetName.length > 80
+      ? 'Use 80 characters or fewer.'
+      : compatiblePresets.some((preset) => preset.id !== selectedPresetId && presetNameKey(preset.name) === presetNameKey(normalizedPresetName))
+        ? 'A formula with this name already exists. Choose a different name or load it to update it.'
+        : ''
+  const duplicateFormula = compatiblePresets.find((preset) => preset.id !== selectedPresetId && formulasMatch(preset.formula, draft.formula))
+  const presetFormulaError = errors.length
+    ? `Fix these values before saving: ${errors[0]}`
+    : duplicateFormula
+      ? `This formula is already saved as “${duplicateFormula.name}”. Load it to update it, or change the formula before saving a new one.`
+      : ''
 
   useEffect(() => {
     const { store: saved, error } = readStore(storageKey)
@@ -309,8 +341,11 @@ function DoughFormulaWorkbench({
   }, [open, selection])
 
   const persist = (next: WorkbenchStore) => {
+    const error = saveStore(storageKey, next)
+    setStoreError(error)
+    if (error) return false
     setStore(next)
-    setStoreError(saveStore(storageKey, next))
+    return true
   }
   const changeMode = (next: InputMode) => {
     setMode(next)
@@ -334,20 +369,27 @@ function DoughFormulaWorkbench({
     })
     setDraft((currentDraft) => ({ ...currentDraft, formula: reversed.formula, batch: { ...currentDraft.batch, pieceWeightGrams: reversed.totalDoughGrams / currentDraft.batch.count } }))
   }
-  const savePreset = (replaceId?: string) => {
-    const name = presetName.trim()
-    if (!name || errors.length) return
-    const item = { id: replaceId ?? `${Date.now()}`, name, formula: clone(draft.formula) }
-    persist({ ...store, presets: replaceId ? store.presets.map((preset) => preset.id === replaceId ? item : preset) : [...store.presets, item] })
+  const savePreset = () => {
+    setPresetAttempted(true)
+    setPresetNotice('')
+    if (presetNameError || presetFormulaError) {
+      if (presetNameError) presetNameInput.current?.focus()
+      return
+    }
+    const item = { id: selectedPreset?.id ?? crypto.randomUUID(), name: normalizedPresetName, formula: clone(draft.formula) }
+    if (!persist({ ...store, presets: selectedPreset ? store.presets.map((preset) => preset.id === selectedPreset.id ? item : preset) : [...store.presets, item] })) return
     setSelectedPresetId(item.id)
+    setChosenPresetId(item.id)
     setPresetName(item.name)
+    setPresetAttempted(false)
+    setPresetNotice(selectedPreset ? 'Formula updated.' : 'Formula saved.')
   }
   const saveStarterProfile = (replaceId?: string) => {
     const name = starterName.trim()
     const profile = draft.formula.starter
     if (!name || !profile || errors.length) return
     const item = { id: replaceId ?? `${Date.now()}`, name, profile: clone(profile) }
-    persist({ ...store, starterProfiles: replaceId ? store.starterProfiles.map((saved) => saved.id === replaceId ? item : saved) : [...store.starterProfiles, item] })
+    if (!persist({ ...store, starterProfiles: replaceId ? store.starterProfiles.map((saved) => saved.id === replaceId ? item : saved) : [...store.starterProfiles, item] })) return
     setSelectedStarterId(item.id)
     setStarterName(item.name)
   }
@@ -362,52 +404,69 @@ function DoughFormulaWorkbench({
           <div data-workbench-scroll-region="" className="min-h-0 min-w-0 flex-1 touch-pan-y overflow-x-hidden overflow-y-auto overscroll-contain px-6 py-5 max-[640px]:px-[18px]">
             <Segmented value={mode} onChange={changeMode} />
 
-            <section className="mt-6 grid gap-3 border-b border-[var(--color-border)] pb-6" aria-labelledby="presets-heading">
-              <div>
-                <div className="flex items-baseline justify-between gap-4">
-                  <h3 id="presets-heading" className="text-xl font-bold">Saved formulas</h3>
-                  <span className="text-xs font-bold text-[var(--color-ink)]">{compatiblePresets.length} saved</span>
+            <WorkbenchPanel headingId="presets-heading" title="Saved formulas" summary={<span className="text-xs text-action-label">{compatiblePresets.length} saved</span>}>
+              <div className="mt-3 grid gap-3">
+              <p className="text-xs leading-relaxed text-action-label">Save your formula here. Batch size and oven stay with this recipe.</p>
+              {chosenPreset ? (
+                <div className="grid gap-2">
+                  <label htmlFor="saved-formula-picker" className="text-xs font-semibold">Load a saved formula</label>
+                  <div className="flex items-start gap-2">
+                    <Select surface="on-ink" id="saved-formula-picker" className="min-w-0 flex-1" value={chosenPreset.id} onChange={(event) => setChosenPresetId(event.target.value)}>
+                      {compatiblePresets.map((preset) => <option key={preset.id} value={preset.id}>{preset.name}{store.defaults[recipe.slug] === preset.id ? ' (default)' : ''}</option>)}
+                    </Select>
+                    <Button variant="on-ink" type="button" size="sm" aria-label={`Load ${chosenPreset.name}`} onClick={() => {
+                      setDraft((current) => ({ ...current, formula: clone(chosenPreset.formula) }))
+                      setSelectedPresetId(chosenPreset.id)
+                      setPresetName(chosenPreset.name)
+                      setPresetAttempted(false)
+                      setPresetNotice('Formula loaded. Apply to recipe when ready.')
+                    }}>Load</Button>
+                  </div>
+                  <p className="text-xs leading-relaxed text-action-label">{presetSummary(chosenPreset.formula)}</p>
                 </div>
-                <p className="mt-1 text-sm">Load a formula here. Batch size and oven stay separate until you apply the recipe.</p>
-              </div>
-              {compatiblePresets.length === 0 ? (
-                <p className="border-y border-[var(--color-border)] py-3 text-sm text-[var(--color-ink)]">No saved formulas yet.</p>
-              ) : (
-                <ul className="grid border-t border-[var(--color-border)]">
-                  {compatiblePresets.map((preset) => {
-                    const isLoaded = activePresetId === preset.id
-                    const isModified = selectedPresetId === preset.id && !isLoaded
-                    const isDefault = store.defaults[recipe.slug] === preset.id
-                    return (
-                      <li key={preset.id} className="grid gap-2 border-b border-[var(--color-border)] py-3">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0">
-                            <div className="font-bold">{preset.name}</div>
-                            <div className="mt-0.5 text-xs text-[var(--color-ink)]">{presetSummary(preset.formula)}</div>
-                          </div>
-                          <div className="flex shrink-0 gap-1 text-[10px] font-bold tracking-[0.6px]">
-                            {isLoaded && <span className="bg-[var(--color-tint)] px-2 py-1">Loaded</span>}
-                            {isModified && <span className="border border-[var(--color-border)] px-2 py-1">Modified</span>}
-                            {isDefault && <span className="border border-[var(--color-border)] px-2 py-1">Default</span>}
-                          </div>
-                        </div>
-                        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-bold">
-                          <Button variant="link" type="button" aria-label={`Load ${preset.name}`} className="text-[var(--color-action-hover)] " onClick={() => { setDraft((current) => ({ ...current, formula: clone(preset.formula) })); setSelectedPresetId(preset.id); setPresetName(preset.name) }}>Load</Button>
-                          <Button variant="link" type="button" className="" onClick={() => persist({ ...store, defaults: { ...store.defaults, [recipe.slug]: preset.id } })}>{isDefault ? 'Default' : 'Make default'}</Button>
-                          <Button variant="link" type="button" aria-label={`Delete ${preset.name}`} className="ml-auto inline-flex items-center gap-1 text-[var(--color-action-hover)]" onClick={() => { persist({ ...store, presets: store.presets.filter((item) => item.id !== preset.id), defaults: Object.fromEntries(Object.entries(store.defaults).filter(([, id]) => id !== preset.id)) }); if (selectedPresetId === preset.id) { setSelectedPresetId(''); setPresetName('') } }}><Trash2 className="size-3.5" />Delete</Button>
-                        </div>
-                      </li>
-                    )
-                  })}
-                </ul>
+              ) : <p className="text-sm text-action-label">No saved formulas yet.</p>}
+
+              <form noValidate className="grid gap-3 border-t border-border-on-ink pt-4" onSubmit={(event) => { event.preventDefault(); savePreset() }}>
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <h4 className="min-w-0 flex-1 break-words text-sm font-semibold">{selectedPreset ? `Editing ${selectedPreset.name}` : 'Save current formula'}</h4>
+                  {selectedPreset && <span className="text-xs text-action-label">{activePresetId ? 'Loaded' : 'Modified'}</span>}
+                </div>
+                <div className="grid gap-1.5">
+                  <label htmlFor="formula-preset-name" className="text-xs font-semibold">Formula name</label>
+                  <Input surface="on-ink" ref={presetNameInput} id="formula-preset-name" aria-label="Formula preset name" required aria-invalid={presetAttempted && Boolean(presetNameError)} aria-describedby={presetAttempted && presetNameError ? 'formula-preset-name-error' : undefined} placeholder="e.g. Weekend pizza" value={presetName} onChange={(event) => { setPresetName(event.target.value); setPresetNotice('') }} />
+                  {presetAttempted && presetNameError && <p id="formula-preset-name-error" role="alert" className="rounded-field bg-danger-soft p-3 text-xs text-danger">{presetNameError}</p>}
+                </div>
+                {presetAttempted && !presetNameError && presetFormulaError && <p role="alert" className="break-words rounded-field bg-danger-soft p-3 text-xs text-danger">{presetFormulaError}</p>}
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button variant="on-ink" type="submit" size="sm">{selectedPreset ? 'Update formula' : 'Save new'}</Button>
+                  {selectedPreset && <Button variant="quiet-on-ink" type="button" size="sm" onClick={() => {
+                    setSelectedPresetId('')
+                    setPresetName('')
+                    setPresetAttempted(false)
+                    setPresetNotice('')
+                    presetNameInput.current?.focus()
+                  }}>New formula</Button>}
+                </div>
+              </form>
+              {selectedPreset && (
+                <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border-on-ink pt-3">
+                  <Button variant="quiet-on-ink" type="button" size="sm" disabled={store.defaults[recipe.slug] === selectedPreset.id} onClick={() => {
+                    if (persist({ ...store, defaults: { ...store.defaults, [recipe.slug]: selectedPreset.id } })) setPresetNotice('Default formula updated.')
+                  }}>{store.defaults[recipe.slug] === selectedPreset.id ? 'Default for this recipe' : 'Make default'}</Button>
+                  <Button variant="quiet-on-ink" type="button" size="sm" aria-label={`Delete ${selectedPreset.name}`} onClick={() => {
+                    if (!persist({ ...store, presets: store.presets.filter((item) => item.id !== selectedPreset.id), defaults: Object.fromEntries(Object.entries(store.defaults).filter(([, id]) => id !== selectedPreset.id)) })) return
+                    setSelectedPresetId('')
+                    setChosenPresetId('')
+                    setPresetName('')
+                    setPresetAttempted(false)
+                    setPresetNotice('Formula deleted.')
+                    presetNameInput.current?.focus()
+                  }}><Trash2 className="size-4" aria-hidden="true" />Delete</Button>
+                </div>
               )}
-              <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
-                <Input aria-label="Formula preset name" placeholder="Formula name" className="px-3" value={presetName} onChange={(event) => setPresetName(event.target.value)} />
-                <Button variant="secondary" type="button" size="sm" disabled={!presetName.trim() || errors.length > 0} onClick={() => savePreset()}>Save new</Button>
+              <p role="status" className="text-xs text-action-label empty:hidden">{storeError || presetNotice}</p>
               </div>
-              {selectedPresetId && <div className="flex items-center justify-between gap-3 text-sm"><span>Rename or replace the selected formula using the name above.</span><Button variant="link" type="button" className="shrink-0 font-bold text-[var(--color-action-hover)] disabled:opacity-40" disabled={!presetName.trim() || errors.length > 0} onClick={() => savePreset(selectedPresetId)}>Replace</Button></div>}
-              {storeError && <p role="status" className="text-sm text-[var(--color-action-hover)]">{storeError}</p>}
-            </section>
+            </WorkbenchPanel>
 
             <section className="mt-6 grid gap-4" aria-labelledby="batch-heading">
               <h3 id="batch-heading" className="text-xl font-bold">Batch</h3>
@@ -416,7 +475,7 @@ function DoughFormulaWorkbench({
                 <Field label={`${draft.batch.pieceLabel} weight`} suffix="g" value={draft.batch.pieceWeightGrams} onChange={(pieceWeightGrams) => setDraft((current) => ({ ...current, batch: { ...current.batch, pieceWeightGrams } }))} />
               </div>
               {recipe.methodOptions.length > 1 && <label className="grid gap-1 text-xs font-bold">Oven method<Select className="font-normal" value={draft.methodId} onChange={(event) => setDraft((current) => ({ ...current, methodId: event.target.value }))}>{recipe.methodOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}</Select></label>}
-              {config.recommendedFormulas[draft.methodId] && !formulasMatch(config.recommendedFormulas[draft.methodId], draft.formula) && <Button variant="link" type="button" className="justify-self-start text-sm font-bold text-[var(--color-action-hover)] " onClick={() => { setSelectedPresetId(''); setPresetName(''); updateFormula(clone(config.recommendedFormulas[draft.methodId])) }}>Use recommended formula for {method?.label ?? 'this method'}</Button>}
+              {config.recommendedFormulas[draft.methodId] && !formulasMatch(config.recommendedFormulas[draft.methodId], draft.formula) && <Button variant="link" type="button" className="justify-self-start text-sm font-bold text-[var(--color-action-hover)] " onClick={() => { setSelectedPresetId(''); setPresetName(''); setPresetAttempted(false); setPresetNotice(''); updateFormula(clone(config.recommendedFormulas[draft.methodId])) }}>Use recommended formula for {method?.label ?? 'this method'}</Button>}
             </section>
 
             {mode === 'target' ? (
@@ -443,7 +502,7 @@ function DoughFormulaWorkbench({
             )}
 
             {draft.formula.family === 'sourdough' && draft.formula.starter && (
-              <section className="mt-7 grid gap-4 border-t border-[var(--color-border)] pt-6" aria-labelledby="starter-heading">
+              <section className="mt-7 grid gap-4 border-t border-border-on-brand pt-6" aria-labelledby="starter-heading">
                 <div><h3 id="starter-heading" className="text-xl font-bold">Ripe starter / levain</h3><p className="mt-1 text-sm">Weight, hydration, and flour composition stay together in both calculator views.</p></div>
                 {mode === 'weights' && <Field label="Ripe starter weight" suffix="g" value={result.levainGrams} onChange={(levainGrams) => applyReverse({ levainGrams })} />}
                 <Field label="Starter hydration" suffix="%" value={draft.formula.starter.hydrationPercent} onChange={(hydrationPercent) => mode === 'weights' ? applyReverse({ starter: { ...draft.formula.starter!, hydrationPercent } }) : updateFormula({ starter: { ...draft.formula.starter!, hydrationPercent } })} />
@@ -455,8 +514,7 @@ function DoughFormulaWorkbench({
               </section>
             )}
 
-            <section className="mt-7 rounded-field bg-ink p-5 text-action-label" aria-labelledby="preview-heading">
-              <h3 id="preview-heading" className="text-2xl font-bold text-brand">Your dough</h3>
+            <WorkbenchPanel headingId="preview-heading" title="Your dough">
               <p className="mt-2 text-sm leading-relaxed">{selectionSummary(draft, method)}</p>
               <dl className="my-5 grid grid-cols-2 gap-4">
                 <div><dt className="text-xs">Total flour</dt><dd className="mt-1 text-xl font-bold tabular-nums text-brand">{formatGrams(result.totalFlourGrams)}</dd></div>
@@ -468,7 +526,7 @@ function DoughFormulaWorkbench({
                 return <div key={item} className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-4"><dt>{name.join(' ')}</dt><dd className="m-0 font-bold tabular-nums">{amount}</dd></div>
               })}</dl>
               {errors.length > 0 && <div id="workbench-errors" role="alert" className="mt-4 rounded-field bg-danger-soft p-4 text-sm text-danger"><strong>Fix these before applying:</strong><ul className="mt-1 list-disc pl-5">{errors.map((error) => <li key={error}>{error}</li>)}</ul></div>}
-            </section>
+            </WorkbenchPanel>
 
           </div>
           <footer className="shrink-0 bg-brand px-6 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] max-[640px]:px-[18px]">

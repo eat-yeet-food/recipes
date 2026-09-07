@@ -6,6 +6,10 @@ Reviewed September 7, 2026. The approved usage contract is [design-system.md](de
 
 The current contract also includes text-only footer branding, the shared mobile search title/filter row, regular-weight hero motto, revised app-owned kicker, removal of the supporting hero tagline, compact filter rows and checkboxes, and omission of per-option recipe counts. The docs and production stories reflect these changes; the new filter geometry appears in the token handbook.
 
+Recipe facts subsequently changed from a rounded yellow panel to an unfilled strip with thin rules, smaller semibold values, muted labels, and responsive columns. Its production stories include the full long-duration pizza example. This refinement has not undergone automated or browser review; standalone checks remain paused at the user’s request.
+
+Later refinements add the shared ink WorkbenchPanel for saved formulas and dough results, normalized-name and exact-formula duplicate prevention, explicit create/update forms, surface-specific dividers, article-header utility actions, and dedicated labeled switches. New stories cover name validation, duplicate formulas, renaming, both recipe action contexts, switch keyboard interaction, and fields/actions on ink. These stories and updated route assertions have not been executed during the requested pause; keyboard, narrow-layout, storage-failure, and visual review remain pending. Deployment’s build and production checks are separate from that outstanding review.
+
 The automated evidence below describes the original Yellow + ink rollout, not full verification of these later refinements. Standalone checks were stopped at the user’s request because another agent was working in the same workspace. No new visual baselines were accepted. The later compact-filter changes and updated hero copy still need a coordinated screenshot, keyboard, narrow-layout, and accessibility review. The standard deployment command performs its own build and production verification; it does not replace that review.
 
 ## What was reviewed

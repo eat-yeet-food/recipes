@@ -61,7 +61,7 @@ function WorkbenchPreview({ target = false, pizza = false }: { target?: boolean;
 const meta = {
   title: 'Recipes/Dough workbench',
   component: WorkbenchPreview,
-  parameters: { layout: 'fullscreen' },
+  parameters: { layout: 'fullscreen', docs: { description: { component: 'Saved formulas use the same ink panel as the dough summary, with a single picker and a named create/update form. Names are required, limited to 80 characters, and unique within a dough family regardless of case or spacing. Exact formula copies are rejected. Errors remain next to the form; saving failures never report success.' } } },
 } satisfies Meta<typeof WorkbenchPreview>
 
 export default meta
@@ -91,4 +91,50 @@ export const SavedFormula: Story = { play: async ({ canvasElement }) => {
   await userEvent.type(await screen.findByRole('textbox', { name: 'Formula preset name' }), 'Weekend batch')
   await userEvent.click(screen.getAllByRole('button', { name: 'Save new' })[0])
   await expect(screen.getByRole('button', { name: 'Load Weekend batch' })).toBeInTheDocument()
+} }
+
+export const DuplicateFormulaName: Story = { play: async ({ canvasElement }) => {
+  const screen = within(canvasElement.ownerDocument.body)
+  await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))
+  const panel = within(screen.getByRole('region', { name: 'Saved formulas' }))
+  const name = panel.getByRole('textbox', { name: 'Formula preset name' })
+  await userEvent.click(panel.getByRole('button', { name: 'Save new', exact: true }))
+  await expect(name).toHaveAttribute('aria-invalid', 'true')
+  await expect(panel.getByRole('alert')).toHaveTextContent('Enter a name')
+  await userEvent.type(name, 'Weekend batch')
+  await userEvent.click(panel.getByRole('button', { name: 'Save new', exact: true }))
+  await userEvent.click(panel.getByRole('button', { name: 'New formula', exact: true }))
+  await userEvent.type(name, '  WEEKEND   batch  ')
+  await userEvent.click(panel.getByRole('button', { name: 'Save new', exact: true }))
+  await expect(panel.getByRole('alert')).toHaveTextContent('A formula with this name already exists')
+  await expect(panel.getAllByRole('option')).toHaveLength(1)
+} }
+
+export const DuplicateFormulaValues: Story = { play: async ({ canvasElement }) => {
+  const screen = within(canvasElement.ownerDocument.body)
+  await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))
+  const panel = within(screen.getByRole('region', { name: 'Saved formulas' }))
+  const name = panel.getByRole('textbox', { name: 'Formula preset name' })
+  await userEvent.type(name, 'Weekend batch')
+  await userEvent.click(panel.getByRole('button', { name: 'Save new', exact: true }))
+  await userEvent.click(panel.getByRole('button', { name: 'New formula', exact: true }))
+  await userEvent.type(name, 'Another batch')
+  await userEvent.click(panel.getByRole('button', { name: 'Save new', exact: true }))
+  await expect(panel.getByRole('alert')).toHaveTextContent('This formula is already saved')
+  await expect(panel.getAllByRole('option')).toHaveLength(1)
+} }
+
+export const RenameSavedFormula: Story = { play: async ({ canvasElement }) => {
+  const screen = within(canvasElement.ownerDocument.body)
+  await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))
+  const panel = within(screen.getByRole('region', { name: 'Saved formulas' }))
+  const name = panel.getByRole('textbox', { name: 'Formula preset name' })
+  await userEvent.type(name, 'Weekend batch')
+  await userEvent.click(panel.getByRole('button', { name: 'Save new', exact: true }))
+  await userEvent.clear(name)
+  await userEvent.type(name, 'Sunday bread')
+  await userEvent.click(panel.getByRole('button', { name: 'Update formula', exact: true }))
+  await expect(panel.getAllByRole('option')).toHaveLength(1)
+  await expect(panel.getByRole('option', { name: 'Sunday bread' })).toBeInTheDocument()
+  await expect(panel.getByRole('status')).toHaveTextContent('Formula updated.')
 } }

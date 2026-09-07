@@ -25,6 +25,13 @@ before applying generic action sizing. Preserve the distinction between
 clickable target size and visible checkbox size, and between active-filter
 indicators and result totals. Expose new reusable tokens in the token handbook.
 
+Select actions, fields, and dividers for their parent surface using the
+handbook’s context-specific variants. A mismatch in the article header does
+not justify changing the approved recipe-card actions. Use a dedicated labeled
+switch for binary settings rather than a button-styled row. Saved-formula UI
+follows the **Saved formulas** contract and shares its panel with dough results;
+keep validation, persistence feedback, and corresponding stories together.
+
 When recording refinements, distinguish implemented changes from proposed
 designs and historical verification from evidence for the current changes.
 

@@ -19,15 +19,17 @@ Run `pnpm storybook` for the interactive handbook. `pnpm test:storybook` builds 
 | --- | --- | --- |
 | `brand` | Dominant sunshine field, brand sticker, selected brand moments | Small yellow text on white; tinting every reading surface |
 | `ink` / `primary` | Reading and flat filled primary actions | Red editorial accents or separate recipe palettes |
-| `action-label` | Cream labels on ink controls, including on yellow panels | Yellow-on-yellow repetition around a dark button |
+| `action-label` | Light text in ink workbench panels and filled recipe-card actions | Applying the same filled treatment to article-header utilities |
 | `action-hover` | Warm dark hover with the same light label | Opacity that changes contrast unpredictably |
 | `tint` | Occasional supporting prose callouts | Active controls, recipe facts, or workbench summaries; washed-out default surfaces |
 | `brand-alt` | Small orange graphic accents and dough illustration | Default control shadows or orange small text |
 | `input` | Checkbox boundary and legacy structural use | Bottom borders on text fields |
+| `border` | Dividers on white reading surfaces | Pale rules on saturated yellow or ink |
+| `border-on-brand` / `border-on-ink` | Surface-specific dividers on yellow / ink respectively | Reusing the white-surface divider regardless of its parent |
 | `danger` / `danger-soft` | Actual errors, invalid fields, destructive actions | Decorative eyebrows, Learn headings, story chrome |
 | `muted-foreground` | Readable secondary text | Arbitrarily transparent labels |
 
-Use one strong yellow field per brand moment, with white space for long reading. Category choices use saturated yellow when unselected and ink when selected. Their pressed state remains explicit; do not communicate selection through color alone. A recipe body stays white; workbench chrome is yellow, fields use ink fills with cream text, and the result summary uses ink with yellow totals. Pale yellow is not the default treatment for everything. Do not copy an external site's theme into one feature. There is no separate Learn or recipe palette and no retired `--yeet-*` color alias.
+Use one strong yellow field per brand moment, with white space for long reading. Category choices use saturated yellow when unselected and ink when selected. Their pressed state remains explicit; do not communicate selection through color alone. A recipe body and its passive facts stay on the white reading surface; workbench chrome is yellow, fields use ink fills with cream text, and the result summary uses ink with yellow totals. Pale yellow is not the default treatment for everything. Do not copy an external site's theme into one feature. There is no separate Learn or recipe palette and no retired `--yeet-*` color alias.
 
 ## Shape and interaction
 
@@ -35,9 +37,13 @@ Standalone actions are pills. Fields use `radius-field`; cards and callouts use 
 
 Faceted filter lists use a compact reading rhythm on desktop and mobile: 14px Avenir labels (`text-sm`), 12px group headings (`text-xs`), 8px between rows, and 10px between checkbox and label. Omit per-option counts and count badges; show the matching recipe total above the results instead. Use Checkbox’s `compact` size (16px visible box) within a fully clickable label row of at least 24px (`spacing-filter-row`), with `radius-filter` corners. Rows grow for wrapped labels. The checkbox hit area is 24px and must not overlap adjacent rows. Group disclosures retain their expanded state and keyboard focus. Do not apply the standalone action’s 44px minimum height or field radius to every filter row. `FacetGroup` in `packages/l7/search` owns this treatment; the desktop sidebar and mobile disclosure share it. Search/Page stories cover unchecked, selected, long-label, and collapsible groups.
 
-Text fields use a flat ink fill, light values/placeholders, and inset keyboard focus; no bottom rule, shadow, or underline. Visible external labels distinguish editing from actions.
+Text fields on white or yellow use a flat ink fill and light values/placeholders. Input and Select use the `on-ink` surface inside ink panels: a light fill with ink values and muted placeholders. Both treatments retain inset keyboard focus, no bottom rule, shadow, or underline, and visible external labels. Invalid fields expose `aria-invalid` and an associated message; error text on ink sits on `danger-soft` so it remains readable.
 
 Buttons have a single flat fill: no offset shadows, decorative outlines, translation on press, or underlined labels in any state. Keyboard focus is a single inset indicator. Icons need a visible boundary when focused too; forced colors retain the system focus indicator. Real prose links remain underlined. A quiet button still uses button semantics and does not become a link merely because it is visually quiet.
+
+Choose button emphasis by its role and parent surface. Article-header utilities use Button’s `utility` variant: ink text and icons on a transparent background, with a muted hover fill. Recipe-card Print and Pin actions keep the filled ink/cream treatment. On ink panels, primary actions use `on-ink` (yellow fill, ink label); secondary actions use `quiet-on-ink` (light text, transparent fill). Do not globally recolor all actions to resolve a mismatch in one context. `RecipeAction` owns the header/card distinction.
+
+Binary settings use the dedicated Switch primitive with a visible adjacent label. Do not wrap the label and track in Button or give their row a hover/selected background. Only the thumb position and track color communicate state; keyboard focus outlines the track. `CookModeSwitch` owns the labeled recipe usage. The recipe-card “Cook Mode” switch keeps surrounding content in place; the header “Cooking view” switch replaces Start Cooking / Back to Recipe and enables the focused article view. Turning Cooking view off also ends cook mode, preserving the prior behavior.
 
 The wordmark component owns all sizes and light/dark contexts. App-bar navigation and the footer use the text lockup alone; the doughnut remains available for the favicon and larger brand contexts. The home hero uses the pizza-led “Big dough energy” composition without the “Made by you” badge. The approved favicon is the existing bitten doughnut recolored with **yellow icing and golden-orange dough**. Pink and chocolate studies are not approved assets. Preserve the bite, crumbs, and sprinkle silhouette. Favicon colors are self-contained SVG values because browser icons do not inherit page CSS.
 
@@ -53,19 +59,27 @@ Navigation and footer retain their respective wordmark sizes, separator, and yel
 
 The Filters button may indicate the number of active filters; individual options omit recipe counts. The matching recipe total sits above the result grid. These are distinct quantities and must not be mixed into option labels.
 
+## Saved formulas
+
+The app-owned `WorkbenchPanel` gives Saved formulas and Your dough the same ink surface, field radius, padding, yellow heading, and light text. A single saved-formula picker replaces repeated Load/Default/Delete rows. The editor distinguishes creating a formula from updating the loaded one; default and delete actions apply only to that loaded formula. Input and Select use their `on-ink` surface. Internal dividers use `border-on-ink`; separators directly on the yellow sheet use `border-on-brand`.
+
+Saved names are required, normalized for Unicode and whitespace, limited to 80 characters, and unique within each dough family without regard to case. Creating or updating cannot duplicate another saved formula’s exact values. Updating a formula excludes its own ID from uniqueness checks. Existing saved entries are preserved until explicitly edited or deleted. Invalid calculator values block saving with an explanation. Name errors appear beside the input with `aria-invalid`, `aria-describedby`, and focus returned to the field; formula errors appear at the form. Save/update confirmation is announced only after browser storage succeeds. Batch size and oven remain outside the saved formula.
+
 ## Control contracts
 
 | Component | Use and states | Keyboard / semantics |
 | --- | --- | --- |
-| Button | Primary, secondary, ghost, quiet (`link` variant), danger, disabled, long label, on-yellow | Native button; `asChild` with a real anchor for navigation; 44px default target; inset focus; `outline` is a compatibility alias for filled secondary |
+| Button | Primary, secondary, utility, ghost, quiet (`link` variant), on-ink, quiet-on-ink, danger, disabled, long label | Native button; `asChild` with a real anchor for navigation; 44px default target; inset focus; `outline` is a compatibility alias for filled secondary |
 | ChoiceGroup | Exclusive selection, short/wrapped labels; dark group, saturated yellow selected item | Named group of native pressed buttons; Tab, Enter, Space; all options reachable; selected state via `aria-pressed` |
-| Input / Select / Textarea | Filled/empty, invalid, disabled, read-only; native select for platform behavior | Always a visible associated label; error association via `aria-describedby`; `aria-invalid` on affected field; never replace numeric semantics with styled text |
-| Checkbox / cook switch | Checked, unchecked, disabled, focus; Checkbox has default and compact sizes, with compact reserved for labeled filter rows | Native/Radix behavior, accessible name, explicit checked state; visible check or moving thumb beyond color alone |
+| Input / Select / Textarea | Filled/empty, invalid, disabled, read-only; Input/Select support default and on-ink surfaces | Always a visible associated label; error association via `aria-describedby`; `aria-invalid` on affected field; never replace numeric semantics with styled text |
+| Checkbox | Checked, unchecked, disabled, focus; default and compact sizes, with compact reserved for labeled filter rows | Native/Radix behavior, accessible name, explicit checked state; visible check beyond color alone |
+| Switch | On/off, disabled, keyboard focus, on white/yellow; external label with no surrounding hover/selected fill | Radix switch semantics, `aria-checked`, associated label, Space toggles, track focus indicator and 44px hit area |
 | Faceted filter list | Compact unchecked/selected rows, text-only labels without counts, wrapped labels, open/closed groups; white reading surface | Whole label toggles checkbox; at least 24px targets; Tab and Space operate checkboxes; Enter/Space operate group disclosure with `aria-expanded` |
 | Mobile filter disclosure | Title and trigger share a row; active-filter indicator, closed/open, narrow title wrapping | Button exposes `aria-expanded` and `aria-controls`; expanded controls follow the header in reading order; desktop uses the sidebar |
 | Dialog / workbench | Open, close, cancel, apply, invalid formula, weights/target, pizza/sourdough, saved formulas, shared state | Named dialog, Escape, contained focus, return to trigger, reachable mobile footer; formula behavior remains domain-owned |
-| RecipeFacts | One saturated yellow fact panel, bold values, quieter labels; no individual pale tiles | Passive definition list, no hover or pressed affordance; wraps long durations and yields |
+| RecipeFacts | Unfilled fact strip with thin `border` rules, 12px muted labels and 18px semibold values; no rounded enclosure. Four columns at `xl`, two below, one at 360px and narrower | Passive definition list, no hover or pressed affordance; wraps long durations and yields without truncation |
 | Dough summary | Ink result panel, yellow totals, ingredient labels left and tabular weights right | Definition lists; preserve units and all formula data; explicit error messages |
+| Saved formulas | Same WorkbenchPanel surface as Your dough; one picker, explicit create/update flow, normalized unique names and no exact duplicate formulas | Native labeled form; Enter submits; inline announced errors; invalid input receives focus; storage failure never reports success |
 | Content blocks | Markdown, media/captions, callouts, steps, comparison, sources | Real heading hierarchy; inline links identifiable; source return links named; table scroll local, never whole-page overflow |
 
 ## Story ownership and coverage

@@ -1,6 +1,7 @@
-import type { ReactNode } from 'react'
+import { useId, type ReactNode } from 'react'
 
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
+import { Switch } from '@eat-yeet/l5-ui-primitives/primitives/switch'
 
 type RecipeActionProps = {
   variant: 'hero' | 'card'
@@ -20,26 +21,17 @@ export function RecipeAction({
   children,
 }: RecipeActionProps) {
   const className = variant === 'hero' ? 'max-[640px]:flex-1' : ''
-  if (href) return <Button asChild className={className}><a href={href} target={target} rel={rel}>{children}</a></Button>
-  return <Button onClick={onClick} className={className}>{children}</Button>
+  const buttonVariant = variant === 'hero' ? 'utility' : 'default'
+  if (href) return <Button asChild variant={buttonVariant} className={className}><a href={href} target={target} rel={rel}>{children}</a></Button>
+  return <Button variant={buttonVariant} onClick={onClick} className={className}>{children}</Button>
 }
 
-export function CookModeSwitch({ checked, onCheckedChange }: { checked: boolean; onCheckedChange: () => void }) {
+export function CookModeSwitch({ checked, onCheckedChange, label = 'Cook Mode' }: { checked: boolean; onCheckedChange: () => void; label?: string }) {
+  const id = useId()
   return (
-    <Button variant="ghost"
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      onClick={onCheckedChange}
-      className="justify-between gap-3"
-    >
-      <span>Cook Mode</span>
-      <span
-        aria-hidden="true"
-        className={`relative h-6 w-11 shrink-0 rounded-full transition-colors motion-reduce:transition-none ${checked ? 'bg-ink' : 'bg-muted-foreground'}`}
-      >
-        <span className={`absolute top-1 left-1 size-4 rounded-full bg-white transition-transform motion-reduce:transition-none ${checked ? 'translate-x-5' : ''}`} />
-      </span>
-    </Button>
+    <div className="flex min-h-11 items-center justify-between gap-3 px-4">
+      <label htmlFor={id} className="cursor-pointer font-action text-sm font-bold text-ink">{label}</label>
+      <Switch id={id} checked={checked} onCheckedChange={onCheckedChange} />
+    </div>
   )
 }

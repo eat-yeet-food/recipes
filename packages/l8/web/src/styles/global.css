@@ -71,6 +71,8 @@
   --color-accent-foreground: var(--color-ink);
   --color-foreground: var(--color-ink);
   --color-border: #d6d0c5;
+  --color-border-on-brand: color-mix(in srgb, var(--color-ink) 40%, var(--color-brand));
+  --color-border-on-ink: color-mix(in srgb, var(--color-action-label) 30%, var(--color-ink));
   --color-border-light: var(--color-border);
   --color-border-medium: var(--color-border);
   --color-input: #807563;

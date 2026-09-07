@@ -47,9 +47,7 @@ for (const recipe of INDEX) {
       printButtons: Array.from(document.querySelectorAll('button')).filter((button) =>
         button.textContent?.includes('Print'),
       ).length,
-      cookButtons: Array.from(document.querySelectorAll('button')).filter((button) =>
-        button.textContent?.includes('Cook Mode'),
-      ).length,
+      cookSwitches: document.querySelectorAll('[role="switch"]').length,
       browseCards: document.querySelectorAll('[data-yeet-browse] a[href^="/recipes/"]').length,
       sidebarDisplay: getComputedStyle(document.querySelector('[data-yeet-browse]')).display,
       titleVisible: text('h1') === expectedTitle,
@@ -60,7 +58,7 @@ for (const recipe of INDEX) {
   check(`${recipe.slug} has matching h1`, facts.titleVisible, `${facts.h1} !== ${recipe.title}`)
   check(`${recipe.slug} renders recipe card`, facts.hasRecipeCard)
   check(`${recipe.slug} does not render duplicate side actions`, facts.shareRailCount === 0, JSON.stringify(facts))
-  check(`${recipe.slug} has print controls and one cook-mode switch`, facts.printButtons >= 2 && facts.cookButtons === 1, JSON.stringify(facts))
+  check(`${recipe.slug} has print controls and dedicated cooking switches`, facts.printButtons >= 2 && facts.cookSwitches === 2, JSON.stringify(facts))
   check(`${recipe.slug} shows desktop browse sidebar`, facts.sidebarDisplay === 'block' && facts.browseCards === 4, JSON.stringify(facts))
 
   await page.close()
@@ -124,11 +122,11 @@ check(
   'cook mode marks article root',
   await desktop.locator('.yeet[data-cook-mode="true"]').count() === 1,
 )
-await desktop.getByRole('button', { name: 'Start Cooking' }).click()
+await desktop.getByRole('switch', { name: 'Cooking view' }).click()
 await desktop.waitForTimeout(200)
 check('start cooking enables cook mode', await desktop.getByRole('switch', { name: 'Cook Mode' }).getAttribute('aria-checked') === 'true')
 check('start cooking hides browse sidebar', await desktop.locator('[data-yeet-browse]').count() === 0)
-check('focused cooking offers a clear return action', await desktop.getByRole('button', { name: 'Back to Recipe' }).isVisible())
+check('focused cooking offers a switch back to the article', await desktop.getByRole('switch', { name: 'Cooking view' }).getAttribute('aria-checked') === 'true')
 const breadcrumbText = (await desktop.getByRole('navigation', { name: 'Breadcrumb' }).textContent()).replace(/\s+/g, '')
 check('recipe breadcrumb omits ambiguous course category', breadcrumbText === 'Home>Recipes>NewYorkStylePizza' && !breadcrumbText.includes('Mains'))
 check(

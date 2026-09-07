@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 
-import { CookingPot, Printer, Share2 } from 'lucide-react'
+import { Printer, Share2 } from 'lucide-react'
 import { cn } from '@eat-yeet/l0-foundation/utils'
 import { imageUrl } from '@eat-yeet/l1-recipe-model/recipes'
 import { ContentPageArticle } from '@eat-yeet/l6-ui-content-blocks/page-article'
 import type { PageBlockRegistry } from '@eat-yeet/l6-ui-content-blocks/page-blocks'
 import type { RecipeContent } from '@eat-yeet/l4-content-model/recipes'
-import { RecipeAction } from './recipe-actions'
+import { CookModeSwitch, RecipeAction } from './recipe-actions'
 import type { RecipePageBlockContext } from './recipe-blocks'
 import { RecipeWorkbenchHost } from './recipe-workbench'
 import type { ActiveRecipeWorkbench } from './workbench-registry'
@@ -60,10 +60,7 @@ function RecipeArticleHeader({
           <Printer className="size-3 max-[640px]:hidden" />
           Print Recipe
         </RecipeAction>
-        <RecipeAction variant="hero" onClick={toggleFocusedCooking}>
-          <CookingPot className="size-3 max-[640px]:hidden" />
-          {focusedCooking ? 'Back to Recipe' : 'Start Cooking'}
-        </RecipeAction>
+        <CookModeSwitch label="Cooking view" checked={focusedCooking} onCheckedChange={toggleFocusedCooking} />
       </div>
       {page.description && <p className="max-w-[690px] m-0 text-base leading-[1.625]">{page.description}</p>}
     </div>
