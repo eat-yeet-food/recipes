@@ -4,6 +4,8 @@ Reviewed September 7, 2026. The approved usage contract is [design-system.md](de
 
 ## Subsequent September 7 refinements
 
+Cook Mode now aligns to the recipe action grid’s right edge, matching the Your recipe box below, including stacked mobile rows. Its label spacing is unchanged. The card story uses the same grid arrangement; standalone checks remain paused.
+
 Responsive recipe headers now reserve the entire narrow row for the title and place Cooking view beside the byline; wide headers retain the switch beside the title. Pin/Print no longer grow across the mobile row, and their icons remain visible. Phone, intermediate-width, and long-title stories render the production header. Standalone visual checks remain paused; these layouts have not received new screenshot baseline approval.
 
 The “Your recipe” label uses the actual bold action font. Formula Save/Update now exposes the shared disabled appearance while invalid, with inline reasons before submission. The duplicate-name/value stories and a disabled-on-ink specimen reflect this behavior; standalone verification remains paused.

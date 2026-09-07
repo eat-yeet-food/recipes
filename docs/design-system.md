@@ -65,6 +65,8 @@ The Filters button may indicate the number of active filters; individual options
 
 ## Recipe layout
 
+In the recipe-card action grid, the complete Cook Mode label/track group aligns to the right edge of its cell, flush with the outer right edge of the Your recipe summary below. Preserve this alignment when the actions stack on mobile; do not center the switch within its column.
+
 The recipe header responds to its own available width. Below 52rem, the title occupies the full row; the byline and Cooking view share the next row, with the switch at the right. At 52rem and above, the switch sits beside the title/byline block. Do not let the switch squeeze a narrow title or split the title from its byline into disconnected rows. Pin and Print form a separate row of compact outlined utility actions: retain their icons and natural widths on mobile rather than stretching them into full-width pills.
 
 Switching Cooking view on or off preserves the header width, recipe-column width, and horizontal position. It hides surrounding media/sidebar content without recentering the page; the configured sidebar column remains reserved at desktop widths. Vertical spacing may tighten when the surrounding content is hidden.

@@ -15,7 +15,7 @@ function ActionsExample({ placement = 'hero', width = 'full', title = 'New York 
     focusedCooking={checked}
     toggleFocusedCooking={() => setChecked((value) => !value)}
   /></div>
-  return <div className="flex flex-wrap items-center gap-3 bg-white p-4">
+  return <div className="grid grid-cols-3 items-center gap-3 bg-white p-4 max-[640px]:grid-cols-1">
     <RecipeAction variant={placement} onClick={() => {}}><Share2 className="size-4" />Pin Recipe</RecipeAction>
     <RecipeAction variant={placement} onClick={() => {}}><Printer className="size-4" />Print Recipe</RecipeAction>
     <CookModeSwitch checked={checked} onCheckedChange={() => setChecked((value) => !value)} />

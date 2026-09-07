@@ -31,7 +31,7 @@ const SWITCH_SPACING = { hero: 'gap-3', card: 'gap-2' } as const
 export function CookModeSwitch({ checked, onCheckedChange, label = 'Cook Mode', variant = 'card' }: { checked: boolean; onCheckedChange: () => void; label?: string; variant?: keyof typeof SWITCH_SPACING }) {
   const id = useId()
   return (
-    <div className={`inline-flex min-h-11 w-fit shrink-0 items-center justify-self-center ${SWITCH_SPACING[variant]}`}>
+    <div className={`inline-flex min-h-11 w-fit shrink-0 items-center justify-self-end ${SWITCH_SPACING[variant]}`}>
       <label htmlFor={id} className="cursor-pointer whitespace-nowrap font-action text-sm font-bold text-ink">{label}</label>
       <Switch id={id} checked={checked} onCheckedChange={onCheckedChange} />
     </div>
