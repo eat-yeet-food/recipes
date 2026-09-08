@@ -58,7 +58,7 @@ for (const recipe of INDEX) {
   check(`${recipe.slug} has matching h1`, facts.titleVisible, `${facts.h1} !== ${recipe.title}`)
   check(`${recipe.slug} renders recipe card`, facts.hasRecipeCard)
   check(`${recipe.slug} does not render duplicate side actions`, facts.shareRailCount === 0, JSON.stringify(facts))
-  check(`${recipe.slug} has print controls and dedicated cooking switches`, facts.printButtons >= 2 && facts.cookSwitches === 2, JSON.stringify(facts))
+  check(`${recipe.slug} has one print control and one dedicated cooking switch`, facts.printButtons === 1 && facts.cookSwitches === 1, JSON.stringify(facts))
   check(`${recipe.slug} shows desktop browse sidebar`, facts.sidebarDisplay === 'block' && facts.browseCards === 4, JSON.stringify(facts))
 
   await page.close()
@@ -80,7 +80,7 @@ check('adjust recipe appears only beside the recipe', await desktop.getByRole('b
 check('recipe controls appear once in the header', await desktop.getByRole('switch', { name: 'Cooking view' }).count() === 1 && await desktop.getByRole('button', { name: 'Print Recipe' }).count() === 1 && await desktop.getByRole('link', { name: 'Pin Recipe' }).count() === 1 && await desktop.getByRole('switch', { name: 'Cook Mode' }).count() === 0)
 const authoredPizzaText = await desktop.locator('#recipe-card').textContent()
 check('pizza toppings show readable per-pizza and batch totals', authoredPizzaText.includes('6 oz pizza sauce (18 oz total)') && authoredPizzaText.includes('28 g pecorino romano (84 g total)') && authoredPizzaText.includes('⅛ tsp dried oregano (⅜ tsp total)'))
-check('outdoor mixing omits unused optional ingredients', authoredPizzaText.includes('Add the water, flour, salt, and yeast to the spiral mixer'))
+check('outdoor mixing omits unused optional ingredients', authoredPizzaText.includes('Add the water, flour, fine sea salt, and SAF gold instant yeast to the spiral mixer'))
 await desktop.getByRole('button', { name: 'Adjust Recipe' }).first().click()
 check('workbench opens as a dialog', await desktop.getByRole('dialog', { name: 'Adjust recipe' }).isVisible())
 check('target inputs pin percent units', (await desktop.getByText('%', { exact: true }).count()) >= 3)
@@ -101,12 +101,12 @@ await desktop.waitForURL('**/recipes/new-york-style-pizza?config=*')
 const indoorFacts = await desktop.evaluate(() => document.body.textContent ?? '')
 check('applied configuration updates URL', desktop.url().includes('?config='), desktop.url())
 check('indoor method applies calculated dough formula', indoorFacts.includes('851g King Arthur High-Gluten Flour') && indoorFacts.includes('17g oil'))
-check('indoor mixing includes configured oil', indoorFacts.includes('Add the water, flour, oil, salt, and yeast to the spiral mixer'))
+check('indoor mixing includes configured oil', indoorFacts.includes('Add the water, flour, oil, fine sea salt, and SAF gold instant yeast to the spiral mixer'))
 check('indoor method shows baking steel equipment', indoorFacts.includes('16&quot; x 16&quot; baking steel') || indoorFacts.includes('16" x 16" baking steel'))
 await desktop.goBack()
 await desktop.waitForURL('**/recipes/new-york-style-pizza')
 const outdoorFacts = await desktop.evaluate(() => document.body.textContent ?? '')
-check('browser Back restores authored formula', outdoorFacts.includes('846g Kirkland Organic All-Purpose Flour') && outdoorFacts.includes('575g water') && outdoorFacts.includes('2.11g instant yeast') && outdoorFacts.includes('16.9g salt'), outdoorFacts.slice(outdoorFacts.indexOf('Ingredients'), outdoorFacts.indexOf('Instructions')))
+check('browser Back restores authored formula', outdoorFacts.includes('846g Kirkland Organic All-Purpose Flour') && outdoorFacts.includes('575g water') && outdoorFacts.includes('2.11g SAF gold instant yeast') && outdoorFacts.includes('16.9g fine sea salt'), outdoorFacts.slice(outdoorFacts.indexOf('Ingredients'), outdoorFacts.indexOf('Instructions')))
 await desktop.getByRole('button', { name: 'Adjust Recipe' }).first().click()
 await desktop.getByLabel('Hydration').fill('71')
 await desktop.getByRole('button', { name: 'Cancel' }).click()
@@ -158,7 +158,7 @@ check('sourdough migration weights survive display rounding',
 await sourdough.getByRole('button', { name: 'Target batch' }).click()
 check('target formula uses readable rounded percentages',
   Math.abs(Number(await sourdough.getByRole('textbox', { name: 'Hydration', exact: true }).inputValue()) - 77) < 0.01 &&
-  Math.abs(Number(await sourdough.getByLabel('Salt').inputValue()) - 2) < 0.01 &&
+  Math.abs(Number(await sourdough.getByLabel('Fine sea salt', { exact: true }).inputValue()) - 2) < 0.01 &&
   Math.abs(Number(await sourdough.getByLabel('Ripe levain').inputValue()) - 17.3) < 0.01)
 await sourdough.getByRole('button', { name: 'Add flour' }).first().click()
 await sourdough.getByLabel('Flour 3 name').fill('Rye')

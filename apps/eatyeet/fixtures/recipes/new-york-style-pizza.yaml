@@ -147,8 +147,8 @@ methodOptions:
               - '852g King Arthur High-Gluten Flour'
               - 554g cold water
               - 17g canola oil
-              - '3/4 tsp [SAF red instant yeast](https://www.amazon.com/LeSaffre-LEAVENING_AGENT/dp/B0CFDPMWWC)'
-              - '17g [Diamond Crystal Baking Salt](https://www.amazon.com/Diamond-Crystal-Baking-Kosher-8-5oz/dp/B0CHVLXM7R/) or fine sea salt'
+              - '3/4 tsp [SAF gold instant yeast](https://a.co/d/j9mxG9d)'
+              - '17g fine sea salt'
           - id: sauce-batch
             title: Pizza Sauce
             items:
@@ -239,8 +239,8 @@ blocks:
         items:
           - '847g [Kirkland Organic All-Purpose Flour](https://www.costco.com/p/-/kirkland-signature-organic-unbleached-all-purpose-flour-10-lbs-2-count/4000063331.)'
           - 576g cold water
-          - '3/4 tsp [SAF red instant yeast](https://www.amazon.com/LeSaffre-LEAVENING_AGENT/dp/B0CFDPMWWC)'
-          - '17g [Diamond Crystal Baking Salt](https://www.amazon.com/Diamond-Crystal-Baking-Kosher-8-5oz/dp/B0CHVLXM7R/) or fine sea salt'
+          - '3/4 tsp [SAF gold instant yeast](https://a.co/d/j9mxG9d)'
+          - '17g fine sea salt'
       - id: sauce-batch
         title: Pizza Sauce
         items:

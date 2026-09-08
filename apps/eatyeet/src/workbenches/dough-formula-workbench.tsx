@@ -1,5 +1,5 @@
 import { isPizzaSizing, pizzaAreaScale, pizzaBallWeight, type PizzaSizing } from '@eat-yeet/l2-recipe-domain/pizza-sizing'
-import { DEFAULT_SOURDOUGH_PROCESS, isSourdoughProcess, type SourdoughProcess } from '@eat-yeet/l2-recipe-domain/sourdough-process'
+import { DEFAULT_SOURDOUGH_PROCESS, isSourdoughProcess, type SourdoughProcess, type SourdoughFoldMethod } from '@eat-yeet/l2-recipe-domain/sourdough-process'
 import { resolveSourdoughSteps, type SourdoughProcessSections, type SpiralMixerProfile } from './sourdough-process'
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
 import { NumberField, formatNumberFieldValue, type NumberFieldPrecision, type NumberFieldValidation } from '@eat-yeet/l5-ui-primitives/primitives/number-field'
@@ -85,7 +85,8 @@ const completeFormula = (formula: DoughFormula, fallback?: DoughFormula): DoughF
 } : formula
 const formulaKey = (formula: DoughFormula) => {
   const complete = completeFormula(formula)
-  const comparable = { ...complete, ...(complete.process ? { process: { ...complete.process, folds: complete.process.folds.map(({ atMinutes }) => atMinutes) } } : {}) }
+  const process = complete.process
+  const comparable = { ...complete, ...(process ? { process: { ...process, foldMethod: undefined, folds: process.folds.map(({ atMinutes, method }) => ({ atMinutes, method: method ?? process.foldMethod })) } } : {}) }
   return JSON.stringify(comparable, (_key, value) => value && typeof value === 'object' && !Array.isArray(value) ? Object.fromEntries(Object.entries(value).sort(([left], [right]) => left.localeCompare(right))) : value)
 }
 const formulasMatch = (left: DoughFormula, right: DoughFormula) => formulaKey(left) === formulaKey(right)
@@ -98,7 +99,7 @@ const cleanPresetName = (name: string) => name.normalize('NFKC').trim().replace(
 const presetNameKey = (name: string) => cleanPresetName(name).toLowerCase()
 
 function presetSummary(formula: DoughFormula) {
-  const parts = [`${formatPercent(formula.hydrationPercent)} hydration`, `${formatPercent(formula.saltPercent)} salt`]
+  const parts = [`${formatPercent(formula.hydrationPercent)} hydration`, `${formatPercent(formula.saltPercent)} fine sea salt`]
   if (formula.family === 'pizza') {
     if (formula.sugarPercent > 0) parts.push(`${formatPercent(formula.sugarPercent)} sugar`)
     if (formula.oilPercent > 0) parts.push(`${formatPercent(formula.oilPercent)} oil`)
@@ -106,7 +107,7 @@ function presetSummary(formula: DoughFormula) {
   } else if (formula.levainPercent > 0) {
     parts.push(`${formatPercent(formula.levainPercent)} levain`)
   }
-  if (formula.process) parts.push(formula.process.mixingMethod === 'hand' ? 'Hand mixed' : 'Spiral mixer', `${formula.process.folds.length} folds`)
+  if (formula.process) parts.push(formula.process.mixingMethod === 'hand' ? 'Hand mixed' : 'Spiral mixer', `${formula.process.folds.length} folding steps`)
   return parts.join(' · ')
 }
 
@@ -147,8 +148,8 @@ function dynamicDoughItems(selection: DoughWorkbenchState, formatWeight = format
   if (result.oilGrams > 0.005) items.push(`${formatWeight(result.oilGrams)} oil`)
   if (result.sugarGrams > 0.005) items.push(`${formatWeight(result.sugarGrams)} sugar`)
   if (result.maltGrams > 0.005) items.push(`${formatWeight(result.maltGrams)} malt powder`)
-  if (result.yeastGrams > 0.005) items.push(`${formatYeastGrams(result.yeastGrams)} instant yeast`)
-  items.push(`${formatWeight(result.saltGrams)} salt`)
+  if (result.yeastGrams > 0.005) items.push(`${formatYeastGrams(result.yeastGrams)} ${selection.formula.family === 'pizza' ? 'SAF gold instant yeast' : 'instant yeast'}`)
+  items.push(`${formatWeight(result.saltGrams)} fine sea salt`)
   return { result, items }
 }
 
@@ -160,8 +161,8 @@ function renderFormulaBindings(value: string, selection: DoughWorkbenchState, co
   if (result.oilGrams > 0.005) ingredients.push('oil')
   if (result.sugarGrams > 0.005) ingredients.push('sugar')
   if (result.maltGrams > 0.005) ingredients.push('malt powder')
-  ingredients.push('salt')
-  if (result.yeastGrams > 0.005) ingredients.push('yeast')
+  ingredients.push('fine sea salt')
+  if (result.yeastGrams > 0.005) ingredients.push(selection.formula.family === 'pizza' ? 'SAF gold instant yeast' : 'instant yeast')
   const mixingIngredients = ingredients.length < 2 ? ingredients.join('') : `${ingredients.slice(0, -1).join(', ')}, and ${ingredients.at(-1)}`
   const plural = pieceCountLabel(selection.batch.count, selection.batch.pieceLabel)
   const bindings: Record<string, string> = {
@@ -473,6 +474,16 @@ function DoughFormulaWorkbench({
     else presetNameInput.current?.focus()
   }
   const updateProcess = (changes: Partial<SourdoughProcess>) => { if (process) updateFormula({ process: { ...process, ...changes } }) }
+  const addFoldingStep = (afterIndex: number) => {
+    if (!process) return
+    const previous = process.folds[afterIndex]
+    const next = process.folds[afterIndex + 1]
+    const start = previous?.atMinutes ?? process.saltDelayMinutes
+    const atMinutes = next ? Math.floor((start + next.atMinutes) / 2) : start + 30
+    const folds = [...process.folds]
+    folds.splice(afterIndex + 1, 0, { id: `fold-${crypto.randomUUID()}`, atMinutes, method: previous?.method === 'lamination' ? 'coil-fold' : previous?.method ?? process.foldMethod })
+    updateProcess({ folds, bulkMinutes: next ? process.bulkMinutes : Math.max(process.bulkMinutes, atMinutes + 30) })
+  }
   const updateSeed = (next: StarterProfile) => updateFormula({ levainBuild: { seed: next, flourPerSeed: seedRatio } })
 
   return (
@@ -586,8 +597,8 @@ function DoughFormulaWorkbench({
                 <FlourEditor value={draft.formula.flour} onChange={(flour) => updateFormula({ flour })} />
                 <div className="grid grid-cols-2 gap-3 max-[380px]:grid-cols-1">
                   <Field label="Hydration" suffix="%" value={draft.formula.hydrationPercent} onChange={(hydrationPercent) => updateFormula({ hydrationPercent })} />
-                  <Field label="Salt" suffix="%" value={draft.formula.saltPercent} onChange={(saltPercent) => updateFormula({ saltPercent })} />
-                  {draft.formula.family === 'pizza' && <><Field label="Oil" suffix="%" value={draft.formula.oilPercent} onChange={(oilPercent) => updateFormula({ oilPercent })} /><Field label="Sugar" suffix="%" value={draft.formula.sugarPercent} onChange={(sugarPercent) => updateFormula({ sugarPercent })} /><Field label="Malt powder" suffix="%" value={draft.formula.maltPercent} onChange={(maltPercent) => updateFormula({ maltPercent })} /><Field label="Instant yeast" suffix="%" decimalPlaces={2} value={draft.formula.yeastPercent} onChange={(yeastPercent) => updateFormula({ yeastPercent })} /></>}
+                  <Field label="Fine sea salt" suffix="%" value={draft.formula.saltPercent} onChange={(saltPercent) => updateFormula({ saltPercent })} />
+                  {draft.formula.family === 'pizza' && <><Field label="Oil" suffix="%" value={draft.formula.oilPercent} onChange={(oilPercent) => updateFormula({ oilPercent })} /><Field label="Sugar" suffix="%" value={draft.formula.sugarPercent} onChange={(sugarPercent) => updateFormula({ sugarPercent })} /><Field label="Malt powder" suffix="%" value={draft.formula.maltPercent} onChange={(maltPercent) => updateFormula({ maltPercent })} /><Field label="SAF gold instant yeast" suffix="%" decimalPlaces={2} value={draft.formula.yeastPercent} onChange={(yeastPercent) => updateFormula({ yeastPercent })} /></>}
                   {draft.formula.family === 'sourdough' && <Field label="Ripe levain" suffix="% of flour" value={draft.formula.levainPercent} onChange={(levainPercent) => updateFormula({ levainPercent })} />}
                 </div>
               </section>
@@ -597,8 +608,8 @@ function DoughFormulaWorkbench({
                 <FlourEditor value={reverseRows} unit="g" onChange={(freshFlour) => applyReverse({ freshFlour })} />
                 <div className="grid grid-cols-2 gap-3 max-[380px]:grid-cols-1">
                   <Field label="Added water" suffix="g" value={weightInputs.addedWaterGrams ?? 0} onChange={(addedWaterGrams) => applyReverse({ addedWaterGrams })} />
-                  <Field label="Salt" suffix="g" value={weightInputs.saltGrams ?? 0} onChange={(saltGrams) => applyReverse({ saltGrams })} />
-                  {draft.formula.family === 'pizza' && <><Field label="Oil" suffix="g" value={weightInputs.oilGrams ?? 0} onChange={(oilGrams) => applyReverse({ oilGrams })} /><Field label="Sugar" suffix="g" value={weightInputs.sugarGrams ?? 0} onChange={(sugarGrams) => applyReverse({ sugarGrams })} /><Field label="Malt powder" suffix="g" value={weightInputs.maltGrams ?? 0} onChange={(maltGrams) => applyReverse({ maltGrams })} /><Field label="Instant yeast" suffix="g" decimalPlaces={yeastGramPrecision(weightInputs.yeastGrams ?? 0)} value={weightInputs.yeastGrams ?? 0} onChange={(yeastGrams) => applyReverse({ yeastGrams })} /></>}
+                  <Field label="Fine sea salt" suffix="g" value={weightInputs.saltGrams ?? 0} onChange={(saltGrams) => applyReverse({ saltGrams })} />
+                  {draft.formula.family === 'pizza' && <><Field label="Oil" suffix="g" value={weightInputs.oilGrams ?? 0} onChange={(oilGrams) => applyReverse({ oilGrams })} /><Field label="Sugar" suffix="g" value={weightInputs.sugarGrams ?? 0} onChange={(sugarGrams) => applyReverse({ sugarGrams })} /><Field label="Malt powder" suffix="g" value={weightInputs.maltGrams ?? 0} onChange={(maltGrams) => applyReverse({ maltGrams })} /><Field label="SAF gold instant yeast" suffix="g" decimalPlaces={yeastGramPrecision(weightInputs.yeastGrams ?? 0)} value={weightInputs.yeastGrams ?? 0} onChange={(yeastGrams) => applyReverse({ yeastGrams })} /></>}
                 </div>
               </section>
             )}
@@ -620,20 +631,30 @@ function DoughFormulaWorkbench({
                 <ChoiceGroup label="Mixing method" value={process.mixingMethod} onChange={(mixingMethod) => updateProcess({ mixingMethod })} options={[{ value: 'hand', label: 'By hand' }, { value: 'spiral', label: 'Spiral mixer' }]} />
                 <div className="grid grid-cols-2 gap-3 max-[380px]:grid-cols-1">
                   <Field label="Autolyse before bulk" suffix="min" step="1" value={process.autolyseMinutes} onChange={(autolyseMinutes) => updateProcess({ autolyseMinutes })} />
-                  <Field label="Add salt at" suffix="min" step="1" value={process.saltDelayMinutes} onChange={(saltDelayMinutes) => updateProcess({ saltDelayMinutes })} />
+                  <Field label="Add fine sea salt at" suffix="min" step="1" value={process.saltDelayMinutes} onChange={(saltDelayMinutes) => updateProcess({ saltDelayMinutes })} />
                   <Field label="Planned end of bulk" suffix="min" step="1" min={1} value={process.bulkMinutes} onChange={(bulkMinutes) => updateProcess({ bulkMinutes })} />
                 </div>
-                <ChoiceGroup label="Folding method" value={process.foldMethod} onChange={(foldMethod) => updateProcess({ foldMethod })} options={[{ value: 'stretch-and-fold', label: 'Stretch and fold' }, { value: 'coil-fold', label: 'Coil fold' }]} />
                 <div className="grid gap-3">
-                  {process.folds.map((fold, index) => <div key={fold.id} className="grid grid-cols-[minmax(0,1fr)_44px] items-end gap-2">
-                    <Field label={`Fold ${index + 1} at`} suffix="min" step="1" min={1} value={fold.atMinutes} onChange={(atMinutes) => updateProcess({ folds: process.folds.map((item) => item.id === fold.id ? { ...item, atMinutes } : item) })} />
-                    <Button variant="ghost" size="icon" type="button" aria-label={`Remove fold ${index + 1}`} onClick={() => updateProcess({ folds: process.folds.filter((item) => item.id !== fold.id) })}><Trash2 className="size-4" /></Button>
+                  <p className="text-sm">Choose a technique for each step. Mix stretch and folds, coil folds, and lamination in the order you use them.</p>
+                  {process.folds.map((fold, index) => <div key={fold.id} className="grid gap-2">
+                    <div className="grid grid-cols-[minmax(0,1fr)_44px] items-end gap-2">
+                      <div className="grid grid-cols-2 gap-3 max-[640px]:grid-cols-1">
+                        <label className="grid min-w-0 gap-1 text-xs font-bold">
+                          Step {index + 1} technique
+                          <Select className="font-normal" value={fold.method ?? process.foldMethod} onChange={(event) => updateProcess({ folds: process.folds.map((item) => item.id === fold.id ? { ...item, method: event.target.value as SourdoughFoldMethod } : item) })}>
+                            <option value="stretch-and-fold">Stretch and fold</option>
+                            <option value="coil-fold">Coil fold</option>
+                            <option value="lamination">Lamination</option>
+                          </Select>
+                        </label>
+                        <Field label={`Step ${index + 1} at`} suffix="min" step="1" min={1} value={fold.atMinutes} onChange={(atMinutes) => updateProcess({ folds: process.folds.map((item) => item.id === fold.id ? { ...item, atMinutes } : item) })} />
+                      </div>
+                      <Button variant="ghost" size="icon" type="button" aria-label={`Remove step ${index + 1}`} onClick={() => updateProcess({ folds: process.folds.filter((item) => item.id !== fold.id) })}><Trash2 className="size-4" /></Button>
+                    </div>
+                    {index < process.folds.length - 1 && <Button variant="link" type="button" className="justify-self-start" disabled={process.folds[index + 1].atMinutes - fold.atMinutes < 2} onClick={() => addFoldingStep(index)}>Insert step after step {index + 1}</Button>}
                   </div>)}
-                  {process.folds.length === 0 && <p className="text-sm">No folds scheduled.</p>}
-                  <Button variant="link" type="button" className="justify-self-start" onClick={() => {
-                    const atMinutes = (process.folds.at(-1)?.atMinutes ?? process.saltDelayMinutes) + 30
-                    updateProcess({ folds: [...process.folds, { id: `fold-${crypto.randomUUID()}`, atMinutes }], bulkMinutes: Math.max(process.bulkMinutes, atMinutes + 30) })
-                  }}><Plus className="size-4" />Add fold</Button>
+                  {process.folds.length === 0 && <p className="text-sm">No folding steps scheduled.</p>}
+                  <Button variant="link" type="button" className="justify-self-start" onClick={() => addFoldingStep(process.folds.length - 1)}><Plus className="size-4" />Add step</Button>
                 </div>
               </section>
             )}

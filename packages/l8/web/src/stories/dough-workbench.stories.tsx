@@ -85,7 +85,7 @@ export const TargetBatch: Story = { args: { target: true } }
 export const Pizza: Story = { args: { pizza: true, target: true }, play: async ({ canvasElement }) => {
   const screen = within(canvasElement.ownerDocument.body)
   await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))
-  await expect(screen.getByRole('textbox', { name: 'Instant yeast' })).toHaveValue('0.25')
+  await expect(screen.getByRole('textbox', { name: 'SAF gold instant yeast' })).toHaveValue('0.25')
 } }
 export const RoundedBatchAndPercentages: Story = { args: { target: true }, play: async ({ canvasElement }) => {
   const screen = within(canvasElement.ownerDocument.body)
@@ -93,7 +93,7 @@ export const RoundedBatchAndPercentages: Story = { args: { target: true }, play:
   await expect(screen.getByRole('textbox', { name: 'loaf weight' })).toHaveValue('908')
   await expect(screen.getByRole('textbox', { name: 'Total dough weight' })).toHaveValue('1815')
   await expect(screen.getByRole('textbox', { name: 'Hydration' })).toHaveValue('77')
-  await expect(screen.getByRole('textbox', { name: 'Salt' })).toHaveValue('2')
+  await expect(screen.getByRole('textbox', { name: 'Fine sea salt' })).toHaveValue('2')
 } }
 
 async function editEveryNumber(canvasElement: HTMLElement) {
@@ -220,7 +220,7 @@ export const SourdoughProcessAndSavedStarter: Story = { args: { target: true }, 
   await expect(screen.getByRole('textbox', { name: 'Formula preset name' })).toHaveAttribute('placeholder', 'e.g. Everyday sourdough')
   await expect(screen.queryByRole('textbox', { name: 'Starter profile name' })).not.toBeInTheDocument()
   await userEvent.click(screen.getByRole('button', { name: 'By hand' }))
-  const fold = screen.getByRole('textbox', { name: 'Fold 2 at' })
+  const fold = screen.getByRole('textbox', { name: 'Step 2 at' })
   await userEvent.clear(fold)
   await userEvent.type(fold, '60')
   await userEvent.tab()
@@ -229,12 +229,31 @@ export const SourdoughProcessAndSavedStarter: Story = { args: { target: true }, 
   await userEvent.type(fold, '95')
   await userEvent.tab()
   await expect(screen.getByRole('button', { name: 'Apply to recipe' })).toBeEnabled()
+  await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Step 1 technique' }), 'stretch-and-fold')
+  await userEvent.click(screen.getByRole('button', { name: 'Insert step after step 1' }))
+  await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Step 2 technique' }), 'lamination')
+  await expect(screen.getByRole('textbox', { name: 'Step 2 at' })).toHaveValue('77')
+  await expect(screen.getByRole('textbox', { name: 'Step 3 at' })).toHaveValue('95')
   await userEvent.type(screen.getByRole('textbox', { name: 'Formula preset name' }), 'Hand mixed loaf')
   await userEvent.click(screen.getByRole('button', { name: 'Save new' }))
   await userEvent.click(screen.getByRole('button', { name: 'Spiral mixer' }))
+  await userEvent.click(screen.getByRole('button', { name: 'Remove step 2' }))
   await userEvent.click(screen.getByRole('button', { name: 'Load Hand mixed loaf' }))
   await expect(screen.getByRole('button', { name: 'By hand' })).toHaveAttribute('aria-pressed', 'true')
-  await expect(screen.getByRole('textbox', { name: 'Fold 2 at' })).toHaveValue('95')
+  await expect(screen.getByRole('textbox', { name: 'Step 3 at' })).toHaveValue('95')
+  await expect(screen.getByRole('combobox', { name: 'Step 1 technique' })).toHaveValue('stretch-and-fold')
+  await expect(screen.getByRole('combobox', { name: 'Step 2 technique' })).toHaveValue('lamination')
+  await expect(screen.getByRole('combobox', { name: 'Step 3 technique' })).toHaveValue('coil-fold')
+  await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Step 2 technique' }), 'coil-fold')
+  await userEvent.click(screen.getByRole('button', { name: 'New formula' }))
+  await userEvent.type(screen.getByRole('textbox', { name: 'Formula preset name' }), 'Without lamination')
+  await expect(screen.getByRole('button', { name: 'Save new' })).toBeEnabled()
+  await userEvent.click(screen.getByRole('button', { name: 'Apply to recipe' }))
+  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+  await userEvent.click(screen.getByRole('button', { name: 'Open workbench' }))
+  await screen.findByRole('dialog')
+  await expect(screen.getByRole('combobox', { name: 'Step 1 technique' })).toHaveValue('stretch-and-fold')
+  await expect(screen.getByRole('combobox', { name: 'Step 2 technique' })).toHaveValue('coil-fold')
 } }
 
 export const PluginProcessProjection: Story = { play: async () => {
@@ -251,6 +270,8 @@ export const PluginProcessProjection: Story = { play: async () => {
   await expect(legacy.formula.process.folds.map((fold: { atMinutes: number }) => fold.atMinutes)).toEqual([60, 90, 120])
   legacy.formula.process.mixingMethod = 'hand'
   legacy.formula.process.bulkMinutes = 320
+  legacy.formula.process.folds[0].method = 'stretch-and-fold'
+  legacy.formula.process.folds[1].method = 'lamination'
   legacy.formula.process.folds[1].atMinutes = 95
   const shared = plugin.decodeState(JSON.parse(JSON.stringify(legacy)), config, source)
   await expect(shared).not.toBeNull()
@@ -260,6 +281,10 @@ export const PluginProcessProjection: Story = { play: async () => {
   const instructions = result.steps.flatMap((section) => section.items).join(' ')
   await expect(instructions).toContain('[95 min elapsed]')
   await expect(instructions).toContain('by hand')
+  const bulkSteps = result.steps.find((section) => section.id === 'bulk')!.items
+  await expect(bulkSteps[2]).toContain('stretch and folds')
+  await expect(bulkSteps[3]).toContain('Laminate the dough')
+  await expect(bulkSteps[4]).toContain('coil folds')
   await expect(instructions).not.toContain('Original fold schedule')
   await expect(instructions).not.toContain('Spiral mixer')
   await expect(result.steps.find((section) => section.id === 'bake')?.items).toEqual(['Bake as authored.'])

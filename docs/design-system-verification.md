@@ -2,6 +2,22 @@
 
 Reviewed September 7, 2026. The approved usage contract is [design-system.md](design-system.md); runtime tokens and production components remain the implementation source of truth.
 
+## September 8 mixed folding sequence
+
+Each timed sourdough step now selects stretch and fold, coil fold, or lamination. Insertion preserves neighboring step IDs and times. Saved formulas and shared recipe state retain techniques; legacy steps inherit their saved global method. Duplicate-formula comparison includes effective techniques.
+
+Verification for this change:
+
+- `pnpm test`: passed, including unit/design-policy checks, build/types/layer boundaries, 134 recipe checks, and 89 rendered stories at 1280 and 390 pixels. Updated two stale route assertions to select the salt percentage field exactly and require the single header Print/Cooking view controls specified by the current contract.
+- `pnpm run test:a11y`: 39 page/state checks, zero failures at 1366, 390, and 320 pixels.
+- `pnpm run test:lighthouse`: accessibility 100 and SEO 100 on all six checked routes.
+- Additional browser checks exercised stretch → lamination → coil sequences, insertion timing, native select-to-time Tab navigation, horizontal overflow, and applied instructions at 1280, 390, and 320 pixels. Reviewed screenshots are in `dist/fold-review`.
+- Standard screenshots and pixel comparison ran through `pnpm parity` against the final release build: 4/15 match. Desktop/mobile workbench old/new/diff images were reviewed. Stored baselines also predate existing header, recipe-facts, saved-starter, numeric-formatting, and home changes; this is not a clean visual-regression pass. No baselines were replaced. Artifacts are in `dist/shots` and `dist/diff`.
+
+Reviewed axe incomplete results include modal focus guards/hidden background content and clipped text in scrolled panels. The mixed-process stories report only the modal focus-guard/background finding; native keyboard movement and existing Escape/focus-return checks pass. Visible process fields and labels were reviewed on yellow/ink surfaces. Physical mobile keyboards, screen-reader behavior, and a full forced-colors matrix were not tested for this change. Historical pause statements below describe earlier work, not the September 8 checks above.
+
+The September 8 release also standardizes baking/pastry ingredients and instructions on fine sea salt and both pizza variants on SAF gold instant yeast. Runtime calculator labels, ingredient previews, and generated mixing instructions use the same names. A recursive content audit covered all 12 baking/pastry recipes; desktop and 320px pizza previews were reviewed in `dist/ingredient-review`. Mac and cheese retains its authored 4g salt weight instead of carrying forward the kosher-salt teaspoon equivalent.
+
 ## Subsequent September 7 refinements
 
 Pizza size presets now scale the authored 16-inch / 480g dough by area to whole-gram weights, carrying diameter through recipe/shared state and updating toppings, yield, and stretching instructions. Custom weight entry remains available. Sugar already works in grams and percentages; saved summaries now include it. Added domain/story cases are unexecuted during the standalone-check pause.
