@@ -9,10 +9,6 @@ export const app = { ...{
   "label": "Eat / Yeet",
   "siteUrl": "https://eatyeet.com",
   "cloudflareProject": "eatyeet",
-  "doppler": {
-    "project": "yeet",
-    "config": "dev"
-  },
   "staticPaths": [
     "/",
     "/recipes",

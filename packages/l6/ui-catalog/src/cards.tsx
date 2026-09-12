@@ -168,10 +168,12 @@ export function BrowseCard({
   imageUrl: src,
   search,
   priority=false,
+  eager=false,
 }: {
   label: string
   imageUrl: string
   priority?:boolean
+  eager?:boolean
   search: SearchParams
 }) {
   return (
@@ -186,7 +188,7 @@ export function BrowseCard({
       <ResponsiveImage
         src={src}
         alt=""
-        loading={priority?"eager":"lazy"}
+        loading={priority || eager ? "eager" : "lazy"}
         fetchPriority={priority?"high":undefined}
         sizes="(max-width: 768px) calc((100vw - 44px) / 2), (max-width: 1200px) calc((100vw - 100px) / 4), 275px"
         className="absolute inset-0 size-full object-cover transition-image-zoom group-hover:scale-[1.06] opacity-100"

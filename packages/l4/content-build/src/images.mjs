@@ -8,8 +8,8 @@ import {
   realpathSync,
 } from 'node:fs'
 import { resolve, relative, join } from 'node:path'
-const widths = [160, 320, 640, 960, 1440, 1920]
-const pipeline = `v2-sharp${sharp.versions.sharp}-vips${sharp.versions.vips}-avif50-webp80-jpeg82-srgb-oriented-focal`
+const widths = [160, 320, 640, 800, 960, 1440, 1920]
+const pipeline = `v3-widths${widths.join('-')}-sharp${sharp.versions.sharp}-vips${sharp.versions.vips}-avif50-webp80-jpeg82-srgb-oriented-focal`
 export function safeImagePath(imagesDir, name) {
   const root = realpathSync(imagesDir)
   const path = realpathSync(resolve(root, name))

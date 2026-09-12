@@ -1,4 +1,5 @@
 'use client'
+import { preload } from 'react-dom'
 import {
   createContext,
   useContext,
@@ -52,6 +53,9 @@ export function ResponsiveImage({
       .filter((v) => v.format === format)
       .map((v) => `${v.url} ${v.width}w`)
       .join(', ')
+  if (props.fetchPriority === 'high') {
+    preload(manifest.url, { as: 'image', type: 'image/avif', imageSrcSet: srcSet('avif'), imageSizes: sizes, fetchPriority: 'high' })
+  }
   return (
     <picture className="contents">
       <source type="image/avif" srcSet={srcSet('avif')} sizes={sizes} />

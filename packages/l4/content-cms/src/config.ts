@@ -130,6 +130,7 @@ export function createCMSConfig(
       autoLogin: false,
       meta: {
         titleSuffix: ' | Eat / Yeet content',
+        defaultOGImageType: 'off',
         robots: { index: false, follow: false },
       },
     },

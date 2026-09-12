@@ -191,7 +191,7 @@ export function RecipeArticle({
           toggleFocusedCooking={toggleFocusedCooking}
         />
       )}
-      media={photo ? <ResponsiveImage src={photo} loading="eager" fetchPriority="high" alt={heroAlt} className="w-full max-h-[690px] rounded-surface object-cover" /> : undefined}
+      media={photo ? <ResponsiveImage src={photo} sizes="(max-width: 640px) calc(100vw - 36px), (max-width: 1120px) calc(100vw - 56px), 1064px" loading="eager" fetchPriority="high" alt={heroAlt} className="w-full max-h-[690px] rounded-surface object-cover" /> : undefined}
       mediaClassName={focusedCooking ? 'hidden' : undefined}
       mainClassName={cn(
         'pt-8 max-[640px]:pt-6 max-[1080px]:max-w-[1120px]',

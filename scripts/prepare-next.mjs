@@ -18,9 +18,11 @@ const report=[]
 async function fonts(dir){for(const entry of readdirSync(dir,{withFileTypes:true})){
  const file=resolve(dir,entry.name)
  if(entry.isDirectory())await fonts(file)
- else if(entry.name.endsWith('.woff2')){
+ else if(/\.(woff2|otf)$/.test(entry.name)){
   const source=readFileSync(file),subset=await subsetFont(source,characters,{targetFormat:'woff2',keepFeatures:['kern','liga','clig','calt','locl','mark','mkmk','tnum','lnum','pnum','onum','frac','sups','subs']})
-  if(subset.length<source.length)writeFileSync(file,subset)
+  const destination=file.replace(/\.otf$/,'.woff2')
+  if(destination!==file || subset.length<source.length)writeFileSync(destination,subset)
+  if(destination!==file)rmSync(file)
   report.push({file:file.slice(out.length+1),sourceBytes:source.length,deliveredBytes:Math.min(source.length,subset.length)})
  }
 }}

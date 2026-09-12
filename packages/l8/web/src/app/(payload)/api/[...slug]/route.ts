@@ -1,21 +1,7 @@
-import {
-  REST_GET,
-  REST_POST,
-  REST_DELETE,
-  REST_PATCH,
-  REST_PUT,
-  REST_OPTIONS,
-} from '@payloadcms/next/routes'
+import { handleEndpoints } from 'payload'
+import { formatAdminURL } from 'payload/shared'
 import { cmsConfig, runtimeSettings } from '../../../../next/cms'
 export const dynamic = 'force-dynamic'
-const factories = {
-  GET: REST_GET,
-  POST: REST_POST,
-  DELETE: REST_DELETE,
-  PATCH: REST_PATCH,
-  PUT: REST_PUT,
-  OPTIONS: REST_OPTIONS,
-}
 async function handle(request: Request, context: any) {
   const { slug = [] } = await context.params
   const authAction =
@@ -30,8 +16,11 @@ async function handle(request: Request, context: any) {
   const origin = request.headers.get('origin')
   if (origin && origin !== runtimeSettings().origin)
     return Response.json({ error: 'Origin denied' }, { status: 403 })
-  const factory = factories[request.method as keyof typeof factories]
-  const response = await factory(cmsConfig())(request as any, context)
+  const config = await cmsConfig()
+  // Use Payload's native dispatcher without adding Next's unused /api/og renderer.
+  const response = await handleEndpoints({ config, request, path: formatAdminURL({
+    apiRoute: config.routes.api, path: `/${slug.map(encodeURIComponent).join('/')}`,
+  }) })
   response.headers.set('Cache-Control', 'private, no-store')
   return response
 }

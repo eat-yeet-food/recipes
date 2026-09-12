@@ -3,7 +3,7 @@
   font-style: normal;
   font-weight: 300;
   font-display: swap;
-  src: url("/fonts/geller/gellertest-headlinelight.otf") format("opentype");
+  src: url("/fonts/geller/gellertest-headlinelight.woff2") format("woff2");
 }
 
 @font-face {
@@ -19,7 +19,7 @@
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: url("/fonts/geller/gellertest-headlinemedium.otf") format("opentype");
+  src: url("/fonts/geller/gellertest-headlinemedium.woff2") format("woff2");
 }
 
 @font-face {
@@ -27,7 +27,7 @@
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url("/fonts/geller/gellertest-headlinesemibold.otf") format("opentype");
+  src: url("/fonts/geller/gellertest-headlinesemibold.woff2") format("woff2");
 }
 
 @font-face {
@@ -43,7 +43,7 @@
   font-style: normal;
   font-weight: 900;
   font-display: swap;
-  src: url("/fonts/geller/gellertest-headlineblack.otf") format("opentype");
+  src: url("/fonts/geller/gellertest-headlineblack.woff2") format("woff2");
 }
 
 @font-face {

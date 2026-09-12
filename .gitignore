@@ -15,6 +15,7 @@ storybook-static/
 **/.next/
 **/.open-next/
 **/.wrangler/
+infra/cloudflare/Pulumi.*.yaml
 **/public-generated/
 **/next-env.d.ts
 packages/l8/web/public/

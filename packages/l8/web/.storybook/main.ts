@@ -25,7 +25,7 @@ const config: StorybookConfig = {
     name: '@storybook/react-vite',
     options: {},
   },
-  staticDirs: [`../../../../${APP_PATHS.publicDir}`],
+  staticDirs: [`../../../../${APP_PATHS.publicDir}`, { from: "../public/fonts", to: "/fonts" }],
   viteFinal: async (config) =>
     mergeConfig(
       {

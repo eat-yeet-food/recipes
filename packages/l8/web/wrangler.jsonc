@@ -6,6 +6,6 @@
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
   "d1_databases": [{ "binding": "D1", "database_name": "eatyeet-local", "database_id": "00000000-0000-0000-0000-000000000001", "remote": false }],
-  "r2_buckets": [{ "binding": "R2", "bucket_name": "eatyeet-local-media", "remote": false }],
+  "r2_buckets": [{ "binding": "R2", "bucket_name": "eatyeet-local-media", "remote": false }, { "binding": "NEXT_INC_CACHE_R2_BUCKET", "bucket_name": "eatyeet-local-cache", "remote": false }],
   "workers_dev": false
 }

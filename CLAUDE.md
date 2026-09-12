@@ -1,6 +1,6 @@
 # Agent Guide
 
-Eat / Yeet uses Next.js App Router and Payload with Git-owned YAML content. Local Cloudflare D1/R2 emulation is implemented; remote migration is a separate phase. `AGENTS.md` points here as the canonical project guide.
+Eat / Yeet uses Next.js App Router and Payload with Git-owned YAML content. Local Cloudflare D1/R2 emulation and remote release tooling are implemented; remote acceptance and cutover require verified account access. `AGENTS.md` points here as the canonical project guide.
 
 ## Required start
 
@@ -39,7 +39,7 @@ Git owns recipes, articles, categories, copy, navigation, author information and
 
 Sync validates all sources before writes and uploads required media before publishing references. Repeated runs must be no-ops; drift repair must preserve database IDs and authentication data. Keep old derivative objects for safe retries and older responses. There is no collection-wide atomicity and no automatic rollback of already-synchronized content after a release failure.
 
-Payload admin and APIs are read-only even for the owner. Owner bootstrap and recovery are CLI-only. Do not enable first-user registration, public signup, web uploads, editing, or GraphQL. Preserve origin checks, owner allowlisting, revocable sessions and lockout rules. Local security assumes a trusted OS account. Future remote hosting requires owner-only Cloudflare Access with MFA and alternate-hostname protection.
+Payload admin and APIs are read-only even for the owner. Owner bootstrap and recovery are CLI-only. Do not enable first-user registration, public signup, web uploads, editing, or GraphQL. Preserve origin checks, owner allowlisting, revocable sessions and lockout rules. Local security assumes a trusted OS account. Remote hosting requires owner-only Cloudflare Access with MFA and alternate-hostname protection, enforced by the Worker request guard.
 
 Local launchers bind `127.0.0.1`; remote bindings are disabled. Wrangler's CLI persistence path is the parent of the `v3` directory used by `getPlatformProxy`. Keep those paths aligned. Server startup never pushes the schema; use tracked migrations and `pnpm db:migrate`.
 
@@ -82,8 +82,10 @@ Use `pnpm build:worker && pnpm preview` for a local Workers smoke test. Tests ma
 
 ## Deployment and remote handoff
 
-`pnpm run deploy` is intentionally blocked until the remote phase is implemented. Do not publish through direct Wrangler commands. No remote infrastructure is part of the local migration.
+Read `docs/payload-remote.md` for the remote workflow and its current deployment blockers. Use `pnpm run deploy --env staging|production` from a clean immutable commit. Cloudflare infrastructure, configuration, domains and Access policies belong to locally operated Pulumi TypeScript; direct Wrangler deployment is outside the workflow. Wrangler dry-run bundling and explicit remote Node D1/R2 bindings are allowed.
 
-The agreed remote architecture is Cloudflare Workers/D1/R2, locally executed Pulumi TypeScript, private R2 Pulumi state, Doppler secrets and local release commands. Preserve Git-only authored content and browser saves. The remote handoff must cover state bootstrap, ownership, secrets, identity/MFA, release locking/recovery, public/private media, caching, domains/SEO, backups, performance and cutover/rollback. A failed deployment does not automatically roll back synchronized content.
+Credentials live in environment-specific macOS Keychain entries. Runtime secrets use Cloudflare Worker secret bindings. No Doppler project or workflow is used. Pulumi state is private R2 with passphrase encryption and timestamped backups. All remote mutation commands share an exclusive conditional R2 lock as well as Pulumi stack locking. Expired heartbeats are interrupted work, never permission to steal a lock. Recovery must establish that child writers and outstanding operations have stopped; revoke credentials if uncertain.
 
-After a future deployment, run `pnpm verify:prod [origin]` once its legacy Pages assertions have been migrated to the Worker release contract. Do not claim current legacy production checks certify the new runtime.
+Preserve Git-only content, stable IDs, authentication data and browser saves. Public derivatives remain privately stored and publication-checked before cached delivery. Public HTML stays dynamic; public data projections use generation-keyed OpenNext R2 caching. Failures after content mutations preserve maintenance until recovery. Application rollback never implicitly undoes content or migrations.
+
+Production requires staging acceptance for the exact commit, including recovery, MFA/owner review and performance. Do not invent account/resource IDs or claim remote verification from local tests. After deployment, run `pnpm verify:prod [origin]` for the Worker contract and production mobile performance measurements. Keep the prior Pages deployment/DNS for route rollback until cutover is verified.

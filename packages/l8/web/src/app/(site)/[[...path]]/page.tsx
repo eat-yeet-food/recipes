@@ -1,7 +1,6 @@
 import { cache } from 'react'
-import { storedContent, storedSEO } from '@eat-yeet/l4-content-model/storage'
 import { notFound } from 'next/navigation'
-import { cms, siteData, services } from '../../../next/cms'
+import { publicDocument, siteData, services } from '../../../next/cms'
 import { metadataFor, JsonLd } from '../../../next/seo'
 import { SearchClient, RecipeClient } from '../../../next/interactive'
 import { HomePage } from '@eat-yeet/l7-home/home/home'
@@ -20,28 +19,9 @@ const documentFor = cache(async (path: string) => {
       notFound()
     return null
   }
-  const { docs } = await (
-    await cms()
-  ).find({
-    collection: match[1] === 'learn' ? 'articles' : 'recipes',
-    overrideAccess: false,
-    user: null,
-    limit: 1,
-    depth: 0,
-    where: {
-      and: [
-        { slug: { equals: match[2] } },
-        { status: { equals: 'published' } },
-      ],
-    },
-  })
-  if (!docs[0]) notFound()
-  return {
-    ...docs[0],
-    updatedAt: docs[0].updatedAt as string,
-    content: storedContent(docs[0]),
-    seo: storedSEO(docs[0]),
-  }
+  const document = await publicDocument(match[1] === 'learn' ? 'articles' : 'recipes', match[2])
+  if (!document) notFound()
+  return document
 })
 export async function generateMetadata({
   params,
@@ -136,9 +116,10 @@ export default async function Page({
               .flatMap((category: any) => {
                 const items = recipesInCategory(recipes, category)
                 if (!items.length) return []
+                if (category.image) return [{ category, image: category.image }]
                 const recipe = items.find((r) => !used.has(r.image)) || items[0]
                 used.add(recipe.image)
-                return [{ category, image: category.image || imageUrl(recipe) }]
+                return [{ category, image: imageUrl(recipe) }]
               })
             return cards.length ? (
               <section key={section.facet} aria-label={section.title}>
@@ -151,7 +132,8 @@ export default async function Page({
                 <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
                   {cards.map(({ category, image }: any, cardIndex: number) => (
                     <BrowseCard
-                      priority={sectionIndex === 0 && cardIndex === 0}
+                      priority={sectionIndex === 0 && cardIndex === 2}
+                      eager={sectionIndex === 0 && cardIndex < 4}
                       key={category.slug}
                       label={category.label}
                       imageUrl={image}

@@ -8,7 +8,7 @@
  *
  *   node scripts/fetch-image.mjs <recipe-slug> <image-url>
  *
- * Keys come from the environment; run under `doppler run --` or export
+ * Keys come from the environment; export
  * PEXELS_API_KEY / PIXABAY_API_KEY first.
  */
 

@@ -22,17 +22,26 @@ import {
   hashContent,
 } from '../packages/l4/content-build/src/sync.mjs'
 import { stateDir, updateOwner } from './local-runtime.mjs'
+import { spawnSync } from 'node:child_process'
 const action = process.argv[2]
+const environmentIndex = process.argv.indexOf('--env')
+const remoteEnvironment = environmentIndex >= 0 ? process.argv[environmentIndex + 1] : undefined
+if (environmentIndex >= 0 && !['staging', 'production'].includes(remoteEnvironment ?? '')) throw new Error('Use --env staging or --env production')
+if (remoteEnvironment && process.env.EATYEET_REMOTE_CHILD !== remoteEnvironment) {
+  const child = spawnSync('node', ['scripts/remote-cli.mjs', 'content', action, '--env', remoteEnvironment], { stdio: 'inherit' })
+  process.exit(child.status ?? 1)
+}
+const contentStateDir = remoteEnvironment ? resolve('.local/remote', remoteEnvironment) : stateDir
 if (
-  !['plan', 'sync', 'migrate', 'owner', 'recover', 'migration:create'].includes(
+  !['prepare', 'plan', 'sync', 'migrate', 'owner', 'recover', 'migration:create'].includes(
     action,
   )
 )
   throw new Error('Unknown content command')
 // Validate the complete source set before connecting or writing any content.
-const source = ['plan', 'sync'].includes(action) ? sourceContent() : null
+const source = ['prepare', 'plan', 'sync'].includes(action) ? sourceContent() : null
 const lock = resolve(stateDir, 'content-sync.lock')
-if (action === 'sync') {
+if (action === 'sync' && !remoteEnvironment) {
   try {
     const fd = openSync(lock, 'wx', 0o600)
     writeFileSync(fd, String(process.pid))
@@ -45,9 +54,11 @@ if (action === 'sync') {
     )
   }
 }
-let cms: Awaited<ReturnType<typeof openLocalCMS>>
+let cms!: Awaited<ReturnType<typeof openLocalCMS>>
 try {
-  cms = await openLocalCMS(action === 'migrate')
+  if (action !== 'prepare') cms = remoteEnvironment
+    ? await (await import('./cms-remote')).openRemoteCMS(remoteEnvironment, action !== 'plan') as any
+    : await openLocalCMS(action === 'migrate')
 
 
   if (action === 'migration:create')
@@ -72,6 +83,7 @@ try {
     rl.close()
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
       throw new Error('Valid email required')
+    if (remoteEnvironment && email !== process.env.OWNER_EMAIL) throw new Error('Owner identity must match the configured remote owner')
     let password = process.env.OWNER_BOOTSTRAP_PASSWORD
     if (!password) {
       if (!stdin.isTTY)
@@ -127,7 +139,9 @@ try {
         overrideAccess: true,
         data: { password, sessions: [], loginAttempts: 0, lockUntil: null },
       })
-    updateOwner(email)
+    if (remoteEnvironment) {
+      if (email !== process.env.OWNER_EMAIL) throw new Error('Owner identity must match the configured remote owner')
+    } else updateOwner(email)
     console.log(
       'Owner configured. Restart running servers to load the owner identity.',
     )
@@ -151,7 +165,7 @@ try {
     for (const image of source.images) {
       const manifest = await prepareImage(
         image.path,
-        resolve(stateDir, 'images'),
+        resolve(contentStateDir, 'images'),
         image.focalPoint,
       )
       manifests.push({ ...image, manifest })
@@ -187,6 +201,12 @@ try {
       const { sourceHash, gitRevision, ...managed } = data
       data.sourceHash = hashContent(managed)
     }
+    if (action === 'prepare') {
+      mkdirSync('dist', { recursive: true })
+      writeFileSync('dist/content-prepared.json', JSON.stringify({ source, images: manifests }, null, 2))
+      console.log('Sources and required image derivatives validated.')
+      process.exit(0)
+    }
     const plan = await planUpserts(
       cms.payload,
       source.records.map(toStoredRecord),
@@ -196,6 +216,7 @@ try {
         `${action === 'sync' ? 'planned ' : ''}${item.action} ${item.data.sourceId}`,
       )
     const merged = new Map<string, any>()
+    let mediaChanges = 0
     for (const item of manifests) {
       const key = item.manifest.hash
       const old = merged.get(key)
@@ -218,6 +239,7 @@ try {
         !old ||
         canonical(old.manifest) !== canonical(manifest) ||
         old.public !== item.public
+      if (changed) mediaChanges++
       console.log(
         `${!old ? 'create' : changed ? 'update' : 'unchanged'} media:${item.names.join(',')}`,
       )
@@ -228,7 +250,7 @@ try {
           { ...item, manifest },
           old,
           changed,
-          resolve(stateDir, 'images'),
+          resolve(contentStateDir, 'images'),
         )
     }
 
@@ -266,6 +288,8 @@ try {
         {
           status: 'complete',
           counts,
+          siteChanged,
+          mediaChanges,
           gitRevision: source.gitRevision,
           records: plan.map(({ data, action }) => ({
             sourceId: data.sourceId,
@@ -296,5 +320,5 @@ try {
   throw error
 } finally {
   if (cms!) await cms.close()
-  if (action === 'sync') unlinkSync(lock)
+  if (action === 'sync' && !remoteEnvironment) unlinkSync(lock)
 }

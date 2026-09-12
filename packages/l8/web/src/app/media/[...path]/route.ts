@@ -1,5 +1,5 @@
 import { getCloudflareContext } from '@opennextjs/cloudflare'
-import { cms } from '../../../next/cms'
+import { cms, runtimeSettings } from '../../../next/cms'
 export const dynamic = 'force-dynamic'
 export async function GET(
   request: Request,
@@ -18,7 +18,9 @@ export async function GET(
   )
     return missing()
   const payload = await cms()
-  const { user } = await payload.auth({ headers: request.headers })
+  const settings = runtimeSettings()
+  const allowOwner = !settings.remote || (new URL(request.url).origin === settings.origin && request.headers.get('x-eatyeet-access') === 'owner')
+  const { user } = allowOwner ? await payload.auth({ headers: request.headers }) : { user: null }
   const { docs } = await payload.find({
     collection: 'media',
     overrideAccess: false,
@@ -33,6 +35,15 @@ export async function GET(
   if (![...manifest.variants, manifest.social].some((v) => v.key === key))
     return missing()
   const { env } = await getCloudflareContext({ async: true })
+  // Publication eligibility is deliberately checked before looking in edge cache.
+  const edge = (globalThis as any).caches?.default
+  const generation = request.headers.get('x-eatyeet-generation')
+  const cacheKey = new Request(new URL(`/__media-cache/${generation}/${key}`, request.url))
+  const mayCache = settings.remote && docs[0].public && edge && generation && !request.headers.has('cache-control') && !request.headers.has('if-none-match')
+  if (mayCache) {
+    const cached = await edge.match(cacheKey)
+    if (cached) return cached
+  }
   const object = await (env as any).R2.get(key)
   if (!object) return missing()
   const headers = new Headers({
@@ -46,5 +57,7 @@ export async function GET(
   })
   if (request.headers.get('if-none-match') === object.httpEtag)
     return new Response(null, { status: 304, headers })
-  return new Response(object.body, { headers })
+  const response = new Response(object.body, { headers })
+  if (mayCache) await edge.put(cacheKey, response.clone())
+  return response
 }

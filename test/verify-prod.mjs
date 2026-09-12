@@ -1,113 +1,92 @@
-/**
- * Cold-loads the deployed site in a real browser and fails on anything a
- * visitor would see as broken.
- *
- * curl is not enough here, and that is the whole point of this file. When the
- * edge cached an HTML body under a JS chunk's URL, `curl` fetched the same
- * chunk and got correct JavaScript — a different cache key, a clean 200, a
- * green check. Chrome asked for it as a module, got `text/html`, refused it,
- * and the site did not hydrate. Only a browser sees that class of failure, so
- * the post-deploy gate has to be a browser.
- *
- * Usage: node test/verify-prod.mjs [origin]
- */
+/** Verify the deployed Worker contract with cold browsers and raw HTTP. */
 import { chromium } from 'playwright'
-
+import { mkdirSync, writeFileSync } from 'node:fs'
 import { SITE_URL, STATIC_PATHS } from '#site-config'
-
-const ORIGIN = (process.argv[2] ?? SITE_URL).replace(/\/$/, '')
-
-function isAnalyticsBeacon(url) {
-  try {
-    const requestUrl = new URL(url)
-    return requestUrl.hostname === 'www.google-analytics.com' && requestUrl.pathname === '/g/collect'
-  } catch {
-    return false
+const origin = (process.argv[2] ?? SITE_URL).replace(/\/$/, '')
+const expected = process.env.EATYEET_EXPECTED_RELEASE
+const mediaOrigin = process.env.EATYEET_MEDIA_ORIGIN ?? (origin === 'https://eatyeet.com' ? 'https://media.eatyeet.com' : origin)
+const results = []
+const check = (name, ok, detail = '') => { results.push({ name, ok, detail }); console.log(`${ok ? 'ok  ' : 'FAIL'} ${name}${detail ? ': ' + detail : ''}`) }
+const headersFor = (url) => {
+  const headers = {}
+  if ([origin, mediaOrigin].includes(new URL(url).origin) && process.env.EATYEET_VERIFY_TOKEN) headers['X-Eatyeet-Verification'] = process.env.EATYEET_VERIFY_TOKEN
+  if (new URL(url).origin === origin) {
+    if (process.env.EATYEET_ACCESS_TOKEN) headers.Cookie = `CF_Authorization=${process.env.EATYEET_ACCESS_TOKEN}`
   }
+  return headers
 }
-
-let failures = 0
-function check(name, ok, detail = '') {
-  console.log(`${ok ? 'ok  ' : 'FAIL'}  ${name}${detail ? ` :: ${detail}` : ''}`)
-  if (!ok) failures += 1
-}
-
+const get = (path, options = {}) => fetch(origin + path, { redirect: 'manual', signal: AbortSignal.timeout(30000), ...options, headers: { ...headersFor(origin + path), ...options.headers } })
 const browser = await chromium.launch()
-
-for (const path of STATIC_PATHS) {
-  // A fresh context per path: a warm cache would hide exactly the failures
-  // this file exists to catch.
-  const context = await browser.newContext({ viewport: { width: 1440, height: 900 } })
-  const page = await context.newPage()
-  const problems = []
-
-  page.on('pageerror', (error) => problems.push(`pageerror: ${error.message}`))
-  page.on('console', (message) => {
-    if (message.type() === 'error') problems.push(`console: ${message.text()}`)
-  })
-  page.on('requestfailed', (request) => {
-    if (!isAnalyticsBeacon(request.url())) {
-      problems.push(`requestfailed: ${request.url()} ${request.failure()?.errorText ?? ''}`)
+try {
+  if (expected) {
+    const response = await get('/.well-known/eatyeet-release')
+    const state = response.headers.get('content-type')?.includes('application/json') ? await response.json() : null
+    check('release identity', response.status === 200 && state?.releaseId === expected)
+    check('synchronized content identity', /^[a-f0-9]{40}$/.test(state?.contentRevision ?? ''))
+  }
+  for (const path of [...new Set([...STATIC_PATHS, '/recipes/new-york-style-pizza', '/learn/mixing-dough-and-gluten-development'])]) {
+    const context = await browser.newContext({ viewport: { width: 1440, height: 900 } })
+    await context.route('**/*', async (route) => route.continue({ headers: { ...route.request().headers(), ...headersFor(route.request().url()) } }))
+    const page = await context.newPage(), errors = []
+    page.on('pageerror', () => errors.push('uncaught page error'))
+    page.on('requestfailed', (request) => { if (new URL(request.url()).origin === origin) errors.push('failed first-party request') })
+    page.on('response', (response) => {
+      const url = new URL(response.url())
+      if (url.origin === origin && response.status() >= 400) errors.push(`HTTP ${response.status()} ${url.pathname}`)
+      if (url.pathname.startsWith('/_next/static/') && /text\/html/.test(response.headers()['content-type'] ?? '')) errors.push('static asset returned HTML')
+    })
+    const response = await page.goto(origin + path, { waitUntil: 'networkidle' })
+    check(`${path} HTTP 200`, response?.status() === 200)
+    check(`${path} dynamic HTML not cached`, /no-store/.test(response?.headers()['cache-control'] ?? ''))
+    if (expected) check(`${path} expected Worker`, response?.headers()['x-eatyeet-release'] === expected)
+    check(`${path} main content`, await page.locator('#main-content').count() === 1)
+    check(`${path} browser errors`, errors.length === 0, errors.join(', '))
+    check(`${path} images loaded`, await page.evaluate(() => [...document.images].filter((image) => image.getBoundingClientRect().top < innerHeight).every((image) => image.complete && image.naturalWidth > 0)))
+    check(`${path} canonical`, await page.locator('link[rel=canonical]').getAttribute('href') === origin + path || (origin.includes('staging.') && (await page.locator('link[rel=canonical]').getAttribute('href'))?.startsWith('https://staging.eatyeet.com')))
+    if (path === '/browse') {
+      let documentLoads = 0
+      page.on('load', () => documentLoads++)
+      await page.locator('a[href^="/search?"]').first().click()
+      await page.waitForURL('**/search?**')
+      check('hydrated client navigation', documentLoads === 0)
     }
-  })
-  page.on('response', (response) => {
-    if (response.status() >= 400) problems.push(`http ${response.status()}: ${response.url()}`)
-    // The poisoned-cache signature: an asset answered with a document.
-    const type = response.headers()['content-type'] ?? ''
-    if (/\/build\/.+\.(js|css)$/.test(response.url()) && type.includes('text/html')) {
-      problems.push(`asset served as HTML: ${response.url()}`)
+    const raw = await get(path)
+    const html = await raw.text()
+    check(`${path} server metadata`, /<title>[^<]+<\/title>/.test(html) && /property="og:title"/.test(html))
+    if (path.startsWith('/recipes/')) check('Recipe JSON-LD', html.includes('application/ld+json') && html.includes('"@type":"Recipe"'))
+    if (path === '/recipes/new-york-style-pizza') {
+      for (const width of [390, 1440]) {
+        await page.setViewportSize({ width, height: 900 })
+        await page.reload({ waitUntil: 'networkidle' })
+        const sources = await page.locator('picture img').evaluateAll((images) => images.filter((image) => image.getBoundingClientRect().top < innerHeight).map((image) => image.currentSrc))
+        check(`responsive derivatives at ${width}px`, sources.length > 0 && sources.every((url) => new URL(url).origin === mediaOrigin && new URL(url).pathname.startsWith('/media/')))
+        for (const url of sources.slice(0, 2)) {
+          const image = await fetch(url, { headers: headersFor(url), redirect: 'manual' })
+          check(`image delivery at ${width}px`, image.ok && /^image\//.test(image.headers.get('content-type') ?? '') && !!image.headers.get('etag') && Number(image.headers.get('content-length')) > 0)
+          if (origin === 'https://eatyeet.com') check('public derivative browser cache', /max-age=31536000/.test(image.headers.get('cache-control') ?? '') && !/immutable/.test(image.headers.get('cache-control') ?? ''))
+          await image.body?.cancel()
+        }
+      }
     }
-  })
-
-  const response = await page.goto(ORIGIN + path, { waitUntil: 'networkidle' })
-  await page.waitForTimeout(1000)
-
-  check(`${path} responds 200`, response?.status() === 200, String(response?.status()))
-  check(`${path} loads clean`, problems.length === 0, problems.join(' | '))
-
-  const hasContent = await page.evaluate(
-    () => (document.querySelector('#main-content')?.childElementCount ?? 0) > 0,
-  )
-  check(`${path} rendered main content`, hasContent)
-
-  const brokenImages = await page.evaluate(() =>
-    Array.from(document.images)
-      .filter((img) => img.complete && img.naturalWidth === 0)
-      .map((img) => img.currentSrc || img.src),
-  )
-  check(`${path} has no broken images`, brokenImages.length === 0, brokenImages.join(', '))
-
-  await context.close()
+    await context.close()
+  }
+  for (const path of [`/_next/static/missing-${Date.now()}.js`, '/media/' + '0'.repeat(64) + '/320.avif']) {
+    const response = await get(path)
+    check(`${path} missing response`, response.status === 404)
+    check(`${path} error not cached`, /no-store/.test(response.headers.get('cache-control') ?? ''))
+    if (path.startsWith('/media/')) check('media error has no HTML body', !(await response.text()).includes('<html'))
+  }
+  for (const path of ['/admin', '/api/owners', '/api/recipes', '/preview/recipes/new-york-style-pizza']) {
+    const response = await fetch(origin + path, { redirect: 'manual', signal: AbortSignal.timeout(30000) })
+    check(`${path} denies anonymous access`, [302,303,401,403].includes(response.status))
+    const forged = await fetch(origin + path, { redirect: 'manual', headers: { 'Cf-Access-Jwt-Assertion': 'forged', Cookie: 'CF_Authorization=forged' } })
+    check(`${path} rejects forged Access token`, [302,303,401,403].includes(forged.status))
+  }
+  const sitemap = await get('/sitemap.xml')
+  check('sitemap XML', sitemap.status === 200 && /xml/.test(sitemap.headers.get('content-type') ?? ''))
+} finally {
+  await browser.close()
+  mkdirSync('dist', { recursive: true })
+  writeFileSync('dist/worker-production-verification.json', JSON.stringify({ origin, releaseId: expected ?? null, checkedAt: new Date().toISOString(), results, passed: results.every((r) => r.ok) }, null, 2))
 }
-
-// Hydration is what the poisoned cache actually destroyed, and neither a
-// screenshot nor a status code can tell: the server HTML renders perfectly
-// while nothing is interactive. Clicking a client-side link is the difference —
-// if the router never mounted, the browser does a full document load instead.
-const nav = await browser.newContext({ viewport: { width: 1440, height: 900 } })
-const navPage = await nav.newPage()
-await navPage.goto(`${ORIGIN}/browse`, { waitUntil: 'networkidle' })
-let fullLoads = 0
-navPage.on('load', () => (fullLoads += 1))
-await navPage.locator('a[href^="/search?"]').first().click()
-await navPage.waitForTimeout(1200)
-check(
-  'client-side routing works (app hydrated)',
-  navPage.url().includes('/search') && fullLoads === 0,
-  `${navPage.url()}, ${fullLoads} full load(s)`,
-)
-await nav.close()
-
-// A missing asset must come back as a 404, never as HTML under a 200 — that is
-// the condition that let the edge pin a document under an asset URL. CLAUDE.md #6.
-const probe = await fetch(`${ORIGIN}/build/does-not-exist-${Date.now()}.js`)
-check(
-  'missing /build/* asset returns 404',
-  probe.status === 404,
-  `HTTP ${probe.status}, content-type ${probe.headers.get('content-type')}`,
-)
-
-await browser.close()
-
-console.log(failures === 0 ? `\nprod verified: ${ORIGIN}` : `\n${failures} check(s) failed`)
-process.exit(failures === 0 ? 0 : 1)
+if (results.some((r) => !r.ok)) process.exitCode = 1

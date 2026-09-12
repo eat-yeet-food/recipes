@@ -1,0 +1,5 @@
+{
+  "pulumi": "3.230.0",
+  "cloudflareProvider": "6.20.0",
+  "pulumiSdk": "3.262.0"
+}

@@ -1,0 +1,6 @@
+name: eatyeet
+runtime:
+  name: nodejs
+  options:
+    typescript: true
+description: Locally operated Eat / Yeet Workers, D1, R2 and Access infrastructure

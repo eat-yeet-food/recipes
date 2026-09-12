@@ -72,7 +72,6 @@ export const STATIC_PATHS = ACTIVE_APP.staticPaths
 export const SITEMAP_STATIC_PATHS = ACTIVE_APP.sitemapStaticPaths
 export const ROBOTS_DISALLOW = ACTIVE_APP.robotsDisallow
 export const CLOUDFLARE_PROJECT = ACTIVE_APP.cloudflareProject
-export const DOPPLER = ACTIVE_APP.doppler
 export const PREVIEW_PATHS = ACTIVE_APP.previewPaths
 export const APP_PATHS = ACTIVE_APP.paths
 export const APP_COPY = ACTIVE_APP.copy
