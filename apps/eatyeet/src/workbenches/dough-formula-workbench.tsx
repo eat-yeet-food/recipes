@@ -252,10 +252,23 @@ export function resolveWorkbenchRecipe(recipe: RecipeContent, selection: DoughWo
 
 const NumericFields = createContext<{ report: NumberFieldValidation; resetKey: number } | null>(null)
 
-function Field({ label, value, onChange, suffix, step, min = 0, positive = false, hideLabel = false, decimalPlaces }: { label: string; value: number; onChange: (value: number) => void; suffix?: string; step?: string; min?: number; positive?: boolean; hideLabel?: boolean; decimalPlaces?: NumberFieldPrecision }) {
+function Field({ label, value, onChange, suffix, step, min = 0, max, positive = false, hideLabel = false, decimalPlaces }: { label: string; value: number; onChange: (value: number) => void; suffix?: string; step?: string; min?: number; max?: number; positive?: boolean; hideLabel?: boolean; decimalPlaces?: NumberFieldPrecision }) {
   const fields = useContext(NumericFields)
   const precision = decimalPlaces ?? (suffix === 'g' && Math.abs(value) >= 20 ? 0 : 1)
-  return <NumberField decimalPlaces={precision} label={label} value={value} onValueChange={onChange} suffix={suffix} min={min} integer={step === '1'} positive={positive} hideLabel={hideLabel} onValidationChange={fields?.report} resetKey={fields?.resetKey} />
+  return <NumberField decimalPlaces={precision} label={label} value={value} onValueChange={onChange} suffix={suffix} min={min} max={max} integer={step === '1'} positive={positive} hideLabel={hideLabel} onValidationChange={fields?.report} resetKey={fields?.resetKey} />
+}
+
+/** Edit whole-minute durations without requiring mental conversion from hours. */
+function DurationField({ label, value, onChange }: { label: string; value: number; onChange: (minutes: number) => void }) {
+  const hours = Math.floor(value / 60)
+  const minutes = value % 60
+  return <fieldset className="grid min-w-0 gap-1">
+    <legend className="mb-1 text-xs font-bold">{label}</legend>
+    <div className="grid grid-cols-2 gap-2">
+      <Field hideLabel label={`${label} hours`} suffix="hr" step="1" value={hours} onChange={(next) => onChange(next * 60 + minutes)} />
+      <Field hideLabel label={`${label} minutes`} suffix="min" step="1" max={59} value={minutes} onChange={(next) => onChange(hours * 60 + next)} />
+    </div>
+  </fieldset>
 }
 
 function FlourEditor({ value, onChange, unit = '%' }: { value: FlourComponent[]; onChange: (value: FlourComponent[]) => void; unit?: '%' | 'g' }) {
@@ -630,9 +643,9 @@ function DoughFormulaWorkbench({
                 <div><h3 id="process-heading" className="text-xl font-bold">Mixing and fermentation</h3><p className="mt-1 text-sm">Saved with your formula. Times below start when you mix in the levain; follow the dough’s rise as well as the clock.</p></div>
                 <ChoiceGroup label="Mixing method" value={process.mixingMethod} onChange={(mixingMethod) => updateProcess({ mixingMethod })} options={[{ value: 'hand', label: 'By hand' }, { value: 'spiral', label: 'Spiral mixer' }]} />
                 <div className="grid grid-cols-2 gap-3 max-[380px]:grid-cols-1">
-                  <Field label="Autolyse before bulk" suffix="min" step="1" value={process.autolyseMinutes} onChange={(autolyseMinutes) => updateProcess({ autolyseMinutes })} />
-                  <Field label="Add fine sea salt at" suffix="min" step="1" value={process.saltDelayMinutes} onChange={(saltDelayMinutes) => updateProcess({ saltDelayMinutes })} />
-                  <Field label="Planned end of bulk" suffix="min" step="1" min={1} value={process.bulkMinutes} onChange={(bulkMinutes) => updateProcess({ bulkMinutes })} />
+                  <DurationField label="Autolyse before bulk" value={process.autolyseMinutes} onChange={(autolyseMinutes) => updateProcess({ autolyseMinutes })} />
+                  <DurationField label="Add fine sea salt at" value={process.saltDelayMinutes} onChange={(saltDelayMinutes) => updateProcess({ saltDelayMinutes })} />
+                  <DurationField label="Planned end of bulk" value={process.bulkMinutes} onChange={(bulkMinutes) => updateProcess({ bulkMinutes })} />
                 </div>
                 <div className="grid gap-3">
                   <p className="text-sm">Choose a technique for each step. Mix stretch and folds, coil folds, and lamination in the order you use them.</p>
@@ -647,7 +660,7 @@ function DoughFormulaWorkbench({
                             <option value="lamination">Lamination</option>
                           </Select>
                         </label>
-                        <Field label={`Step ${index + 1} at`} suffix="min" step="1" min={1} value={fold.atMinutes} onChange={(atMinutes) => updateProcess({ folds: process.folds.map((item) => item.id === fold.id ? { ...item, atMinutes } : item) })} />
+                        <DurationField label={`Step ${index + 1} at`} value={fold.atMinutes} onChange={(atMinutes) => updateProcess({ folds: process.folds.map((item) => item.id === fold.id ? { ...item, atMinutes } : item) })} />
                       </div>
                       <Button variant="ghost" size="icon" type="button" aria-label={`Remove step ${index + 1}`} onClick={() => updateProcess({ folds: process.folds.filter((item) => item.id !== fold.id) })}><Trash2 className="size-4" /></Button>
                     </div>

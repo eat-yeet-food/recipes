@@ -18,6 +18,13 @@ export interface SpiralMixerProfile {
   finishMinutes: number
 }
 
+function formatDuration(minutes: number): string {
+  if (minutes < 60) return `${minutes}m`
+  const hours = Math.floor(minutes / 60)
+  const remainder = minutes % 60
+  return remainder ? `${hours}:${String(remainder).padStart(2, '0')}h` : `${hours}h`
+}
+
 /** The plugin replaces explicitly bound sections; it never guesses from prose. */
 export function resolveSourdoughSteps(sections: Section[], bindings: SourdoughProcessSections, process: SourdoughProcess, levainIngredients?: string, mixer?: SpiralMixerProfile): Section[] {
   const hand = process.mixingMethod === 'hand'
@@ -37,15 +44,15 @@ export function resolveSourdoughSteps(sections: Section[], bindings: SourdoughPr
     }
     if (section.id === bindings.autolyse) return {
       ...section, title: 'Autolyse', itemIds: ['autolyse-water'],
-      items: [`Mix flour and the first portion of water ({{initialWaterGrams}}) ${initialMix} ${process.autolyseMinutes ? `Cover and rest for ${process.autolyseMinutes} min before starting bulk fermentation.` : 'Continue directly to mixing in the levain.'}`],
+      items: [`Mix flour and the first portion of water ({{initialWaterGrams}}) ${initialMix} ${process.autolyseMinutes ? `Cover and rest for ${formatDuration(process.autolyseMinutes)} before starting bulk fermentation.` : 'Continue directly to mixing in the levain.'}`],
     }
     if (section.id !== bindings.bulk) return section
     return {
       ...section, itemIds: timeline.map((event) => event.id),
       items: timeline.map((event, index) => {
-        const stamp = `<strong>[${event.atMinutes} min elapsed]</strong>`
+        const stamp = `<strong>[${formatDuration(event.atMinutes)} elapsed]</strong>`
         const next = timeline[index + 1]
-        const rest = next ? ` Cover until the next step at ${next.atMinutes} min elapsed.` : ''
+        const rest = next ? ` Cover until the next step at ${formatDuration(next.atMinutes)} elapsed.` : ''
         if (event.kind === 'mix') return `${stamp} Mix in the ripe levain ${levainMix}.${rest}`
         if (event.kind === 'salt') return `${stamp} Add fine sea salt and the remaining water ({{remainingWaterGrams}}). ${saltMix}${rest}`
         if (event.kind === 'fold') {

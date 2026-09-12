@@ -4,8 +4,8 @@ order: 4
 description: 'Traditional sourdough bread, featuring a long fermentation process for complex flavor and perfect texture.'
 category: savory
 prepMinutes: 60
-cookMinutes: 40
-totalMinutes: 1870
+cookMinutes: 39
+totalMinutes: 1869
 yieldAmount: 2
 yieldUnit: loaves
 image: sourdough-bread.jpg
@@ -26,8 +26,8 @@ methodOptions:
     label: Dutch Oven
     description: 'Traditional sourdough bread, featuring a long fermentation process for complex flavor and perfect texture.'
     prepMinutes: 60
-    cookMinutes: 40
-    totalMinutes: 1870
+    cookMinutes: 39
+    totalMinutes: 1869
     yieldAmount: 2
     yieldUnit: loaves
 workbench:
@@ -70,8 +70,10 @@ workbench:
           folds:
             - id: fold-1
               atMinutes: 60
+              method: stretch-and-fold
             - id: fold-2
               atMinutes: 90
+              method: stretch-and-fold
             - id: fold-3
               atMinutes: 120
         hydrationPercent: 77.04
@@ -163,8 +165,8 @@ blocks:
           - '**[0m elapsed]** Mix in levain in the Ooni Halo Pro at 165 RPM until evenly incorporated + cover and rest at 70°F for 20m.'
           - id: add-salt-and-water
             text: '**[30m elapsed]** Mix in fine sea salt + remainder of water ({{remainingWaterGrams}}) at 90 RPM for 1m. Increase to 165 RPM and mix for about 4m. Cover and rest at 70°F for 25m. Internal dough temp should be about 72°F.'
-          - '**[1h elapsed]** Coil fold + cover and rest at 70°F for 25m'
-          - '**[1:30h elapsed]** Coil fold + cover and rest at 70°F for 25m'
+          - '**[1h elapsed]** Stretch and fold + cover and rest at 70°F for 25m'
+          - '**[1:30h elapsed]** Stretch and fold + cover and rest at 70°F for 25m'
           - '**[2:00h elapsed]** Coil fold + cover and rest at 70°F for 2:50h.'
           - '**[4:50h elapsed]** End of bulk when risen approximately 100% in volume'
       - title: Shape
@@ -177,7 +179,7 @@ blocks:
         items:
           - Preheat oven at 550°F for 45m
           - 'Score loaf at 45° angle about ¼ inch deep, slightly offset center and bake in a covered dutch oven at 470°F for 20m with an ice cube.'
-          - Bake uncovered at 470°F for 17m. Raise temp to 500°F and bake for 3 more minutes.
+          - Bake uncovered at 470°F for 17m. Raise temp to 500°F and bake for 2 more minutes.
           - Place on baking rack and allow to cool for 4h before slicing
     notes:
       - The autolyse process allows flour to fully hydrate and develops gluten naturally

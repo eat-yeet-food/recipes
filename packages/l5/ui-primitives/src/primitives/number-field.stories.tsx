@@ -3,10 +3,10 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, userEvent, within } from 'storybook/test'
 import { NumberField, type NumberFieldPrecision } from './number-field'
 
-function Example({ integer = false, initialValue = 1, decimalPlaces = 1 }: { integer?: boolean; initialValue?: number; decimalPlaces?: NumberFieldPrecision }) {
+function Example({ integer = false, initialValue = 1, decimalPlaces = 1, max }: { max?: number; integer?: boolean; initialValue?: number; decimalPlaces?: NumberFieldPrecision }) {
   const [value, setValue] = useState(initialValue)
   return <div className="max-w-80 bg-brand p-5">
-    <NumberField label={integer ? 'Quantity' : 'Weight'} value={value} onValueChange={setValue} integer={integer} min={integer ? 1 : 0} suffix={integer ? undefined : 'g'} decimalPlaces={decimalPlaces} />
+    <NumberField label={integer ? 'Quantity' : 'Weight'} value={value} onValueChange={setValue} integer={integer} min={integer ? 1 : 0} max={max} suffix={integer ? undefined : 'g'} decimalPlaces={decimalPlaces} />
     <p role="status">Accepted value: {value}</p>
   </div>
 }
@@ -64,4 +64,21 @@ export const InvalidQuantity: Story = { args: { integer: true }, play: async ({ 
   await expect(input).toHaveAttribute('aria-invalid', 'true')
   await expect(screen.getByText('Enter a whole number.')).toBeInTheDocument()
   await expect(screen.getByRole('status')).toHaveTextContent('Accepted value: 1')
+} }
+
+export const MaximumValue: Story = { args: { integer: true, max: 59 }, play: async ({ canvasElement }) => {
+  const screen = within(canvasElement)
+  const input = screen.getByRole('textbox', { name: 'Quantity' })
+  await userEvent.clear(input)
+  await userEvent.type(input, '60')
+  await userEvent.tab()
+  await expect(input).toHaveValue('60')
+  await expect(input).toHaveAttribute('aria-invalid', 'true')
+  await expect(screen.getByText('Enter 59 or less.')).toBeInTheDocument()
+  await expect(screen.getByRole('status')).toHaveTextContent('Accepted value: 6')
+  await userEvent.clear(input)
+  await userEvent.type(input, '59')
+  await userEvent.tab()
+  await expect(input).toHaveAttribute('aria-invalid', 'false')
+  await expect(screen.getByRole('status')).toHaveTextContent('Accepted value: 59')
 } }

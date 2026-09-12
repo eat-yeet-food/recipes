@@ -6,28 +6,30 @@ export { formatNumberFieldValue, type NumberFieldPrecision } from './number-fiel
 
 export type NumberFieldValidation = (id: string, error: string | null) => void
 
-function parseNumber(text: string, min: number, integer: boolean, positive: boolean) {
+function parseNumber(text: string, min: number, max: number, integer: boolean, positive: boolean) {
   const trimmed = text.trim()
   if (!trimmed) return { error: 'Enter a value.' }
   if (!/^[+-]?(?:\d+(?:[.,]\d*)?|[.,]\d+)$/.test(trimmed)) return { error: 'Enter a number, using a decimal point or comma.' }
-  return validateNumber(Number(trimmed.replace(',', '.')), min, integer, positive)
+  return validateNumber(Number(trimmed.replace(',', '.')), min, max, integer, positive)
 }
 
-function validateNumber(value: number, min: number, integer: boolean, positive: boolean) {
+function validateNumber(value: number, min: number, max: number, integer: boolean, positive: boolean) {
   if (!Number.isFinite(value)) return { error: 'Enter a finite number.' }
   if (integer && !Number.isSafeInteger(value)) return { error: 'Enter a whole number.' }
   if (positive && value <= 0) return { error: 'Enter a value greater than zero.' }
   if (value < min) return { error: `Enter ${min} or more.` }
+  if (value > max) return { error: `Enter ${max} or less.` }
   return { value, error: null }
 }
 
 /** Preserve editable text separately from the last accepted numeric value. */
-export function NumberField({ label, value, onValueChange, suffix, min = 0, integer = false, positive = false, hideLabel = false, onValidationChange, resetKey = 0, decimalPlaces = 1 }: {
+export function NumberField({ label, value, onValueChange, suffix, min = 0, max = Infinity, integer = false, positive = false, hideLabel = false, onValidationChange, resetKey = 0, decimalPlaces = 1 }: {
   label: string
   value: number
   onValueChange: (value: number) => void
   suffix?: string
   min?: number
+  max?: number
   integer?: boolean
   positive?: boolean
   hideLabel?: boolean
@@ -39,7 +41,7 @@ export function NumberField({ label, value, onValueChange, suffix, min = 0, inte
   const [edit, setEdit] = useState<{ text: string; revision: number } | null>(null)
   const [focused, setFocused] = useState(false)
   const editing = edit?.revision === resetKey ? edit : null
-  const parsed = editing ? parseNumber(editing.text, min, integer, positive) : validateNumber(value, min, integer, positive)
+  const parsed = editing ? parseNumber(editing.text, min, max, integer, positive) : validateNumber(value, min, max, integer, positive)
   const text = editing ? editing.text : parsed.error && Number.isFinite(value) ? String(value) : formatNumberFieldValue(value, integer ? 0 : decimalPlaces)
   const error = parsed.error
   const showError = Boolean(error) && !focused
@@ -60,7 +62,7 @@ export function NumberField({ label, value, onValueChange, suffix, min = 0, inte
         onChange={(event) => {
           const next = event.target.value
           setEdit({ text: next, revision: resetKey })
-          const result = parseNumber(next, min, integer, positive)
+          const result = parseNumber(next, min, max, integer, positive)
           if (result.error === null) onValueChange(result.value)
         }}
         onBlur={() => { setFocused(false); if (!error) setEdit(null) }}

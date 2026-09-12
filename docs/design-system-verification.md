@@ -2,6 +2,17 @@
 
 Reviewed September 7, 2026. The approved usage contract is [design-system.md](design-system.md); runtime tokens and production components remain the implementation source of truth.
 
+## September 10 sourdough hours and minutes
+
+Sourdough timing now uses paired hr/min inputs and compact recipe timestamps such as 1h, 1:30h, and 4:50h. Saved process values remain whole minutes.
+
+- `pnpm test` passed, including 90 production stories at 1280 and 390 pixels. Timing stories cover minute bounds, invalid step ordering, insertion, saved restoration, and generated hour/minute instructions.
+- `pnpm run test:a11y` passed all 39 page/state checks; `pnpm run test:lighthouse` scored accessibility 100 and SEO 100 on all six routes.
+- Browser review at 1280, 390, and 320 pixels confirmed readable timing pairs and that editing bulk hours applies the expected 5:50h timestamp. Process screenshots are in `dist/timing-review`.
+- `pnpm shots` passed with no page errors. The September 11 pre-release `pnpm parity` run matched 4/15 stored screenshots. Stored/current desktop and mobile summary images and pixel diffs were inspected. Baselines predate the process editor and earlier numeric, starter, and recipe-layout changes; no baselines were replaced or clean parity claimed.
+
+The touched stories’ axe incomplete findings concern isolated-page bypass landmarks and modal focus guards/hidden background content. Existing app Escape/focus-return checks pass. Physical mobile keyboards and screen-reader behavior were not tested for this change.
+
 ## September 8 mixed folding sequence
 
 Each timed sourdough step now selects stretch and fold, coil fold, or lamination. Insertion preserves neighboring step IDs and times. Saved formulas and shared recipe state retain techniques; legacy steps inherit their saved global method. Duplicate-formula comparison includes effective techniques.
