@@ -5,7 +5,6 @@ import { fileURLToPath, URL } from 'node:url'
 import { ACTIVE_APP, APP_PATHS } from '../../../../site.config.mjs'
 import { appBuildConfig } from '../../../../scripts/app-build-config.mjs'
 
-const routerMock = fileURLToPath(new URL('../src/storybook/router-mock.tsx', import.meta.url))
 const appBuild = appBuildConfig(ACTIVE_APP)
 const appOnlyPluginPattern = /(tanstack|nitro|suppress-module-directive)/i
 
@@ -38,7 +37,6 @@ const config: StorybookConfig = {
         define: appBuild.define,
         resolve: {
           alias: [
-            { find: '@tanstack/react-router', replacement: routerMock },
             ...appBuild.alias,
           ],
         },

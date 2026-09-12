@@ -1,3 +1,4 @@
+'use client'
 /** Passive recipe facts: compact typography and rules on the reading surface. */
 export function RecipeFacts({ items }: { items: readonly (readonly [string, string])[] }) {
   return <dl className="mt-0 mb-7 grid grid-cols-2 gap-x-6 border-b border-border text-ink max-[360px]:grid-cols-1 xl:grid-cols-4">

@@ -1,3 +1,4 @@
+'use client'
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
 import { Settings2 } from 'lucide-react'
 

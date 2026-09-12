@@ -1,3 +1,5 @@
+sourceId: 'recipes:sourdough-bread'
+status: published
 slug: sourdough-bread
 title: Sourdough Bread
 order: 4
@@ -42,7 +44,9 @@ workbench:
     spiralMixer:
       name: Ooni Halo Pro
       initialRpm: 165
-      initialMinutes: [4, 5]
+      initialMinutes:
+        - 4
+        - 5
       targetTemperatureF: 70
       saltRpm: 90
       saltMinutes: 1
@@ -115,72 +119,126 @@ blocks:
     equipment:
       - title: ''
         items:
-          - Kitchen scale
-          - Ooni Halo Pro spiral mixer
-          - Large mixing bowl
-          - Bench scraper
-          - Proofing basket (banneton)
-          - Dutch oven
-          - Lame or sharp knife for scoring
-          - Razor blades for lame
-          - Wire cooling rack
-          - Bread knife
+          - id: equipment-1-item-1
+            text: Kitchen scale
+          - id: equipment-1-item-2
+            text: Ooni Halo Pro spiral mixer
+          - id: equipment-1-item-3
+            text: Large mixing bowl
+          - id: equipment-1-item-4
+            text: Bench scraper
+          - id: equipment-1-item-5
+            text: Proofing basket (banneton)
+          - id: equipment-1-item-6
+            text: Dutch oven
+          - id: equipment-1-item-7
+            text: Lame or sharp knife for scoring
+          - id: equipment-1-item-8
+            text: Razor blades for lame
+          - id: equipment-1-item-9
+            text: Wire cooling rack
+          - id: equipment-1-item-10
+            text: Bread knife
+        id: equipment-1
     ingredients:
       - id: starter-maintenance
         title: Starter
         items:
-          - 6g starter
-          - 15g whole wheat flour
-          - 15g bread flour
-          - 23g water
+          - id: starter-maintenance-item-1
+            text: 6g starter
+          - id: starter-maintenance-item-2
+            text: 15g whole wheat flour
+          - id: starter-maintenance-item-3
+            text: 15g bread flour
+          - id: starter-maintenance-item-4
+            text: 23g water
       - id: levain-build
         title: Levain
         items:
-          - 50g starter
-          - 50g whole wheat flour
-          - 50g bread flour
-          - 77g water
+          - id: levain-build-item-1
+            text: 50g starter
+          - id: levain-build-item-2
+            text: 50g whole wheat flour
+          - id: levain-build-item-3
+            text: 50g bread flour
+          - id: levain-build-item-4
+            text: 77g water
       - id: dough
         title: Bread
         items:
-          - '765g [bread flour](https://www.walmart.com/ip/King-Arthur-Unbleached-Flour-5-lbs/10535108?wmlspartner=wlpa&selectedSellerId=0&wmlspartner=wlpa&cn=FY26-ENTP-PMAX_CVP_cnv_dps_dsn_dis_ad_entp_e_n&gclsrc=aw.ds&adid=2222222229710535108_0000000000_22488309517&wl0=&wl1=x&wl2=c&wl3=&wl4=&wl5=9009731&wl6=&wl7=&wl8=&wl9=pla&wl10=8175035&wl11=online&wl12=10535108&veh=sem&gad_source=1&gad_campaignid=22488321244&gbraid=0AAAAADmfBIpnwbCRCx-Lh8QmClJX7tCPp&gclid=Cj0KCQjw8KrFBhDUARIsAMvIApZAbILLGSMWrz1ABKhWgrRQmpk_e3aTcFm7hEG-wrTvuiJNb6qf1jAaAhBoEALw_wcB)'
-          - '150g [whole wheat flour](https://www.target.com/p/bob-39-s-red-mill-organic-whole-wheat-flour-5lbs/-/A-92889638?sid=&TCID=PDS-22806998596&gclsrc=aw.ds&gad_source=1&gad_campaignid=22803279746&gbraid=0AAAAAD-5dfZBxwL-BLt-ymR8_PLhoa3xI&gclid=Cj0KCQjw8KrFBhDUARIsAMvIApZsBV2zeEfCYO1LqrfoeLFww5kNUKvm8kiJL8-RcQ-4-qacCOa4VkEaAjIPEALw_wcB)'
-          - '685g + 20g cool water (divided)'
-          - 175g peak levain
-          - '20g fine sea salt'
+          - id: dough-item-1
+            text: >-
+              765g [bread
+              flour](https://www.walmart.com/ip/King-Arthur-Unbleached-Flour-5-lbs/10535108?wmlspartner=wlpa&selectedSellerId=0&wmlspartner=wlpa&cn=FY26-ENTP-PMAX_CVP_cnv_dps_dsn_dis_ad_entp_e_n&gclsrc=aw.ds&adid=2222222229710535108_0000000000_22488309517&wl0=&wl1=x&wl2=c&wl3=&wl4=&wl5=9009731&wl6=&wl7=&wl8=&wl9=pla&wl10=8175035&wl11=online&wl12=10535108&veh=sem&gad_source=1&gad_campaignid=22488321244&gbraid=0AAAAADmfBIpnwbCRCx-Lh8QmClJX7tCPp&gclid=Cj0KCQjw8KrFBhDUARIsAMvIApZAbILLGSMWrz1ABKhWgrRQmpk_e3aTcFm7hEG-wrTvuiJNb6qf1jAaAhBoEALw_wcB)
+          - id: dough-item-2
+            text: >-
+              150g [whole wheat
+              flour](https://www.target.com/p/bob-39-s-red-mill-organic-whole-wheat-flour-5lbs/-/A-92889638?sid=&TCID=PDS-22806998596&gclsrc=aw.ds&gad_source=1&gad_campaignid=22803279746&gbraid=0AAAAAD-5dfZBxwL-BLt-ymR8_PLhoa3xI&gclid=Cj0KCQjw8KrFBhDUARIsAMvIApZsBV2zeEfCYO1LqrfoeLFww5kNUKvm8kiJL8-RcQ-4-qacCOa4VkEaAjIPEALw_wcB)
+          - id: dough-item-3
+            text: 685g + 20g cool water (divided)
+          - id: dough-item-4
+            text: 175g peak levain
+          - id: dough-item-5
+            text: 20g fine sea salt
     steps:
       - id: levain
         title: Levain
         items:
-          - Mix starter with water and flour
-          - 'Cover and rest at 70°F until peaked, 6h'
+          - id: levain-item-1
+            text: Mix starter with water and flour
+          - id: levain-item-2
+            text: 'Cover and rest at 70°F until peaked, 6h'
       - id: autolyse
         title: Autolyse (3h before bulk)
         items:
           - id: autolyse-water
-            text: Mix flour and the first portion of water ({{initialWaterGrams}}) using cool water in the Ooni Halo Pro at 165 RPM for about 4-5m until the dough reaches 70°F. Cover and rest at 70°F for 3h.
+            text: >-
+              Mix flour and the first portion of water ({{initialWaterGrams}}) using cool water in the Ooni Halo Pro at
+              165 RPM for about 4-5m until the dough reaches 70°F. Cover and rest at 70°F for 3h.
       - id: bulk-fermentation
         title: Bulk Fermentation
         items:
-          - '**[0m elapsed]** Mix in levain in the Ooni Halo Pro at 165 RPM until evenly incorporated + cover and rest at 70°F for 20m.'
+          - id: bulk-fermentation-item-1
+            text: >-
+              **[0m elapsed]** Mix in levain in the Ooni Halo Pro at 165 RPM until evenly incorporated + cover and rest
+              at 70°F for 20m.
           - id: add-salt-and-water
-            text: '**[30m elapsed]** Mix in fine sea salt + remainder of water ({{remainingWaterGrams}}) at 90 RPM for 1m. Increase to 165 RPM and mix for about 4m. Cover and rest at 70°F for 25m. Internal dough temp should be about 72°F.'
-          - '**[1h elapsed]** Stretch and fold + cover and rest at 70°F for 25m'
-          - '**[1:30h elapsed]** Stretch and fold + cover and rest at 70°F for 25m'
-          - '**[2:00h elapsed]** Coil fold + cover and rest at 70°F for 2:50h.'
-          - '**[4:50h elapsed]** End of bulk when risen approximately 100% in volume'
+            text: >-
+              **[30m elapsed]** Mix in fine sea salt + remainder of water ({{remainingWaterGrams}}) at 90 RPM for 1m.
+              Increase to 165 RPM and mix for about 4m. Cover and rest at 70°F for 25m. Internal dough temp should be
+              about 72°F.
+          - id: bulk-fermentation-item-3
+            text: '**[1h elapsed]** Stretch and fold + cover and rest at 70°F for 25m'
+          - id: bulk-fermentation-item-4
+            text: '**[1:30h elapsed]** Stretch and fold + cover and rest at 70°F for 25m'
+          - id: bulk-fermentation-item-5
+            text: '**[2:00h elapsed]** Coil fold + cover and rest at 70°F for 2:50h.'
+          - id: bulk-fermentation-item-6
+            text: '**[4:50h elapsed]** End of bulk when risen approximately 100% in volume'
       - title: Shape
         items:
           - id: divide-dough
-            text: Divide into {{pieceCount}} {{pieceLabelPlural}} ({{pieceWeightGrams}} each), preshape, and rest at 70°F for 30m.
-          - Shape and place in banneton. Rest at 70°F for 10m.
-          - 'Stitch, cover and place in 37°F refrigerator for 12-18h'
+            text: >-
+              Divide into {{pieceCount}} {{pieceLabelPlural}} ({{pieceWeightGrams}} each), preshape, and rest at 70°F
+              for 30m.
+          - id: steps-4-item-2
+            text: Shape and place in banneton. Rest at 70°F for 10m.
+          - id: steps-4-item-3
+            text: 'Stitch, cover and place in 37°F refrigerator for 12-18h'
+        id: steps-4
       - title: Bake
         items:
-          - Preheat oven at 550°F for 45m
-          - 'Score loaf at 45° angle about ¼ inch deep, slightly offset center and bake in a covered dutch oven at 470°F for 20m with an ice cube.'
-          - Bake uncovered at 470°F for 17m. Raise temp to 500°F and bake for 2 more minutes.
-          - Place on baking rack and allow to cool for 4h before slicing
+          - id: steps-5-item-1
+            text: Preheat oven at 550°F for 45m
+          - id: steps-5-item-2
+            text: >-
+              Score loaf at 45° angle about ¼ inch deep, slightly offset center and bake in a covered dutch oven at
+              470°F for 20m with an ice cube.
+          - id: steps-5-item-3
+            text: Bake uncovered at 470°F for 17m. Raise temp to 500°F and bake for 2 more minutes.
+          - id: steps-5-item-4
+            text: Place on baking rack and allow to cool for 4h before slicing
+        id: steps-5
     notes:
       - The autolyse process allows flour to fully hydrate and develops gluten naturally
       - Bulk fermentation timing can vary based on temperature and starter activity
@@ -192,8 +250,18 @@ blocks:
       - Temperature control is crucial throughout the process
       - Don't rush the fermentation process - time develops flavor
       - Use a kitchen scale for accurate measurements
-      - 'Watch [stretch and fold technique](https://www.theperfectloaf.com/how-to-stretch-and-fold-sourdough-bread-dough/) for proper bulk fermentation'
-      - 'Master [preshaping technique](https://www.theperfectloaf.com/guides/how-to-preshape-bread-dough/) for better final shape'
+      - >-
+        Watch [stretch and fold
+        technique](https://www.theperfectloaf.com/how-to-stretch-and-fold-sourdough-bread-dough/) for proper bulk
+        fermentation
+      - >-
+        Master [preshaping technique](https://www.theperfectloaf.com/guides/how-to-preshape-bread-dough/) for better
+        final shape
       - 'Learn [batard shaping technique](https://www.theperfectloaf.com/guides/shaping-a-batard/) for oval-shaped loaves'
-      - 'Learn proper [scoring techniques](https://www.theperfectloaf.com/guides/the-ultimate-guide-to-baking-bread-dough/) for optimal oven spring'
-      - 'Read about [percent rise](https://thesourdoughjourney.com/the-mystery-of-percentage-rise-in-bulk-fermentation/) to help understand when bulk fermentation is complete'
+      - >-
+        Learn proper [scoring
+        techniques](https://www.theperfectloaf.com/guides/the-ultimate-guide-to-baking-bread-dough/) for optimal oven
+        spring
+      - >-
+        Read about [percent rise](https://thesourdoughjourney.com/the-mystery-of-percentage-rise-in-bulk-fermentation/)
+        to help understand when bulk fermentation is complete

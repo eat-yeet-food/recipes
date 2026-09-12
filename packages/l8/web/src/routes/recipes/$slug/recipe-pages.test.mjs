@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url'
 import { readFileSync } from 'node:fs'
 
 import { RESOLVED_APP_PATHS } from '#web-test/app-paths'
-import { startStatic } from '#web-test/static-server'
+import { startApp as startStatic } from '#web-test/static-server'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', '..', '..', '..', '..')
 const INDEX = JSON.parse(readFileSync(join(RESOLVED_APP_PATHS.generatedDir, 'index.json'), 'utf8'))

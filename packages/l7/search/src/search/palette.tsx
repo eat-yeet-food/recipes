@@ -1,3 +1,5 @@
+'use client'
+import { ResponsiveImage } from '@eat-yeet/l5-ui-primitives/primitives/responsive-image'
 /**
  * Global search palette. Opens from the nav search button or Cmd/Ctrl-K and
  * filters the local generated recipe index.
@@ -9,7 +11,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from '@tanstack/react-router'
+import { useNavigate } from '@eat-yeet/l5-ui-primitives/primitives/navigation'
 
 import { Clock, UtensilsCrossed } from 'lucide-react'
 import { Command, CommandDialog, CommandInput, CommandList, CommandGroup, CommandItem } from '@eat-yeet/l5-ui-primitives/primitives/command'
@@ -35,7 +37,7 @@ function ResultImage({ recipe }: { recipe: RecipeSummary }) {
   return (
     <div className="relative size-10 shrink-0 overflow-hidden rounded-md bg-ink/5">
       {src ? (
-        <img src={src} alt="" className="absolute inset-0 size-full object-cover" />
+        <ResponsiveImage src={src} sizes="40px" alt="" className="absolute inset-0 size-full object-cover" />
       ) : (
         <div className="absolute inset-0 flex items-center justify-center">
           <UtensilsCrossed className="size-4 text-ink/15" strokeWidth="1.25" />

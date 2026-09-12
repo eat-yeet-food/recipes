@@ -1,3 +1,4 @@
+'use client'
 import { formatYield, humanizeMinutes } from '@eat-yeet/l2-recipe-domain/format'
 import type { RecipeBlock, Section } from '@eat-yeet/l4-content-model/blocks'
 import type { RecipeContent } from '@eat-yeet/l4-content-model/recipes'

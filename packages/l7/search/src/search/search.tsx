@@ -1,3 +1,4 @@
+'use client'
 /**
  * Search page feature: local facet filtering, desktop rail, and mobile
  * disclosure backed by the generated recipe index.

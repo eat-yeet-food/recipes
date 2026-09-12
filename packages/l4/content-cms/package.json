@@ -1,0 +1,16 @@
+{
+  "name": "@eat-yeet/l4-content-cms",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./config": "./src/config.ts",
+    "./service": "./src/service.ts"
+  },
+  "dependencies": {
+    "payload": "3.89.0",
+    "@payloadcms/db-d1-sqlite": "3.89.0",
+    "@payloadcms/storage-r2": "3.89.0",
+    "@eat-yeet/l3-api-contract": "workspace:*",
+    "@eat-yeet/l4-content-model": "workspace:*"
+  }
+}

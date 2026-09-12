@@ -12,7 +12,7 @@ import AxeBuilder from '@axe-core/playwright'
 import { chromium } from 'playwright'
 
 import { RESOLVED_APP_PATHS } from '#web-test/app-paths'
-import { startStatic } from '#web-test/static-server'
+import { startApp as startStatic } from '#web-test/static-server'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', '..', '..')
 const OUT = join(ROOT, '.output', 'public')

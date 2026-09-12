@@ -1,7 +1,11 @@
+sourceId: 'recipes:chicken-fettuccine-alfredo'
+status: published
 slug: chicken-fettuccine-alfredo
 title: Fettuccine Alfredo
 order: 7
-description: 'Fettuccine tossed in a Parmigiano cream sauce emulsified with starchy pasta water, with grilled chicken if you want it.'
+description: >-
+  Fettuccine tossed in a Parmigiano cream sauce emulsified with starchy pasta water, with grilled chicken if you want
+  it.
 category: savory
 prepMinutes: 15
 cookMinutes: 25
@@ -32,53 +36,115 @@ blocks:
     ingredients:
       - title: Chicken
         items:
-          - '3 boneless, skinless chicken breasts (about 1½ lb)'
-          - ¼ cup canola oil
-          - 3 tbsp lemon juice (about 1 lemon)
-          - '4 cloves garlic, minced'
-          - 1½ tsp kosher salt
-          - ½ tsp freshly ground black pepper
+          - id: ingredients-1-item-1
+            text: '3 boneless, skinless chicken breasts (about 1½ lb)'
+          - id: ingredients-1-item-2
+            text: ¼ cup canola oil
+          - id: ingredients-1-item-3
+            text: 3 tbsp lemon juice (about 1 lemon)
+          - id: ingredients-1-item-4
+            text: '4 cloves garlic, minced'
+          - id: ingredients-1-item-5
+            text: 1½ tsp kosher salt
+          - id: ingredients-1-item-6
+            text: ½ tsp freshly ground black pepper
+        id: ingredients-1
       - title: Sauce
         items:
-          - 6 tbsp unsalted butter
-          - '2 small shallots, very finely minced'
-          - ¾ cup heavy cream
-          - 1½ cups finely grated Parmigiano Reggiano
-          - ½ tsp kosher salt
-          - Several grinds of black pepper
+          - id: ingredients-2-item-1
+            text: 6 tbsp unsalted butter
+          - id: ingredients-2-item-2
+            text: '2 small shallots, very finely minced'
+          - id: ingredients-2-item-3
+            text: ¾ cup heavy cream
+          - id: ingredients-2-item-4
+            text: 1½ cups finely grated Parmigiano Reggiano
+          - id: ingredients-2-item-5
+            text: ½ tsp kosher salt
+          - id: ingredients-2-item-6
+            text: Several grinds of black pepper
+        id: ingredients-2
       - title: Pasta
         items:
-          - 16 oz (500g) dried fettuccine
-          - 'Kosher salt, for the pasta water'
+          - id: ingredients-3-item-1
+            text: 16 oz (500g) dried fettuccine
+          - id: ingredients-3-item-2
+            text: 'Kosher salt, for the pasta water'
+        id: ingredients-3
       - title: To Serve
         items:
-          - Coarsely chopped fresh parsley (optional)
-          - Extra Parmigiano Reggiano
+          - id: ingredients-4-item-1
+            text: Coarsely chopped fresh parsley (optional)
+          - id: ingredients-4-item-2
+            text: Extra Parmigiano Reggiano
+        id: ingredients-4
     steps:
       - title: Marinade
         items:
-          - 'Whisk the ¼ cup canola oil, lemon juice, garlic, salt, and pepper together in a bowl or zip-top bag. Add the chicken and turn to coat.'
-          - Refrigerate 3–24 hours. Pull it out about 30 min before cooking so it is not going onto the grill straight from the fridge.
+          - id: steps-1-item-1
+            text: >-
+              Whisk the ¼ cup canola oil, lemon juice, garlic, salt, and pepper together in a bowl or zip-top bag. Add
+              the chicken and turn to coat.
+          - id: steps-1-item-2
+            text: >-
+              Refrigerate 3–24 hours. Pull it out about 30 min before cooking so it is not going onto the grill straight
+              from the fridge.
+        id: steps-1
       - title: Chicken
         items:
-          - 'Scrape the marinade off the chicken and pat it dry. Clinging garlic scorches over the hot part of the grill, and wet chicken steams instead of browning.'
-          - 'Use a tenderizing beater to pound the chicken to an even thickness so it grills evenly.'
-          - 'Grill over the hotter part of a 400°F grill for about 5 min per side, until the chicken reaches 165°F internal.'
-          - 'Rest on a board for 3 min, then cut into ½-inch slices and tent with foil.'
+          - id: steps-2-item-1
+            text: >-
+              Scrape the marinade off the chicken and pat it dry. Clinging garlic scorches over the hot part of the
+              grill, and wet chicken steams instead of browning.
+          - id: steps-2-item-2
+            text: Use a tenderizing beater to pound the chicken to an even thickness so it grills evenly.
+          - id: steps-2-item-3
+            text: >-
+              Grill over the hotter part of a 400°F grill for about 5 min per side, until the chicken reaches 165°F
+              internal.
+          - id: steps-2-item-4
+            text: 'Rest on a board for 3 min, then cut into ½-inch slices and tent with foil.'
+        id: steps-2
       - title: Pasta
         items:
-          - 'Boil the fettuccine in well-salted water and pull it 1 minute short of the package''s al dente. Reserve ½ cup of the pasta water plus a mug more, then drain.'
+          - id: steps-3-item-1
+            text: >-
+              Boil the fettuccine in well-salted water and pull it 1 minute short of the package's al dente. Reserve ½
+              cup of the pasta water plus a mug more, then drain.
+        id: steps-3
       - title: Sauce
         items:
-          - 'In a large straight-sided skillet over medium heat, melt the butter. Add the shallots and cook until tender, about 2 min.'
-          - 'Pour in the cream, bring to a boil, then drop to medium-low and simmer 3 min.'
-          - 'Off the heat, stir in the Parmigiano, salt, and pepper until smooth. Keeping it off direct heat is what stops the cheese from breaking.'
+          - id: steps-4-item-1
+            text: >-
+              In a large straight-sided skillet over medium heat, melt the butter. Add the shallots and cook until
+              tender, about 2 min.
+          - id: steps-4-item-2
+            text: 'Pour in the cream, bring to a boil, then drop to medium-low and simmer 3 min.'
+          - id: steps-4-item-3
+            text: >-
+              Off the heat, stir in the Parmigiano, salt, and pepper until smooth. Keeping it off direct heat is what
+              stops the cheese from breaking.
+        id: steps-4
       - title: Finish
         items:
-          - 'Return the pan to medium-high. Add the drained pasta and the ½ cup reserved water and toss gently for about 1 min — the starch pulls butter, cream, and cheese into a glossy coat that clings to each strand instead of pooling.'
-          - 'Off the heat immediately. Plate, top with the sliced chicken, and finish with parsley, extra Parmigiano, and more pepper.'
+          - id: steps-5-item-1
+            text: >-
+              Return the pan to medium-high. Add the drained pasta and the ½ cup reserved water and toss gently for
+              about 1 min — the starch pulls butter, cream, and cheese into a glossy coat that clings to each strand
+              instead of pooling.
+          - id: steps-5-item-2
+            text: >-
+              Off the heat immediately. Plate, top with the sliced chicken, and finish with parsley, extra Parmigiano,
+              and more pepper.
+        id: steps-5
     notes:
-      - 'The toss at the end is the whole recipe. Starchy pasta water plus heat is what turns butter, cream, and cheese into a sauce instead of a puddle.'
+      - >-
+        The toss at the end is the whole recipe. Starchy pasta water plus heat is what turns butter, cream, and cheese
+        into a sauce instead of a puddle.
     tips:
-      - Grate the Parmigiano finely yourself. Pre-shredded cheese carries anti-caking starch that turns the sauce grainy.
-      - Have everything cut and grated before the chicken goes in — from that point on the whole dish moves in one continuous stretch.
+      - >-
+        Grate the Parmigiano finely yourself. Pre-shredded cheese carries anti-caking starch that turns the sauce
+        grainy.
+      - >-
+        Have everything cut and grated before the chicken goes in — from that point on the whole dish moves in one
+        continuous stretch.

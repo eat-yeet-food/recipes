@@ -1,3 +1,4 @@
+'use client'
 /** One lockup for navigation, home, footer, and handbook. */
 const SIZES = {
   hero: { root: 'gap-3 text-[clamp(38px,6vw,80px)] max-md:gap-2', icon: 'size-14 md:size-20', dot: 'size-2' },

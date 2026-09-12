@@ -1,3 +1,4 @@
+'use client'
 import type { ComponentType } from 'react'
 
 import type { RecipeContent } from '@eat-yeet/l4-content-model/recipes'

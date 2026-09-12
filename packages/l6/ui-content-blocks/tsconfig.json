@@ -20,6 +20,9 @@
     },
     {
       "path": "../../l4/content-model/tsconfig.json"
+    },
+    {
+      "path": "../../l5/ui-primitives/tsconfig.json"
     }
   ],
   "include": [

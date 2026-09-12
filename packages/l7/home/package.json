@@ -10,7 +10,6 @@
     "@eat-yeet/l2-recipe-domain": "workspace:*",
     "@eat-yeet/l5-ui-primitives": "workspace:*",
     "@eat-yeet/l6-ui-catalog": "workspace:*",
-    "@tanstack/react-router": "^1.163.3",
     "lucide-react": "^1.33.0"
   }
 }

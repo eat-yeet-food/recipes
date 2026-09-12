@@ -8,9 +8,8 @@
   "dependencies": {
     "@eat-yeet/l0-foundation": "workspace:*",
     "@eat-yeet/l5-ui-primitives": "workspace:*",
-    "@tanstack/react-router": "^1.163.3",
     "lucide-react": "^1.33.0",
-    "react": "^19.0.0"
+    "react": "19.2.8"
   },
   "devDependencies": {
     "@storybook/react-vite": "^10.5.8"

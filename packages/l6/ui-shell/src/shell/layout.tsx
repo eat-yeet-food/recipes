@@ -1,9 +1,10 @@
+'use client'
 /**
  * Site shell chrome: fixed nav, footer, responsive menu, and search launcher.
  */
 
 import { useEffect, useState } from 'react'
-import { Link } from '@tanstack/react-router'
+import { Link } from '@eat-yeet/l5-ui-primitives/primitives/navigation'
 
 import { Menu, Search } from 'lucide-react'
 import { Wordmark, type WordmarkCopy } from './wordmark'
@@ -31,10 +32,12 @@ export function Nav({
   siteName,
   wordmark,
   onOpenPalette,
+  navigation = [{label:"Recipes",href:"/search"},{label:"Learn",href:"/learn"}],
 }: {
   pathname: string
   siteName: string
   wordmark: WordmarkCopy
+  navigation?: {label:string;href:string;desktop?:boolean;mobile?:boolean}[]
   onOpenPalette: () => void
 }) {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -91,12 +94,7 @@ export function Nav({
         </div>
         <div className="ml-auto flex items-center gap-3">
           <div className="hidden md:flex items-center gap-6">
-            <Link to="/search" className={linkClass}>
-              Recipes
-            </Link>
-            <Link to="/learn" className={linkClass}>
-              Learn
-            </Link>
+            {navigation.filter(item=>item.desktop!==false).map(item=><Link key={item.href} to={item.href} className={linkClass}>{item.label}</Link>)}
           </div>
           <div className="hidden md:flex items-center gap-3">
             <Button
@@ -141,27 +139,7 @@ export function Nav({
       </div>
       <div id="mobile-nav-menu" hidden={!menuOpen} className="border-t border-ink/10 bg-white px-4 py-3 md:hidden">
         <div className="mx-auto flex max-w-[var(--max-width)] flex-col gap-1">
-          <Link
-            to="/search"
-            onClick={() => setMenuOpen(false)}
-            className="rounded px-2 py-3 min-h-11 inline-flex items-center font-nav text-sm font-bold text-ink hover:bg-ink/5"
-          >
-            Recipes
-          </Link>
-          <Link
-            to="/browse"
-            onClick={() => setMenuOpen(false)}
-            className="rounded px-2 py-3 min-h-11 inline-flex items-center font-nav text-sm font-bold text-ink hover:bg-ink/5"
-          >
-            Browse
-          </Link>
-          <Link
-            to="/learn"
-            onClick={() => setMenuOpen(false)}
-            className="rounded px-2 py-3 min-h-11 inline-flex items-center font-nav text-sm font-bold text-ink hover:bg-ink/5"
-          >
-            Learn
-          </Link>
+          {navigation.filter(item=>item.mobile!==false).map(item=><Link key={item.href} to={item.href} onClick={()=>setMenuOpen(false)} className="rounded px-2 py-3 min-h-11 inline-flex items-center font-nav text-sm font-bold text-ink hover:bg-ink/5">{item.label}</Link>)}
         </div>
       </div>
     </nav>
@@ -169,7 +147,7 @@ export function Nav({
 }
 
 /** footer.tsx */
-export function Footer({ siteName, wordmark }: { siteName: string; wordmark: WordmarkCopy }) {
+export function Footer({ siteName, wordmark, navigation = [{label:"Home",href:"/"},{label:"Recipes",href:"/search"},{label:"Browse",href:"/browse"},{label:"Learn",href:"/learn"}] }: { siteName: string; wordmark: WordmarkCopy; navigation?:{label:string;href:string}[] }) {
   const linkClass =
     'inline-flex min-h-11 items-center text-sm font-bold text-ink transition-colors hover:text-action-hover'
   const [year, setYear] = useState('2026')
@@ -185,18 +163,7 @@ export function Footer({ siteName, wordmark }: { siteName: string; wordmark: Wor
           <Wordmark copy={wordmark} size="footer" />
         </div>
         <nav data-site-footer-links="" className="mt-4 flex flex-wrap justify-center gap-x-6 gap-y-1" aria-label="Footer">
-          <Link to="/" className={linkClass}>
-            Home
-          </Link>
-          <Link to="/search" className={linkClass}>
-            Recipes
-          </Link>
-          <Link to="/browse" className={linkClass}>
-            Browse
-          </Link>
-          <Link to="/learn" className={linkClass}>
-            Learn
-          </Link>
+          {navigation.map(item=><Link key={item.href} to={item.href} className={linkClass}>{item.label}</Link>)}
         </nav>
         <p className="mt-4 text-[11px] tracking-[1px] text-ink/70">
           &copy; {year} {siteName}. All rights reserved.

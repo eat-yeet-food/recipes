@@ -1,0 +1,186 @@
+sourceId: 'site:eatyeet'
+siteName: Eat / Yeet
+defaultOgImage: /images/charred-crust-pizza.jpg
+analytics:
+  googleTagId: G-44ZHQCCVG0
+copy:
+  description: 'A focused recipe archive for breads, pasta, donuts, weeknight mains, and baking projects.'
+  wordmark:
+    first: Eat
+    second: Yeet
+    background: YEET
+  hero:
+    image: /images/charred-crust-pizza.jpg
+    imageAlt: New York style pizza with a charred golden crust
+    imageCaption: New York Style Pizza
+    headline: |-
+      BIG
+      DOUGH
+      ENERGY.
+    kicker: 'Eat / Yeet · Savory, Sweet, or Yeet!'
+    motto: 'Eat the best, yeet the rest'
+    cta: Let’s eat
+  home:
+    eyebrow: Top Eats
+    latestTitle: Latest Recipes
+    browseEyebrow: Explore
+    browseTitle: Browse by Category
+  pages:
+    homeTitle: Eat / Yeet
+    recipesTitle: All Recipes | Eat / Yeet
+    recipesHeading: All Recipes
+    recipesDescription: 'Every recipe in the collection — breads, pizza, pasta, donuts, cookies, and more. Tested, refined, and written without the filler.'
+    recipesIntro: 'Every recipe in the collection, newest first.'
+    browseTitle: Browse Recipes | Eat / Yeet
+    browseHeading: Browse Recipes
+    browseDescription: 'Browse recipes by course, cuisine, cooking method, and dietary preference. Find your next meal without the clutter.'
+    browseIntro: 'Explore our collection by course, cuisine, cooking method, or dietary preference.'
+    searchTitle: Search Recipes | Eat / Yeet
+    searchDescription: 'Search and filter recipes by cuisine, course, method, dietary restrictions, and more.'
+    learnTitle: Learn | Eat / Yeet
+    learnHeading: Learn
+    learnDescription: 'A practical guide to mixing methods, gluten development, dough temperature, and choosing the right development target.'
+    learnIntro: 'Start with one practical reference for mixing methods, gluten development, dough temperature, and choosing the right development target.'
+    recipeFallbackTitle: Recipe | Eat / Yeet
+    recipeTitleSuffix: Eat / Yeet
+    articleFallbackTitle: Learn | Eat / Yeet
+    articleTitleSuffix: Eat / Yeet
+  jsonLdAuthor: Patrick Hogan
+categories:
+  - sourceId: categories:mains
+    slug: mains
+    label: Mains
+    facet: courses
+    value: mains
+    image: /images/categories/mains.webp
+    featured: true
+  - sourceId: categories:desserts
+    slug: desserts
+    label: Desserts
+    facet: courses
+    value: desserts
+    image: /images/categories/desserts.webp
+    featured: true
+  - sourceId: categories:breakfast
+    slug: breakfast
+    label: Breakfast & Brunch
+    facet: courses
+    value: breakfast_and_brunch
+    image: /images/categories/breakfast.webp
+    featured: true
+  - sourceId: categories:italian
+    slug: italian
+    label: Italian
+    facet: cuisines
+    value: italian
+    image: /images/categories/italian.webp
+    featured: true
+  - sourceId: categories:asian
+    slug: asian
+    label: Asian
+    facet: cuisines
+    value: asian
+    image: /images/categories/asian.webp
+    featured: true
+  - sourceId: categories:baking
+    slug: baking
+    label: Baking
+    facet: methods
+    value: baking
+    image: /images/categories/baking.webp
+    featured: true
+  - sourceId: categories:grilling
+    slug: grilling
+    label: Grilling
+    facet: methods
+    value: grilling
+    image: /images/categories/grilling.webp
+    featured: true
+  - sourceId: categories:vegetarian
+    slug: vegetarian
+    label: Vegetarian
+    facet: restrictions
+    value: vegetarian
+    image: /images/categories/vegetarian.webp
+    featured: true
+  - sourceId: categories:sides
+    slug: sides
+    label: Sides
+    facet: courses
+    value: sides
+  - sourceId: categories:sauces
+    slug: sauces
+    label: Condiments & Sauces
+    facet: courses
+    value: condiments_and_sauces
+  - sourceId: categories:frying
+    slug: frying
+    label: Frying
+    facet: methods
+    value: frying
+  - sourceId: categories:stovetop
+    slug: stovetop
+    label: Stovetop
+    facet: methods
+    value: stovetop
+  - sourceId: categories:no-cook
+    slug: no-cook
+    label: No Cook
+    facet: methods
+    value: no_cook
+  - sourceId: categories:european
+    slug: european
+    label: European
+    facet: cuisines
+    value: european
+  - sourceId: categories:north-american
+    slug: north-american
+    label: North American
+    facet: cuisines
+    value: north_american
+  - sourceId: categories:central-american
+    slug: central-american
+    label: Central American
+    facet: cuisines
+    value: central_american
+  - sourceId: categories:gluten-free
+    slug: gluten-free
+    label: Gluten Free
+    facet: restrictions
+    value: gluten_free
+  - sourceId: categories:entertaining
+    slug: entertaining
+    label: Entertaining
+    facet: occasions
+    value: entertaining
+  - sourceId: categories:everyday
+    slug: everyday
+    label: Everyday
+    facet: occasions
+    value: everyday
+
+navigation:
+  - label: Home
+    href: /
+    desktop: false
+    mobile: false
+  - label: Recipes
+    href: /search
+  - label: Browse
+    href: /browse
+    desktop: false
+  - label: Learn
+    href: /learn
+browseSections:
+  - facet: courses
+    title: By Course
+    eyebrow: What are you making?
+  - facet: cuisines
+    title: By Cuisine
+    eyebrow: Explore flavors
+  - facet: methods
+    title: By Method
+    eyebrow: How do you cook?
+  - facet: restrictions
+    title: By Diet
+    eyebrow: Dietary needs

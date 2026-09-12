@@ -1,3 +1,5 @@
+sourceId: 'recipes:liege-waffles'
+status: published
 slug: liege-waffles
 title: Liege Waffles
 order: 12
@@ -38,47 +40,111 @@ blocks:
     equipment:
       - title: ''
         items:
-          - Kitchen scale
-          - Stand mixer with dough hook
-          - Proofing bin with lid
-          - '[Hamilton Beach removable-grid Belgian waffle maker](https://www.target.com/p/hamilton-beach-belgian-waffle-maker/-/A-50769401), with removable plates and adjustable temperature control'
-          - Wire rack
+          - id: equipment-1-item-1
+            text: Kitchen scale
+          - id: equipment-1-item-2
+            text: Stand mixer with dough hook
+          - id: equipment-1-item-3
+            text: Proofing bin with lid
+          - id: equipment-1-item-4
+            text: >-
+              [Hamilton Beach removable-grid Belgian waffle
+              maker](https://www.target.com/p/hamilton-beach-belgian-waffle-maker/-/A-50769401), with removable plates
+              and adjustable temperature control
+          - id: equipment-1-item-5
+            text: Wire rack
+        id: equipment-1
     ingredients:
       - title: Dough
         items:
-          - 450g all-purpose flour, divided (reserve 120g)
-          - 50g light brown sugar
-          - '7g [SAF gold instant yeast](https://a.co/d/j9mxG9d)'
-          - 8g fine sea salt
-          - 180g whole milk, room temperature
-          - 100g eggs, room temperature (2 large eggs)
-          - 10g vanilla extract
-          - 225g unsalted butter, softened
-          - 225g Belgian pearl sugar
+          - id: ingredients-1-item-1
+            text: '450g all-purpose flour, divided (reserve 120g)'
+          - id: ingredients-1-item-2
+            text: 50g light brown sugar
+          - id: ingredients-1-item-3
+            text: '7g [SAF gold instant yeast](https://a.co/d/j9mxG9d)'
+          - id: ingredients-1-item-4
+            text: 8g fine sea salt
+          - id: ingredients-1-item-5
+            text: '180g whole milk, room temperature'
+          - id: ingredients-1-item-6
+            text: '100g eggs, room temperature (2 large eggs)'
+          - id: ingredients-1-item-7
+            text: 10g vanilla extract
+          - id: ingredients-1-item-8
+            text: '225g unsalted butter, softened'
+          - id: ingredients-1-item-9
+            text: 225g Belgian pearl sugar
+        id: ingredients-1
       - title: For cooking
         items:
-          - Neutral oil or nonstick spray, for the waffle iron if needed
-          - Honey, maple syrup, or powdered sugar, for serving
+          - id: ingredients-2-item-1
+            text: 'Neutral oil or nonstick spray, for the waffle iron if needed'
+          - id: ingredients-2-item-2
+            text: 'Honey, maple syrup, or powdered sugar, for serving'
+        id: ingredients-2
     steps:
       - title: Dough
         items:
-          - 'Mix the dry ingredients: Reserve 120g of the flour. Add the remaining 330g flour, light brown sugar, instant yeast, and fine sea salt to the bowl of a stand mixer. Mix briefly by hand or on low speed so the yeast and fine sea salt are evenly distributed.'
-          - 'Add the room-temperature liquids: Add the milk, eggs, and vanilla. Mix with the dough hook on low speed until the dough starts to come together.'
-          - 'Mix in the butter: With the mixer on low to medium-low, add the softened butter in roughly 1 tablespoon chunks. Wait for each addition to mix in before adding the next.'
-          - 'Add the reserved flour and develop: Add the reserved 120g flour and mix on low until incorporated. Increase to medium and mix for 5 minutes.'
-          - 'Bulk ferment: Transfer the dough to a lightly greased bowl or proofing bin. Cover and hold at 76°F for 1.5 hours, until the dough is puffy and relaxed.'
-          - 'Add pearl sugar and portion: Gently mix or fold in the pearl sugar just until evenly distributed. Divide into 12 pieces, about 104g each, and place them in a lightly greased proofing bin with room to expand.'
-          - 'Final proof: Cover and proof at 72°F for 1 hour. The portions should look slightly expanded and airy, not doubled.'
+          - id: steps-1-item-1
+            text: >-
+              Mix the dry ingredients: Reserve 120g of the flour. Add the remaining 330g flour, light brown sugar,
+              instant yeast, and fine sea salt to the bowl of a stand mixer. Mix briefly by hand or on low speed so the
+              yeast and fine sea salt are evenly distributed.
+          - id: steps-1-item-2
+            text: >-
+              Add the room-temperature liquids: Add the milk, eggs, and vanilla. Mix with the dough hook on low speed
+              until the dough starts to come together.
+          - id: steps-1-item-3
+            text: >-
+              Mix in the butter: With the mixer on low to medium-low, add the softened butter in roughly 1 tablespoon
+              chunks. Wait for each addition to mix in before adding the next.
+          - id: steps-1-item-4
+            text: >-
+              Add the reserved flour and develop: Add the reserved 120g flour and mix on low until incorporated.
+              Increase to medium and mix for 5 minutes.
+          - id: steps-1-item-5
+            text: >-
+              Bulk ferment: Transfer the dough to a lightly greased bowl or proofing bin. Cover and hold at 76°F for 1.5
+              hours, until the dough is puffy and relaxed.
+          - id: steps-1-item-6
+            text: >-
+              Add pearl sugar and portion: Gently mix or fold in the pearl sugar just until evenly distributed. Divide
+              into 12 pieces, about 104g each, and place them in a lightly greased proofing bin with room to expand.
+          - id: steps-1-item-7
+            text: >-
+              Final proof: Cover and proof at 72°F for 1 hour. The portions should look slightly expanded and airy, not
+              doubled.
+        id: steps-1
       - title: Cook
         items:
-          - 'Preheat the waffle iron to about 360°F. On the linked Hamilton Beach waffle maker, use setting 2. Lightly oil the plates only if they tend to stick.'
-          - Cook one dough portion at a time until deeply golden brown and caramelized at the edges, usually 3-5 minutes depending on the iron.
-          - Transfer cooked waffles to a wire rack so steam can escape. Serve warm with honey, maple syrup, powdered sugar, or nothing at all.
+          - id: steps-2-item-1
+            text: >-
+              Preheat the waffle iron to about 360°F. On the linked Hamilton Beach waffle maker, use setting 2. Lightly
+              oil the plates only if they tend to stick.
+          - id: steps-2-item-2
+            text: >-
+              Cook one dough portion at a time until deeply golden brown and caramelized at the edges, usually 3-5
+              minutes depending on the iron.
+          - id: steps-2-item-3
+            text: >-
+              Transfer cooked waffles to a wire rack so steam can escape. Serve warm with honey, maple syrup, powdered
+              sugar, or nothing at all.
+        id: steps-2
     notes:
-      - This is a dough, not a pourable batter. After mixing it should be soft, enriched, and a little shaggy.
-      - Keep the milk and eggs at room temperature and soften the butter before mixing. Warm milk is not needed when using instant yeast and a controlled proof.
-      - Liege waffles are messy because the pearl sugar melts and caramelizes against the iron. Removable plates make cleanup much easier; wipe them carefully between batches if buildup gets heavy, then remove and wash them after the iron cools.
+      - 'This is a dough, not a pourable batter. After mixing it should be soft, enriched, and a little shaggy.'
+      - >-
+        Keep the milk and eggs at room temperature and soften the butter before mixing. Warm milk is not needed when
+        using instant yeast and a controlled proof.
+      - >-
+        Liege waffles are messy because the pearl sugar melts and caramelizes against the iron. Removable plates make
+        cleanup much easier; wipe them carefully between batches if buildup gets heavy, then remove and wash them after
+        the iron cools.
     tips:
-      - Add the softened butter gradually in roughly 1 tablespoon chunks so each piece can mix into the dough before the next addition.
-      - If your kitchen is cool, use a proofing box or turned-off oven with the light on and verify the dough temperature with an infrared thermometer.
+      - >-
+        Add the softened butter gradually in roughly 1 tablespoon chunks so each piece can mix into the dough before the
+        next addition.
+      - >-
+        If your kitchen is cool, use a proofing box or turned-off oven with the light on and verify the dough
+        temperature with an infrared thermometer.
       - Let waffles cool for a minute before eating; the melted pearl sugar is very hot right off the iron.

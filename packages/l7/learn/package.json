@@ -12,6 +12,7 @@
     "@eat-yeet/l4-content-model": "workspace:*",
     "@eat-yeet/l6-ui-catalog": "workspace:*",
     "@eat-yeet/l6-ui-content-blocks": "workspace:*",
-    "lucide-react": "^1.33.0"
+    "lucide-react": "^1.33.0",
+    "@eat-yeet/l5-ui-primitives": "workspace:*"
   }
 }

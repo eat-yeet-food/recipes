@@ -1,7 +1,11 @@
+sourceId: 'recipes:pollo-asado'
+status: published
 slug: pollo-asado
 title: Pollo Asado
 order: 1
-description: 'Smoky chicken thighs marinated in chipotle adobo, garlic, and rice bran oil. The sauce coats every piece generously, and a finishing salt dust seasons the char straight off the grill.'
+description: >-
+  Smoky chicken thighs marinated in chipotle adobo, garlic, and rice bran oil. The sauce coats every piece generously,
+  and a finishing salt dust seasons the char straight off the grill.
 category: savory
 prepMinutes: 30
 cookMinutes: 15
@@ -28,22 +32,48 @@ blocks:
     ingredients:
       - title: ''
         items:
-          - '6 [chipotle peppers in adobo sauce](https://www.amazon.com/s?k=chipotles+in+adobo+sauce), from the can'
-          - '2 tbsp adobo sauce, from the can'
-          - 'Juice of 1 mandarin orange, freshly squeezed'
-          - '4 garlic cloves, peeled and trimmed'
-          - 60g rice bran oil (or any neutral oil)
-          - '2g salt, plus more for dusting after grilling'
-          - 3 lb boneless skinless chicken thighs
+          - id: ingredients-1-item-1
+            text: '6 [chipotle peppers in adobo sauce](https://www.amazon.com/s?k=chipotles+in+adobo+sauce), from the can'
+          - id: ingredients-1-item-2
+            text: '2 tbsp adobo sauce, from the can'
+          - id: ingredients-1-item-3
+            text: 'Juice of 1 mandarin orange, freshly squeezed'
+          - id: ingredients-1-item-4
+            text: '4 garlic cloves, peeled and trimmed'
+          - id: ingredients-1-item-5
+            text: 60g rice bran oil (or any neutral oil)
+          - id: ingredients-1-item-6
+            text: '2g salt, plus more for dusting after grilling'
+          - id: ingredients-1-item-7
+            text: 3 lb boneless skinless chicken thighs
+        id: ingredients-1
     steps:
       - title: ''
         items:
-          - 'Blend the marinade: Add the chipotle peppers, adobo sauce, mandarin juice, garlic, rice bran oil, and salt to a blender. Blend until smooth, about 30 seconds, scraping down as needed. The sauce should be thick, smoky, and glossy.'
-          - 'Marinate the chicken: Place the chicken thighs in a zip-top bag or shallow dish. Pour the marinade over and massage to coat every piece. Refrigerate overnight (8-24 hours).'
-          - 'Bring to room temp: Pull the chicken from the fridge 20-30 minutes before cooking so it cooks evenly.'
-          - 'Cook the chicken: Grill over the hottest part of the grill at 500-525°F. About 5 minutes per side until 175°F internal — the adobo-rich sauce will char and bloom but won''t burn the way a sugar-loaded marinade would.'
-          - 'Rest, dust, and serve: Let the thighs rest 5 minutes, then dust with flaky or kosher salt while still hot so it sticks to the char. Slice and serve with rice, charred tortillas, slaw, or pickled onions.'
+          - id: steps-1-item-1
+            text: >-
+              Blend the marinade: Add the chipotle peppers, adobo sauce, mandarin juice, garlic, rice bran oil, and salt
+              to a blender. Blend until smooth, about 30 seconds, scraping down as needed. The sauce should be thick,
+              smoky, and glossy.
+          - id: steps-1-item-2
+            text: >-
+              Marinate the chicken: Place the chicken thighs in a zip-top bag or shallow dish. Pour the marinade over
+              and massage to coat every piece. Refrigerate overnight (8-24 hours).
+          - id: steps-1-item-3
+            text: 'Bring to room temp: Pull the chicken from the fridge 20-30 minutes before cooking so it cooks evenly.'
+          - id: steps-1-item-4
+            text: >-
+              Cook the chicken: Grill over the hottest part of the grill at 500-525°F. About 5 minutes per side until
+              175°F internal — the adobo-rich sauce will char and bloom but won't burn the way a sugar-loaded marinade
+              would.
+          - id: steps-1-item-5
+            text: >-
+              Rest, dust, and serve: Let the thighs rest 5 minutes, then dust with flaky or kosher salt while still hot
+              so it sticks to the char. Slice and serve with rice, charred tortillas, slaw, or pickled onions.
+        id: steps-1
     notes:
       - Save the leftover chipotle peppers in adobo in a small container in the fridge or freeze in tablespoon portions.
     tips:
-      - Save the extra adobo sauce from the can and spoon a little over the chicken after slicing if you want more smoke and heat.
+      - >-
+        Save the extra adobo sauce from the can and spoon a little over the chicken after slicing if you want more smoke
+        and heat.

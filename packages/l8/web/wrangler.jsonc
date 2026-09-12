@@ -1,0 +1,11 @@
+{
+  "$schema": "../../../node_modules/wrangler/config-schema.json",
+  "name": "eatyeet-local",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-09-12",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
+  "d1_databases": [{ "binding": "D1", "database_name": "eatyeet-local", "database_id": "00000000-0000-0000-0000-000000000001", "remote": false }],
+  "r2_buckets": [{ "binding": "R2", "bucket_name": "eatyeet-local-media", "remote": false }],
+  "workers_dev": false
+}

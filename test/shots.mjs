@@ -8,7 +8,7 @@ import { mkdirSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { startStatic } from './static-server.mjs'
+import { startApp as startStatic } from './app-server.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const OUT = process.argv.slice(2).find((a) => !a.startsWith('--')) ?? join(ROOT, 'dist', 'shots')

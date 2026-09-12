@@ -11,7 +11,7 @@
     "@eat-yeet/l6-ui-catalog": "workspace:*",
     "@eat-yeet/l6-ui-content-blocks": "workspace:*",
     "lucide-react": "^1.33.0",
-    "react": "^19.0.0"
+    "react": "19.2.8"
   },
   "exports": {
     "./recipes/*": "./src/recipes/*.tsx"

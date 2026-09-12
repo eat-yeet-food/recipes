@@ -1,3 +1,5 @@
+'use client'
+import { ResponsiveImage } from '@eat-yeet/l5-ui-primitives/primitives/responsive-image'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 
 import { Printer, Share2 } from 'lucide-react'
@@ -189,7 +191,7 @@ export function RecipeArticle({
           toggleFocusedCooking={toggleFocusedCooking}
         />
       )}
-      media={photo ? <img src={photo} alt={heroAlt} className="w-full max-h-[690px] rounded-surface object-cover" /> : undefined}
+      media={photo ? <ResponsiveImage src={photo} loading="eager" fetchPriority="high" alt={heroAlt} className="w-full max-h-[690px] rounded-surface object-cover" /> : undefined}
       mediaClassName={focusedCooking ? 'hidden' : undefined}
       mainClassName={cn(
         'pt-8 max-[640px]:pt-6 max-[1080px]:max-w-[1120px]',

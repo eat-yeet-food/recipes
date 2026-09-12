@@ -1,3 +1,5 @@
+'use client'
+import { ResponsiveImage } from '@eat-yeet/l5-ui-primitives/primitives/responsive-image'
 import { Fragment, type ReactNode } from 'react'
 
 import type {
@@ -97,7 +99,7 @@ function ImageBlockView({ block }: { block: ImageBlock }) {
         {block.images.map((image, index) => (
           <figure key={`${image.src}-${index}`} className="m-0 h-full">
             <div className={aspectClass ? 'overflow-hidden bg-[var(--color-tint)]' : undefined}>
-              <img
+              <ResponsiveImage
                 src={blockImageUrl(image)}
                 alt={image.alt}
                 loading="lazy"

@@ -3,7 +3,11 @@
   "name": "l8-web",
   "projectType": "application",
   "sourceRoot": "src",
-  "tags": ["layer:l8", "scope:web", "type:app"],
+  "tags": [
+    "layer:l8",
+    "scope:web",
+    "type:app"
+  ],
   "metadata": {
     "tsConfig": "tsconfig.json"
   },
@@ -13,7 +17,9 @@
       "options": {
         "command": "pnpm run content"
       },
-      "outputs": ["{workspaceRoot}/apps/*/generated"]
+      "outputs": [
+        "{workspaceRoot}/apps/*/generated"
+      ]
     },
     "dev": {
       "executor": "nx:run-commands",
@@ -26,7 +32,9 @@
       "options": {
         "command": "pnpm run build"
       },
-      "outputs": ["{workspaceRoot}/.output/public", "{workspaceRoot}/.output/server"]
+      "outputs": [
+        "{workspaceRoot}/packages/l8/web/.next"
+      ]
     },
     "preview": {
       "executor": "nx:run-commands",
@@ -69,7 +77,9 @@
       "options": {
         "command": "pnpm run build-storybook"
       },
-      "outputs": ["{workspaceRoot}/storybook-static"]
+      "outputs": [
+        "{workspaceRoot}/storybook-static"
+      ]
     },
     "serve": {
       "executor": "nx:run-commands",

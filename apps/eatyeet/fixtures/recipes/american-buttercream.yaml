@@ -1,3 +1,5 @@
+sourceId: 'recipes:american-buttercream'
+status: published
 slug: american-buttercream
 title: American Buttercream
 order: 11
@@ -31,17 +33,33 @@ blocks:
     ingredients:
       - title: ''
         items:
-          - 2 sticks unsalted butter (65-68°F)
-          - 454g powdered sugar (sifted)
-          - 2 tbsp heavy cream
-          - ⅛ tsp fine sea salt
-          - '1 tbsp [vanilla extract](https://www.amazon.com/s?k=nielsen+massey+vanilla+extract)'
+          - id: ingredients-1-item-1
+            text: 2 sticks unsalted butter (65-68°F)
+          - id: ingredients-1-item-2
+            text: 454g powdered sugar (sifted)
+          - id: ingredients-1-item-3
+            text: 2 tbsp heavy cream
+          - id: ingredients-1-item-4
+            text: ⅛ tsp fine sea salt
+          - id: ingredients-1-item-5
+            text: '1 tbsp [vanilla extract](https://www.amazon.com/s?k=nielsen+massey+vanilla+extract)'
+        id: ingredients-1
     steps:
       - title: ''
         items:
-          - 'Whip the butter: In a stand mixer fitted with the paddle attachment, beat the butter on low speed, then increase to medium-high speed and whip for about 3 minutes until light and smooth. Scrape down the sides and bottom of the bowl.'
-          - 'Add powdered sugar: Add the powdered sugar in three additions, mixing on low speed between each addition. Scrape down the bowl after each addition.'
-          - 'Add remaining ingredients: Add the vanilla extract, fine sea salt, and heavy cream.'
-          - 'Final whip: Beat on high speed for 1 minute until smooth, fluffy, and fully combined.'
+          - id: steps-1-item-1
+            text: >-
+              Whip the butter: In a stand mixer fitted with the paddle attachment, beat the butter on low speed, then
+              increase to medium-high speed and whip for about 3 minutes until light and smooth. Scrape down the sides
+              and bottom of the bowl.
+          - id: steps-1-item-2
+            text: >-
+              Add powdered sugar: Add the powdered sugar in three additions, mixing on low speed between each addition.
+              Scrape down the bowl after each addition.
+          - id: steps-1-item-3
+            text: 'Add remaining ingredients: Add the vanilla extract, fine sea salt, and heavy cream.'
+          - id: steps-1-item-4
+            text: 'Final whip: Beat on high speed for 1 minute until smooth, fluffy, and fully combined.'
+        id: steps-1
     notes: []
     tips: []

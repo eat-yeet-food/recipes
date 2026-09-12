@@ -20,10 +20,10 @@ import { join, dirname, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
-const BUILD_DIR = join(ROOT, '.output', 'public', 'build')
+const BUILD_DIR = join(ROOT, 'packages/l8/web/.next/static/css')
 
 if (!existsSync(BUILD_DIR)) {
-  console.error(`has-class: no build output at ${relative(ROOT, BUILD_DIR)} — run 'vite build' first`)
+  console.error(`has-class: no build output at ${relative(ROOT, BUILD_DIR)} — run 'pnpm build' first`)
   process.exit(2)
 }
 

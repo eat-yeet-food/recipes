@@ -1,3 +1,4 @@
+'use client'
 import { useId, type ReactNode } from 'react'
 
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'

@@ -1,3 +1,5 @@
+'use client'
+import { ResponsiveImage } from '@eat-yeet/l5-ui-primitives/primitives/responsive-image'
 import { BookOpen, SlidersHorizontal, Thermometer, UtensilsCrossed } from 'lucide-react'
 import { cn } from '@eat-yeet/l0-foundation/utils'
 import { articleImageUrl, type ArticleSummary } from '@eat-yeet/l1-article-model/articles'
@@ -32,7 +34,7 @@ function categoryLabel(category: string) {
   return category ? labelize(category) : 'Learning'
 }
 
-function ArticleGroup({ category, articles }: { category: string; articles: ArticleSummary[] }) {
+function ArticleGroup({ category, articles, priority=false }: { category: string; articles: ArticleSummary[]; priority?:boolean }) {
   const Icon = CATEGORY_ICONS[category as keyof typeof CATEGORY_ICONS] ?? BookOpen
 
   return (
@@ -46,8 +48,8 @@ function ArticleGroup({ category, articles }: { category: string; articles: Arti
         </h2>
       </div>
       <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        {articles.map((article) => (
-          <ArticleCard key={article.slug} article={article} />
+        {articles.map((article,index) => (
+          <ArticleCard key={article.slug} article={article} priority={priority&&index===0} />
         ))}
       </div>
     </section>
@@ -78,8 +80,8 @@ export function LearnIndexPage({ articles, copy }: { articles: ArticleSummary[];
         </section>
       ) : (
         <div className="grid gap-12">
-          {[...grouped.entries()].map(([category, group]) => (
-            <ArticleGroup key={category} category={category} articles={group} />
+          {[...grouped.entries()].map(([category, group],index) => (
+            <ArticleGroup key={category} category={category} articles={group} priority={index===0} />
           ))}
         </div>
       )}
@@ -185,8 +187,8 @@ export function ArticleDetailPage({
 
       {photo && (
         <figure className="m-0 max-[900px]:order-first max-[900px]:mb-2">
-          <img
-            src={photo}
+          <ResponsiveImage
+            src={photo} loading="eager" fetchPriority="high"
             alt={`${article.title} hero image`}
             className="aspect-[3/2] w-full max-h-[520px] rounded-surface object-cover max-[900px]:max-h-none"
           />

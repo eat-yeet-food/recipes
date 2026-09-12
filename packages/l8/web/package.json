@@ -20,9 +20,13 @@
     "@eat-yeet/l7-learn": "workspace:*",
     "@eat-yeet/l7-recipes": "workspace:*",
     "@eat-yeet/l7-search": "workspace:*",
-    "@tanstack/react-router": "^1.163.3",
-    "@tanstack/react-start": "^1.163.3",
-    "react": "^19.0.0"
+    "react": "19.2.8",
+    "@eat-yeet/l4-content-cms": "workspace:*",
+    "next": "16.3.5",
+    "payload": "3.89.0",
+    "@payloadcms/next": "3.89.0",
+    "@payloadcms/storage-r2": "3.89.0",
+    "@opennextjs/cloudflare": "1.20.6"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",

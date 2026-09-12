@@ -1,0 +1,22 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "tsBuildInfoFile": "../../../.nx/cache/packages/l4/content-cms.tsbuildinfo",
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "../../../.nx/types/packages/l4/content-cms"
+  },
+  "references": [
+    {
+      "path": "../../l3/api-contract/tsconfig.json"
+    },
+    {
+      "path": "../content-model/tsconfig.json"
+    }
+  ],
+  "include": [
+    "src"
+  ]
+}

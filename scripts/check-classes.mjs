@@ -30,7 +30,7 @@ import { fileURLToPath } from 'node:url'
 // An explicit root lets scripts/check-classes.test.mjs point this at fixtures and
 // prove the guard still catches each shape a class can reach the DOM through.
 const ROOT = process.argv[2] ?? join(dirname(fileURLToPath(import.meta.url)), '..')
-const BUILD_DIR = join(ROOT, '.output', 'public', 'build')
+const BUILD_DIR = process.argv[2] ? join(ROOT, '.output', 'public', 'build') : join(ROOT, 'packages/l8/web/.next/static/css')
 
 /**
  * Class selectors the compiled build defines, unescaped back to source form.
@@ -41,11 +41,11 @@ const BUILD_DIR = join(ROOT, '.output', 'public', 'build')
  */
 function definedClasses() {
   if (!existsSync(BUILD_DIR)) {
-    console.error(`classes: no build output at ${relative(ROOT, BUILD_DIR)} — run 'vite build' first`)
+    console.error(`classes: no build output at ${relative(ROOT, BUILD_DIR)} — run 'pnpm build' first`)
     process.exit(1)
   }
   const cssFiles = readdirSync(BUILD_DIR).filter((f) => f.endsWith('.css'))
-  const css = cssFiles.map((f) => readFileSync(join(BUILD_DIR, f), 'utf8')).join('\n')
+  const css = cssFiles.map((f) => readFileSync(join(BUILD_DIR, f), 'utf8')).filter(css=>process.argv[2]||css.includes('--color-brand:')).join('\n')
   const found = new Set()
   for (const [, raw] of css.matchAll(/\.(-?(?:[A-Za-z_]|\\.)(?:[\w-]|\\.)*)/g)) {
     found.add(raw.replace(/\\(.)/g, '$1'))
@@ -56,7 +56,7 @@ function definedClasses() {
 function sourceFiles(dir) {
   const out = []
   for (const entry of readdirSync(dir)) {
-    if (['node_modules', 'generated', 'dist', '.nx', 'storybook-static'].includes(entry)) continue
+    if (['.next', '.open-next', '.wrangler', 'node_modules', 'generated', 'dist', '.nx', 'storybook-static'].includes(entry)) continue
     const path = join(dir, entry)
     if (statSync(path).isDirectory()) out.push(...sourceFiles(path))
     else if (/\.tsx?$/.test(path) && !/\.test\.[cm]?[jt]sx?$/.test(path)) out.push(path)

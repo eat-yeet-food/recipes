@@ -1,9 +1,11 @@
+'use client'
+import { ResponsiveImage } from '@eat-yeet/l5-ui-primitives/primitives/responsive-image'
 /**
  * Catalog cards and grids shared by home, browse, search, stories, and recipe
  * recommendations.
  */
 
-import { Link } from '@tanstack/react-router'
+import { Link } from '@eat-yeet/l5-ui-primitives/primitives/navigation'
 
 import { BookOpen, Clock, UtensilsCrossed } from 'lucide-react'
 import { cn } from '@eat-yeet/l0-foundation/utils'
@@ -45,7 +47,7 @@ const CardFallback = ({ icon = 'recipe' }: { icon?: 'recipe' | 'article' }) => (
 )
 
 /** Recipe summary card. */
-export function RecipeCard({ recipe, headingLevel = 3 }: { recipe: RecipeSummary; headingLevel?: 2 | 3 }) {
+export function RecipeCard({ recipe, headingLevel = 3, priority = false }: { recipe: RecipeSummary; headingLevel?: 2 | 3; priority?:boolean }) {
   const Heading = headingLevel === 2 ? 'h2' : 'h3'
   const src = imageUrl(recipe)
   const totalTime = humanizeMinutes(recipe.totalMinutes)
@@ -60,12 +62,14 @@ export function RecipeCard({ recipe, headingLevel = 3 }: { recipe: RecipeSummary
       <div className="relative aspect-[3/2] w-full overflow-hidden">
         {src ? (
           <div className="absolute inset-0 bg-warm-deep">
-            <img
+            <ResponsiveImage
               src={src}
+              loading={priority?"eager":"lazy"}
+              fetchPriority={priority?"high":undefined}
               alt={recipe.title}
               width="800"
               height="533"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              sizes="(max-width: 640px) calc(100vw - 48px), (max-width: 1024px) calc((100vw - 80px) / 2), 360px"
               className="absolute inset-0 h-full w-full object-cover transition-image-zoom group-hover:scale-[1.06]"
             />
           </div>
@@ -112,7 +116,7 @@ const ARTICLE_TYPE_LABELS = {
 } satisfies Record<ArticleSummary['type'], string>
 
 /** Article summary card using the same card system as recipes. */
-export function ArticleCard({ article }: { article: ArticleSummary }) {
+export function ArticleCard({ article, priority = false }: { article: ArticleSummary; priority?:boolean }) {
   const src = articleImageUrl(article)
 
   return (
@@ -124,12 +128,14 @@ export function ArticleCard({ article }: { article: ArticleSummary }) {
       <div className="relative aspect-[3/2] w-full overflow-hidden">
         {src ? (
           <div className="absolute inset-0 bg-warm-deep">
-            <img
+            <ResponsiveImage
               src={src}
+              loading={priority?"eager":"lazy"}
+              fetchPriority={priority?"high":undefined}
               alt={article.title}
               width="800"
               height="533"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              sizes="(max-width: 640px) calc(100vw - 48px), (max-width: 1024px) calc((100vw - 80px) / 2), 360px"
               className="absolute inset-0 h-full w-full object-cover transition-image-zoom group-hover:scale-[1.06]"
             />
           </div>
@@ -161,9 +167,11 @@ export function BrowseCard({
   label,
   imageUrl: src,
   search,
+  priority=false,
 }: {
   label: string
   imageUrl: string
+  priority?:boolean
   search: SearchParams
 }) {
   return (
@@ -175,10 +183,12 @@ export function BrowseCard({
       <div className="absolute inset-0 flex items-center justify-center bg-warm-deep">
         <UtensilsCrossed className="size-10 text-ink/15" strokeWidth="1.25" />
       </div>
-      <img
+      <ResponsiveImage
         src={src}
         alt=""
-        loading="lazy"
+        loading={priority?"eager":"lazy"}
+        fetchPriority={priority?"high":undefined}
+        sizes="(max-width: 768px) calc((100vw - 44px) / 2), (max-width: 1200px) calc((100vw - 100px) / 4), 275px"
         className="absolute inset-0 size-full object-cover transition-image-zoom group-hover:scale-[1.06] opacity-100"
       />
       <span className="absolute bottom-2 inset-x-2 rounded-field bg-ink px-2 py-1 text-center font-action text-xs font-bold text-action-label">
@@ -202,8 +212,8 @@ export function RecipeGrid({ recipes }: { recipes: RecipeSummary[] }) {
   }
   return (
     <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-      {recipes.map((recipe) => (
-        <RecipeCard key={recipe.slug} recipe={recipe} headingLevel={2} />
+      {recipes.map((recipe,index) => (
+        <RecipeCard key={recipe.slug} recipe={recipe} headingLevel={2} priority={index===0} />
       ))}
     </div>
   )

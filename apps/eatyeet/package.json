@@ -10,6 +10,6 @@
     "@eat-yeet/l5-ui-primitives": "workspace:*",
     "@eat-yeet/l7-recipes": "workspace:*",
     "lucide-react": "^1.33.0",
-    "react": "^19.0.0"
+    "react": "19.2.8"
   }
 }

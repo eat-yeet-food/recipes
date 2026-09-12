@@ -1,3 +1,5 @@
+sourceId: 'recipes:banh-mi-dough'
+status: published
 slug: banh-mi-dough
 title: Bánh Mì Dough
 order: 5
@@ -36,54 +38,129 @@ blocks:
     equipment:
       - title: ''
         items:
-          - Kitchen scale
-          - Large mixing bowl or planetary mixer with dough hook
-          - Instant-read thermometer
-          - Bench scraper
-          - Clean lint-free kitchen towel or baker's couche
-          - Baking steel
-          - Wooden pizza peel
-          - Lame or sharp knife
-          - Fine-mist spray bottle filled with water
-          - '[Deep oven-safe stainless-steel pan](https://www.amazon.com/dp/B0F8QYL9D9), large enough to invert over the rolls'
-          - Oven mitts
-          - Wire rack
+          - id: equipment-1-item-1
+            text: Kitchen scale
+          - id: equipment-1-item-2
+            text: Large mixing bowl or planetary mixer with dough hook
+          - id: equipment-1-item-3
+            text: Instant-read thermometer
+          - id: equipment-1-item-4
+            text: Bench scraper
+          - id: equipment-1-item-5
+            text: Clean lint-free kitchen towel or baker's couche
+          - id: equipment-1-item-6
+            text: Baking steel
+          - id: equipment-1-item-7
+            text: Wooden pizza peel
+          - id: equipment-1-item-8
+            text: Lame or sharp knife
+          - id: equipment-1-item-9
+            text: Fine-mist spray bottle filled with water
+          - id: equipment-1-item-10
+            text: >-
+              [Deep oven-safe stainless-steel pan](https://www.amazon.com/dp/B0F8QYL9D9), large enough to invert over
+              the rolls
+          - id: equipment-1-item-11
+            text: Oven mitts
+          - id: equipment-1-item-12
+            text: Wire rack
+        id: equipment-1
     ingredients:
       - title: Dough
         items:
-          - '450g [Kirkland Signature organic all-purpose flour](https://www.costco.com/p/-/kirkland-signature-organic-unbleached-all-purpose-flour-10-lbs-2-count/4000063331)'
-          - 260g water
-          - '1 large egg, about 50g out of the shell'
-          - 8g fine sea salt
-          - '11g [dough improver](https://www.amazon.com/dp/B00BF0E7CQ)'
-          - 10g canola oil
-          - '7g [SAF red instant yeast](https://www.amazon.com/LeSaffre-LEAVENING_AGENT/dp/B0CFDPMWWC)'
-          - Rice flour, for dusting
+          - id: ingredients-1-item-1
+            text: >-
+              450g [Kirkland Signature organic all-purpose
+              flour](https://www.costco.com/p/-/kirkland-signature-organic-unbleached-all-purpose-flour-10-lbs-2-count/4000063331)
+          - id: ingredients-1-item-2
+            text: 260g water
+          - id: ingredients-1-item-3
+            text: '1 large egg, about 50g out of the shell'
+          - id: ingredients-1-item-4
+            text: 8g fine sea salt
+          - id: ingredients-1-item-5
+            text: '11g [dough improver](https://www.amazon.com/dp/B00BF0E7CQ)'
+          - id: ingredients-1-item-6
+            text: 10g canola oil
+          - id: ingredients-1-item-7
+            text: '7g [SAF red instant yeast](https://www.amazon.com/LeSaffre-LEAVENING_AGENT/dp/B0CFDPMWWC)'
+          - id: ingredients-1-item-8
+            text: 'Rice flour, for dusting'
+        id: ingredients-1
     steps:
       - title: Mix and cold ferment
         items:
-          - 'Choose the water temperature so the finished dough will be 72°F. Add the water, egg, and canola oil to a large bowl or the mixer bowl, then add the flour, dough improver, fine sea salt, and instant yeast.'
-          - 'Planetary mixer: Mix with the dough hook on low until no dry flour remains, about 3 minutes. Increase to medium-low and mix until the dough is smooth, elastic, and able to stretch thinly before tearing, about 5-8 minutes more. Stop when the dough reaches 72°F.'
-          - 'By hand: Mix until no dry flour remains, then knead on a clean counter until the dough is smooth, elastic, and able to stretch thinly before tearing, about 10-12 minutes. Stop when the dough reaches 72°F.'
-          - Round the dough into a tight ball, place it in a lightly oiled container, cover, and refrigerate promptly for 12-18 hours.
+          - id: steps-1-item-1
+            text: >-
+              Choose the water temperature so the finished dough will be 72°F. Add the water, egg, and canola oil to a
+              large bowl or the mixer bowl, then add the flour, dough improver, fine sea salt, and instant yeast.
+          - id: steps-1-item-2
+            text: >-
+              Planetary mixer: Mix with the dough hook on low until no dry flour remains, about 3 minutes. Increase to
+              medium-low and mix until the dough is smooth, elastic, and able to stretch thinly before tearing, about
+              5-8 minutes more. Stop when the dough reaches 72°F.
+          - id: steps-1-item-3
+            text: >-
+              By hand: Mix until no dry flour remains, then knead on a clean counter until the dough is smooth, elastic,
+              and able to stretch thinly before tearing, about 10-12 minutes. Stop when the dough reaches 72°F.
+          - id: steps-1-item-4
+            text: >-
+              Round the dough into a tight ball, place it in a lightly oiled container, cover, and refrigerate promptly
+              for 12-18 hours.
+        id: steps-1
       - title: Shape and proof
         items:
-          - The next morning, divide the cold dough into 4 equal pieces, about 200g each. Lightly dust the work surface with flour and gently press each piece into a rectangle.
-          - Fold the top edge two-thirds of the way down and press the fold firmly with the heel of your palm. Fold the bottom edge two-thirds of the way up and press again with the heel of your palm.
-          - Fold the top half completely over the bottom half and seal the seam firmly with the heel of your palm. Roll from the center outward until the loaf is about 8 inches long, tapering the ends slightly.
-          - Lightly dust a clean towel or baker's couche with rice flour. Arrange the rolls seam-side up in folds of the towel, cover, and proof at room temperature until noticeably puffy and a light press springs back slowly, about 45-75 minutes.
+          - id: steps-2-item-1
+            text: >-
+              The next morning, divide the cold dough into 4 equal pieces, about 200g each. Lightly dust the work
+              surface with flour and gently press each piece into a rectangle.
+          - id: steps-2-item-2
+            text: >-
+              Fold the top edge two-thirds of the way down and press the fold firmly with the heel of your palm. Fold
+              the bottom edge two-thirds of the way up and press again with the heel of your palm.
+          - id: steps-2-item-3
+            text: >-
+              Fold the top half completely over the bottom half and seal the seam firmly with the heel of your palm.
+              Roll from the center outward until the loaf is about 8 inches long, tapering the ends slightly.
+          - id: steps-2-item-4
+            text: >-
+              Lightly dust a clean towel or baker's couche with rice flour. Arrange the rolls seam-side up in folds of
+              the towel, cover, and proof at room temperature until noticeably puffy and a light press springs back
+              slowly, about 45-75 minutes.
+        id: steps-2
       - title: Score and bake
         items:
-          - While the rolls proof, place a baking steel on the middle rack and preheat the oven to 500°F for at least 45 minutes. Make sure the deep stainless-steel pan will cover the rolls without touching them.
-          - Lightly dust a wooden peel with rice flour. Gently turn the proofed rolls seam-side down onto the peel.
-          - Score each roll once lengthwise, holding the blade at a shallow angle and cutting about 1/4 inch deep.
-          - Slide the rolls directly onto the hot steel. Mist them generously with water, immediately cover them with the inverted deep pan, and bake at 500°F for 8 minutes.
-          - Wearing oven mitts, carefully lift the cover away from you to release the steam. Continue baking uncovered at 500°F for 8-10 minutes, until the rolls are deeply golden and their centers register about 200°F.
-          - Transfer the rolls to a wire rack and cool for at least 30 minutes before slicing.
+          - id: steps-3-item-1
+            text: >-
+              While the rolls proof, place a baking steel on the middle rack and preheat the oven to 500°F for at least
+              45 minutes. Make sure the deep stainless-steel pan will cover the rolls without touching them.
+          - id: steps-3-item-2
+            text: Lightly dust a wooden peel with rice flour. Gently turn the proofed rolls seam-side down onto the peel.
+          - id: steps-3-item-3
+            text: 'Score each roll once lengthwise, holding the blade at a shallow angle and cutting about 1/4 inch deep.'
+          - id: steps-3-item-4
+            text: >-
+              Slide the rolls directly onto the hot steel. Mist them generously with water, immediately cover them with
+              the inverted deep pan, and bake at 500°F for 8 minutes.
+          - id: steps-3-item-5
+            text: >-
+              Wearing oven mitts, carefully lift the cover away from you to release the steam. Continue baking uncovered
+              at 500°F for 8-10 minutes, until the rolls are deeply golden and their centers register about 200°F.
+          - id: steps-3-item-6
+            text: Transfer the rolls to a wire rack and cool for at least 30 minutes before slicing.
+        id: steps-3
     notes:
-      - The 260g added water plus the water in the egg puts this dough at approximately 65% effective hydration; the exact number varies with egg size.
-      - The 7g yeast is about 1.6% of the flour weight. Because that is a generous amount for an overnight dough, refrigerate it promptly after mixing and use it the next morning.
-      - The full formula makes about 796g of dough, or about 200g per roll.
+      - >-
+        The 260g added water plus the water in the egg puts this dough at approximately 65% effective hydration; the
+        exact number varies with egg size.
+      - >-
+        The 7g yeast is about 1.6% of the flour weight. Because that is a generous amount for an overnight dough,
+        refrigerate it promptly after mixing and use it the next morning.
+      - 'The full formula makes about 796g of dough, or about 200g per roll.'
     tips:
-      - Aim for good gluten development rather than a perfectly transparent windowpane. The dough should be smooth, elastic, and strong enough to hold its shape.
-      - The misted water trapped beneath the cover keeps the crust flexible during the first part of the bake so the rolls can expand fully.
+      - >-
+        Aim for good gluten development rather than a perfectly transparent windowpane. The dough should be smooth,
+        elastic, and strong enough to hold its shape.
+      - >-
+        The misted water trapped beneath the cover keeps the crust flexible during the first part of the bake so the
+        rolls can expand fully.

@@ -7,6 +7,7 @@ import ts from 'typescript'
 const EXTENSIONS = ['.ts', '.tsx', '.mts', '.cts', '.js', '.jsx', '.mjs', '.cjs', '.json']
 const IGNORED = new Set(['node_modules', 'generated', 'dist', '.nx', '.git', '.output', 'storybook-static'])
 const APP_IMPORTS = {
+  'packages/l8/web/src/next/interactive.tsx': new Set(['@app/page-blocks', '@app/recipe-workbenches']),
   'packages/l8/web/src/lib/api.ts': new Set(['@app/articles', '@app/recipes']),
   'packages/l8/web/src/routes/recipes/$slug/index.tsx': new Set(['@app/page-blocks', '@app/recipe-workbenches']),
   'packages/l8/web/src/stories/dough-workbench.stories.tsx': new Set(['@app/recipe-workbenches']),

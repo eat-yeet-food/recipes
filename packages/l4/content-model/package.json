@@ -5,7 +5,9 @@
   "exports": {
     "./articles": "./src/articles.ts",
     "./blocks": "./src/blocks.ts",
-    "./recipes": "./src/recipes.ts"
+    "./recipes": "./src/recipes.ts",
+    "./storage": "./src/storage.ts",
+    "./field-shapes": "./src/field-shapes.ts"
   },
   "dependencies": {
     "@eat-yeet/l1-article-model": "workspace:*",

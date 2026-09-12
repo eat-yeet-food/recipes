@@ -12,7 +12,7 @@ export function designViolations(source, path) {
   if (path.endsWith('storybook.css') && /var\(--color-danger\)/.test(source)) problems.push('status red used in story chrome')
   return problems
 }
-function walk(dir) { return readdirSync(dir, { withFileTypes: true }).filter(e => !['node_modules', 'generated', 'dist', '.nx', 'storybook-static'].includes(e.name)).flatMap(e => e.isDirectory() ? walk(join(dir,e.name)) : [join(dir,e.name)]) }
+function walk(dir) { return readdirSync(dir, { withFileTypes: true }).filter(e => !['.next', '.open-next', '.wrangler', 'node_modules', 'generated', 'dist', '.nx', 'storybook-static'].includes(e.name)).flatMap(e => e.isDirectory() ? walk(join(dir,e.name)) : [join(dir,e.name)]) }
 export function checkDesignSystem() {
   const files = [...walk(join(ROOT,'packages')), ...readdirSync(join(ROOT,'apps')).flatMap(app => walk(join(ROOT,'apps',app,'src')))]
   const failures = files.filter(p => /\.(tsx|css)$/.test(p)).flatMap(p => designViolations(readFileSync(p,'utf8'),p).map(message => `${relative(ROOT,p)}: ${message}`))

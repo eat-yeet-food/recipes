@@ -9,7 +9,8 @@
   "dependencies": {
     "@eat-yeet/l0-foundation": "workspace:*",
     "@eat-yeet/l4-content-model": "workspace:*",
-    "react": "^19.0.0"
+    "react": "19.2.8",
+    "@eat-yeet/l5-ui-primitives": "workspace:*"
   },
   "devDependencies": {
     "@storybook/react-vite": "^10.5.8"

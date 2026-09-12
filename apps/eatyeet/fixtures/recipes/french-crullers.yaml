@@ -1,7 +1,14 @@
+sourceId: 'recipes:french-crullers'
+status: published
 slug: french-crullers
 title: French Crullers
 order: 14
-description: 'French crullers are a culinary masterpiece - prized for their delicate, tender, airy centers. They are prepared by deep frying a classic French pâte à choux. This dough relies on steam for lift rather than traditional leavening agents. When prepared properly, pâte à choux creates a delicate pastry that puffs beautifully. This dough is versatile, forming the base of many French pastries like éclairs and cream puffs. For crullers, the dough is piped into rings, then fried to perfection.'
+description: >-
+  French crullers are a culinary masterpiece - prized for their delicate, tender, airy centers. They are prepared by
+  deep frying a classic French pâte à choux. This dough relies on steam for lift rather than traditional leavening
+  agents. When prepared properly, pâte à choux creates a delicate pastry that puffs beautifully. This dough is
+  versatile, forming the base of many French pastries like éclairs and cream puffs. For crullers, the dough is piped
+  into rings, then fried to perfection.
 category: sweet
 prepMinutes: 60
 cookMinutes: 60
@@ -28,42 +35,98 @@ blocks:
     equipment:
       - title: ''
         items:
-          - Kitchen scale
-          - Infrared thermometer
-          - Planetary stand mixer
-          - Heat resistant spatula
-          - XL piping bags
-          - Ateco 828 piping tip
-          - Deep fryer
-          - Baking racks
-          - Pre cut parchment
+          - id: equipment-1-item-1
+            text: Kitchen scale
+          - id: equipment-1-item-2
+            text: Infrared thermometer
+          - id: equipment-1-item-3
+            text: Planetary stand mixer
+          - id: equipment-1-item-4
+            text: Heat resistant spatula
+          - id: equipment-1-item-5
+            text: XL piping bags
+          - id: equipment-1-item-6
+            text: Ateco 828 piping tip
+          - id: equipment-1-item-7
+            text: Deep fryer
+          - id: equipment-1-item-8
+            text: Baking racks
+          - id: equipment-1-item-9
+            text: Pre cut parchment
+        id: equipment-1
     ingredients:
       - title: ''
         items:
-          - 470g water
-          - 170g unsalted European style butter
-          - 1 ½ tbsp granulated sugar
-          - ¾ tsp fine sea salt
-          - 260g sifted bread flour
-          - 300g eggs (6 large eggs)
-          - 30g egg white (1 large egg white)
-          - 48 oz Crisco shortening or enough to fill fryer to 2" high — for frying
+          - id: ingredients-1-item-1
+            text: 470g water
+          - id: ingredients-1-item-2
+            text: 170g unsalted European style butter
+          - id: ingredients-1-item-3
+            text: 1 ½ tbsp granulated sugar
+          - id: ingredients-1-item-4
+            text: ¾ tsp fine sea salt
+          - id: ingredients-1-item-5
+            text: 260g sifted bread flour
+          - id: ingredients-1-item-6
+            text: 300g eggs (6 large eggs)
+          - id: ingredients-1-item-7
+            text: 30g egg white (1 large egg white)
+          - id: ingredients-1-item-8
+            text: 48 oz Crisco shortening or enough to fill fryer to 2" high — for frying
+        id: ingredients-1
     steps:
       - title: ''
         items:
-          - 'Combine water, butter, sugar, and fine sea salt in a pot. Bring to a light rolling boil over medium heat. Once butter melts, add the flour all at once and stir vigorously until the dough comes together, about 1 minute. Cook and mix until the panade reaches 170°F, about 4-5 minutes. Remove from heat.'
-          - Transfer dough to a stand mixer fitted with the paddle attachment. Beat at medium speed until the dough cools to 135°F.
-          - 'With the mixer on low, add eggs one at a time, ensuring each is fully incorporated before adding the next. The dough should form a "V" shape when lifted from the paddle.'
-          - Transfer dough to an XL piping bag fitted with an Ateco 828 tip. Store in an airtight gallon bag and refrigerate for 1 hour. Allow to warm slightly if too firm to pipe.
-          - 'In a deep fryer or large pot, heat oil to 375°F.'
-          - Pipe four 4" rings of dough onto well-oiled parchment squares just before frying.
-          - 'Place the dough (parchment side up) into the oil. Remove parchment after a few seconds. Fry until golden brown, about 5 minutes on the first side and 4 minutes on the second. Transfer to a wire rack to drain.'
-          - 'After cooling for 1-5 minutes, dip crullers in glaze and allow to set on a wire rack.'
+          - id: steps-1-item-1
+            text: >-
+              Combine water, butter, sugar, and fine sea salt in a pot. Bring to a light rolling boil over medium heat.
+              Once butter melts, add the flour all at once and stir vigorously until the dough comes together, about 1
+              minute. Cook and mix until the panade reaches 170°F, about 4-5 minutes. Remove from heat.
+          - id: steps-1-item-2
+            text: >-
+              Transfer dough to a stand mixer fitted with the paddle attachment. Beat at medium speed until the dough
+              cools to 135°F.
+          - id: steps-1-item-3
+            text: >-
+              With the mixer on low, add eggs one at a time, ensuring each is fully incorporated before adding the next.
+              The dough should form a "V" shape when lifted from the paddle.
+          - id: steps-1-item-4
+            text: >-
+              Transfer dough to an XL piping bag fitted with an Ateco 828 tip. Store in an airtight gallon bag and
+              refrigerate for 1 hour. Allow to warm slightly if too firm to pipe.
+          - id: steps-1-item-5
+            text: 'In a deep fryer or large pot, heat oil to 375°F.'
+          - id: steps-1-item-6
+            text: Pipe four 4" rings of dough onto well-oiled parchment squares just before frying.
+          - id: steps-1-item-7
+            text: >-
+              Place the dough (parchment side up) into the oil. Remove parchment after a few seconds. Fry until golden
+              brown, about 5 minutes on the first side and 4 minutes on the second. Transfer to a wire rack to drain.
+          - id: steps-1-item-8
+            text: 'After cooling for 1-5 minutes, dip crullers in glaze and allow to set on a wire rack.'
+        id: steps-1
     notes:
-      - '**Water-to-Flour Ratio**: The 2:1 water-to-flour ratio is standard for pâte à choux, but a slight reduction in water here enhances the structure and minimizes splitting.'
-      - '**Piping Technique**: Using a 4-inch diameter ring and an Ateco 828 piping tip results in large crullers with beautiful definition. Piping directly onto oiled parchment with no rest just before frying helps prevent sticking and ensures uniform shape.'
-      - '**Extended Frying Time**: Frying for a few extra seconds on the presentation side at 375°F adds a crisp texture and structural stability to the cruller.'
-      - '**Water**: Using water instead of milk prevents burning of milk solids. These are very large and will burn with the extended frying time and elevated temperature if milk is used.'
+      - >-
+        **Water-to-Flour Ratio**: The 2:1 water-to-flour ratio is standard for pâte à choux, but a slight reduction in
+        water here enhances the structure and minimizes splitting.
+      - >-
+        **Piping Technique**: Using a 4-inch diameter ring and an Ateco 828 piping tip results in large crullers with
+        beautiful definition. Piping directly onto oiled parchment with no rest just before frying helps prevent
+        sticking and ensures uniform shape.
+      - >-
+        **Extended Frying Time**: Frying for a few extra seconds on the presentation side at 375°F adds a crisp texture
+        and structural stability to the cruller.
+      - >-
+        **Water**: Using water instead of milk prevents burning of milk solids. These are very large and will burn with
+        the extended frying time and elevated temperature if milk is used.
     tips:
-      - '**Egg Quantity**: Adding too many eggs can weaken the dough, resulting in collapse of the cruller. This recipe is based on eggs weighing approximately 50g each. Weigh the eggs to ensure you''re within the recommended range. It is better to use less than what is recommended here rather than more, as using any more may weaken the integrity of the cruller and cause it to collapse. Use a scale to measure the first 5 eggs and add a fraction of the final egg if at risk of exceeding 300g.'
-      - '**Frying**: Using solid shortening in a fryer with an exposed heating element can cause the oil to burn and develop an unpleasant, fishy odor. For the best results, use a fryer designed specifically for solid fats, or opt for liquid oils in fryers with exposed elements to avoid this issue.'
+      - >-
+        **Egg Quantity**: Adding too many eggs can weaken the dough, resulting in collapse of the cruller. This recipe
+        is based on eggs weighing approximately 50g each. Weigh the eggs to ensure you're within the recommended range.
+        It is better to use less than what is recommended here rather than more, as using any more may weaken the
+        integrity of the cruller and cause it to collapse. Use a scale to measure the first 5 eggs and add a fraction of
+        the final egg if at risk of exceeding 300g.
+      - >-
+        **Frying**: Using solid shortening in a fryer with an exposed heating element can cause the oil to burn and
+        develop an unpleasant, fishy odor. For the best results, use a fryer designed specifically for solid fats, or
+        opt for liquid oils in fryers with exposed elements to avoid this issue.

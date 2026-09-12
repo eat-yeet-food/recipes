@@ -1,3 +1,5 @@
+sourceId: 'recipes:donut-glaze'
+status: published
 slug: donut-glaze
 title: Donut Glaze
 order: 15
@@ -28,21 +30,47 @@ blocks:
     ingredients:
       - title: ''
         items:
-          - 550g granulated sugar (for powdered sugar)
-          - 200g simple syrup (100 ml hot water + 100g granulated sugar)
-          - 30 ml corn syrup
-          - 7g melted butter
-          - 5g vanilla extract
-          - ¼ tsp fine sea salt
+          - id: ingredients-1-item-1
+            text: 550g granulated sugar (for powdered sugar)
+          - id: ingredients-1-item-2
+            text: 200g simple syrup (100 ml hot water + 100g granulated sugar)
+          - id: ingredients-1-item-3
+            text: 30 ml corn syrup
+          - id: ingredients-1-item-4
+            text: 7g melted butter
+          - id: ingredients-1-item-5
+            text: 5g vanilla extract
+          - id: ingredients-1-item-6
+            text: ¼ tsp fine sea salt
+        id: ingredients-1
     steps:
       - title: ''
         items:
-          - Blend granulated sugar in a blender for a few minutes into 10x powder.
-          - Boil water in a kettle. Pour over the second division of granulated sugar in a heat tolerant measuring glass and stir to dissolve.
-          - 'In a mixing bowl add powdered sugar, and fine sea salt. Add and stir in ⅓ of the simple syrup mix with a large spoon. Once a thick ball forms, add in the rest of the syrup in three more additions. Stir until the consistency of honey. Stir in corn syrup and melted butter. Scrape down the bowl on all sides and cover with cling wrap.'
-          - Maintain temp on double burner at 110°F. Remove from heat as needed to maintain temperature very close to this value.
-          - 'Keep covered and always stir before dipping or pouring on donut to keep a film from developing on the top. Apply to warm donut for transparent thin glaze, to cool donut for opaque thicker glaze.'
+          - id: steps-1-item-1
+            text: Blend granulated sugar in a blender for a few minutes into 10x powder.
+          - id: steps-1-item-2
+            text: >-
+              Boil water in a kettle. Pour over the second division of granulated sugar in a heat tolerant measuring
+              glass and stir to dissolve.
+          - id: steps-1-item-3
+            text: >-
+              In a mixing bowl add powdered sugar, and fine sea salt. Add and stir in ⅓ of the simple syrup mix with a
+              large spoon. Once a thick ball forms, add in the rest of the syrup in three more additions. Stir until the
+              consistency of honey. Stir in corn syrup and melted butter. Scrape down the bowl on all sides and cover
+              with cling wrap.
+          - id: steps-1-item-4
+            text: >-
+              Maintain temp on double burner at 110°F. Remove from heat as needed to maintain temperature very close to
+              this value.
+          - id: steps-1-item-5
+            text: >-
+              Keep covered and always stir before dipping or pouring on donut to keep a film from developing on the top.
+              Apply to warm donut for transparent thin glaze, to cool donut for opaque thicker glaze.
+        id: steps-1
     notes:
-      - 'For best results, make your own powdered sugar by blending granulated sugar in a blender until it becomes a fine powder. This bypasses the metallic taste of cornstarch in regular store bought powdered sugar or slight hint of molasses in organic powdered sugar.'
+      - >-
+        For best results, make your own powdered sugar by blending granulated sugar in a blender until it becomes a fine
+        powder. This bypasses the metallic taste of cornstarch in regular store bought powdered sugar or slight hint of
+        molasses in organic powdered sugar.
       - No need to sift if not using fresh powdered sugar from a blender.
     tips: []

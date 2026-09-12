@@ -1,7 +1,9 @@
+sourceId: 'recipes:new-york-style-pizza'
+status: published
 slug: new-york-style-pizza
 title: New York Style Pizza
 order: 3
-description: 'Cold-fermented New York-style pizza dough for an outdoor pizza oven or an indoor baking steel.'
+description: Cold-fermented New York-style pizza dough for an outdoor pizza oven or an indoor baking steel.
 category: savory
 prepMinutes: 4590
 cookMinutes: 6
@@ -43,7 +45,11 @@ workbench:
     pizzaSizing:
       referenceDiameterInches: 16
       referenceBallWeightGrams: 480
-      diametersInches: [10, 12, 14, 16]
+      diametersInches:
+        - 10
+        - 12
+        - 14
+        - 16
     defaultSelection:
       version: 1
       methodId: outdoor-oven
@@ -107,7 +113,9 @@ defaultMethod: outdoor-oven
 methodOptions:
   - id: outdoor-oven
     label: Outdoor Oven
-    description: 'A 65% hydration New York-style pizza dough mixed cold, fermented for 2-3 days, and baked hot with tomato sauce, Trader Joe''s low moisture whole milk mozzarella, pecorino romano, and oregano.'
+    description: >-
+      A 65% hydration New York-style pizza dough mixed cold, fermented for 2-3 days, and baked hot with tomato sauce,
+      Trader Joe's low moisture whole milk mozzarella, pecorino romano, and oregano.
     prepMinutes: 4590
     cookMinutes: 6
     totalMinutes: 4596
@@ -115,7 +123,9 @@ methodOptions:
     yieldUnit: 16-inch pizzas
   - id: indoor-steel
     label: Indoor Steel
-    description: 'A home-oven New York-style pizza dough for a baking steel: 63% hydration, 2% canola oil, a 2-3 day cold ferment, tomato sauce, Trader Joe''s low moisture whole milk mozzarella, pecorino romano, and oregano.'
+    description: >-
+      A home-oven New York-style pizza dough for a baking steel: 63% hydration, 2% canola oil, a 2-3 day cold ferment,
+      tomato sauce, Trader Joe's low moisture whole milk mozzarella, pecorino romano, and oregano.
     prepMinutes: 4590
     cookMinutes: 7
     totalMinutes: 4597
@@ -126,179 +136,404 @@ methodOptions:
         equipment:
           - title: ''
             items:
-              - '[Kitchen scale](https://www.amazon.com/OXO-Grips-Everyday-Glass-Scale/dp/B0BNSP4C3F?source=ps-sl-shoppingads-lpcontext&ref_=fplfs&smid=A1TWYVWG4QDVKK&gQT=1&th=1)'
-              - '[Bench dough scraper](https://www.amazon.com/Bread-Dough-Bench-Bowl-Scraper/dp/B0894HTQVZ/ref=sr_1_1_pp?crid=CCB3H9YKD884&dib=eyJ2IjoiMSJ9.ew7o8SO4igvrGqNITDghgc4NWbBVdhPgD2XPknFBeYSvXq9KvghJ2j0By9zPXlMbXmysOoBiRcAS2Uu8UcezaaxMwD7MwjCm0vKZUP--1E1G_H8iA9Ll6GdWNFq_cOagA4PYerMabUFPzFRP5_8wD0doyyVbyrjlzcgjhVLY2cBeKGgy15kepzCsWx2yeoA4kp_b9SV8zspePMG96GkzhrGSSZzDVTxWuesBijC3BQEiBvTy07GuRQvWU7uzrkLoN6qe29nHQG94r6dBzYDJzKuqLBZ_70rWXnKUhOjfR74.RFm3ozlmnuGxPakJxqzy2X7DH0ZLD_DdEQ081PY5lqI&dib_tag=se&keywords=bench+scraper&qid=1750794298&s=home-garden&sprefix=bench,garden,127&sr=1-1)'
-              - '[Ooni Halo Pro Spiral Mixer](https://ooni.com/products/ooni-halo-pro-spiral-mixer)'
-              - '[9" proofing tins](https://www.webstaurantstore.com/choice-9-round-stacking-dough-pan/176DPAN96.html?utm_source=google&utm_medium=cpc&gbraid=0AAAAAD_Dx-vt77gLbs6NDGMeygXq7xhDG&gclid=CjwKCAjwmenCBhA4EiwAtVjzmub9VXbmLlgC8kWhNQiwyqNvkpYM91N5H8DVzu6SEmAjkSe94Fs2rxoCoHsQAvD_BwE) ([lids](https://www.webstaurantstore.com/choice-9-dough-pan-lid/176DPAN96C.html))'
-              - '[Infrared thermometer](https://www.amazon.com/Etekcity-Lasergrip-1080-Non-Contact-Thermometer/dp/B00DMI632G/ref=asc_df_B00DMI632G?mcid=2d419244ec1b319e80908e4723b0afae&tag=hyprod-20&linkCode=df0&hvadid=693585715857&hvpos&hvnetw=g&hvrand=17294660038293995409&hvpone&hvptwo&hvqmt&hvdev=c&hvdvcmdl&hvlocint&hvlocphy=9009731&hvtargid=pla-309607628772&psc=1&hvocijid=17294660038293995409-B00DMI632G-&hvexpln=0)'
-              - '[16" x 16" baking steel](https://www.amazon.com/Deluxe-Thickness-Homemade-Multipurpose-Cooking/dp/B0GTSWTZJT/ref=sr_1_7?crid=2O7OWXSXMGPJJ&dib=eyJ2IjoiMSJ9.FHfwTPwfx7tFu--fvQ6B4e5AWeJOpKWYnhFgLG_bNum7swboZnOtqyOg1orgoHixRLta_a_7j0D1okAxKIYSccx-Dvnc3653dNFP9ipUyLyzuCCv1MGNwX5rIkWjes6P_Pdj2rO51UzgTQZ4OQByzPWA2QYn5vK52sAMJGky8l_78B0EpuzyaQxMR_mmhlPE7U4ngUHYehzdrg9glcBJ6E9Zw4sQDtl3ohUzfq622k8YY0RNXUP2ZK30O4N3sNVwnxnxLg7dYyW9mwLt4DEAoJ_45b_m4BgR8ysxqXGm-8I.FLQeimgYkvzO4MyIgAsVDjdkBov0TJ_bKrM9xp2sfao&dib_tag=se&keywords=16x16+pizza+steel+for+oven+french&qid=1787612279&sprefix=16x16+pizza+steel+for+oven+frenc%2Caps%2C182&sr=8-7)'
-              - Wood peel for launching
-              - '[Wire rack](https://www.amazon.com/Hiware-2-Pack-Cooling-Racks-Baking/dp/B0829T38F7/ref=sr_1_1_pp?crid=7OEVUQM44P93&dib=eyJ2IjoiMSJ9.oHx30FUv-EawXqmpviVzTfGRuQUqGA1T-OEeyjfxXHQl_1os2gBzXgqkVF5XKmz3k5nT0TRjvIYdq8GHhnIxSvY3Q85bckgJk8roTqaCDZI-kRFxpGmjfSZDz7b7PnBkh--FwhVvZexYkVZPbCLEjWl06bj-YvIM_DzUKD6J7RIRNece-ixFxUiZUa3ImayNPRPdAS7cR95l96zrgoHvxz7v2oGfh1oExJ7DxCr3HM-REo4ApwLulNibJ87RybfwDOoKUX_dblF1l28r68-P_7GCijhsOrDHjCxHU55rbo.hE6GA35AZOr8oi5BvAnUKmCEh5eYDwWfTWVXkHLT6t0&dib_tag=se&keywords=wire+rack&qid=1750798097&sprefix=wire+rack,aps,143&sr=8-1)'
-              - '[Pizza cutter](https://www.amazon.com/KitchenAid-KE113OHOBA-Classic-Pizza-Wheel/dp/B07YP2VL68/ref=sr_1_1_sspa?crid=2IKLMIVCOJQZN&dib=eyJ2IjoiMSJ9.b0kowESHJwwYKjeG-7rL96GNnkYDTZnw5grcIa1vFJUMDuaNm2PsJ7huBcb5XWHQBys1YXxtNww7vj2zXAFvQmSSsq0BsLA7t9IsAUE2t6oIQInaXuX-VCmSw40-7ZdkjKLx6XYYQZoTqcZsqukKyJGiN1fAvc8Ce3o8b5pIttoNTA17hChhtNcj9Mnsq5JLxDvsHn1zfXhn4yLKjFTXMSS6kOmLF8LjfYm93SI6xR6pERWVEIL0BYGXsgpMjTbxZ6Ioi-xYlcotdFdIFD9HArbCZrsh2YvgGhNoA75sJLY.SfjFpgSbXTlRaFw7YKTgYa68XKnoteM8fd4rl94ONgI&dib_tag=se&keywords=pizza+cutter&qid=1750798113&sprefix=pizza+,aps,132&sr=8-1-spons&sp_csd=d2lkZ2V0TmFtZT1zcF9hdGY&psc=1)'
+              - id: equipment-1-item-1
+                text: >-
+                  [Kitchen
+                  scale](https://www.amazon.com/OXO-Grips-Everyday-Glass-Scale/dp/B0BNSP4C3F?source=ps-sl-shoppingads-lpcontext&ref_=fplfs&smid=A1TWYVWG4QDVKK&gQT=1&th=1)
+              - id: equipment-1-item-2
+                text: >-
+                  [Bench dough
+                  scraper](https://www.amazon.com/Bread-Dough-Bench-Bowl-Scraper/dp/B0894HTQVZ/ref=sr_1_1_pp?crid=CCB3H9YKD884&dib=eyJ2IjoiMSJ9.ew7o8SO4igvrGqNITDghgc4NWbBVdhPgD2XPknFBeYSvXq9KvghJ2j0By9zPXlMbXmysOoBiRcAS2Uu8UcezaaxMwD7MwjCm0vKZUP--1E1G_H8iA9Ll6GdWNFq_cOagA4PYerMabUFPzFRP5_8wD0doyyVbyrjlzcgjhVLY2cBeKGgy15kepzCsWx2yeoA4kp_b9SV8zspePMG96GkzhrGSSZzDVTxWuesBijC3BQEiBvTy07GuRQvWU7uzrkLoN6qe29nHQG94r6dBzYDJzKuqLBZ_70rWXnKUhOjfR74.RFm3ozlmnuGxPakJxqzy2X7DH0ZLD_DdEQ081PY5lqI&dib_tag=se&keywords=bench+scraper&qid=1750794298&s=home-garden&sprefix=bench,garden,127&sr=1-1)
+              - id: equipment-1-item-3
+                text: '[Ooni Halo Pro Spiral Mixer](https://ooni.com/products/ooni-halo-pro-spiral-mixer)'
+              - id: equipment-1-item-4
+                text: >-
+                  [9" proofing
+                  tins](https://www.webstaurantstore.com/choice-9-round-stacking-dough-pan/176DPAN96.html?utm_source=google&utm_medium=cpc&gbraid=0AAAAAD_Dx-vt77gLbs6NDGMeygXq7xhDG&gclid=CjwKCAjwmenCBhA4EiwAtVjzmub9VXbmLlgC8kWhNQiwyqNvkpYM91N5H8DVzu6SEmAjkSe94Fs2rxoCoHsQAvD_BwE)
+                  ([lids](https://www.webstaurantstore.com/choice-9-dough-pan-lid/176DPAN96C.html))
+              - id: equipment-1-item-5
+                text: >-
+                  [Infrared
+                  thermometer](https://www.amazon.com/Etekcity-Lasergrip-1080-Non-Contact-Thermometer/dp/B00DMI632G/ref=asc_df_B00DMI632G?mcid=2d419244ec1b319e80908e4723b0afae&tag=hyprod-20&linkCode=df0&hvadid=693585715857&hvpos&hvnetw=g&hvrand=17294660038293995409&hvpone&hvptwo&hvqmt&hvdev=c&hvdvcmdl&hvlocint&hvlocphy=9009731&hvtargid=pla-309607628772&psc=1&hvocijid=17294660038293995409-B00DMI632G-&hvexpln=0)
+              - id: equipment-1-item-6
+                text: >-
+                  [16" x 16" baking
+                  steel](https://www.amazon.com/Deluxe-Thickness-Homemade-Multipurpose-Cooking/dp/B0GTSWTZJT/ref=sr_1_7?crid=2O7OWXSXMGPJJ&dib=eyJ2IjoiMSJ9.FHfwTPwfx7tFu--fvQ6B4e5AWeJOpKWYnhFgLG_bNum7swboZnOtqyOg1orgoHixRLta_a_7j0D1okAxKIYSccx-Dvnc3653dNFP9ipUyLyzuCCv1MGNwX5rIkWjes6P_Pdj2rO51UzgTQZ4OQByzPWA2QYn5vK52sAMJGky8l_78B0EpuzyaQxMR_mmhlPE7U4ngUHYehzdrg9glcBJ6E9Zw4sQDtl3ohUzfq622k8YY0RNXUP2ZK30O4N3sNVwnxnxLg7dYyW9mwLt4DEAoJ_45b_m4BgR8ysxqXGm-8I.FLQeimgYkvzO4MyIgAsVDjdkBov0TJ_bKrM9xp2sfao&dib_tag=se&keywords=16x16+pizza+steel+for+oven+french&qid=1787612279&sprefix=16x16+pizza+steel+for+oven+frenc%2Caps%2C182&sr=8-7)
+              - id: equipment-1-item-7
+                text: Wood peel for launching
+              - id: equipment-1-item-8
+                text: >-
+                  [Wire
+                  rack](https://www.amazon.com/Hiware-2-Pack-Cooling-Racks-Baking/dp/B0829T38F7/ref=sr_1_1_pp?crid=7OEVUQM44P93&dib=eyJ2IjoiMSJ9.oHx30FUv-EawXqmpviVzTfGRuQUqGA1T-OEeyjfxXHQl_1os2gBzXgqkVF5XKmz3k5nT0TRjvIYdq8GHhnIxSvY3Q85bckgJk8roTqaCDZI-kRFxpGmjfSZDz7b7PnBkh--FwhVvZexYkVZPbCLEjWl06bj-YvIM_DzUKD6J7RIRNece-ixFxUiZUa3ImayNPRPdAS7cR95l96zrgoHvxz7v2oGfh1oExJ7DxCr3HM-REo4ApwLulNibJ87RybfwDOoKUX_dblF1l28r68-P_7GCijhsOrDHjCxHU55rbo.hE6GA35AZOr8oi5BvAnUKmCEh5eYDwWfTWVXkHLT6t0&dib_tag=se&keywords=wire+rack&qid=1750798097&sprefix=wire+rack,aps,143&sr=8-1)
+              - id: equipment-1-item-9
+                text: >-
+                  [Pizza
+                  cutter](https://www.amazon.com/KitchenAid-KE113OHOBA-Classic-Pizza-Wheel/dp/B07YP2VL68/ref=sr_1_1_sspa?crid=2IKLMIVCOJQZN&dib=eyJ2IjoiMSJ9.b0kowESHJwwYKjeG-7rL96GNnkYDTZnw5grcIa1vFJUMDuaNm2PsJ7huBcb5XWHQBys1YXxtNww7vj2zXAFvQmSSsq0BsLA7t9IsAUE2t6oIQInaXuX-VCmSw40-7ZdkjKLx6XYYQZoTqcZsqukKyJGiN1fAvc8Ce3o8b5pIttoNTA17hChhtNcj9Mnsq5JLxDvsHn1zfXhn4yLKjFTXMSS6kOmLF8LjfYm93SI6xR6pERWVEIL0BYGXsgpMjTbxZ6Ioi-xYlcotdFdIFD9HArbCZrsh2YvgGhNoA75sJLY.SfjFpgSbXTlRaFw7YKTgYa68XKnoteM8fd4rl94ONgI&dib_tag=se&keywords=pizza+cutter&qid=1750798113&sprefix=pizza+,aps,132&sr=8-1-spons&sp_csd=d2lkZ2V0TmFtZT1zcF9hdGY&psc=1)
+            id: equipment-1
           - title: Nice to haves
             items:
-              - '[Large rotary cheese grater](https://www.amazon.com/Rotary-Cheese-Grater-Vegetable-Chopper/dp/B07VPZRWM5/ref=asc_df_B07VPZRWM5?mcid=741a8ff4834336dc8dad3cca408592c1&tag=hyprod-20&linkCode=df0&hvadid=693711673837&hvpos&hvnetw=g&hvrand=15500585928110911450&hvpone&hvptwo&hvqmt&hvdev=c&hvdvcmdl&hvlocint=&hvlocphy=9009731&hvtargid=pla-817676965110&hvocijid=15500585928110911450-B07VPZRWM5-&hvexpln=0&th=1)'
-              - '[Fine rotary cheese grater](https://www.amazon.com/Cheese-Grater-Handheld-Vegetables-Chocolate/dp/B0B84HVRBK/ref=asc_df_B0B84HVRBK?mcid=49669e766c143f4b845f8f0eb6fd5c94&tag=hyprod-20&linkCode=df0&hvadid=693769995782&hvpos&hvnetw=g&hvrand=1564222352010975378&hvpone&hvptwo&hvqmt&hvdev=c&hvdvcmdl=&hvlocint=&hvlocphy=9009731&hvtargid=pla-1950528473268&psc=1&hvocijid=1564222352010975378-B0B84HVRBK-&hvexpln=0)'
+              - id: equipment-2-item-1
+                text: >-
+                  [Large rotary cheese
+                  grater](https://www.amazon.com/Rotary-Cheese-Grater-Vegetable-Chopper/dp/B07VPZRWM5/ref=asc_df_B07VPZRWM5?mcid=741a8ff4834336dc8dad3cca408592c1&tag=hyprod-20&linkCode=df0&hvadid=693711673837&hvpos&hvnetw=g&hvrand=15500585928110911450&hvpone&hvptwo&hvqmt&hvdev=c&hvdvcmdl&hvlocint=&hvlocphy=9009731&hvtargid=pla-817676965110&hvocijid=15500585928110911450-B07VPZRWM5-&hvexpln=0&th=1)
+              - id: equipment-2-item-2
+                text: >-
+                  [Fine rotary cheese
+                  grater](https://www.amazon.com/Cheese-Grater-Handheld-Vegetables-Chocolate/dp/B0B84HVRBK/ref=asc_df_B0B84HVRBK?mcid=49669e766c143f4b845f8f0eb6fd5c94&tag=hyprod-20&linkCode=df0&hvadid=693769995782&hvpos&hvnetw=g&hvrand=1564222352010975378&hvpone&hvptwo&hvqmt&hvdev=c&hvdvcmdl=&hvlocint=&hvlocphy=9009731&hvtargid=pla-1950528473268&psc=1&hvocijid=1564222352010975378-B0B84HVRBK-&hvexpln=0)
+            id: equipment-2
         ingredients:
           - id: dough
             title: Dough
             items:
-              - '861g [Kirkland Organic All-Purpose Flour](https://www.costco.com/p/-/kirkland-signature-organic-unbleached-all-purpose-flour-10-lbs-2-count/4000063331.)'
-              - 542g cold water
-              - 17.2g canola oil
-              - '2.15g [SAF gold instant yeast](https://a.co/d/j9mxG9d)'
-              - '17.2g fine sea salt'
+              - id: dough-item-1
+                text: >-
+                  861g [Kirkland Organic All-Purpose
+                  Flour](https://www.costco.com/p/-/kirkland-signature-organic-unbleached-all-purpose-flour-10-lbs-2-count/4000063331.)
+              - id: dough-item-2
+                text: 542g cold water
+              - id: dough-item-3
+                text: 17.2g canola oil
+              - id: dough-item-4
+                text: '2.15g [SAF gold instant yeast](https://a.co/d/j9mxG9d)'
+              - id: dough-item-5
+                text: 17.2g fine sea salt
           - id: sauce-batch
             title: Pizza Sauce
             items:
-              - 1 can Bianco di Napoli whole peeled tomatoes
+              - id: sauce-batch-item-1
+                text: 1 can Bianco di Napoli whole peeled tomatoes
           - id: pizza-toppings
             title: Pizza
             items:
               - id: pizza-sauce
                 text: pizza sauce
               - id: mozzarella
-                text: "shredded [Trader Joe's whole milk low moisture mozzarella](https://www.traderjoes.com/home/search?q=whole%20milk%20low%20moisture%20mozzarella&section=products)"
+                text: >-
+                  shredded [Trader Joe's whole milk low moisture
+                  mozzarella](https://www.traderjoes.com/home/search?q=whole%20milk%20low%20moisture%20mozzarella&section=products)
               - id: pecorino
                 text: pecorino romano
-              - '[Olive oil](https://www.amazon.com/Graza-Sizzle-Extra-Virgin-Olive-Oil-Cooking-High-Polyphenol/dp/B09WV8DBPV/ref=asc_df_B09WV8DBPV?mcid=70ed972e0350313daddca3d5ee42bc1a&tag=hyprod-20&linkCode=df0&hvadid=693367302614&hvpos&hvnetw=g&hvrand=17371064147806287911&hvpone&hvptwo&hvqmt&hvdev=c&hvdvcmdl&hvlocint&hvlocphy=9009731&hvtargid=pla-2006470262336&psc=1&hvocijid=17371064147806287911-B09WV8DBPV-&hvexpln=0)'
-              - '50g [Semolina flour](https://shop.kingarthurbaking.com/items/semolina-flour?utm_source=google&utm_medium=cpc&utm_term&utm_content=adtaxi&gad_source=1&gad_campaignid=22480904075&gbraid=0AAAAADiGhPK4w0ymJ2ZHxouS0qcChO-7Y&gclid=CjwKCAjwmenCBhA4EiwAtVjzmibHOPT_R4uMvXe44GRfVd6KqCijZEJnd1ENYHCiJnd1_Hctc8QaOBoC_80QAvD_BwE) + 50g [all purpose flour](https://www.wholefoodsmarket.com/product/365-by-whole-foods-market-all-purpose-flour-80-oz-b074jd6hhh) for dusting'
+              - id: pizza-toppings-item-4
+                text: >-
+                  [Olive
+                  oil](https://www.amazon.com/Graza-Sizzle-Extra-Virgin-Olive-Oil-Cooking-High-Polyphenol/dp/B09WV8DBPV/ref=asc_df_B09WV8DBPV?mcid=70ed972e0350313daddca3d5ee42bc1a&tag=hyprod-20&linkCode=df0&hvadid=693367302614&hvpos&hvnetw=g&hvrand=17371064147806287911&hvpone&hvptwo&hvqmt&hvdev=c&hvdvcmdl&hvlocint&hvlocphy=9009731&hvtargid=pla-2006470262336&psc=1&hvocijid=17371064147806287911-B09WV8DBPV-&hvexpln=0)
+              - id: pizza-toppings-item-5
+                text: >-
+                  50g [Semolina
+                  flour](https://shop.kingarthurbaking.com/items/semolina-flour?utm_source=google&utm_medium=cpc&utm_term&utm_content=adtaxi&gad_source=1&gad_campaignid=22480904075&gbraid=0AAAAADiGhPK4w0ymJ2ZHxouS0qcChO-7Y&gclid=CjwKCAjwmenCBhA4EiwAtVjzmibHOPT_R4uMvXe44GRfVd6KqCijZEJnd1ENYHCiJnd1_Hctc8QaOBoC_80QAvD_BwE)
+                  + 50g [all purpose
+                  flour](https://www.wholefoodsmarket.com/product/365-by-whole-foods-market-all-purpose-flour-80-oz-b074jd6hhh)
+                  for dusting
               - id: oregano
                 text: dried oregano
         steps:
           - title: Dough
             items:
-              - Fill a pitcher with water and ice and let it chill down. Weigh out the water only; keep the ice out of the mixer bowl.
+              - id: steps-1-item-1
+                text: >-
+                  Fill a pitcher with water and ice and let it chill down. Weigh out the water only; keep the ice out of
+                  the mixer bowl.
               - id: combine-dough
-                text: Add the {{mixingIngredients}} to the spiral mixer all at once.
-              - Mix at 40% speed until the dough reads 72F on your IR thermometer. Scrape the bowl and hook down with your bench scraper if dough climbs.
-              - Transfer the dough to your bench. Knead shortly, guide dough with bench scraper into the form of a ball, place in a bowl, cover with saran wrap, and allow it to rest at room temperature for 1.5h.
+                text: 'Add the {{mixingIngredients}} to the spiral mixer all at once.'
+              - id: steps-1-item-3
+                text: >-
+                  Mix at 40% speed until the dough reads 72F on your IR thermometer. Scrape the bowl and hook down with
+                  your bench scraper if dough climbs.
+              - id: steps-1-item-4
+                text: >-
+                  Transfer the dough to your bench. Knead shortly, guide dough with bench scraper into the form of a
+                  ball, place in a bowl, cover with saran wrap, and allow it to rest at room temperature for 1.5h.
               - id: divide-dough
-                text: Divide and shape dough into {{pieceCount}} {{pieceLabelPlural}}, shooting for {{pieceWeightGrams}} each ({{totalDoughGrams}} total dough). Pull four times in gentle circles on your unfloured bench until smooth on the top. Pinch any bottom seam that remains.
-              - Grease your proofing container with canola oil. Transfer the dough to the container with your bench scraper. After placing in a proofing container, lightly oil your hands and gently rub the top of the dough to make it less sticky and retain moisture. Cover and place in the refrigerator for 2-3 days.
+                text: >-
+                  Divide and shape dough into {{pieceCount}} {{pieceLabelPlural}}, shooting for {{pieceWeightGrams}}
+                  each ({{totalDoughGrams}} total dough). Pull four times in gentle circles on your unfloured bench
+                  until smooth on the top. Pinch any bottom seam that remains.
+              - id: steps-1-item-6
+                text: >-
+                  Grease your proofing container with canola oil. Transfer the dough to the container with your bench
+                  scraper. After placing in a proofing container, lightly oil your hands and gently rub the top of the
+                  dough to make it less sticky and retain moisture. Cover and place in the refrigerator for 2-3 days.
+            id: steps-1
           - title: Pre-Assembly
             items:
-              - 'Pizza sauce: Drain off 1/4 cup of water from the can, then hand crush or mill the tomatoes to a smooth, easy-to-spread consistency. Place sauce in a small bowl and cover with saran wrap. It is ok to freeze / refrigerate for a bit, but always bring to room temperature immediately before use to avoid gummy pizza.'
-              - 'Cheese: Grate the mozzarella and finely grate the romano.'
-              - 'Bench flour: Mix 50/50 semolina + all purpose flour in a small bowl and set aside.'
+              - id: steps-2-item-1
+                text: >-
+                  Pizza sauce: Drain off 1/4 cup of water from the can, then hand crush or mill the tomatoes to a
+                  smooth, easy-to-spread consistency. Place sauce in a small bowl and cover with saran wrap. It is ok to
+                  freeze / refrigerate for a bit, but always bring to room temperature immediately before use to avoid
+                  gummy pizza.
+              - id: steps-2-item-2
+                text: 'Cheese: Grate the mozzarella and finely grate the romano.'
+              - id: steps-2-item-3
+                text: 'Bench flour: Mix 50/50 semolina + all purpose flour in a small bowl and set aside.'
+            id: steps-2
           - title: Pizza Assembly
             items:
-              - The day you plan to bake, remove dough from the refrigerator and allow the dough to rest for 2 hours.
-              - Place the baking steel on the top rack and preheat the oven at its highest setting, ideally 550F, for at least 1 hour.
-              - Lightly dust your wooden peel with bench flour.
-              - Remove dough with your bench scraper and cover liberally with bench flour.
-              - Stretch dough to {{pizzaDiameter}}.
-              - Place the dough on the peel with the rough bottom side facing up.
-              - Apply sauce to the pizza in a circular motion with a large spoon all the way to the raised portion that will become your crust.
-              - Pinch dried oregano in your fingers to oxidize and spread over the top of the sauce.
-              - Spread Romano cheese evenly over the entire pizza, covering as much of the sauce as possible.
-              - Scatter the shredded mozzarella evenly over the top.
+              - id: steps-3-item-1
+                text: 'The day you plan to bake, remove dough from the refrigerator and allow the dough to rest for 2 hours.'
+              - id: steps-3-item-2
+                text: >-
+                  Place the baking steel on the top rack and preheat the oven at its highest setting, ideally 550F, for
+                  at least 1 hour.
+              - id: steps-3-item-3
+                text: Lightly dust your wooden peel with bench flour.
+              - id: steps-3-item-4
+                text: Remove dough with your bench scraper and cover liberally with bench flour.
+              - id: steps-3-item-5
+                text: 'Stretch dough to {{pizzaDiameter}}.'
+              - id: steps-3-item-6
+                text: Place the dough on the peel with the rough bottom side facing up.
+              - id: steps-3-item-7
+                text: >-
+                  Apply sauce to the pizza in a circular motion with a large spoon all the way to the raised portion
+                  that will become your crust.
+              - id: steps-3-item-8
+                text: Pinch dried oregano in your fingers to oxidize and spread over the top of the sauce.
+              - id: steps-3-item-9
+                text: 'Spread Romano cheese evenly over the entire pizza, covering as much of the sauce as possible.'
+              - id: steps-3-item-10
+                text: Scatter the shredded mozzarella evenly over the top.
+            id: steps-3
           - title: Launch / Bake
             items:
-              - Launch the pizza directly onto the baking steel.
-              - Bake for 6-7 minutes, rotating once or twice, until the bottom is crisp and the cheese is melted.
-              - If the top needs more color after the bottom is done, switch to broil for 30-60 seconds and watch closely.
-              - Remove the pizza from the oven with your peel and place on a wire rack.
-              - Transfer the pizza to a cutting board, slice, and return to the wire rack to keep crispy.
-              - Serve hot.
+              - id: steps-4-item-1
+                text: Launch the pizza directly onto the baking steel.
+              - id: steps-4-item-2
+                text: 'Bake for 6-7 minutes, rotating once or twice, until the bottom is crisp and the cheese is melted.'
+              - id: steps-4-item-3
+                text: >-
+                  If the top needs more color after the bottom is done, switch to broil for 30-60 seconds and watch
+                  closely.
+              - id: steps-4-item-4
+                text: Remove the pizza from the oven with your peel and place on a wire rack.
+              - id: steps-4-item-5
+                text: 'Transfer the pizza to a cutting board, slice, and return to the wire rack to keep crispy.'
+              - id: steps-4-item-6
+                text: Serve hot.
+            id: steps-4
         notes:
-          - This dough formula uses Kirkland Organic All-Purpose Flour at 63% hydration with 2% canola oil and lands around 1,440g total dough, or about 480g per dough ball.
-          - Trader Joe's whole milk low moisture mozzarella is a particularly good choice for this pizza. If the shredded cheese clumps or is difficult to distribute, freeze it briefly after shredding; this can help the strands separate.
-          - The canola oil is here because this version bakes at home-oven temperatures. It helps browning and tenderness on a baking steel.
-          - Great [article](https://www.richardeaglespoon.com/articles/how-to-pizza) with a lot info.
-          - Good [video](https://www.youtube.com/watch?v=TQYApZ_-P24) with more info, not always reliable but pretty informative.
-          - Lots of info in [r/Pizza](https://www.reddit.com/r/Pizza/) from the community.
-          - I recommend making a couple more balls than you plan to eat to start. It will take 5 bakes to settle in and making more each time will shorten the learning curve.
+          - >-
+            This dough formula uses Kirkland Organic All-Purpose Flour at 63% hydration with 2% canola oil and lands
+            around 1,440g total dough, or about 480g per dough ball.
+          - >-
+            Trader Joe's whole milk low moisture mozzarella is a particularly good choice for this pizza. If the
+            shredded cheese clumps or is difficult to distribute, freeze it briefly after shredding; this can help the
+            strands separate.
+          - >-
+            The canola oil is here because this version bakes at home-oven temperatures. It helps browning and
+            tenderness on a baking steel.
+          - 'Great [article](https://www.richardeaglespoon.com/articles/how-to-pizza) with a lot info.'
+          - >-
+            Good [video](https://www.youtube.com/watch?v=TQYApZ_-P24) with more info, not always reliable but pretty
+            informative.
+          - 'Lots of info in [r/Pizza](https://www.reddit.com/r/Pizza/) from the community.'
+          - >-
+            I recommend making a couple more balls than you plan to eat to start. It will take 5 bakes to settle in and
+            making more each time will shorten the learning curve.
         tips:
-          - If launching is tricky, build the pizza on parchment on your peel. Launch with the parchment, then slide it out after 2 minutes.
+          - >-
+            If launching is tricky, build the pizza on parchment on your peel. Launch with the parchment, then slide it
+            out after 2 minutes.
 blocks:
   - type: recipe
     equipment:
       - title: ''
         items:
-          - '[Kitchen scale](https://www.amazon.com/OXO-Grips-Everyday-Glass-Scale/dp/B0BNSP4C3F?source=ps-sl-shoppingads-lpcontext&ref_=fplfs&smid=A1TWYVWG4QDVKK&gQT=1&th=1)'
-          - '[Bench dough scraper](https://www.amazon.com/Bread-Dough-Bench-Bowl-Scraper/dp/B0894HTQVZ/ref=sr_1_1_pp?crid=CCB3H9YKD884&dib=eyJ2IjoiMSJ9.ew7o8SO4igvrGqNITDghgc4NWbBVdhPgD2XPknFBeYSvXq9KvghJ2j0By9zPXlMbXmysOoBiRcAS2Uu8UcezaaxMwD7MwjCm0vKZUP--1E1G_H8iA9Ll6GdWNFq_cOagA4PYerMabUFPzFRP5_8wD0doyyVbyrjlzcgjhVLY2cBeKGgy15kepzCsWx2yeoA4kp_b9SV8zspePMG96GkzhrGSSZzDVTxWuesBijC3BQEiBvTy07GuRQvWU7uzrkLoN6qe29nHQG94r6dBzYDJzKuqLBZ_70rWXnKUhOjfR74.RFm3ozlmnuGxPakJxqzy2X7DH0ZLD_DdEQ081PY5lqI&dib_tag=se&keywords=bench+scraper&qid=1750794298&s=home-garden&sprefix=bench,garden,127&sr=1-1)'
-          - '[Ooni Halo Pro Spiral Mixer](https://ooni.com/products/ooni-halo-pro-spiral-mixer)'
-          - '[9" proofing tins](https://www.webstaurantstore.com/choice-9-round-stacking-dough-pan/176DPAN96.html?utm_source=google&utm_medium=cpc&gbraid=0AAAAAD_Dx-vt77gLbs6NDGMeygXq7xhDG&gclid=CjwKCAjwmenCBhA4EiwAtVjzmub9VXbmLlgC8kWhNQiwyqNvkpYM91N5H8DVzu6SEmAjkSe94Fs2rxoCoHsQAvD_BwE) ([lids](https://www.webstaurantstore.com/choice-9-dough-pan-lid/176DPAN96C.html))'
-          - '[Infrared thermometer](https://www.amazon.com/Etekcity-Lasergrip-1080-Non-Contact-Thermometer/dp/B00DMI632G/ref=asc_df_B00DMI632G?mcid=2d419244ec1b319e80908e4723b0afae&tag=hyprod-20&linkCode=df0&hvadid=693585715857&hvpos&hvnetw=g&hvrand=17294660038293995409&hvpone&hvptwo&hvqmt&hvdev=c&hvdvcmdl&hvlocint&hvlocphy=9009731&hvtargid=pla-309607628772&psc=1&hvocijid=17294660038293995409-B00DMI632G-&hvexpln=0)'
-          - '[Wood peel for launching](https://www.amazon.com/New-Star-Foodservice-50295-Wooden/dp/B009LPDNPO/ref=sr_1_1_sspa?crid=ANHW3CPI395V&dib=eyJ2IjoiMSJ9.psTdMyM9heuHSClTVwRVkUaiY4K_-LReNLPlmb6HFlKhOCZ0klinBLFRDOvG3Zq19VeFztljGiR3TsxRRLRM5d6D-pz7rD7zmlIYr1c3tDUWdESVxAzwp0Vu3yxaroOIBHmKyu0QCUv7Sbbo8X4VT4OK9wBGUStLp5lp5ASPOqZbZS-UJiVX4cgjzBqGvTV4xB_0jTajqF2i3TfKSEbHwLx_WVK3pQOfua5dvIYOD8Hh47SUVpKyDOYXG6seJL7WX-X4UhphUnV6-FhxKSgBu3IAWUkI_CFE6ncRoFo7n_w.9VcdOwughDOP6Z8uAWrTMhhNb2nXEMUuXI1NNKzLhjo&dib_tag=se&keywords=wood+peel&qid=1750794477&s=home-garden&sprefix=wood+peel,garden,121&sr=1-1-spons&sp_csd=d2lkZ2V0TmFtZT1zcF9hdGY&psc=1)'
-          - '[Metal peels](https://www.amazon.com/dp/B0D2XZ5YDJ?ref_=ppx_hzod_title_dt_b_fed_asin_title_1_0&th=1)'
-          - '[Pizza oven](https://halocooks.com/products/versa-16-outdoor-pizza-oven)'
-          - 16" pizza screen
-          - '[Wire rack](https://www.amazon.com/Hiware-2-Pack-Cooling-Racks-Baking/dp/B0829T38F7/ref=sr_1_1_pp?crid=7OEVUQM44P93&dib=eyJ2IjoiMSJ9.oHx30FUv-EawXqmpviVzTfGRuQUqGA1T-OEeyjfxXHQl_1os2gBzXgqkVF5XKmz3k5nT0TRjvIYdq8GHhnIxSvY3Q85bckgJk8roTqaCDZI-kRFxpGmjfSZDz7b7PnBkh--FwhVvZexYkVZPbCLEjWl06bj-YvIM_DzUKD6J7RIRNece-ixFxUiZUa3ImayNPRPdAS7cR95l96zrgoHvxz7v2oGfh1oExJ7DxCr3HM-REo4ApwLulNibJ87RybfwDOoKUX_dblF1l28r68-P_7GCijhsOrDHjCxHU55rbo.hE6GA35AZOr8oi5BvAnUKmCEh5eYDwWfTWVXkHLT6t0&dib_tag=se&keywords=wire+rack&qid=1750798097&sprefix=wire+rack,aps,143&sr=8-1)'
-          - '[Pizza cutter](https://www.amazon.com/KitchenAid-KE113OHOBA-Classic-Pizza-Wheel/dp/B07YP2VL68/ref=sr_1_1_sspa?crid=2IKLMIVCOJQZN&dib=eyJ2IjoiMSJ9.b0kowESHJwwYKjeG-7rL96GNnkYDTZnw5grcIa1vFJUMDuaNm2PsJ7huBcb5XWHQBys1YXxtNww7vj2zXAFvQmSSsq0BsLA7t9IsAUE2t6oIQInaXuX-VCmSw40-7ZdkjKLx6XYYQZoTqcZsqukKyJGiN1fAvc8Ce3o8b5pIttoNTA17hChhtNcj9Mnsq5JLxDvsHn1zfXhn4yLKjFTXMSS6kOmLF8LjfYm93SI6xR6pERWVEIL0BYGXsgpMjTbxZ6Ioi-xYlcotdFdIFD9HArbCZrsh2YvgGhNoA75sJLY.SfjFpgSbXTlRaFw7YKTgYa68XKnoteM8fd4rl94ONgI&dib_tag=se&keywords=pizza+cutter&qid=1750798113&sprefix=pizza+,aps,132&sr=8-1-spons&sp_csd=d2lkZ2V0TmFtZT1zcF9hdGY&psc=1)'
+          - id: equipment-1-item-1
+            text: >-
+              [Kitchen
+              scale](https://www.amazon.com/OXO-Grips-Everyday-Glass-Scale/dp/B0BNSP4C3F?source=ps-sl-shoppingads-lpcontext&ref_=fplfs&smid=A1TWYVWG4QDVKK&gQT=1&th=1)
+          - id: equipment-1-item-2
+            text: >-
+              [Bench dough
+              scraper](https://www.amazon.com/Bread-Dough-Bench-Bowl-Scraper/dp/B0894HTQVZ/ref=sr_1_1_pp?crid=CCB3H9YKD884&dib=eyJ2IjoiMSJ9.ew7o8SO4igvrGqNITDghgc4NWbBVdhPgD2XPknFBeYSvXq9KvghJ2j0By9zPXlMbXmysOoBiRcAS2Uu8UcezaaxMwD7MwjCm0vKZUP--1E1G_H8iA9Ll6GdWNFq_cOagA4PYerMabUFPzFRP5_8wD0doyyVbyrjlzcgjhVLY2cBeKGgy15kepzCsWx2yeoA4kp_b9SV8zspePMG96GkzhrGSSZzDVTxWuesBijC3BQEiBvTy07GuRQvWU7uzrkLoN6qe29nHQG94r6dBzYDJzKuqLBZ_70rWXnKUhOjfR74.RFm3ozlmnuGxPakJxqzy2X7DH0ZLD_DdEQ081PY5lqI&dib_tag=se&keywords=bench+scraper&qid=1750794298&s=home-garden&sprefix=bench,garden,127&sr=1-1)
+          - id: equipment-1-item-3
+            text: '[Ooni Halo Pro Spiral Mixer](https://ooni.com/products/ooni-halo-pro-spiral-mixer)'
+          - id: equipment-1-item-4
+            text: >-
+              [9" proofing
+              tins](https://www.webstaurantstore.com/choice-9-round-stacking-dough-pan/176DPAN96.html?utm_source=google&utm_medium=cpc&gbraid=0AAAAAD_Dx-vt77gLbs6NDGMeygXq7xhDG&gclid=CjwKCAjwmenCBhA4EiwAtVjzmub9VXbmLlgC8kWhNQiwyqNvkpYM91N5H8DVzu6SEmAjkSe94Fs2rxoCoHsQAvD_BwE)
+              ([lids](https://www.webstaurantstore.com/choice-9-dough-pan-lid/176DPAN96C.html))
+          - id: equipment-1-item-5
+            text: >-
+              [Infrared
+              thermometer](https://www.amazon.com/Etekcity-Lasergrip-1080-Non-Contact-Thermometer/dp/B00DMI632G/ref=asc_df_B00DMI632G?mcid=2d419244ec1b319e80908e4723b0afae&tag=hyprod-20&linkCode=df0&hvadid=693585715857&hvpos&hvnetw=g&hvrand=17294660038293995409&hvpone&hvptwo&hvqmt&hvdev=c&hvdvcmdl&hvlocint&hvlocphy=9009731&hvtargid=pla-309607628772&psc=1&hvocijid=17294660038293995409-B00DMI632G-&hvexpln=0)
+          - id: equipment-1-item-6
+            text: >-
+              [Wood peel for
+              launching](https://www.amazon.com/New-Star-Foodservice-50295-Wooden/dp/B009LPDNPO/ref=sr_1_1_sspa?crid=ANHW3CPI395V&dib=eyJ2IjoiMSJ9.psTdMyM9heuHSClTVwRVkUaiY4K_-LReNLPlmb6HFlKhOCZ0klinBLFRDOvG3Zq19VeFztljGiR3TsxRRLRM5d6D-pz7rD7zmlIYr1c3tDUWdESVxAzwp0Vu3yxaroOIBHmKyu0QCUv7Sbbo8X4VT4OK9wBGUStLp5lp5ASPOqZbZS-UJiVX4cgjzBqGvTV4xB_0jTajqF2i3TfKSEbHwLx_WVK3pQOfua5dvIYOD8Hh47SUVpKyDOYXG6seJL7WX-X4UhphUnV6-FhxKSgBu3IAWUkI_CFE6ncRoFo7n_w.9VcdOwughDOP6Z8uAWrTMhhNb2nXEMUuXI1NNKzLhjo&dib_tag=se&keywords=wood+peel&qid=1750794477&s=home-garden&sprefix=wood+peel,garden,121&sr=1-1-spons&sp_csd=d2lkZ2V0TmFtZT1zcF9hdGY&psc=1)
+          - id: equipment-1-item-7
+            text: '[Metal peels](https://www.amazon.com/dp/B0D2XZ5YDJ?ref_=ppx_hzod_title_dt_b_fed_asin_title_1_0&th=1)'
+          - id: equipment-1-item-8
+            text: '[Pizza oven](https://halocooks.com/products/versa-16-outdoor-pizza-oven)'
+          - id: equipment-1-item-9
+            text: 16" pizza screen
+          - id: equipment-1-item-10
+            text: >-
+              [Wire
+              rack](https://www.amazon.com/Hiware-2-Pack-Cooling-Racks-Baking/dp/B0829T38F7/ref=sr_1_1_pp?crid=7OEVUQM44P93&dib=eyJ2IjoiMSJ9.oHx30FUv-EawXqmpviVzTfGRuQUqGA1T-OEeyjfxXHQl_1os2gBzXgqkVF5XKmz3k5nT0TRjvIYdq8GHhnIxSvY3Q85bckgJk8roTqaCDZI-kRFxpGmjfSZDz7b7PnBkh--FwhVvZexYkVZPbCLEjWl06bj-YvIM_DzUKD6J7RIRNece-ixFxUiZUa3ImayNPRPdAS7cR95l96zrgoHvxz7v2oGfh1oExJ7DxCr3HM-REo4ApwLulNibJ87RybfwDOoKUX_dblF1l28r68-P_7GCijhsOrDHjCxHU55rbo.hE6GA35AZOr8oi5BvAnUKmCEh5eYDwWfTWVXkHLT6t0&dib_tag=se&keywords=wire+rack&qid=1750798097&sprefix=wire+rack,aps,143&sr=8-1)
+          - id: equipment-1-item-11
+            text: >-
+              [Pizza
+              cutter](https://www.amazon.com/KitchenAid-KE113OHOBA-Classic-Pizza-Wheel/dp/B07YP2VL68/ref=sr_1_1_sspa?crid=2IKLMIVCOJQZN&dib=eyJ2IjoiMSJ9.b0kowESHJwwYKjeG-7rL96GNnkYDTZnw5grcIa1vFJUMDuaNm2PsJ7huBcb5XWHQBys1YXxtNww7vj2zXAFvQmSSsq0BsLA7t9IsAUE2t6oIQInaXuX-VCmSw40-7ZdkjKLx6XYYQZoTqcZsqukKyJGiN1fAvc8Ce3o8b5pIttoNTA17hChhtNcj9Mnsq5JLxDvsHn1zfXhn4yLKjFTXMSS6kOmLF8LjfYm93SI6xR6pERWVEIL0BYGXsgpMjTbxZ6Ioi-xYlcotdFdIFD9HArbCZrsh2YvgGhNoA75sJLY.SfjFpgSbXTlRaFw7YKTgYa68XKnoteM8fd4rl94ONgI&dib_tag=se&keywords=pizza+cutter&qid=1750798113&sprefix=pizza+,aps,132&sr=8-1-spons&sp_csd=d2lkZ2V0TmFtZT1zcF9hdGY&psc=1)
+        id: equipment-1
       - title: Nice to haves
         items:
-          - '[Large rotary cheese grater](https://www.amazon.com/Rotary-Cheese-Grater-Vegetable-Chopper/dp/B07VPZRWM5/ref=asc_df_B07VPZRWM5?mcid=741a8ff4834336dc8dad3cca408592c1&tag=hyprod-20&linkCode=df0&hvadid=693711673837&hvpos&hvnetw=g&hvrand=15500585928110911450&hvpone&hvptwo&hvqmt&hvdev=c&hvdvcmdl&hvlocint=&hvlocphy=9009731&hvtargid=pla-817676965110&hvocijid=15500585928110911450-B07VPZRWM5-&hvexpln=0&th=1)'
-          - '[Fine rotary cheese grater](https://www.amazon.com/Cheese-Grater-Handheld-Vegetables-Chocolate/dp/B0B84HVRBK/ref=asc_df_B0B84HVRBK?mcid=49669e766c143f4b845f8f0eb6fd5c94&tag=hyprod-20&linkCode=df0&hvadid=693769995782&hvpos&hvnetw=g&hvrand=1564222352010975378&hvpone&hvptwo&hvqmt&hvdev=c&hvdvcmdl=&hvlocint=&hvlocphy=9009731&hvtargid=pla-1950528473268&psc=1&hvocijid=1564222352010975378-B0B84HVRBK-&hvexpln=0)'
+          - id: equipment-2-item-1
+            text: >-
+              [Large rotary cheese
+              grater](https://www.amazon.com/Rotary-Cheese-Grater-Vegetable-Chopper/dp/B07VPZRWM5/ref=asc_df_B07VPZRWM5?mcid=741a8ff4834336dc8dad3cca408592c1&tag=hyprod-20&linkCode=df0&hvadid=693711673837&hvpos&hvnetw=g&hvrand=15500585928110911450&hvpone&hvptwo&hvqmt&hvdev=c&hvdvcmdl&hvlocint=&hvlocphy=9009731&hvtargid=pla-817676965110&hvocijid=15500585928110911450-B07VPZRWM5-&hvexpln=0&th=1)
+          - id: equipment-2-item-2
+            text: >-
+              [Fine rotary cheese
+              grater](https://www.amazon.com/Cheese-Grater-Handheld-Vegetables-Chocolate/dp/B0B84HVRBK/ref=asc_df_B0B84HVRBK?mcid=49669e766c143f4b845f8f0eb6fd5c94&tag=hyprod-20&linkCode=df0&hvadid=693769995782&hvpos&hvnetw=g&hvrand=1564222352010975378&hvpone&hvptwo&hvqmt&hvdev=c&hvdvcmdl=&hvlocint=&hvlocphy=9009731&hvtargid=pla-1950528473268&psc=1&hvocijid=1564222352010975378-B0B84HVRBK-&hvexpln=0)
+        id: equipment-2
     ingredients:
       - id: dough
         title: Dough
         items:
-          - '861g [Kirkland Organic All-Purpose Flour](https://www.costco.com/p/-/kirkland-signature-organic-unbleached-all-purpose-flour-10-lbs-2-count/4000063331.)'
-          - 560g cold water
-          - '2.15g [SAF gold instant yeast](https://a.co/d/j9mxG9d)'
-          - '17.2g fine sea salt'
+          - id: dough-item-1
+            text: >-
+              861g [Kirkland Organic All-Purpose
+              Flour](https://www.costco.com/p/-/kirkland-signature-organic-unbleached-all-purpose-flour-10-lbs-2-count/4000063331.)
+          - id: dough-item-2
+            text: 560g cold water
+          - id: dough-item-3
+            text: '2.15g [SAF gold instant yeast](https://a.co/d/j9mxG9d)'
+          - id: dough-item-4
+            text: 17.2g fine sea salt
       - id: sauce-batch
         title: Pizza Sauce
         items:
-          - 1 can Bianco di Napoli whole peeled tomatoes
+          - id: sauce-batch-item-1
+            text: 1 can Bianco di Napoli whole peeled tomatoes
       - id: pizza-toppings
         title: Pizza
         items:
           - id: pizza-sauce
             text: pizza sauce
           - id: mozzarella
-            text: "shredded [Trader Joe's whole milk low moisture mozzarella](https://www.traderjoes.com/home/search?q=whole%20milk%20low%20moisture%20mozzarella&section=products)"
+            text: >-
+              shredded [Trader Joe's whole milk low moisture
+              mozzarella](https://www.traderjoes.com/home/search?q=whole%20milk%20low%20moisture%20mozzarella&section=products)
           - id: pecorino
             text: pecorino romano
-          - '[Olive oil](https://www.amazon.com/Graza-Sizzle-Extra-Virgin-Olive-Oil-Cooking-High-Polyphenol/dp/B09WV8DBPV/ref=asc_df_B09WV8DBPV?mcid=70ed972e0350313daddca3d5ee42bc1a&tag=hyprod-20&linkCode=df0&hvadid=693367302614&hvpos&hvnetw=g&hvrand=17371064147806287911&hvpone&hvptwo&hvqmt&hvdev=c&hvdvcmdl&hvlocint&hvlocphy=9009731&hvtargid=pla-2006470262336&psc=1&hvocijid=17371064147806287911-B09WV8DBPV-&hvexpln=0)'
-          - '50g [Semolina flour](https://shop.kingarthurbaking.com/items/semolina-flour?utm_source=google&utm_medium=cpc&utm_term&utm_content=adtaxi&gad_source=1&gad_campaignid=22480904075&gbraid=0AAAAADiGhPK4w0ymJ2ZHxouS0qcChO-7Y&gclid=CjwKCAjwmenCBhA4EiwAtVjzmibHOPT_R4uMvXe44GRfVd6KqCijZEJnd1ENYHCiJnd1_Hctc8QaOBoC_80QAvD_BwE) + 50g [all purpose flour](https://www.wholefoodsmarket.com/product/365-by-whole-foods-market-all-purpose-flour-80-oz-b074jd6hhh) for dusting'
+          - id: pizza-toppings-item-4
+            text: >-
+              [Olive
+              oil](https://www.amazon.com/Graza-Sizzle-Extra-Virgin-Olive-Oil-Cooking-High-Polyphenol/dp/B09WV8DBPV/ref=asc_df_B09WV8DBPV?mcid=70ed972e0350313daddca3d5ee42bc1a&tag=hyprod-20&linkCode=df0&hvadid=693367302614&hvpos&hvnetw=g&hvrand=17371064147806287911&hvpone&hvptwo&hvqmt&hvdev=c&hvdvcmdl&hvlocint&hvlocphy=9009731&hvtargid=pla-2006470262336&psc=1&hvocijid=17371064147806287911-B09WV8DBPV-&hvexpln=0)
+          - id: pizza-toppings-item-5
+            text: >-
+              50g [Semolina
+              flour](https://shop.kingarthurbaking.com/items/semolina-flour?utm_source=google&utm_medium=cpc&utm_term&utm_content=adtaxi&gad_source=1&gad_campaignid=22480904075&gbraid=0AAAAADiGhPK4w0ymJ2ZHxouS0qcChO-7Y&gclid=CjwKCAjwmenCBhA4EiwAtVjzmibHOPT_R4uMvXe44GRfVd6KqCijZEJnd1ENYHCiJnd1_Hctc8QaOBoC_80QAvD_BwE)
+              + 50g [all purpose
+              flour](https://www.wholefoodsmarket.com/product/365-by-whole-foods-market-all-purpose-flour-80-oz-b074jd6hhh)
+              for dusting
           - id: oregano
             text: dried oregano
     steps:
       - title: Dough
         items:
-          - Fill a pitcher with water and ice and let it chill down. Weigh out the water only — keep the ice out of the mixer bowl.
+          - id: steps-1-item-1
+            text: >-
+              Fill a pitcher with water and ice and let it chill down. Weigh out the water only — keep the ice out of
+              the mixer bowl.
           - id: combine-dough
-            text: Add the {{mixingIngredients}} to the spiral mixer all at once.
-          - Mix at 40% speed until the dough reads 72°F on your IR thermometer. Scrape the bowl and hook down with your bench scraper if dough climbs.
-          - 'Transfer the dough to your bench. Knead shortly, guide dough with bench scraper into the form of a ball, place in a bowl, cover with saran wrap, and allow it to rest at room temperature for 1.5h.'
+            text: 'Add the {{mixingIngredients}} to the spiral mixer all at once.'
+          - id: steps-1-item-3
+            text: >-
+              Mix at 40% speed until the dough reads 72°F on your IR thermometer. Scrape the bowl and hook down with
+              your bench scraper if dough climbs.
+          - id: steps-1-item-4
+            text: >-
+              Transfer the dough to your bench. Knead shortly, guide dough with bench scraper into the form of a ball,
+              place in a bowl, cover with saran wrap, and allow it to rest at room temperature for 1.5h.
           - id: divide-dough
             text: "Divide and shape dough into {{pieceCount}} {{pieceLabelPlural}}, shooting for {{pieceWeightGrams}} each ({{totalDoughGrams}} total dough). Pull four times in gentle circles on your unfloured bench until smooth on the top. Pinch any bottom seam that remains. Circular dough balls make circular pizzas \U0001F642 ([video](https://www.youtube.com/watch?v=Vo5OW8Xkah4&t=9s))."
-          - 'Grease your proofing container with canola oil. Transfer the dough to the container with your bench scraper. After placing in a proofing container, lightly oil your hands and gently rub the top of the dough to make it less sticky and retain moisture. Cover and place in the refrigerator for 2-3 days.'
+          - id: steps-1-item-6
+            text: >-
+              Grease your proofing container with canola oil. Transfer the dough to the container with your bench
+              scraper. After placing in a proofing container, lightly oil your hands and gently rub the top of the dough
+              to make it less sticky and retain moisture. Cover and place in the refrigerator for 2-3 days.
+        id: steps-1
       - title: Pre-Assembly
         items:
-          - 'Pizza sauce: Drain off ¼ cup of water from the can, then hand crush or mill the tomatoes to a smooth, easy-to-spread consistency. Place sauce in a small bowl and cover with saran wrap. It''s ok to freeze / refrigerate for a bit, but always bring to room temperature immediately before use to avoid gummy pizza.'
-          - 'Cheese: Grate the mozzarella and finely grate the romano.'
-          - 'Bench flour: Mix 50/50 semolina + all purpose flour in a small bowl and set aside.'
+          - id: steps-2-item-1
+            text: >-
+              Pizza sauce: Drain off ¼ cup of water from the can, then hand crush or mill the tomatoes to a smooth,
+              easy-to-spread consistency. Place sauce in a small bowl and cover with saran wrap. It's ok to freeze /
+              refrigerate for a bit, but always bring to room temperature immediately before use to avoid gummy pizza.
+          - id: steps-2-item-2
+            text: 'Cheese: Grate the mozzarella and finely grate the romano.'
+          - id: steps-2-item-3
+            text: 'Bench flour: Mix 50/50 semolina + all purpose flour in a small bowl and set aside.'
+        id: steps-2
       - title: Pizza Assembly
         items:
-          - 'The day you plan to bake, remove dough from the refrigerator and allow the dough to rest for 2 hours.'
-          - 'Preheat your oven on low for 30 minutes with rotation activated, then begin prepping the pizza.'
-          - Lightly dust your wooden peel with bench flour.
-          - Remove dough with your bench scraper and cover liberally with bench flour.
-          - 'Stretch dough to {{pizzaDiameter}} ([video](https://www.youtube.com/watch?v=Entzcl8q7H4)).'
-          - Place the dough on the peel with the rough bottom side facing up.
-          - Apply sauce to the pizza in a circular motion with a large spoon all the way to the raised portion that will become your crust.
-          - Pinch dried oregano in your fingers to oxidize and spread over the top of the sauce.
-          - 'Spread Romano cheese evenly over the entire pizza, covering as much of the sauce as possible.'
-          - 'Scatter the shredded mozzarella evenly over the top.'
+          - id: steps-3-item-1
+            text: 'The day you plan to bake, remove dough from the refrigerator and allow the dough to rest for 2 hours.'
+          - id: steps-3-item-2
+            text: 'Preheat your oven on low for 30 minutes with rotation activated, then begin prepping the pizza.'
+          - id: steps-3-item-3
+            text: Lightly dust your wooden peel with bench flour.
+          - id: steps-3-item-4
+            text: Remove dough with your bench scraper and cover liberally with bench flour.
+          - id: steps-3-item-5
+            text: 'Stretch dough to {{pizzaDiameter}} ([video](https://www.youtube.com/watch?v=Entzcl8q7H4)).'
+          - id: steps-3-item-6
+            text: Place the dough on the peel with the rough bottom side facing up.
+          - id: steps-3-item-7
+            text: >-
+              Apply sauce to the pizza in a circular motion with a large spoon all the way to the raised portion that
+              will become your crust.
+          - id: steps-3-item-8
+            text: Pinch dried oregano in your fingers to oxidize and spread over the top of the sauce.
+          - id: steps-3-item-9
+            text: 'Spread Romano cheese evenly over the entire pizza, covering as much of the sauce as possible.'
+          - id: steps-3-item-10
+            text: Scatter the shredded mozzarella evenly over the top.
+        id: steps-3
       - title: Launch / Bake
         items:
-          - 'Once the pizza is built, turn the oven off. Wait until the center of the stone reads 630°F on your IR thermometer.'
-          - 'Turn the oven back on to medium with rotation off and launch the pizza in the center of the stone. Turn rotation back off.'
-          - 'Bake for 5-6 minutes, rotating frequently. If the bottom is running ahead of the top, slide the pizza onto a screen just before the bottom reaches the doneness you want and finish the bake on the screen.'
-          - Remove the pizza from the oven with your large metal peel and place on a wire rack.
-          - 'Transfer the pizza to a cutting board, slice, and return to the wire rack to keep crispy.'
-          - Serve hot.
+          - id: steps-4-item-1
+            text: >-
+              Once the pizza is built, turn the oven off. Wait until the center of the stone reads 630°F on your IR
+              thermometer.
+          - id: steps-4-item-2
+            text: >-
+              Turn the oven back on to medium with rotation off and launch the pizza in the center of the stone. Turn
+              rotation back off.
+          - id: steps-4-item-3
+            text: >-
+              Bake for 5-6 minutes, rotating frequently. If the bottom is running ahead of the top, slide the pizza onto
+              a screen just before the bottom reaches the doneness you want and finish the bake on the screen.
+          - id: steps-4-item-4
+            text: Remove the pizza from the oven with your large metal peel and place on a wire rack.
+          - id: steps-4-item-5
+            text: 'Transfer the pizza to a cutting board, slice, and return to the wire rack to keep crispy.'
+          - id: steps-4-item-6
+            text: Serve hot.
+        id: steps-4
     notes:
-      - 'This dough formula uses Kirkland Organic All-Purpose Flour at 65% hydration and lands around 1,440g total dough, or about 480g per dough ball.'
-      - Trader Joe's whole milk low moisture mozzarella is a particularly good choice for this pizza. If the shredded cheese clumps or is difficult to distribute, freeze it briefly after shredding; this can help the strands separate.
-      - Olive oil and sugar have been withheld from this recipe due to high temperatures of the pizza oven to prevent burning. These are often employed in lower temperature ovens to improve browning.
+      - >-
+        This dough formula uses Kirkland Organic All-Purpose Flour at 65% hydration and lands around 1,440g total dough,
+        or about 480g per dough ball.
+      - >-
+        Trader Joe's whole milk low moisture mozzarella is a particularly good choice for this pizza. If the shredded
+        cheese clumps or is difficult to distribute, freeze it briefly after shredding; this can help the strands
+        separate.
+      - >-
+        Olive oil and sugar have been withheld from this recipe due to high temperatures of the pizza oven to prevent
+        burning. These are often employed in lower temperature ovens to improve browning.
       - 'Great [article](https://www.richardeaglespoon.com/articles/how-to-pizza) with a lot info.'
-      - 'Good [video](https://www.youtube.com/watch?v=TQYApZ_-P24) with more info, not always reliable but pretty informative.'
+      - >-
+        Good [video](https://www.youtube.com/watch?v=TQYApZ_-P24) with more info, not always reliable but pretty
+        informative.
       - 'Lots of info in [r/Pizza](https://www.reddit.com/r/Pizza/) from the community.'
-      - I recommend making a couple more balls than you plan to eat to start. It will take 5 bakes to settle in and making more each time will shorten the learning curve.
+      - >-
+        I recommend making a couple more balls than you plan to eat to start. It will take 5 bakes to settle in and
+        making more each time will shorten the learning curve.
     tips:
-      - If launching is tricky, build the pizza on parchment on your peel. Launch with the parchment, then slide it out after 1 minute.
+      - >-
+        If launching is tricky, build the pizza on parchment on your peel. Launch with the parchment, then slide it out
+        after 1 minute.

@@ -1,228 +1,89 @@
 # Agent Guide
 
-This repository builds multiple static recipe apps from one pnpm/Nx workspace.
-One app config marks itself as the default; other apps are selected with
-`APP_ID`.
+Eat / Yeet uses Next.js App Router and Payload with Git-owned YAML content. Local Cloudflare D1/R2 emulation is implemented; remote migration is a separate phase. `AGENTS.md` points here as the canonical project guide.
 
-`AGENTS.md` points here so all agents use one source of repo guidance.
+## Required start
 
-## Required Start
+Read `.codex/skills/implement/SKILL.md` before editing. Apply the component architecture, owned controls, theme token, and pre-final verification policies. Read `.codex/skills/design-system/SKILL.md` and `docs/design-system.md` for branded UI work.
 
-Before implementation work, read `.codex/skills/implement/SKILL.md`. It routes
-to the component architecture, owned controls, theme token, and pre-final
-verification policies for this repo.
+Read `docs/payload-local.md` for current setup, sync, migration, security, and verification commands. Implementation evidence lives under `docs/changes/payload-local`.
 
-## Layer Rules
+## Ownership and package boundaries
 
-Packages are nested under `packages/lN/name` and each package is an Nx project.
-The project name must start with the same layer number as its path and carry a
-matching `layer:lN` tag.
+Packages live under `packages/lN/name`, with matching Nx names/tags. Imports may go to the same or lower layers only. Every cross-package import needs a package dependency and TypeScript project reference. Root files orchestrate; do not create root runtime `src` files. App source can compose l0–l7, but cannot import web composition or another app.
 
-Current package stack:
+- l0 foundation: environment-free helpers.
+- l1 models: recipe/article summaries and API data models.
+- l2 recipe-domain: calculations, formatting, formula persistence, filtering/search.
+- l3 api-contract/query/static: provider-independent services, query helpers, Storybook fixture transports.
+- l4 content-model: normalized recipe/article/block view models.
+- l4 content-build: parsing, safe Markdown, source validation, derivative generation, upsert/media synchronization primitives.
+- l4 content-cms: Payload schema/access rules and provider-independent service adapters.
+- l5 ui-primitives: shared controls, navigation interface, responsive images.
+- l6 UI packages: shell, catalog, content blocks.
+- l7 features: home, search, learn, recipes/workbenches.
+- l8 web: Next route composition, request-driven Payload wiring, metadata, styles and Storybook.
+- `apps/<app>`: Git sources, app configuration and executable plugin/block registries.
 
-- `packages/l0/foundation`
-- `packages/l1/api-model`
-- `packages/l1/article-model`
-- `packages/l1/recipe-model`
-- `packages/l2/recipe-domain`
-- `packages/l3/api-contract`
-- `packages/l3/api-query`
-- `packages/l3/api-static`
-- `packages/l4/content-model`
-- `packages/l4/content-build`
-- `packages/l5/ui-primitives`
-- `packages/l6/ui-catalog`
-- `packages/l6/ui-content-blocks`
-- `packages/l6/ui-shell`
-- `packages/l7/home`
-- `packages/l7/learn`
-- `packages/l7/recipes`
-- `packages/l7/search`
-- `packages/l8/web`
+Run `pnpm boundaries` and `pnpm typecheck:ts`. The boundary checker covers aliases, dynamic literal imports, tests, app source and generated-fixture ownership. Only designated web composition entrypoints may import `@app/*`; expand that allowlist deliberately.
 
-Lower layers must not import higher layers. Cross-package imports must be
-represented in the importing package's `tsconfig.json` references and package
-dependencies. App source has its own package manifest and composite tsconfig;
-apps can compose layers l0–l7 but cannot import web composition or another app.
-The boundary checker includes app source, import types, dynamic literal imports,
-and fixture globs. Unresolved workspace imports fail. Run:
+## Runtime and Git content
 
-```bash
-pnpm run boundaries
-pnpm run typecheck:ts
-```
+Public requests must read Payload, never generated fixture JSON or source YAML. `packages/l8/web/src/next/cms.ts` is server-only. `content-cms/service.ts` returns existing view models; keep Payload types out of public contracts and UI layers. Request-driven Local API calls require `overrideAccess: false`. Privileged bootstrap/sync code stays in CLI entrypoints.
 
-## Source Ownership
+Recipes, method variants and Learn articles share the typed Payload block definitions in `content-cms/src/blocks.ts`. The storage codec in `content-model/src/storage.ts` reconstructs the common public block model and separates authored IDs from Payload IDs. Do not fork block definitions by content collection.
 
-Root files orchestrate the workspace, active app selection, scripts, and shared
-tests. App/runtime source lives in packages.
+Author-facing metadata uses native fields generated from `content-model/src/field-shapes.ts`, including calculator defaults, learning references and SEO. Keep machine fields hidden. Keep large optional learning/calculator sections in shallow child rows: D1 limits both query columns and expression depth. Preserve null/absent fields, authored IDs and numeric/text yield types through the storage codec. Hidden legacy JSON is retained for older revisions, not used by current synchronized public reads.
 
-Use the existing owner for new code:
+Git owns recipes, articles, categories, copy, navigation, author information and SEO defaults. Source images stay in Git. Generated derivatives, database/storage state and secrets are ignored. Explicit immutable `sourceId` values own record identity; preserve section/item IDs and browser storage keys. Missing source files never implicitly delete or unpublish data. Explicit states are draft/published/archived. Content is synchronized only by `content:sync`, never by server startup.
 
-- foundation helpers: `packages/l0/foundation`
-- recipe summary model: `packages/l1/recipe-model`
-- API loader/types: `packages/l1/api-model`
-- pure recipe operations: `packages/l2/recipe-domain`
-- API query client defaults, query keys, query options, and hooks:
-  `packages/l3/api-query`
-- static API helpers with app-supplied data: `packages/l3/api-static`
-- page/content view models: `packages/l4/content-model`
-- YAML/content generation: `packages/l4/content-build`
-- primitive controls: `packages/l5/ui-primitives`
-- shared UI patterns: `packages/l6/*`
-- feature composition: `packages/l7/*`
-- TanStack routes/bootstrap/styles: `packages/l8/web`
-- selected public app config adapter: `packages/l8/web/src/lib/app-config.ts`
-- app-owned config, recipe adapters, and app block registries: `apps/<app>`
-- selected API client wiring: `packages/l8/web/src/lib/api.ts`
+Sync validates all sources before writes and uploads required media before publishing references. Repeated runs must be no-ops; drift repair must preserve database IDs and authentication data. Keep old derivative objects for safe retries and older responses. There is no collection-wide atomicity and no automatic rollback of already-synchronized content after a release failure.
 
-Do not add new root `src/` files.
+Payload admin and APIs are read-only even for the owner. Owner bootstrap and recovery are CLI-only. Do not enable first-user registration, public signup, web uploads, editing, or GraphQL. Preserve origin checks, owner allowlisting, revocable sessions and lockout rules. Local security assumes a trusted OS account. Future remote hosting requires owner-only Cloudflare Access with MFA and alternate-hostname protection.
 
-## Styling
+Local launchers bind `127.0.0.1`; remote bindings are disabled. Wrangler's CLI persistence path is the parent of the `v3` directory used by `getPlatformProxy`. Keep those paths aligned. Server startup never pushes the schema; use tracked migrations and `pnpm db:migrate`.
 
-Tailwind compiles from `packages/l8/web/src/styles/global.css`.
-Use semantic theme tokens. Do not introduce raw color literals in component
-classes when a token should exist.
+`site.config.mjs` discovers `apps/<app>/app.config.mjs`. Root orchestration selects the active app. Runtime components must not import root config. Next's build config resolves the selected app's executable modules. Authored site configuration arrives through Payload. Vite and generated JSON are retained for Storybook and historical tooling only.
 
-`site-overrides.css` is for font declarations, root variables, app-specific
-surface hooks, and scoped content rules that cannot be expressed on JSX nodes.
+## Images, SEO and caching
 
-Check compiled utility availability before relying on unusual classes:
+Sharp runs only during local sync. Derivative keys include source bytes, transformation settings, Sharp/libvips versions and pipeline version. Bump the pipeline when transformations change. Never upscale ordinary responsive variants. Use the shared `<picture>` component, correct `sizes`, reserved dimensions and one primary eager/high-priority image. Keep originals out of normal delivery. Errors must be non-cacheable and must never return HTML with an image URL.
 
-```bash
-pnpm run build
-node scripts/has-class.mjs 'mt-12' 'w-[260px]'
-```
+Public content-addressed derivatives have long cache lifetimes without `immutable`, retaining browser reload/revalidation behavior. Draft/private media requires authorization. Do not make the bucket public. Remote public delivery uses a custom media domain, not `r2.dev`.
 
-`pnpm run classes` is part of the build.
+Metadata is server-rendered, uses a trusted canonical origin and strips query parameters. JSON-LD reflects the authored default recipe; never invent reviews/nutrition. Local indexing is disabled by default. SEO tests explicitly enable production indexing policy on loopback. Sitemaps include published/indexable records only. Previews require owner auth and no-store/noindex.
 
-## App Registry
+## Styling and design
 
-`apps/<app>/app.config.mjs` owns that app's origin, route, fixture, public
-asset, Doppler, Cloudflare project, copy, categories, and preview path
-configuration. `site.config.mjs` discovers app configs by convention and owns
-only active app selection plus derived exports. Root scripts import it through
-`#site-config`. Do not statically import concrete app configs from root or
-shared layers.
+Tailwind compiles `packages/l8/web/src/styles/global.css`. Use semantic tokens; avoid raw component colors. `site-overrides.css` is for fonts, root variables, scoped content and app surface hooks. Shared owned controls should remain shared across pages and Storybook.
 
-Package runtime code must not import `site.config.mjs` directly or climb to the
-workspace root. Vite injects the selected app's public runtime config as
-`__APP_CONFIG__`; web routes, stories, and SEO helpers consume it via
-`packages/l8/web/src/lib/app-config.ts`.
+`docs/design-system.md` defines Yellow + ink. Filled/outlined labels remain plain; borderless text actions use the shared unpadded, underlined treatment. Selection radii derive from an outer radius and inset. Preserve the approved yellow-icing/orange-dough favicon.
 
-Content generation is orchestrated from `scripts/build-content.mjs`. Root scripts
-resolve app-owned paths and invoke the YAML adapter. The publisher in
-`packages/l4/content-build` accepts normalized `RecipeContent[]` and
-`ArticleContent[]`, plus absolute `imagesDir` and `generatedDir` paths. It never
-discovers the repository or reads YAML itself. Keep source parsing, normalization,
-Markdown rendering, asset checks, and publication separate inside this layer.
-
-A future CMS adapter supplies the same content models and owns sanitization of
-its rich-text output. It must not leak provider types into the API/query or UI
-layers. The publisher validates slugs, collection uniqueness, output collisions,
-and local asset containment, and prepares output before replacing the previous
-valid directory. YAML uses `safeLoad`; never enable executable JavaScript tags.
-
-Vite and Storybook share root `scripts/app-build-config.mjs` for aliases and the
-public configuration allowlist. Only designated web composition entrypoints may
-import `@app/*`; add new entrypoints deliberately to the boundary guard. Shared
-runtime code cannot import root configuration or concrete app data. Web tests
-use `#web-test/*` through the explicit build/test support module outside `src`;
-the loopback static server is owned by root `test/static-server.mjs`.
-
-Generated app data belongs under `apps/<app>/generated`, never under shared
-packages. App stubs load their own app's generated `index.json` and
-`recipes/*.json`; shared layers may accept that data as input but must not own
-or import app-specific generated files.
-
-## API Access
-
-Keep reusable API and query behavior out of the app layer:
-
-- `packages/l3/api-contract` defines request, response, and service contracts.
-- `packages/l3/api-query` defines QueryClient defaults, query keys, recipe
-  query options, and React Query hooks.
-- `apps/<app>/src/recipes.stub.ts` provides the active app's fixture stub
-  implementation and loads app-owned generated fixtures.
-- `apps/<app>/src/page-blocks.ts` constructs the active app's page block
-  registry. Current apps register only shared blocks from the proper package
-  layer, but apps can add their own registrations here later.
-- Vite maps `@app/recipes` and `@app/page-blocks` to the selected app modules at
-  build time; do not reintroduce a runtime selector that statically imports
-  every app module.
-- `packages/l8/web/src/lib/api.ts` selects the active app stub and creates the
-  recipe API access object.
-
-Routes and stories may use the selected API access object from
-`packages/l8/web/src/lib/api.ts`, but should not import generated recipe data
-or fixture chunks directly. Each app gets its own stub entry point so future
-apps can swap transport behavior without changing query code.
+Check compiled utility availability with `pnpm classes` or `node scripts/has-class.mjs 'mt-12'`. These read the public Next CSS, excluding Payload admin CSS. Ignore generated Next/OpenNext output in source policy scans.
 
 ## Verification
 
-Before final commit or deploy for app, routing, UI, styling, SEO, or content
-changes, run:
+For app, routing, styling, SEO, content or dependency changes:
 
-```bash
+```sh
 pnpm test
-pnpm run test:a11y
-pnpm run test:lighthouse
+pnpm test:a11y
+pnpm test:lighthouse
+pnpm test:security
+pnpm shots
+pnpm parity
 ```
 
-For a non-default app before launch, also run:
+`pnpm test` covers design policy, units, boundaries, TypeScript, a production build, isolated sync/security integration, raw HTTP/SEO checks, browser recipe/interaction behavior and rendered Storybook with axe/play functions. Review incomplete findings in `dist/app-a11y.json` and `dist/storybook-a11y.json`; automated passes do not replace keyboard/visual review. Inspect old/new/diff screenshots before accepting a baseline. Never update baselines just to make tests green.
 
-```bash
-APP_ID=<app-id> pnpm run build
-APP_ID=<app-id> node scripts/verify-build.test.mjs
-```
+Lighthouse requires three comparable mobile production-preview runs per representative route: median performance ≥90, LCP ≤2.5 seconds, CLS ≤0.1. Record local results as local lab evidence; production network/CDN performance is separate. Image delivery reports must verify selected URLs, transfer sizes, missing/private responses and hydration downloads.
 
-Run `pnpm run test:security` after dependency changes. This checks the full
-lockfile, including build tooling. Keep advisory overrides narrowly scoped to
-affected versions and retain them until upstream resolution no longer needs them.
+Use `pnpm build:worker && pnpm preview` for a local Workers smoke test. Tests may use isolated state under `.local`; never overwrite the development owner. If a required command fails, fix it or record its exact unresolved blocker. Keep security overrides scoped to affected dependency versions.
 
-If a verification command fails, fix the cause or document the blocker.
+## Deployment and remote handoff
 
-## Deployment
+`pnpm run deploy` is intentionally blocked until the remote phase is implemented. Do not publish through direct Wrangler commands. No remote infrastructure is part of the local migration.
 
-Deploy the default app:
+The agreed remote architecture is Cloudflare Workers/D1/R2, locally executed Pulumi TypeScript, private R2 Pulumi state, Doppler secrets and local release commands. Preserve Git-only authored content and browser saves. The remote handoff must cover state bootstrap, ownership, secrets, identity/MFA, release locking/recovery, public/private media, caching, domains/SEO, backups, performance and cutover/rollback. A failed deployment does not automatically roll back synchronized content.
 
-```bash
-doppler run -p yeet -c dev -- pnpm run deploy
-```
-
-Deploy a specific app:
-
-```bash
-APP_ID=<app-id> doppler run -p yeet -c dev -- pnpm run deploy
-```
-
-Wrangler is an exact dev dependency invoked with `pnpm exec`; do not replace it
-with an unpinned package download. The deploy script builds, uploads to Cloudflare Pages, purges cache, and verifies
-the production origin.
-
-Never deploy `.output/public` manually. `pnpm run deploy` owns the production
-safety rails: it deletes any stale build output, rebuilds the selected app,
-writes a deploy identity manifest, refuses to upload if the manifest does not
-match `APP_ID`, `SITE_URL`, and the Cloudflare Pages project, and passes
-`--branch main` to Wrangler so deployments from an isolated worktree still
-target the production Pages branch instead of a preview alias. This prevents
-build output for one app from being uploaded to another app's production
-project.
-
-## Design system
-
-`docs/design-system.md` is the approved Yellow + ink usage contract. Read
-`.codex/skills/design-system/SKILL.md` for branded UI or handbook changes. Keep
-app controls and colocated stories in sync; never add a second feature palette.
-Filled and outlined button labels stay plain. Borderless text actions use the
-shared unpadded, underlined treatment in every interactive state. Selection radii derive
-from one outer radius and inset. The approved favicon has yellow icing and
-golden-orange dough.
-
-`pnpm test` includes `test:design-system` and rendered Storybook checks with axe
-and play functions. Review `dist/storybook-a11y.json`, including incomplete
-findings, and `pnpm shots` desktop/mobile app output. For visual changes inspect
-old/new/diff, then deliberately update only reviewed baselines. Never update
-baselines merely to turn a test green. Run `pnpm parity` against the reviewed
-baseline before finalizing a visual release. Full app accessibility requires
-keyboard and visual review in addition to automated reports.
+After a future deployment, run `pnpm verify:prod [origin]` once its legacy Pages assertions have been migrated to the Worker release contract. Do not claim current legacy production checks certify the new runtime.

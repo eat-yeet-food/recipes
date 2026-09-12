@@ -1,3 +1,4 @@
+'use client'
 import { buttonVariants } from '@eat-yeet/l5-ui-primitives/primitives/button'
 /**
  * The dead ends a visitor can reach, styled as one thing.
@@ -11,7 +12,7 @@ import { buttonVariants } from '@eat-yeet/l5-ui-primitives/primitives/button'
  * happened in a sentence, and offers a way out. A dead end with no exit is the
  * part that actually loses people.
  */
-import { Link } from '@tanstack/react-router'
+import { Link } from '@eat-yeet/l5-ui-primitives/primitives/navigation'
 
 import { ArrowRight } from 'lucide-react'
 

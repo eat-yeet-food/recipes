@@ -20,6 +20,9 @@
     },
     {
       "path": "../../l2/recipe-domain/tsconfig.json"
+    },
+    {
+      "path": "../../l5/ui-primitives/tsconfig.json"
     }
   ],
   "include": [

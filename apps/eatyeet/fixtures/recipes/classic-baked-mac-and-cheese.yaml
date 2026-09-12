@@ -1,3 +1,5 @@
+sourceId: 'recipes:classic-baked-mac-and-cheese'
+status: published
 slug: classic-baked-mac-and-cheese
 title: Classic Baked Mac & Cheese
 order: 2
@@ -31,32 +33,70 @@ blocks:
     ingredients:
       - title: Pasta
         items:
-          - 8 oz fusilli
+          - id: ingredients-1-item-1
+            text: 8 oz fusilli
+        id: ingredients-1
       - title: Cheese Sauce
         items:
-          - 4 tbsp unsalted butter
-          - 3 tbsp all-purpose flour
-          - '2 cups whole milk, warmed'
-          - 1 bay leaf
-          - '6 oz sharp cheddar, grated'
-          - ¼ tsp mustard powder
-          - 4g fine sea salt
+          - id: ingredients-2-item-1
+            text: 4 tbsp unsalted butter
+          - id: ingredients-2-item-2
+            text: 3 tbsp all-purpose flour
+          - id: ingredients-2-item-3
+            text: '2 cups whole milk, warmed'
+          - id: ingredients-2-item-4
+            text: 1 bay leaf
+          - id: ingredients-2-item-5
+            text: '6 oz sharp cheddar, grated'
+          - id: ingredients-2-item-6
+            text: ¼ tsp mustard powder
+          - id: ingredients-2-item-7
+            text: 4g fine sea salt
+        id: ingredients-2
       - title: Topping
         items:
-          - ½ cup panko breadcrumbs
-          - '2 Tbsp Parmesan, grated'
-          - '1 tbsp unsalted butter, melted'
+          - id: ingredients-3-item-1
+            text: ½ cup panko breadcrumbs
+          - id: ingredients-3-item-2
+            text: '2 Tbsp Parmesan, grated'
+          - id: ingredients-3-item-3
+            text: '1 tbsp unsalted butter, melted'
+        id: ingredients-3
     steps:
       - title: ''
         items:
-          - Heat oven to 425°F and butter a 2-quart baking dish. Boil the fusilli in well-salted water 2 minutes short of al dente — it finishes in the oven. Drain and set aside.
-          - Warm the milk to 150°F in a glass measuring cup in the microwave. Add the bay leaf and let it steep while you make the roux.
-          - 'Melt the butter over medium heat. Whisk in the flour and mustard powder and cook, whisking constantly, until it smells nutty but stays pale, 1–2 min.'
-          - 'Remove the bay leaf. Gradually whisk in the warm milk, a splash at a time at first to prevent lumps. Cook, whisking often, until the sauce coats the back of a spoon, about 5 min.'
-          - 'Off the heat, whisk in the fine sea salt. Add the cheddar in handfuls, stirring until smooth. Keep the pan off direct heat so the cheese doesn''t break.'
-          - Fold in the drained pasta — it should look loose and saucy. Scrape into the baking dish and level the top.
-          - 'In a skillet over medium heat, melt the butter and toast the panko, stirring, until evenly golden, 3–4 min. Off the heat, stir in the Parmesan. Scatter evenly over the assembled dish.'
-          - 'Bake at 425°F for 10–15 min, until bubbling at the edges. The panko is already toasted so watch it — pull before it gets too dark.'
-          - Rest 8–10 min before serving so the sauce sets.
+          - id: steps-1-item-1
+            text: >-
+              Heat oven to 425°F and butter a 2-quart baking dish. Boil the fusilli in well-salted water 2 minutes short
+              of al dente — it finishes in the oven. Drain and set aside.
+          - id: steps-1-item-2
+            text: >-
+              Warm the milk to 150°F in a glass measuring cup in the microwave. Add the bay leaf and let it steep while
+              you make the roux.
+          - id: steps-1-item-3
+            text: >-
+              Melt the butter over medium heat. Whisk in the flour and mustard powder and cook, whisking constantly,
+              until it smells nutty but stays pale, 1–2 min.
+          - id: steps-1-item-4
+            text: >-
+              Remove the bay leaf. Gradually whisk in the warm milk, a splash at a time at first to prevent lumps. Cook,
+              whisking often, until the sauce coats the back of a spoon, about 5 min.
+          - id: steps-1-item-5
+            text: >-
+              Off the heat, whisk in the fine sea salt. Add the cheddar in handfuls, stirring until smooth. Keep the pan
+              off direct heat so the cheese doesn't break.
+          - id: steps-1-item-6
+            text: Fold in the drained pasta — it should look loose and saucy. Scrape into the baking dish and level the top.
+          - id: steps-1-item-7
+            text: >-
+              In a skillet over medium heat, melt the butter and toast the panko, stirring, until evenly golden, 3–4
+              min. Off the heat, stir in the Parmesan. Scatter evenly over the assembled dish.
+          - id: steps-1-item-8
+            text: >-
+              Bake at 425°F for 10–15 min, until bubbling at the edges. The panko is already toasted so watch it — pull
+              before it gets too dark.
+          - id: steps-1-item-9
+            text: Rest 8–10 min before serving so the sauce sets.
+        id: steps-1
     notes: []
     tips: []
