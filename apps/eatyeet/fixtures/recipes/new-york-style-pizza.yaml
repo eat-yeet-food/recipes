@@ -54,7 +54,7 @@ workbench:
         pieceLabel: ball
       formula:
         family: pizza
-        hydrationPercent: 68
+        hydrationPercent: 65
         saltPercent: 2
         oilPercent: 0
         sugarPercent: 0
@@ -68,7 +68,7 @@ workbench:
     recommendedFormulas:
       outdoor-oven:
         family: pizza
-        hydrationPercent: 68
+        hydrationPercent: 65
         saltPercent: 2
         oilPercent: 0
         sugarPercent: 0
@@ -81,7 +81,7 @@ workbench:
             percent: 100
       indoor-steel:
         family: pizza
-        hydrationPercent: 65
+        hydrationPercent: 63
         saltPercent: 2
         oilPercent: 2
         sugarPercent: 0
@@ -89,8 +89,8 @@ workbench:
         yeastPercent: 0.25
         levainPercent: 0
         flour:
-          - id: king-arthur-high-gluten
-            name: King Arthur High-Gluten Flour
+          - id: kirkland-organic-all-purpose
+            name: Kirkland Organic All-Purpose Flour
             percent: 100
 learning:
   mixing:
@@ -107,7 +107,7 @@ defaultMethod: outdoor-oven
 methodOptions:
   - id: outdoor-oven
     label: Outdoor Oven
-    description: 'A high-hydration New York-style pizza dough mixed cold, fermented for 2-3 days, and baked hot with tomato sauce, Trader Joe''s low moisture whole milk mozzarella, pecorino romano, and oregano.'
+    description: 'A 65% hydration New York-style pizza dough mixed cold, fermented for 2-3 days, and baked hot with tomato sauce, Trader Joe''s low moisture whole milk mozzarella, pecorino romano, and oregano.'
     prepMinutes: 4590
     cookMinutes: 6
     totalMinutes: 4596
@@ -115,7 +115,7 @@ methodOptions:
     yieldUnit: 16-inch pizzas
   - id: indoor-steel
     label: Indoor Steel
-    description: 'A home-oven New York-style pizza dough for a baking steel: 65% hydration, 2% canola oil, a 2-3 day cold ferment, tomato sauce, Trader Joe''s low moisture whole milk mozzarella, pecorino romano, and oregano.'
+    description: 'A home-oven New York-style pizza dough for a baking steel: 63% hydration, 2% canola oil, a 2-3 day cold ferment, tomato sauce, Trader Joe''s low moisture whole milk mozzarella, pecorino romano, and oregano.'
     prepMinutes: 4590
     cookMinutes: 7
     totalMinutes: 4597
@@ -143,11 +143,11 @@ methodOptions:
           - id: dough
             title: Dough
             items:
-              - '852g King Arthur High-Gluten Flour'
-              - 554g cold water
-              - 17g canola oil
-              - '3/4 tsp [SAF gold instant yeast](https://a.co/d/j9mxG9d)'
-              - '17g fine sea salt'
+              - '861g [Kirkland Organic All-Purpose Flour](https://www.costco.com/p/-/kirkland-signature-organic-unbleached-all-purpose-flour-10-lbs-2-count/4000063331.)'
+              - 542g cold water
+              - 17.2g canola oil
+              - '2.15g [SAF gold instant yeast](https://a.co/d/j9mxG9d)'
+              - '17.2g fine sea salt'
           - id: sauce-batch
             title: Pizza Sauce
             items:
@@ -202,7 +202,7 @@ methodOptions:
               - Transfer the pizza to a cutting board, slice, and return to the wire rack to keep crispy.
               - Serve hot.
         notes:
-          - This dough formula uses King Arthur High-Gluten Flour at 65% hydration with 2% canola oil and lands around 1,440g total dough, or about 480g per dough ball.
+          - This dough formula uses Kirkland Organic All-Purpose Flour at 63% hydration with 2% canola oil and lands around 1,440g total dough, or about 480g per dough ball.
           - Trader Joe's whole milk low moisture mozzarella is a particularly good choice for this pizza. If the shredded cheese clumps or is difficult to distribute, freeze it briefly after shredding; this can help the strands separate.
           - The canola oil is here because this version bakes at home-oven temperatures. It helps browning and tenderness on a baking steel.
           - Great [article](https://www.richardeaglespoon.com/articles/how-to-pizza) with a lot info.
@@ -235,10 +235,10 @@ blocks:
       - id: dough
         title: Dough
         items:
-          - '847g [Kirkland Organic All-Purpose Flour](https://www.costco.com/p/-/kirkland-signature-organic-unbleached-all-purpose-flour-10-lbs-2-count/4000063331.)'
-          - 576g cold water
-          - '3/4 tsp [SAF gold instant yeast](https://a.co/d/j9mxG9d)'
-          - '17g fine sea salt'
+          - '861g [Kirkland Organic All-Purpose Flour](https://www.costco.com/p/-/kirkland-signature-organic-unbleached-all-purpose-flour-10-lbs-2-count/4000063331.)'
+          - 560g cold water
+          - '2.15g [SAF gold instant yeast](https://a.co/d/j9mxG9d)'
+          - '17.2g fine sea salt'
       - id: sauce-batch
         title: Pizza Sauce
         items:
@@ -293,7 +293,7 @@ blocks:
           - 'Transfer the pizza to a cutting board, slice, and return to the wire rack to keep crispy.'
           - Serve hot.
     notes:
-      - 'This dough formula uses Kirkland Organic All-Purpose Flour at 68% hydration and lands around 1,440g total dough, or about 480g per dough ball.'
+      - 'This dough formula uses Kirkland Organic All-Purpose Flour at 65% hydration and lands around 1,440g total dough, or about 480g per dough ball.'
       - Trader Joe's whole milk low moisture mozzarella is a particularly good choice for this pizza. If the shredded cheese clumps or is difficult to distribute, freeze it briefly after shredding; this can help the strands separate.
       - Olive oil and sugar have been withheld from this recipe due to high temperatures of the pizza oven to prevent burning. These are often employed in lower temperature ovens to improve browning.
       - 'Great [article](https://www.richardeaglespoon.com/articles/how-to-pizza) with a lot info.'
