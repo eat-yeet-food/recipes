@@ -1,7 +1,16 @@
 import { spawnSync } from 'node:child_process'
-import { randomBytes, scryptSync, createCipheriv, createDecipheriv } from 'node:crypto'
+import { randomBytes, scryptSync, createCipheriv, createDecipheriv, createHash } from 'node:crypto'
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { cloudflareAPI } from './cloudflare.mjs'
+
+// Cloudflare documents the token ID and SHA-256 of its value as S3 credentials.
+// Only use this for user API tokens that include Workers R2 Storage permissions.
+export async function r2CredentialsFromToken(token, api = cloudflareAPI(token)) {
+  const { result } = await api('/user/tokens/verify')
+  if (result?.status !== 'active' || !/^[a-f0-9]{32}$/.test(result.id)) throw new Error('An active Cloudflare user API token with a valid ID is required')
+  return { R2_ACCESS_KEY_ID: result.id, R2_SECRET_ACCESS_KEY: createHash('sha256').update(token).digest('hex') }
+}
 
 export async function hiddenInput(label) {
   if (!process.stdin.isTTY) throw new Error('An interactive terminal is required for secret enrollment')
@@ -39,7 +48,7 @@ export function keychain(action, account, value) {
   return action === 'get' ? JSON.parse(result.stdout) : undefined
 }
 export function seal(value, passphrase) {
-  if (passphrase.length < 16) throw new Error('Recovery passphrase must contain at least 16 characters')
+  if (passphrase.length < 9) throw new Error('Recovery passphrase must contain at least 9 characters')
   const salt = randomBytes(32), iv = randomBytes(12)
   const key = scryptSync(passphrase, salt, 32)
   const cipher = createCipheriv('aes-256-gcm', key, iv)
@@ -53,9 +62,9 @@ export function unseal(envelope, passphrase) {
   decipher.setAuthTag(decode('tag'))
   return JSON.parse(Buffer.concat([decipher.update(decode('ciphertext')), decipher.final()]).toString())
 }
-export async function credentialsCommand(environment, action, path) {
+export async function credentialsCommand(environment, action, path, { deriveR2 = false } = {}) {
   if (action === 'export') {
-    const password = await hiddenInput('Separate recovery passphrase (16+ characters)')
+    const password = await hiddenInput('Separate recovery passphrase (9+ characters)')
     if (password !== await hiddenInput('Repeat recovery passphrase')) throw new Error('Passphrases differ')
     const enrolled = { ...keychain('get', environment), RECOVERY_EXPORTED_AT: new Date().toISOString() }
     writeFileSync(path, JSON.stringify(seal(enrolled, password)), { mode: 0o600, flag: 'wx' })
@@ -65,9 +74,14 @@ export async function credentialsCommand(environment, action, path) {
     keychain('set', environment, unseal(JSON.parse(readFileSync(path, 'utf8')), await hiddenInput('Recovery passphrase')))
   } else if (action === 'enroll') {
     const credentials = {}
-    for (const name of ['CLOUDFLARE_API_TOKEN', 'R2_ACCESS_KEY_ID', 'R2_SECRET_ACCESS_KEY', 'PULUMI_CONFIG_PASSPHRASE']) {
+    for (const name of deriveR2 ? ['CLOUDFLARE_API_TOKEN'] : ['CLOUDFLARE_API_TOKEN', 'R2_ACCESS_KEY_ID', 'R2_SECRET_ACCESS_KEY', 'PULUMI_CONFIG_PASSPHRASE']) {
       credentials[name] = await hiddenInput(name)
       if (!credentials[name]) throw new Error(`${name} is required`)
+    }
+    if (deriveR2) {
+      credentials.CLOUDFLARE_API_TOKEN = credentials.CLOUDFLARE_API_TOKEN.trim()
+      Object.assign(credentials, await r2CredentialsFromToken(credentials.CLOUDFLARE_API_TOKEN))
+      credentials.PULUMI_CONFIG_PASSPHRASE = randomBytes(48).toString('base64url')
     }
     credentials.PAYLOAD_SECRET = randomBytes(48).toString('hex')
     credentials.RELEASE_VERIFY_SECRET = randomBytes(48).toString('hex')

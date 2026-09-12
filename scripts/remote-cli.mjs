@@ -13,7 +13,7 @@ import { databaseBackup, readBackup } from './remote/backups.mjs'
 import { acceptStaging, rehearseRestore } from './remote/acceptance.mjs'
 
 const { values, positionals } = parseArgs({ allowPositionals: true, options: {
-  env: { type: 'string' }, resume: { type: 'string' }, rollback: { type: 'string' },
+  env: { type: 'string' }, resume: { type: 'string' }, rollback: { type: 'string' }, 'derive-r2': { type: 'boolean' },
   backup: { type: 'string' }, bookmark: { type: 'string' }, 'owner-reviewed': { type: 'boolean' }, 'writer-stopped': { type: 'boolean' },
 } })
 const [action, operation, file] = positionals
@@ -23,7 +23,7 @@ const validCommands = { credentials: ['enroll', 'export', 'import'], inventory: 
 if (action !== 'recover-lock' && !validCommands[action]?.includes(operation)) throw new Error('Unknown remote command; see docs/payload-remote.md')
 const environment = environmentName(values.env)
 if (action === 'credentials') {
-  await credentialsCommand(environment, operation, file)
+  await credentialsCommand(environment, operation, file, { deriveR2: values['derive-r2'] })
 } else {
   const credentials = keychain('get', environment)
   const api = cloudflareAPI(credentials.CLOUDFLARE_API_TOKEN)

@@ -15,10 +15,11 @@ export function cloudflareAPI(token) {
 export async function listAll(api, path) {
   const items = []
   for (let page = 1; ; page++) {
-    const data = await api(`${path}${path.includes('?') ? '&' : '?'}page=${page}&per_page=50`)
+    // Pages rejects larger page sizes; its verified default is 10.
+    const data = await api(`${path}${path.includes('?') ? '&' : '?'}page=${page}&per_page=10`)
     const rows = Array.isArray(data.result) ? data.result : data.result?.buckets ?? []
     items.push(...rows)
-    if (!data.result_info || page >= data.result_info.total_pages || rows.length < 50) return items
+    if (!data.result_info || page >= data.result_info.total_pages || rows.length < 10) return items
   }
 }
 export async function inventory(api, { allowPartial = false } = {}) {

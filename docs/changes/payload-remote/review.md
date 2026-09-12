@@ -53,4 +53,14 @@ Still required: scoped bootstrap/staging/production API and R2 credentials, sepa
 
 A metadata-only Keychain lookup confirmed that `com.eatyeet.release` entries for `bootstrap`, `staging`, and `production` are absent (status 44). No secret values were read or displayed by that check. The user was asked about enrollment; credentials must be entered in the local interactive command, never in chat.
 
+### Credential enrollment follow-up
+
+The owner subsequently created the reviewed `Eat Yeet bootstrap` token, enrolled it through the local hidden terminal prompt, and exported `.local/remote/bootstrap/recovery.json`. The encrypted export exists with mode 0600 and its completion timestamp is registered in the bootstrap Keychain entry. No token or recovery passphrase was printed. The owner requested a 9-character recovery minimum; this is implemented and boundary-tested. The independently generated Pulumi passphrase retains its original entropy.
+
+Enrollment now supports `--derive-r2`: it verifies an active user API token and derives its S3 access ID/secret using Cloudflare's documented token ID and SHA-256 mapping. R2 permissions are still required. Credential/recovery and remote release tests pass (22 tests). Staging and production credentials have not yet been enrolled.
+
+Authenticated inventory exposed a pagination bug, not a Pages permission failure: the API rejected `per_page=50` and `25`, but accepted `10` and returned its default size as 10. The common inventory page size is now 10. The existing Pages project is `eatyeet` (`e835ec8d-674f-4b10-84a3-fe0c931beb5a`), with `eatyeet.com`, `www.eatyeet.com`, and `eatyeet.pages.dev`, production branch `main`, no Git source configuration, and no deploy hooks. Both public DNS names are proxied CNAMEs to `eatyeet.pages.dev`. No DNS or Pages settings have been changed.
+
+The remaining API errors are account activation prerequisites: R2 returns 10042, "Please enable R2 through the Cloudflare Dashboard"; Access returns 9999 with `access.api.error.not_enabled`. Thus the enrolled token is valid, but these products have not been enabled. R2 checkout displays $0 due now, 10 GB-month storage, 1 million Class A and 10 million Class B operations included monthly, then usage charges. Zero Trust Free is being prepared; accepting subscription terms requires owner confirmation before activation. No subscription has been activated by the agent.
+
 The operator guide documents conservative recovery limitations: lost-host writer recovery requires credential revocation and operation review; application rollback preserves migrations/content; older exports require verified isolated restoration before database replacement. The exact live legacy route rollback must be finalized from full inventory before cutover.

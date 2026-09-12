@@ -1,6 +1,6 @@
 # Cloudflare remote operations
 
-Implementation is on `codex/payload-remote`. Wrangler authentication and partial account inventory are complete. **Provisioning, MFA review, staging rehearsal and production cutover have not been performed.** OAuth lacks the permissions needed for complete inventory; scoped deployment credentials and recovery exports remain prerequisites. Do not treat local tests as production acceptance. See `docs/changes/payload-remote/review.md` for current evidence and blockers.
+Implementation is on `codex/payload-remote`. Wrangler authentication, bootstrap Keychain enrollment and its encrypted recovery export are complete. Partial inventory has identified the existing Pages deployment and DNS. **R2 and Access still require account activation; provisioning, MFA review, staging rehearsal and production cutover have not been performed.** Staging/production credential enrollment also remains necessary. Do not treat local tests as production acceptance. See `docs/changes/payload-remote/review.md` for current evidence and blockers.
 
 Local development remains documented in `docs/payload-local.md`. Ordinary `dev`, `build`, `preview`, `content:sync` and `db:migrate` use local bindings. Remote commands require an explicit environment. No Doppler project, CLI wrapper or runtime integration is used.
 
@@ -18,7 +18,15 @@ pnpm remote:credentials export /path/to/offline/bootstrap-recovery.json --env bo
 pnpm remote:inventory --env bootstrap
 ```
 
-Repeat credential enrollment/export for `staging` and `production`. Each entry contains a scoped Cloudflare API token, R2 access key/secret, Pulumi encryption passphrase, Payload secret and release-verification secret. Enrollment refuses to overwrite an existing entry. Recovery import deliberately restores an existing entry:
+Repeat credential enrollment/export for `staging` and `production`. Each entry contains a scoped Cloudflare API token, R2 access key/secret, Pulumi encryption passphrase, Payload secret and release-verification secret. Enrollment refuses to overwrite an existing entry.
+
+For user API tokens with Workers R2 Storage permissions, `pnpm remote:credentials enroll --env bootstrap --derive-r2` needs only the API token. It verifies that the token is active, derives R2 credentials using Cloudflare's documented token-ID/SHA-256 mapping, and generates the state encryption passphrase in memory. Use distinct tokens for each environment. Export a recovery copy immediately afterward; the generated state passphrase is only in Keychain and that encrypted export. This option does not create permissions or prove R2 is enabled; complete inventory before provisioning. Without the flag, enrollment continues to accept separately issued R2 credentials and a manually entered state passphrase.
+
+See [Cloudflare's R2 token derivation documentation](https://developers.cloudflare.com/r2/api/tokens/#get-s3-api-credentials-from-an-api-token).
+
+Recovery passphrases require at least 9 characters, as requested by the owner. The generated Pulumi state encryption passphrase remains independent of this recovery passphrase.
+
+Recovery import deliberately restores an existing entry:
 
 ```sh
 pnpm remote:credentials import /path/to/offline/staging-recovery.json --env staging
