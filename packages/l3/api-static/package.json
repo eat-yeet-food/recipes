@@ -5,5 +5,10 @@
   "exports": {
     "./articles": "./src/articles.ts",
     "./recipes": "./src/recipes.ts"
+  },
+  "dependencies": {
+    "@eat-yeet/l1-article-model": "workspace:*",
+    "@eat-yeet/l1-recipe-model": "workspace:*",
+    "@eat-yeet/l3-api-contract": "workspace:*"
   }
 }

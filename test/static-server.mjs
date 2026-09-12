@@ -1,61 +1,76 @@
-/**
- * Minimal static server for exercising the web build over real HTTP, where
- * absolute asset paths and separate requests behave as they will in production.
- * Resolves clean URLs to their prerendered index.html the way Pages does.
- */
-
+/** Loopback-only preview/test server for the static Pages output. */
 import { createServer } from 'node:http'
-import { readFileSync, statSync } from 'node:fs'
-import { join, extname, normalize } from 'node:path'
+import { existsSync, readFileSync, realpathSync, statSync } from 'node:fs'
+import { extname, isAbsolute, join, relative, resolve } from 'node:path'
 
 const TYPES = {
-  '.html': 'text/html; charset=utf-8',
-  '.js': 'text/javascript; charset=utf-8',
-  '.css': 'text/css; charset=utf-8',
-  '.woff2': 'font/woff2',
-  '.webp': 'image/webp',
-  '.jpg': 'image/jpeg',
-  '.svg': 'image/svg+xml',
+  '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
+  '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.woff2': 'font/woff2',
+  '.webp': 'image/webp', '.jpg': 'image/jpeg', '.png': 'image/png', '.svg': 'image/svg+xml',
+}
+const inside = (file, root) => {
+  const rel = relative(root, file)
+  return rel === '' || (rel !== '..' && !rel.startsWith('../') && !isAbsolute(rel))
 }
 
-/** Serves `dir` on an ephemeral port. Resolves to { url, close }. */
-export function startStatic(dir, port = 0) {
+function headerRules(root) {
+  const file = join(root, '_headers')
+  if (!existsSync(file)) return []
+  const rules = []
+  for (const line of readFileSync(file, 'utf8').split('\n')) {
+    if (line.startsWith('/')) rules.push({ path: line.trim(), headers: {} })
+    else if (/^\s+[^:]+:/.test(line) && rules.length) {
+      const split = line.indexOf(':')
+      rules.at(-1).headers[line.slice(0, split).trim().toLowerCase()] = line.slice(split + 1).trim()
+    }
+  }
+  return rules
+}
+
+/** Serves an existing directory; startup errors reject and malformed requests return 400. */
+export async function startStatic(dir, port = 0) {
+  const root = realpathSync(dir)
+  const rules = headerRules(root)
   const server = createServer((req, res) => {
-    const path = decodeURIComponent(new URL(req.url, 'http://localhost').pathname)
-    if (path === '/favicon.ico') {
-      res.writeHead(204).end()
+    let path
+    try {
+      path = decodeURIComponent(new URL(req.url, 'http://localhost').pathname)
+      if (path.includes('\0') || path.includes('\\') || path.split('/').includes('..')) throw new Error('invalid path')
+    } catch {
+      res.writeHead(400, { 'content-type': 'text/plain' }).end('bad request')
       return
     }
-    // normalize() collapses any ../ before it can escape the served directory.
-    const file = join(dir, normalize(path).replace(/^(\.\.[/\\])+/, ''))
-
-    // Clean URLs resolve to a directory's index.html, which is what Cloudflare
-    // Pages does for prerendered routes like /recipes/<slug>.
-    let target = file
-    try {
-      if (path.endsWith('/') || statSync(file).isDirectory()) target = join(file, 'index.html')
-    } catch {
-      target = file
+    if (req.method !== 'GET' && req.method !== 'HEAD') {
+      res.writeHead(405, { allow: 'GET, HEAD' }).end()
+      return
     }
-
+    if (path === '/favicon.ico') { res.writeHead(204).end(); return }
+    const headers = {}
+    for (const rule of rules) {
+      if (rule.path === path || (rule.path.endsWith('*') && path.startsWith(rule.path.slice(0, -1)))) {
+        for (const [name, value] of Object.entries(rule.headers)) headers[name] = headers[name] ? `${headers[name]}, ${value}` : value
+      }
+    }
+    const sendFile = (target, status) => {
+      if (!inside(realpathSync(target), root) || !statSync(target).isFile()) throw new Error('not a public file')
+      const content = readFileSync(target)
+      res.writeHead(status, { ...headers, 'content-type': TYPES[extname(target)] ?? 'application/octet-stream', ...(status === 404 ? { 'cache-control': 'no-store' } : {}) })
+      res.end(req.method === 'HEAD' ? undefined : content)
+    }
+    const file = resolve(root, '.' + path)
     try {
-      if (!statSync(target).isFile()) throw new Error('not a file')
-      res.writeHead(200, { 'content-type': TYPES[extname(target)] ?? 'application/octet-stream' })
-      res.end(readFileSync(target))
+      if (!inside(file, root)) throw new Error('outside public root')
+      sendFile(statSync(file).isDirectory() ? join(file, 'index.html') : file, 200)
     } catch {
-      res.writeHead(404, { 'content-type': 'text/plain' })
-      res.end('not found')
+      try { sendFile(join(root, '404.html'), 404) } catch {
+        res.writeHead(404, { ...headers, 'content-type': 'text/plain', 'cache-control': 'no-store' }).end(req.method === 'HEAD' ? undefined : 'not found')
+      }
     }
   })
-
-  // Port 0 lets the OS pick a free one, which is what the tests want; the local
-  // preview server passes a fixed port so the URL is stable across restarts.
-  return new Promise((resolve) => {
+  return new Promise((done, reject) => {
+    server.once('error', reject)
     server.listen(port, '127.0.0.1', () => {
-      resolve({
-        url: `http://127.0.0.1:${server.address().port}/`,
-        close: () => new Promise((done) => server.close(done)),
-      })
+      done({ url: `http://127.0.0.1:${server.address().port}/`, close: () => new Promise((closed, fail) => server.close((error) => error ? fail(error) : closed())) })
     })
   })
 }

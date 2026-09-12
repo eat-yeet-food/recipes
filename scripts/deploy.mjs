@@ -73,7 +73,7 @@ const expected = localAssets()
 if (expected.length === 0) throw new Error('no /build/* assets found in .output/public/index.html')
 
 step(`deploy .output/public -> ${PROJECT} production (${PRODUCTION_BRANCH})`)
-execFileSync('npx', ['wrangler', 'pages', 'deploy', OUT, '--project-name', PROJECT, '--branch', PRODUCTION_BRANCH], {
+execFileSync('pnpm', ['exec', 'wrangler', 'pages', 'deploy', OUT, '--project-name', PROJECT, '--branch', PRODUCTION_BRANCH], {
   stdio: 'inherit',
 })
 

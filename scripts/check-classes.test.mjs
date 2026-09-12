@@ -97,6 +97,10 @@ catches(
 )
 
 // --- things that are not classes and must not be reported ---------------
+allows('ignores test prose and fixtures', { 'behavior.test.ts': 'it("static list limiting behavior", () => {})' })
+allows('ignores installed dependencies', { 'node_modules/vendor/a.tsx': 'export const A = () => <div className="mt-999" />' })
+catches('checks app-owned components', { '../apps/demo/src/a.tsx': 'export const A = () => <div className="mt-999" />' }, 'mt-999')
+
 allows('clean file', { 'a.tsx': `export const A = () => <div className="flex gap-10 hidden w-[260px] shrink-0 lg:block" />` })
 
 allows('data strings that look like classes', {

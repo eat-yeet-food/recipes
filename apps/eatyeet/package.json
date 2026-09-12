@@ -1,0 +1,15 @@
+{
+  "name": "@eat-yeet/app-eatyeet",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@eat-yeet/l2-recipe-domain": "workspace:*",
+    "@eat-yeet/l3-api-contract": "workspace:*",
+    "@eat-yeet/l3-api-static": "workspace:*",
+    "@eat-yeet/l4-content-model": "workspace:*",
+    "@eat-yeet/l5-ui-primitives": "workspace:*",
+    "@eat-yeet/l7-recipes": "workspace:*",
+    "lucide-react": "^1.33.0",
+    "react": "^19.0.0"
+  }
+}

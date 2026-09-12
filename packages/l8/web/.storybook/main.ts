@@ -2,23 +2,12 @@ import type { StorybookConfig } from '@storybook/react-vite'
 import tailwindcss from '@tailwindcss/vite'
 import { mergeConfig, type PluginOption } from 'vite'
 import { fileURLToPath, URL } from 'node:url'
-import { ACTIVE_APP, APP_ID, APP_PATHS } from '../../../../site.config.mjs'
+import { ACTIVE_APP, APP_PATHS } from '../../../../site.config.mjs'
+import { appBuildConfig } from '../../../../scripts/app-build-config.mjs'
 
-const webSrc = fileURLToPath(new URL('../src', import.meta.url))
 const routerMock = fileURLToPath(new URL('../src/storybook/router-mock.tsx', import.meta.url))
-const activeRecipeModule = fileURLToPath(new URL(`../../../../apps/${APP_ID}/src/recipes.stub.ts`, import.meta.url))
-const activePageBlocksModule = fileURLToPath(new URL(`../../../../apps/${APP_ID}/src/page-blocks.ts`, import.meta.url))
-const activeRecipeWorkbenchesModule = fileURLToPath(new URL(`../../../../apps/${APP_ID}/src/recipe-workbenches.ts`, import.meta.url))
+const appBuild = appBuildConfig(ACTIVE_APP)
 const appOnlyPluginPattern = /(tanstack|nitro|suppress-module-directive)/i
-const publicAppConfig = {
-  id: ACTIVE_APP.id,
-  siteName: ACTIVE_APP.siteName,
-  siteUrl: ACTIVE_APP.siteUrl,
-  defaultOgImage: ACTIVE_APP.defaultOgImage,
-  analytics: ACTIVE_APP.analytics,
-  copy: ACTIVE_APP.copy,
-  categories: ACTIVE_APP.categories,
-}
 
 function withoutAppOnlyPlugins(plugins: PluginOption[] = []): PluginOption[] {
   return plugins
@@ -46,17 +35,11 @@ const config: StorybookConfig = {
       },
       {
         plugins: [tailwindcss()],
-        define: {
-          __APP_ID__: JSON.stringify(APP_ID),
-          __APP_CONFIG__: JSON.stringify(publicAppConfig),
-        },
+        define: appBuild.define,
         resolve: {
           alias: [
             { find: '@tanstack/react-router', replacement: routerMock },
-            { find: '@app/recipes', replacement: activeRecipeModule },
-            { find: '@app/page-blocks', replacement: activePageBlocksModule },
-            { find: '@app/recipe-workbenches', replacement: activeRecipeWorkbenchesModule },
-            { find: '@', replacement: webSrc },
+            ...appBuild.alias,
           ],
         },
       },

@@ -14,7 +14,7 @@
     "build": "pnpm run content && HOST=127.0.0.1 vite build && node scripts/copy-public.mjs && node scripts/check-classes.mjs && pnpm run boundaries && pnpm run typecheck:ts && node scripts/prerender.mjs && node scripts/build-seo.mjs",
     "preview": "HOST=127.0.0.1 vite preview",
     "test": "pnpm run test:design-system && pnpm run test:unit && pnpm run build && node scripts/check-classes.test.mjs && node scripts/verify-build.test.mjs && node test/seo-pages.test.mjs && node packages/l8/web/src/routes/interact.test.mjs && node 'packages/l8/web/src/routes/recipes/$slug/recipe-pages.test.mjs' && pnpm run test:storybook",
-    "test:unit": "node --test packages/l8/web/src/lib/seo.test.ts packages/l4/content-build/src/parse.test.mjs packages/l2/recipe-domain/src/formula.test.ts packages/l2/recipe-domain/src/sourdough-process.test.ts packages/l5/ui-primitives/src/primitives/number-field-format.test.ts scripts/deploy-manifest.test.mjs",
+    "test:unit": "node --test packages/l8/web/src/lib/seo.test.ts packages/l4/content-build/src/parse.test.mjs packages/l2/recipe-domain/src/formula.test.ts packages/l2/recipe-domain/src/sourdough-process.test.ts packages/l5/ui-primitives/src/primitives/number-field-format.test.ts scripts/deploy-manifest.test.mjs packages/l4/content-build/src/build-content.test.ts packages/l3/api-static/src/generated.test.ts scripts/check-layer-imports.test.mjs scripts/app-build-config.test.mjs test/static-server.test.mjs",
     "test:seo": "pnpm run build && node test/seo-pages.test.mjs",
     "test:a11y": "pnpm run build && node packages/l8/web/src/routes/accessibility.test.mjs",
     "test:lighthouse": "pnpm run build && node packages/l8/web/src/routes/lighthouse.test.mjs",
@@ -34,7 +34,8 @@
     "typecheck": "pnpm run content && pnpm run routes && pnpm run boundaries && pnpm run typecheck:ts",
     "typecheck:ts": "tsc -b --pretty false",
     "nx": "nx",
-    "test:design-system": "node scripts/check-design-system.mjs && node --test scripts/check-design-system.test.mjs"
+    "test:design-system": "node scripts/check-design-system.mjs && node --test scripts/check-design-system.test.mjs",
+    "test:security": "pnpm audit --audit-level=moderate"
   },
   "dependencies": {
     "@eat-yeet/l0-foundation": "workspace:*",
@@ -80,7 +81,7 @@
     "@vitejs/plugin-react": "^5.0.0",
     "chrome-launcher": "^1.2.1",
     "gray-matter": "^4.0.3",
-    "js-yaml": "^3.15.1",
+    "js-yaml": "^3.15.2",
     "lighthouse": "^13.4.1",
     "marked": "^14.1.3",
     "nitro": "^3.0.260610-beta",
@@ -92,6 +93,17 @@
     "storybook": "^10.5.8",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.7.2",
-    "vite": "^7.3.1"
+    "vite": "^7.3.1",
+    "wrangler": "4.131.1"
+  },
+  "pnpm": {
+    "overrides": {
+      "js-yaml@>=3.0.0 <3.15.2": "3.15.2",
+      "js-yaml@>=4.0.0 <4.3.2": "4.3.2",
+      "brace-expansion@>=5.0.0 <5.0.9": "5.0.9",
+      "qs@>=2.2.5 <6.16.0": "6.16.0",
+      "hono@<4.13.5": "4.13.5",
+      "smol-toml@<=1.7.0": "1.7.1"
+    }
   }
 }

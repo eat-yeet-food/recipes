@@ -372,3 +372,27 @@ blocks:
     assert.equal(article.searchText.includes('choose a mixer'), true)
   })
 })
+
+it('rejects executable YAML tags for both source adapters', () => {
+  const malicious = `title:\n  toString: !!js/function 'function () { return "executed"; }'\nblocks:\n  - type: markdown\n    markdown: Test\n`
+  for (const parse of [parseRecipe, parseArticle]) {
+    assert.throws(() => parse(malicious, 'unsafe'), /unknown tag/)
+    assert.throws(() => parse('[]', 'unsafe'), /expected a YAML mapping/)
+    assert.throws(() => parse('slug: ../outside\nblocks:\n - type: markdown\n   markdown: Test', 'unsafe'), /invalid slug/)
+  }
+})
+
+it('handles invalid numeric entities and preserves safe rendering', () => {
+  const result = parseRecipe('blocks:\n - type: markdown\n   markdown: "&#1114112; &#xD800; [bad](javascript:alert%281%29) <script>alert(1)</script>"', 'entities')
+  assert.ok(result.searchText.includes('\uFFFD'))
+  assert.ok(!result.blocks[0].html.includes('<script>'))
+  assert.ok(!result.blocks[0].html.includes('href="javascript:'))
+})
+
+it('rejects duplicate fixture identities with directory context', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'content-duplicates-'))
+  try {
+    for (const file of ['one.yaml', 'two.yaml']) writeFileSync(join(dir, file), 'slug: same\nblocks:\n - type: markdown\n   markdown: Test')
+    assert.throws(() => loadRecipes(dir), (error) => error.message.includes(dir) && /duplicate slug/.test(error.message))
+  } finally { rmSync(dir, { recursive: true, force: true }) }
+})

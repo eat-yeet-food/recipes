@@ -6,23 +6,11 @@ import viteReact from '@vitejs/plugin-react'
 import { nitro } from 'nitro/vite'
 import tailwindcss from '@tailwindcss/vite'
 
-import { ACTIVE_APP, APP_ID, APP_PATHS } from '#site-config'
+import { ACTIVE_APP, APP_PATHS } from '#site-config'
+import { appBuildConfig } from './scripts/app-build-config.mjs'
 
 const ROOT = fileURLToPath(new URL('.', import.meta.url))
-const WEB_SRC = fileURLToPath(new URL('./packages/l8/web/src', import.meta.url))
-const ACTIVE_ARTICLE_MODULE = fileURLToPath(new URL(`./apps/${APP_ID}/src/articles.stub.ts`, import.meta.url))
-const ACTIVE_RECIPE_MODULE = fileURLToPath(new URL(`./apps/${APP_ID}/src/recipes.stub.ts`, import.meta.url))
-const ACTIVE_PAGE_BLOCKS_MODULE = fileURLToPath(new URL(`./apps/${APP_ID}/src/page-blocks.ts`, import.meta.url))
-const ACTIVE_RECIPE_WORKBENCHES_MODULE = fileURLToPath(new URL(`./apps/${APP_ID}/src/recipe-workbenches.ts`, import.meta.url))
-const PUBLIC_APP_CONFIG = {
-  id: ACTIVE_APP.id,
-  siteName: ACTIVE_APP.siteName,
-  siteUrl: ACTIVE_APP.siteUrl,
-  defaultOgImage: ACTIVE_APP.defaultOgImage,
-  analytics: ACTIVE_APP.analytics,
-  copy: ACTIVE_APP.copy,
-  categories: ACTIVE_APP.categories,
-}
+const appBuild = appBuildConfig(ACTIVE_APP)
 
 function suppressModuleDirectiveWarning(warning: { code?: string }): boolean {
   return warning.code === 'MODULE_LEVEL_DIRECTIVE'
@@ -58,10 +46,7 @@ function suppressModuleDirectiveWarnings(): import('vite').Plugin {
  */
 export default defineConfig({
   preview: { host: '127.0.0.1' },
-  define: {
-    __APP_ID__: JSON.stringify(APP_ID),
-    __APP_CONFIG__: JSON.stringify(PUBLIC_APP_CONFIG),
-  },
+  define: appBuild.define,
   publicDir: join(ROOT, APP_PATHS.publicDir),
   // Assets live under /build, not Vite's default /assets. This keeps the
   // current asset namespace isolated from stale edge-cache entries while
@@ -69,15 +54,7 @@ export default defineConfig({
   build: { sourcemap: false, assetsDir: 'build' },
   // Vite owns runtime aliases that depend on APP_ID. TypeScript sees their
   // public shapes through packages/l8/web/src/app-modules.d.ts.
-  resolve: {
-    alias: [
-      { find: '@app/articles', replacement: ACTIVE_ARTICLE_MODULE },
-      { find: '@app/recipes', replacement: ACTIVE_RECIPE_MODULE },
-      { find: '@app/page-blocks', replacement: ACTIVE_PAGE_BLOCKS_MODULE },
-      { find: '@app/recipe-workbenches', replacement: ACTIVE_RECIPE_WORKBENCHES_MODULE },
-      { find: '@', replacement: WEB_SRC },
-    ],
-  },
+  resolve: { alias: appBuild.alias },
   plugins: [
     suppressModuleDirectiveWarnings(),
     tailwindcss(),

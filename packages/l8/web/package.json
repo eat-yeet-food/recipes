@@ -3,10 +3,34 @@
   "private": true,
   "type": "module",
   "imports": {
-    "#web-test/app-paths": "./src/test/app-paths.mjs",
-    "#web-test/static-server": "./src/test/static-server.mjs"
+    "#web-test/app-paths": "./test-support.mjs",
+    "#web-test/static-server": "./test-support.mjs"
   },
   "dependencies": {
-    "@eat-yeet/l5-ui-primitives": "workspace:*"
+    "@eat-yeet/l1-article-model": "workspace:*",
+    "@eat-yeet/l1-recipe-model": "workspace:*",
+    "@eat-yeet/l2-recipe-domain": "workspace:*",
+    "@eat-yeet/l3-api-contract": "workspace:*",
+    "@eat-yeet/l3-api-query": "workspace:*",
+    "@eat-yeet/l4-content-model": "workspace:*",
+    "@eat-yeet/l6-ui-catalog": "workspace:*",
+    "@eat-yeet/l6-ui-content-blocks": "workspace:*",
+    "@eat-yeet/l6-ui-shell": "workspace:*",
+    "@eat-yeet/l7-home": "workspace:*",
+    "@eat-yeet/l7-learn": "workspace:*",
+    "@eat-yeet/l7-recipes": "workspace:*",
+    "@eat-yeet/l7-search": "workspace:*",
+    "@tanstack/react-router": "^1.163.3",
+    "@tanstack/react-start": "^1.163.3",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@eat-yeet/l5-ui-primitives": "workspace:*",
+    "@storybook/react-vite": "^10.5.8",
+    "chrome-launcher": "^1.2.1",
+    "lighthouse": "^13.4.1",
+    "playwright": "^1.62.1",
+    "storybook": "^10.5.8"
   }
 }

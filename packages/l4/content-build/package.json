@@ -3,8 +3,12 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./app-paths": "./src/app-paths.mjs",
     "./build-content": "./src/build-content.mjs",
     "./parse": "./src/parse.mjs"
+  },
+  "dependencies": {
+    "@eat-yeet/l4-content-model": "workspace:*",
+    "js-yaml": "^3.15.2",
+    "marked": "^14.1.3"
   }
 }

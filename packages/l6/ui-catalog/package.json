@@ -4,5 +4,17 @@
   "type": "module",
   "exports": {
     "./cards": "./src/cards.tsx"
+  },
+  "dependencies": {
+    "@eat-yeet/l0-foundation": "workspace:*",
+    "@eat-yeet/l1-article-model": "workspace:*",
+    "@eat-yeet/l1-recipe-model": "workspace:*",
+    "@eat-yeet/l2-recipe-domain": "workspace:*",
+    "@tanstack/react-router": "^1.163.3",
+    "lucide-react": "^1.33.0"
+  },
+  "devDependencies": {
+    "@storybook/react-vite": "^10.5.8",
+    "react": "^19.0.0"
   }
 }

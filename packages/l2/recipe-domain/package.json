@@ -8,5 +8,8 @@
     "./formula": "./src/formula.ts",
     "./format": "./src/format.ts",
     "./search": "./src/search.ts"
+  },
+  "dependencies": {
+    "@eat-yeet/l1-recipe-model": "workspace:*"
   }
 }

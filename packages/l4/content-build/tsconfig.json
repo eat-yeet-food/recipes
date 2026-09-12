@@ -8,5 +8,12 @@
     "emitDeclarationOnly": true,
     "outDir": "../../../.nx/types/packages/l4/content-build"
   },
-  "include": ["src"]
+  "include": [
+    "src"
+  ],
+  "references": [
+    {
+      "path": "../content-model/tsconfig.json"
+    }
+  ]
 }

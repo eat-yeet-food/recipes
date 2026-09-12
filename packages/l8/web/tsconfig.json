@@ -36,7 +36,7 @@
       "path": "../../l4/content-model/tsconfig.json"
     },
     {
-      "path": "../../l4/content-build/tsconfig.json"
+      "path": "../../l5/ui-primitives/tsconfig.json"
     },
     {
       "path": "../../l6/ui-catalog/tsconfig.json"
@@ -58,9 +58,6 @@
     },
     {
       "path": "../../l7/search/tsconfig.json"
-    },
-    {
-      "path": "../../l5/ui-primitives/tsconfig.json"
     }
   ],
   "include": [

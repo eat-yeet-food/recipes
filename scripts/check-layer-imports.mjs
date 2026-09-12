@@ -1,237 +1,181 @@
-/**
- * Enforce Nx layer metadata and import direction.
- *
- * Project names carry their architecture level (`l1-recipe-model`,
- * `l8-web`). Higher layers may import the same or lower layers; lower layers
- * may never import higher layers. This guard intentionally uses Nx
- * project.json metadata so the rule survives the package extraction work.
- */
-
+/** Enforce workspace ownership, package dependencies, and layer direction. */
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { dirname, isAbsolute, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import ts from 'typescript'
 
-const ROOT = resolve(join(dirname(fileURLToPath(import.meta.url)), '..'))
-const SOURCE_EXTENSIONS = ['.ts', '.tsx', '.mts', '.cts', '.js', '.jsx', '.mjs', '.cjs']
-const IGNORED_DIRS = new Set([
-  '.git',
-  '.nx',
-  '.output',
-  '.tanstack',
-  'dist',
-  'node_modules',
-  'storybook-static',
-])
+const EXTENSIONS = ['.ts', '.tsx', '.mts', '.cts', '.js', '.jsx', '.mjs', '.cjs', '.json']
+const IGNORED = new Set(['node_modules', 'generated', 'dist', '.nx', '.git', '.output', 'storybook-static'])
+const APP_IMPORTS = {
+  'packages/l8/web/src/lib/api.ts': new Set(['@app/articles', '@app/recipes']),
+  'packages/l8/web/src/routes/recipes/$slug/index.tsx': new Set(['@app/page-blocks', '@app/recipe-workbenches']),
+  'packages/l8/web/src/stories/dough-workbench.stories.tsx': new Set(['@app/recipe-workbenches']),
+}
+const inside = (file, root) => {
+  const rel = relative(root, file)
+  return rel === '' || (rel !== '..' && !rel.startsWith('../') && !isAbsolute(rel))
+}
+const json = (file) => JSON.parse(readFileSync(file, 'utf8'))
+const posix = (path) => path.split('\\').join('/')
 
-function readJson(path) {
-  return JSON.parse(readFileSync(path, 'utf8'))
+export function sourceFiles(root) {
+  if (!existsSync(root)) return []
+  return readdirSync(root, { withFileTypes: true }).flatMap((entry) => {
+    if (IGNORED.has(entry.name)) return []
+    const path = join(root, entry.name)
+    return entry.isDirectory() ? sourceFiles(path) : /\.[cm]?[jt]sx?$/.test(path) ? [path] : []
+  })
 }
 
-function posix(path) {
-  return path.split('\\').join('/')
-}
-
-function rel(path) {
-  return posix(relative(ROOT, path)) || '.'
-}
-
-function isInside(child, parent) {
-  const path = relative(parent, child)
-  return path === '' || (!path.startsWith('..') && !isAbsolute(path))
-}
-
-function listProjectFiles() {
-  const files = []
-  const candidates = ['project.json', 'apps', 'packages']
-
-  function walk(path) {
-    if (!existsSync(path)) return
-    const stats = statSync(path)
-    if (stats.isFile()) {
-      if (path.endsWith('/project.json')) files.push(path)
-      return
-    }
-    if (!stats.isDirectory()) return
-    if (IGNORED_DIRS.has(path.split('/').at(-1))) return
-    for (const entry of readdirSync(path)) walk(join(path, entry))
-  }
-
-  for (const candidate of candidates) walk(join(ROOT, candidate))
-  return files
-}
-
-function parseLayer(project) {
-  const fromName = /^l(\d+)-/.exec(project.name ?? '')
-  const fromTag = (project.tags ?? []).find((tag) => /^layer:l\d+$/.test(tag))
-  const tagLayer = fromTag ? Number(fromTag.slice('layer:l'.length)) : null
-  const nameLayer = fromName ? Number(fromName[1]) : null
-
-  if (nameLayer == null) {
-    throw new Error(`${project.name || '(unnamed project)'} must be named with an l<number>- prefix`)
-  }
-  if (tagLayer == null) {
-    throw new Error(`${project.name} must have a matching layer:l${nameLayer} tag`)
-  }
-  if (tagLayer !== nameLayer) {
-    throw new Error(`${project.name} tag ${fromTag} does not match its l${nameLayer}- name prefix`)
-  }
-
-  return nameLayer
-}
-
-function loadProjects() {
-  return listProjectFiles().map((file) => {
-    const config = readJson(file)
-    const root = dirname(file)
-    const sourceRoot = resolve(root, config.sourceRoot ?? '.')
-    const tsConfig = config.metadata?.tsConfig ? resolve(root, config.metadata.tsConfig) : null
-    return {
-      name: config.name,
-      root,
-      sourceRoot,
-      tsConfig,
-      layer: parseLayer(config),
-      packageName: existsSync(join(root, 'package.json')) ? readJson(join(root, 'package.json')).name : null,
-    }
-  }).sort((a, b) => b.sourceRoot.length - a.sourceRoot.length)
-}
-
-function findSourceFiles(root) {
-  const files = []
-
-  function walk(path) {
-    const stats = statSync(path)
-    if (stats.isDirectory()) {
-      if (IGNORED_DIRS.has(path.split('/').at(-1))) return
-      for (const entry of readdirSync(path)) walk(join(path, entry))
-      return
-    }
-    if (SOURCE_EXTENSIONS.some((ext) => path.endsWith(ext)) && !path.endsWith('.d.ts')) files.push(path)
-  }
-
-  if (existsSync(root)) walk(root)
-  return files
-}
-
-function importSpecifiers(file) {
-  const source = ts.createSourceFile(file, readFileSync(file, 'utf8'), ts.ScriptTarget.Latest, true)
+export function importSpecifiers(file) {
+  const text = readFileSync(file, 'utf8')
+  const source = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true)
   const imports = []
-
+  function add(node) { if (node && ts.isStringLiteralLike(node)) imports.push(node.text) }
   function visit(node) {
-    if ((ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) && node.moduleSpecifier) {
-      imports.push(node.moduleSpecifier.text)
-    } else if (
-      ts.isCallExpression(node) &&
-      node.expression.kind === ts.SyntaxKind.ImportKeyword &&
-      node.arguments.length === 1 &&
-      ts.isStringLiteralLike(node.arguments[0])
-    ) {
-      imports.push(node.arguments[0].text)
-    } else if (
-      ts.isCallExpression(node) &&
-      ts.isIdentifier(node.expression) &&
-      node.expression.text === 'require' &&
-      node.arguments.length === 1 &&
-      ts.isStringLiteralLike(node.arguments[0])
-    ) {
-      imports.push(node.arguments[0].text)
+    if (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) add(node.moduleSpecifier)
+    if (ts.isImportTypeNode(node) && ts.isLiteralTypeNode(node.argument)) add(node.argument.literal)
+    if (ts.isCallExpression(node)) {
+      if (node.expression.kind === ts.SyntaxKind.ImportKeyword || (ts.isIdentifier(node.expression) && node.expression.text === 'require')) {
+        if (node.arguments[0] && ts.isStringLiteralLike(node.arguments[0])) add(node.arguments[0])
+        else imports.push('#nonliteral-import')
+      }
+      if (node.expression.getText(source) === 'import.meta.glob') {
+        const arg = node.arguments[0]
+        if (arg && ts.isArrayLiteralExpression(arg)) arg.elements.forEach(add)
+        else if (arg && ts.isStringLiteralLike(arg)) add(arg)
+        else imports.push('#nonliteral-glob')
+      }
     }
     ts.forEachChild(node, visit)
   }
-
   visit(source)
-  return imports
+  // JSDoc import types on Node build modules also declare architectural dependencies.
+  for (const comment of text.matchAll(/\/\*\*[\s\S]*?\*\//g)) {
+    for (const match of comment[0].matchAll(/import\(['"]([^'"]+)['"]\)/g)) imports.push(match[1])
+  }
+  return [...new Set(imports)]
 }
 
 function existingFile(path) {
-  const attempts = [path, ...SOURCE_EXTENSIONS.map((ext) => `${path}${ext}`)]
-  for (const attempt of attempts) {
-    if (existsSync(attempt) && statSync(attempt).isFile()) return attempt
+  for (const candidate of [path, ...EXTENSIONS.map((ext) => `${path}${ext}`), ...EXTENSIONS.map((ext) => join(path, `index${ext}`))]) {
+    if (existsSync(candidate) && statSync(candidate).isFile()) return candidate
   }
-  for (const ext of SOURCE_EXTENSIONS) {
-    const attempt = join(path, `index${ext}`)
-    if (existsSync(attempt) && statSync(attempt).isFile()) return attempt
-  }
+  // TypeScript resolves .js imports to their authored .ts files.
+  if (/\.js$/.test(path) && existsSync(path.slice(0, -3) + '.ts')) return path.slice(0, -3) + '.ts'
   return null
 }
 
-function resolveImport(specifier, file, projects) {
-  if (specifier.startsWith('.')) return existingFile(resolve(dirname(file), specifier))
-  if (specifier.startsWith('@/')) return existingFile(resolve(ROOT, 'packages', 'l8', 'web', 'src', specifier.slice(2)))
-
-  const byPackageName = projects.find((project) => (
-    project.packageName &&
-    (specifier === project.packageName || specifier.startsWith(`${project.packageName}/`))
-  ))
-  if (!byPackageName) return null
-
-  const suffix = specifier === byPackageName.packageName ? '' : specifier.slice(byPackageName.packageName.length + 1)
-  return existingFile(resolve(byPackageName.sourceRoot, suffix)) ?? byPackageName.sourceRoot
-}
-
-function owningProject(path, projects) {
-  return projects.find((project) => isInside(path, project.sourceRoot) || isInside(path, project.root))
-}
-
-function tsconfigReferences(path) {
-  const config = readJson(path)
-  return new Set((config.references ?? []).map((ref) => resolve(dirname(path), ref.path)))
-}
-
-function validateTsReferences(projects) {
-  const rootReferences = tsconfigReferences(join(ROOT, 'tsconfig.json'))
-  for (const project of projects) {
-    if (!project.tsConfig) throw new Error(`${project.name} metadata.tsConfig is required`)
-    if (!existsSync(project.tsConfig)) throw new Error(`${project.name} metadata.tsConfig does not exist: ${rel(project.tsConfig)}`)
-    if (!rootReferences.has(project.tsConfig)) {
-      throw new Error(`root tsconfig.json must reference ${rel(project.tsConfig)} for ${project.name}`)
-    }
-
-    const config = readJson(project.tsConfig)
-    if (config.compilerOptions?.composite !== true) {
-      throw new Error(`${rel(project.tsConfig)} must set compilerOptions.composite=true`)
+export function checkWorkspace(root) {
+  root = resolve(root)
+  const errors = []
+  const projects = []
+  const rel = (path) => posix(relative(root, path))
+  const fail = (message) => errors.push(message)
+  for (const layerDir of existsSync(join(root, 'packages')) ? readdirSync(join(root, 'packages'), { withFileTypes: true }) : []) {
+    if (!layerDir.isDirectory() || !/^l\d+$/.test(layerDir.name)) continue
+    const layer = Number(layerDir.name.slice(1))
+    for (const entry of readdirSync(join(root, 'packages', layerDir.name), { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue
+      const path = join(root, 'packages', layerDir.name, entry.name)
+      if (!existsSync(join(path, 'project.json'))) { fail(`${rel(path)} missing project.json`); continue }
+      const config = json(join(path, 'project.json'))
+      if (!config.metadata?.tsConfig) fail(`${rel(path)}/project.json metadata.tsConfig is required`)
+      if (!config.name?.startsWith(`l${layer}-`) || (config.tags ?? []).filter((tag) => /^layer:/.test(tag)).join() !== `layer:l${layer}`) {
+        fail(`${rel(path)} directory, project name and layer tag must agree`)
+      }
+      projects.push({ root: path, sourceRoot: resolve(path, config.sourceRoot ?? 'src'), layer, kind: 'package', name: config.name, tsConfig: resolve(path, config.metadata?.tsConfig ?? 'tsconfig.json') })
     }
   }
-}
-
-function validateImports(projects) {
-  const errors = []
-  const referencesByProject = new Map(projects.map((project) => [
-    project.name,
-    project.tsConfig ? tsconfigReferences(project.tsConfig) : new Set(),
-  ]))
-
+  for (const entry of existsSync(join(root, 'apps')) ? readdirSync(join(root, 'apps'), { withFileTypes: true }) : []) {
+    if (!entry.isDirectory()) continue
+    const path = join(root, 'apps', entry.name)
+    projects.push({ root: path, sourceRoot: join(path, 'src'), kind: 'app', name: entry.name, tsConfig: join(path, 'tsconfig.json') })
+  }
+  const refs = (path) => new Set((json(path).references ?? []).map((ref) => {
+    const target = resolve(dirname(path), ref.path)
+    return target.endsWith('.json') ? target : join(target, 'tsconfig.json')
+  }))
+  const rootReferences = refs(join(root, 'tsconfig.json'))
   for (const project of projects) {
-    for (const file of findSourceFiles(project.sourceRoot)) {
-      for (const specifier of importSpecifiers(file)) {
-        const resolved = resolveImport(specifier, file, projects)
-        if (!resolved) continue
-
-        const target = owningProject(resolved, projects)
-        if (!target || target.name === project.name) continue
-
-        if (project.layer < target.layer) {
-          errors.push(`${rel(file)} imports ${specifier} from ${target.name}; l${project.layer} cannot import l${target.layer}`)
+    const manifest = join(project.root, 'package.json')
+    project.manifest = existsSync(manifest) ? json(manifest) : {}
+    if (!project.manifest.name) fail(`${rel(project.root)} missing named package.json`)
+    if (!inside(project.sourceRoot, project.root)) fail(`${project.name}: sourceRoot must belong to its project`)
+    if (!inside(project.tsConfig, project.root)) fail(`${project.name}: tsConfig must belong to its project`)
+    if (!existsSync(project.tsConfig)) { fail(`${project.name} missing tsconfig.json`); project.references = new Set(); continue }
+    if (!rootReferences.has(project.tsConfig)) fail(`root tsconfig.json must reference ${rel(project.tsConfig)}`)
+    if (json(project.tsConfig).compilerOptions?.composite !== true) fail(`${rel(project.tsConfig)} must set composite=true`)
+    project.references = refs(project.tsConfig)
+  }
+  const owner = (file) => projects.find((project) => inside(file, project.root))
+  for (const project of projects) {
+    if (!inside(project.sourceRoot, project.root)) continue
+    for (const file of sourceFiles(project.sourceRoot)) {
+      const fileName = rel(file)
+      for (let specifier of importSpecifiers(file)) {
+        specifier = specifier.replace(/^!/, '')
+        if (specifier.startsWith('@app/')) {
+          if (!APP_IMPORTS[fileName]?.has(specifier)) fail(`${fileName}: @app imports are only allowed at designated web composition points`)
+          continue
         }
-
-        if (project.tsConfig && target.tsConfig && !referencesByProject.get(project.name).has(target.tsConfig)) {
-          errors.push(`${rel(project.tsConfig)} must reference ${rel(target.tsConfig)} because ${project.name} imports ${target.name}`)
+        if (specifier.startsWith('#web-test/')) {
+          if (project.name !== 'l8-web' || !/\.test\.[cm]?[jt]sx?$/.test(file)) fail(`${fileName}: test support cannot be imported by runtime source`)
+          continue
         }
+        if (specifier === '#site-config') { fail(`${fileName}: runtime source cannot import root app configuration`); continue }
+        let targetPath
+        let target
+        if (specifier.startsWith('.')) targetPath = resolve(dirname(file), specifier.split('?')[0])
+        else if (specifier.startsWith('@/')) targetPath = resolve(root, 'packages/l8/web/src', specifier.slice(2))
+        else if (specifier.startsWith('/')) targetPath = resolve(root, '.' + specifier)
+        else {
+          target = projects.find((p) => p.manifest.name && (specifier === p.manifest.name || specifier.startsWith(p.manifest.name + '/')))
+          if (target) {
+            const key = specifier === target.manifest.name ? '.' : '.' + specifier.slice(target.manifest.name.length)
+            let exported = target.manifest.exports?.[key]
+            if (!exported) {
+              for (const [pattern, value] of Object.entries(target.manifest.exports ?? {}).sort(([a], [b]) => b.length - a.length)) {
+                if (!pattern.includes('*') || typeof value !== 'string') continue
+                const [prefix, suffix] = pattern.split('*')
+                if (key.startsWith(prefix) && key.endsWith(suffix)) {
+                  exported = value.replaceAll('*', key.slice(prefix.length, suffix ? -suffix.length : undefined))
+                  break
+                }
+              }
+            }
+            if (typeof exported !== 'string') { fail(`${fileName}: unresolved package export ${specifier}`); continue }
+            targetPath = resolve(target.root, exported)
+            if (!existingFile(targetPath)) { fail(`${fileName}: package export does not exist: ${specifier}`); continue }
+            if (!inside(targetPath, target.root)) { fail(`${fileName}: package export escapes its owner: ${specifier}`); continue }
+          }
+          else if (specifier.startsWith('@eat-yeet/') || specifier.startsWith('#')) { fail(`${fileName}: unresolved workspace import ${specifier}`); continue }
+          else continue
+        }
+        target ??= owner(targetPath)
+        if (!target) { fail(`${fileName}: import ${specifier} escapes package/app ownership`); continue }
+        const dataImport = /\/(generated|fixtures)(\/|$)/.test(posix(targetPath))
+        if (dataImport && (project.kind !== 'app' || target !== project)) fail(`${fileName}: generated data and fixtures belong to their app adapter`)
+        if (target.kind === 'app' && target !== project) fail(`${fileName}: concrete app imports are forbidden; use the selected adapter`)
+        if (project.kind === 'app' && target.layer === 8) fail(`${fileName}: app adapters cannot depend on web composition`)
+        if (target === project) {
+          if (!dataImport && specifier.startsWith('.') && !existingFile(targetPath) && !/[?*]/.test(specifier)) fail(`${fileName}: unresolved relative import ${specifier}`)
+          continue
+        }
+        if (project.kind === 'package' && target.kind === 'package' && project.layer < target.layer) fail(`${fileName}: l${project.layer} cannot import l${target.layer}`)
+        if (!project.references.has(target.tsConfig)) fail(`${rel(project.tsConfig)} must reference ${rel(target.tsConfig)}`)
+        const manifest = project.manifest
+        if (![manifest.dependencies, manifest.devDependencies, manifest.peerDependencies].some((deps) => deps?.[target.manifest.name])) fail(`${rel(project.root)}/package.json missing dependency ${target.manifest.name}`)
       }
     }
   }
-
-  return errors
+  return { errors: [...new Set(errors)], projectCount: projects.length }
 }
 
-const projects = loadProjects()
-validateTsReferences(projects)
-
-const errors = validateImports(projects)
-if (errors.length > 0) {
-  console.error(errors.map((error) => `layer-imports: ${error}`).join('\n'))
-  process.exit(1)
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  const result = checkWorkspace(process.argv[2] ?? fileURLToPath(new URL('../', import.meta.url)))
+  if (result.errors.length) {
+    console.error(result.errors.map((error) => `layer-imports: ${error}`).join('\n'))
+    process.exitCode = 1
+  } else console.log(`layer-imports: ${result.projectCount} package/app owners checked`)
 }
-
-console.log(`layer-imports: ${projects.length} Nx project${projects.length === 1 ? '' : 's'} checked`)

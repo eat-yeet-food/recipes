@@ -20,6 +20,7 @@
     { "path": "./packages/l7/recipes/tsconfig.json" },
     { "path": "./packages/l7/search/tsconfig.json" },
     { "path": "./packages/l8/web/tsconfig.json" },
+    { "path": "./apps/eatyeet/tsconfig.json" },
     { "path": "./tsconfig.app.json" }
   ]
 }

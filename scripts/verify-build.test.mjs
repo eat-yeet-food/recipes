@@ -16,6 +16,7 @@ import { RESOLVED_APP_PATHS } from './app-paths.mjs'
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const OUT = join(ROOT, '.output', 'public')
 const INDEX = JSON.parse(readFileSync(join(RESOLVED_APP_PATHS.generatedDir, 'index.json'), 'utf8'))
+const ARTICLES = JSON.parse(readFileSync(join(RESOLVED_APP_PATHS.generatedDir, 'articles/index.json'), 'utf8'))
 
 const failures = []
 const check = (name, ok, detail = '') => {
@@ -40,6 +41,11 @@ check('sitemap exists', exists('/sitemap.xml'), '/sitemap.xml')
 check('robots exists', exists('/robots.txt'), '/robots.txt')
 check('headers exist', exists('/_headers'), '/_headers')
 
+for (const article of ARTICLES) {
+  check(`${article.slug} article page is prerendered`, exists(`/learn/${article.slug}/index.html`))
+  if (article.image) check(`${article.slug} article image exists`, exists(`/images/${article.image}`))
+}
+
 for (const recipe of INDEX) {
   check(`${recipe.slug} page is prerendered`, exists(`/recipes/${recipe.slug}/index.html`))
   if (recipe.image) check(`${recipe.slug} image exists`, exists(`/images/${recipe.image}`))
@@ -54,6 +60,10 @@ check('sitemap omits search', !sitemap.includes(`${SITE_URL}/search`))
 for (const path of ROBOTS_DISALLOW) {
   check(`robots disallows ${path}`, robots.includes(`Disallow: ${path}`))
 }
+check('framing is restricted to the same origin', headers.includes('X-Frame-Options: SAMEORIGIN'))
+check('conservative CSP is generated', headers.includes("Content-Security-Policy: frame-ancestors 'self'; object-src 'none'; base-uri 'self'"))
+for (const article of ARTICLES) check(`${article.slug} appears in sitemap`, sitemap.includes(`${SITE_URL}/learn/${article.slug}`))
+
 check('hashed build assets get a long max-age', /\/build\/\*\s*\n\s*Cache-Control: public, max-age=31536000\s*(\n|$)/.test(headers))
 
 // Not an oversight: `immutable` stops browsers revalidating even on reload, so
@@ -64,12 +74,12 @@ check('hashed build assets are NOT immutable', !headers.includes('immutable'))
 
 // The security headers must stay alone under /* — Pages merges every matching
 // rule, so a Cache-Control here would recombine with /build/*.
-check('/* carries no Cache-Control', /\/\*\s*\n\s*X-Content-Type-Options/.test(headers))
+check('/* carries no Cache-Control', !headers.split(/\n\s*\n/).find((rule) => rule.startsWith('/*\n'))?.includes('Cache-Control:'))
 
 // HTML names the hashed assets, so a stale document points a browser at a build
 // that may no longer be current. Five minutes bounds that exposure. Generated
 // from site.config.mjs, so every prerendered route must carry the rule.
-const pageTtlMissing = allPaths(INDEX).filter(
+const pageTtlMissing = allPaths(INDEX, ARTICLES).filter(
   (path) => !new RegExp(`^${path.replace(/[/]/g, '\\/')}\\n  Cache-Control: public, max-age=300, must-revalidate$`, 'm').test(headers),
 )
 check('every page has a 5-minute TTL', pageTtlMissing.length === 0, pageTtlMissing.join(', '))
@@ -91,7 +101,7 @@ for (const src of scripts.filter((value) => value.startsWith('/'))) {
 }
 
 const recipeChunks = readdirSync(join(OUT, 'build')).filter((file) => file.endsWith('.js'))
-for (const recipe of INDEX) {
+for (const recipe of [...INDEX, ...ARTICLES]) {
   check(
     `${recipe.slug} body chunk exists`,
     recipeChunks.some((file) => file.startsWith(`${recipe.slug}-`)),

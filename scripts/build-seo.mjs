@@ -94,6 +94,8 @@ const pageRules = allPaths(index, articleIndex)
 
 const headers = `/*
   X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Content-Security-Policy: frame-ancestors 'self'; object-src 'none'; base-uri 'self'
   Referrer-Policy: strict-origin-when-cross-origin
 
 /build/*

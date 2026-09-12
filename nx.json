@@ -6,7 +6,10 @@
     "libsDir": "packages"
   },
   "namedInputs": {
-    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "default": [
+      "{projectRoot}/**/*",
+      "sharedGlobals"
+    ],
     "production": [
       "default",
       "!{projectRoot}/**/*.stories.tsx",
@@ -25,33 +28,64 @@
   },
   "targetDefaults": {
     "build": {
-      "inputs": ["production", "^production"],
-      "outputs": ["{workspaceRoot}/.output/public", "{workspaceRoot}/.output/server"]
+      "inputs": [
+        "production",
+        "^production"
+      ],
+      "outputs": [
+        "{workspaceRoot}/.output/public",
+        "{workspaceRoot}/.output/server"
+      ]
     },
     "build-storybook": {
-      "inputs": ["default", "^production"],
-      "outputs": ["{workspaceRoot}/storybook-static"]
+      "inputs": [
+        "default",
+        "^production"
+      ],
+      "outputs": [
+        "{workspaceRoot}/storybook-static"
+      ]
     },
     "content": {
-      "inputs": ["{workspaceRoot}/apps/**/*", "{workspaceRoot}/site.config.mjs", "{workspaceRoot}/packages/l4/content-build/src/**/*"],
-      "outputs": ["{workspaceRoot}/apps/*/generated"]
+      "inputs": [
+        "{workspaceRoot}/apps/**/*",
+        "{workspaceRoot}/site.config.mjs",
+        "{workspaceRoot}/packages/l4/content-build/src/**/*",
+        "{workspaceRoot}/scripts/build-content.mjs",
+        "{workspaceRoot}/scripts/app-paths.mjs"
+      ],
+      "outputs": [
+        "{workspaceRoot}/apps/*/generated"
+      ]
     },
     "boundaries": {
       "inputs": [
-        "{workspaceRoot}/apps/**/project.json",
+        "{workspaceRoot}/apps/**/src/**/*",
+        "{workspaceRoot}/apps/**/package.json",
+        "{workspaceRoot}/apps/**/tsconfig.json",
+        "{workspaceRoot}/packages/**/src/**/*",
         "{workspaceRoot}/packages/**/project.json",
-        "{workspaceRoot}/project.json",
+        "{workspaceRoot}/packages/**/package.json",
+        "{workspaceRoot}/packages/**/tsconfig.json",
         "{workspaceRoot}/scripts/check-layer-imports.mjs",
-        "{workspaceRoot}/tsconfig.json",
-        "{workspaceRoot}/tsconfig.*.json"
+        "{workspaceRoot}/tsconfig.json"
       ]
     },
     "test": {
-      "inputs": ["default", "^production"]
+      "inputs": [
+        "default",
+        "^production"
+      ]
     },
     "typecheck": {
-      "inputs": ["default", "^production"],
-      "dependsOn": ["boundaries", "^typecheck"]
+      "inputs": [
+        "default",
+        "^production"
+      ],
+      "dependsOn": [
+        "boundaries",
+        "^typecheck"
+      ]
     }
   }
 }

@@ -3,9 +3,20 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@eat-yeet/l5-ui-primitives": "workspace:*"
+    "@eat-yeet/l0-foundation": "workspace:*",
+    "@eat-yeet/l1-recipe-model": "workspace:*",
+    "@eat-yeet/l2-recipe-domain": "workspace:*",
+    "@eat-yeet/l4-content-model": "workspace:*",
+    "@eat-yeet/l5-ui-primitives": "workspace:*",
+    "@eat-yeet/l6-ui-catalog": "workspace:*",
+    "@eat-yeet/l6-ui-content-blocks": "workspace:*",
+    "lucide-react": "^1.33.0",
+    "react": "^19.0.0"
   },
   "exports": {
     "./recipes/*": "./src/recipes/*.tsx"
+  },
+  "devDependencies": {
+    "@storybook/react-vite": "^10.5.8"
   }
 }

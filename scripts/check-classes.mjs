@@ -56,9 +56,10 @@ function definedClasses() {
 function sourceFiles(dir) {
   const out = []
   for (const entry of readdirSync(dir)) {
+    if (['node_modules', 'generated', 'dist', '.nx', 'storybook-static'].includes(entry)) continue
     const path = join(dir, entry)
     if (statSync(path).isDirectory()) out.push(...sourceFiles(path))
-    else if (/\.tsx?$/.test(path)) out.push(path)
+    else if (/\.tsx?$/.test(path) && !/\.test\.[cm]?[jt]sx?$/.test(path)) out.push(path)
   }
   return out
 }
@@ -185,7 +186,7 @@ const GROUP_OR_PEER = /^(group|peer)(\/[\w-]+)?$/
 const defined = definedClasses()
 const problems = []
 
-const sourceRoots = ['packages', 'src']
+const sourceRoots = ['packages', 'apps', 'src']
   .map((dir) => join(ROOT, dir))
   .filter((dir) => existsSync(dir))
 

@@ -4,7 +4,7 @@ import AxeBuilder from '@axe-core/playwright'
 import { readFileSync, mkdirSync, writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { join } from 'node:path'
-import { startStatic } from '../../../../../test/static-server.mjs'
+import { startStatic } from '#web-test/static-server'
 
 const root = fileURLToPath(new URL('../../../../../', import.meta.url))
 const index = JSON.parse(readFileSync(join(root,'storybook-static/index.json'),'utf8'))

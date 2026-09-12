@@ -22,6 +22,7 @@ Current package stack:
 
 - `packages/l0/foundation`
 - `packages/l1/api-model`
+- `packages/l1/article-model`
 - `packages/l1/recipe-model`
 - `packages/l2/recipe-domain`
 - `packages/l3/api-contract`
@@ -34,12 +35,17 @@ Current package stack:
 - `packages/l6/ui-content-blocks`
 - `packages/l6/ui-shell`
 - `packages/l7/home`
+- `packages/l7/learn`
 - `packages/l7/recipes`
 - `packages/l7/search`
 - `packages/l8/web`
 
 Lower layers must not import higher layers. Cross-package imports must be
-represented in the importing package's `tsconfig.json` references. Run:
+represented in the importing package's `tsconfig.json` references and package
+dependencies. App source has its own package manifest and composite tsconfig;
+apps can compose layers l0–l7 but cannot import web composition or another app.
+The boundary checker includes app source, import types, dynamic literal imports,
+and fixture globs. Unresolved workspace imports fail. Run:
 
 ```bash
 pnpm run boundaries
@@ -104,10 +110,25 @@ workspace root. Vite injects the selected app's public runtime config as
 `__APP_CONFIG__`; web routes, stories, and SEO helpers consume it via
 `packages/l8/web/src/lib/app-config.ts`.
 
-Content generation is orchestrated from `scripts/build-content.mjs`, which
-passes the selected app paths from the active app config into
-`packages/l4/content-build`. Keep `packages/l4/content-build` independent of
-the root app selector.
+Content generation is orchestrated from `scripts/build-content.mjs`. Root scripts
+resolve app-owned paths and invoke the YAML adapter. The publisher in
+`packages/l4/content-build` accepts normalized `RecipeContent[]` and
+`ArticleContent[]`, plus absolute `imagesDir` and `generatedDir` paths. It never
+discovers the repository or reads YAML itself. Keep source parsing, normalization,
+Markdown rendering, asset checks, and publication separate inside this layer.
+
+A future CMS adapter supplies the same content models and owns sanitization of
+its rich-text output. It must not leak provider types into the API/query or UI
+layers. The publisher validates slugs, collection uniqueness, output collisions,
+and local asset containment, and prepares output before replacing the previous
+valid directory. YAML uses `safeLoad`; never enable executable JavaScript tags.
+
+Vite and Storybook share root `scripts/app-build-config.mjs` for aliases and the
+public configuration allowlist. Only designated web composition entrypoints may
+import `@app/*`; add new entrypoints deliberately to the boundary guard. Shared
+runtime code cannot import root configuration or concrete app data. Web tests
+use `#web-test/*` through the explicit build/test support module outside `src`;
+the loopback static server is owned by root `test/static-server.mjs`.
 
 Generated app data belongs under `apps/<app>/generated`, never under shared
 packages. App stubs load their own app's generated `index.json` and
@@ -155,6 +176,10 @@ APP_ID=<app-id> pnpm run build
 APP_ID=<app-id> node scripts/verify-build.test.mjs
 ```
 
+Run `pnpm run test:security` after dependency changes. This checks the full
+lockfile, including build tooling. Keep advisory overrides narrowly scoped to
+affected versions and retain them until upstream resolution no longer needs them.
+
 If a verification command fails, fix the cause or document the blocker.
 
 ## Deployment
@@ -171,7 +196,8 @@ Deploy a specific app:
 APP_ID=<app-id> doppler run -p yeet -c dev -- pnpm run deploy
 ```
 
-The deploy script builds, uploads to Cloudflare Pages, purges cache, and verifies
+Wrangler is an exact dev dependency invoked with `pnpm exec`; do not replace it
+with an unpinned package download. The deploy script builds, uploads to Cloudflare Pages, purges cache, and verifies
 the production origin.
 
 Never deploy `.output/public` manually. `pnpm run deploy` owns the production

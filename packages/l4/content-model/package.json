@@ -6,5 +6,9 @@
     "./articles": "./src/articles.ts",
     "./blocks": "./src/blocks.ts",
     "./recipes": "./src/recipes.ts"
+  },
+  "dependencies": {
+    "@eat-yeet/l1-article-model": "workspace:*",
+    "@eat-yeet/l1-recipe-model": "workspace:*"
   }
 }
