@@ -4,6 +4,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { runRelease } from './release.mjs'
+import { acceptanceException } from './acceptance-policy.mjs'
 
 class Store {
   objects = new Map(); sequence = 0
@@ -21,7 +22,7 @@ async function fixture(run) {
   process.chdir(directory)
   const operations = new Store(), stateStore = new Store(), events = []
   const revision = 'a'.repeat(40)
-  await stateStore.write(`acceptance/staging/${revision}.json`, { restoreVerified: true, accessVerified: true, performanceVerified: true })
+  await stateStore.write(`acceptance/staging/${revision}.json`, { revision, restoreVerified: true, accessVerified: true, performanceVerified: true, ownerReviewed: true })
   const context = {
     config: { environment: 'production', origin: 'https://eatyeet.com' }, credentials: { RELEASE_VERIFY_SECRET: 'fixture-only-secret-longer-than-32' },
     stateStore, outputs: { operationsBucket: 'ops', mediaBucket: 'media', workerName: 'app' },
@@ -85,7 +86,7 @@ test('a new compatible commit can recover maintenance after explicit writer reco
   await stateStore.remove('locks/production.json', held.etag)
   const revision = 'b'.repeat(40)
   context.revision = () => revision
-  await stateStore.write(`acceptance/staging/${revision}.json`, { restoreVerified: true, accessVerified: true, performanceVerified: true })
+  await stateStore.write(`acceptance/staging/${revision}.json`, { revision, restoreVerified: true, accessVerified: true, performanceVerified: true, ownerReviewed: true })
   context.command = command
   await runRelease(context)
   assert.equal((await operations.read('control.json')).value.contentRevision, revision)
@@ -107,4 +108,25 @@ test('migration failure keeps maintenance and never synchronizes or deploys', as
   await assert.rejects(runRelease(context), /failed at migrate/)
   assert.equal((await operations.read('control.json')).value.status, 'maintenance')
   assert.ok(!events.includes('sync') && !events.includes('application'))
+}))
+
+test('production records authorized limitations without reporting them as passes', async () => fixture(async ({ context, operations, stateStore }) => {
+  const revision = context.revision()
+  context.config.ownerEmail = 'owner@example.test'
+  const evidence = { revision, restoreVerified: true, accessVerified: true, performanceVerified: false, ownerReviewed: false,
+    exception: acceptanceException('Owner directed production deployment despite the disclosed measured limitations.', revision, context.config.ownerEmail, ['performance', 'owner-review']) }
+  await stateStore.write(`acceptance/staging/${revision}.json`, evidence)
+  await runRelease(context)
+  const control = (await operations.read('control.json')).value
+  assert.deepEqual((await operations.read(`releases/${control.releaseId}.json`)).value.acceptance, evidence)
+}))
+
+test('expired exceptions reject production before build or remote locking', async () => fixture(async ({ context, stateStore, events }) => {
+  const revision = context.revision()
+  context.config.ownerEmail = 'owner@example.test'
+  await stateStore.write(`acceptance/staging/${revision}.json`, { revision, restoreVerified: true, accessVerified: true, performanceVerified: false, ownerReviewed: false,
+    exception: acceptanceException('Owner directed production deployment despite the disclosed measured limitations.', revision, context.config.ownerEmail, ['performance', 'owner-review'], Date.now() - 86401000) })
+  await assert.rejects(runRelease(context), /owner exception/)
+  assert.deepEqual(events, [])
+  assert.equal(await stateStore.read('locks/production.json'), null)
 }))

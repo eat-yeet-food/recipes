@@ -9,6 +9,7 @@ import { command, cleanRevision, migrationManifest, assertCompatible, digest } f
 import { databaseBackup } from './backups.mjs'
 import { ownerAccessSession } from './access-session.mjs'
 import { deploymentManifest } from '../../infra/cloudflare/assets.cjs'
+import { assertProductionAcceptance } from './acceptance-policy.mjs'
 
 export function probeToken(credentials, releaseId, origin) {
   const body = Buffer.from(JSON.stringify({ releaseId, origin, exp: Math.floor(Date.now() / 1000) + 600 })).toString('base64url')
@@ -51,16 +52,17 @@ export async function runRelease(context, { resume, rollback } = {}) {
   assertCompatible(previous?.migrations, migrations)
   const rollbackRecord = rollback ? (await operations.read(`releases/${rollback}.json`))?.value : null
   if (rollback && (!rollbackRecord || rollbackRecord.status !== 'complete' || JSON.stringify(rollbackRecord.migrations) !== JSON.stringify(previous?.migrations))) throw new Error('Application rollback requires a completed release with the currently applied migration set')
+  let acceptance
   if (config.environment === 'production' && !rollback && !resume) {
-    const evidence = (await stateStore.read(`acceptance/staging/${revision}.json`))?.value
-    if (!evidence?.restoreVerified || !evidence?.accessVerified || !evidence?.performanceVerified) throw new Error('Production requires staging acceptance for this exact commit, including restore, Access/MFA and performance')
+    acceptance = (await stateStore.read(`acceptance/staging/${revision}.json`))?.value
+    assertProductionAcceptance(acceptance, revision, config.ownerEmail)
   }
   const { bundleFile, assetsDirectory } = await (context.build ?? buildArtifacts)({ directory, outputs, childEnv, abort, child, rollback, command: run })
   if ((context.revision ?? cleanRevision)() !== revision) throw new Error('Source commit changed during the build')
   await lock.acquire(releaseId)
   childEnv.EATYEET_RELEASE_LOCK = lock.value.token
   lock.startHeartbeat((error) => abort.abort(error))
-  record = { ...record, id: releaseId, revision, migrations, previous, startedAt: record?.startedAt ?? new Date().toISOString(), status: 'running', phase: 'prepared' }
+  record = { ...record, ...(acceptance ? { acceptance } : {}), id: releaseId, revision, migrations, previous, startedAt: record?.startedAt ?? new Date().toISOString(), status: 'running', phase: 'prepared' }
   const phase = async (name) => {
     await lock.checkpoint(name)
     record.phase = name

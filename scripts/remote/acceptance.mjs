@@ -1,10 +1,11 @@
 import { DatabaseSync } from 'node:sqlite'
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
+import { readFileSync, writeFileSync, mkdirSync, rmSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { ObjectStore } from './storage.mjs'
 import { databaseBackup, readBackup } from './backups.mjs'
 import { command, cleanRevision, digest } from './process.mjs'
 import { ownerAccessSession } from './access-session.mjs'
+import { performancePassed, acceptanceException } from './acceptance-policy.mjs'
 
 export async function rehearseRestore({ config, credentials, client, api, outputs, lock }) {
   if (config.environment !== 'staging') throw new Error('Restore rehearsal is restricted to staging')
@@ -30,7 +31,7 @@ export async function rehearseRestore({ config, credentials, client, api, output
   console.log('Staging Time Travel and content/owner identity verification passed.')
 }
 
-export async function acceptStaging({ config, credentials, client, api, outputs, lock, stateStore }, ownerReviewed) {
+export async function acceptStaging({ config, credentials, client, api, outputs, lock, stateStore }, ownerReviewed, approvedLimitations) {
   if (config.environment !== 'staging') throw new Error('Acceptance rehearsal runs against staging only')
   const revision = cleanRevision()
   const store = new ObjectStore(client, outputs.operationsBucket)
@@ -38,7 +39,15 @@ export async function acceptStaging({ config, credentials, client, api, outputs,
   if (control?.status !== 'ready' || control.contentRevision !== revision) throw new Error('Staging must have a completed release of this commit')
   const session = await ownerAccessSession(config.origin)
   await command('node', ['test/verify-prod.mjs', config.origin], { env: { EATYEET_ACCESS_TOKEN: session, EATYEET_EXPECTED_RELEASE: control.releaseId } })
-  await command('node', ['test/remote-performance.mjs', config.origin], { env: { EATYEET_ACCESS_TOKEN: session } })
+  rmSync('dist/remote-performance.json', { force: true })
+  let performanceError
+  try { await command('node', ['test/remote-performance.mjs', config.origin], { env: { EATYEET_ACCESS_TOKEN: session } }) }
+  catch (error) { performanceError = error }
+  // A failed measurement or stale/missing report cannot become an exception.
+  const performance = JSON.parse(readFileSync('dist/remote-performance.json', 'utf8'))
+  const performanceVerified = performancePassed(performance, config.origin)
+  if (performanceError && performanceVerified) throw performanceError
+  if (!performanceVerified && !approvedLimitations) throw performanceError ?? new Error('Mobile performance targets failed')
   await lock.assertOwner()
   const backup = await databaseBackup(api, config, outputs, store, credentials, `rehearsal-${Date.now()}`)
   const restored = await readBackup(store, credentials, backup.key)
@@ -54,11 +63,13 @@ export async function acceptStaging({ config, credentials, client, api, outputs,
   if (integrity !== 'ok' || !['recipes', 'articles', 'owners'].every((table) => tables.includes(table))) throw new Error('Export restore integrity check failed')
   const timeTravel = (await store.read(`rehearsals/${revision}.json`))?.value
   if (!timeTravel?.timeTravelVerified) throw new Error('Encrypted export restore passed. Run remote:rehearse to verify actual staging D1 Time Travel before acceptance.')
-  if (!ownerReviewed) throw new Error('Automated checks passed. Complete owner MFA/admin/preview review, then rerun with --owner-reviewed to attest that review.')
+  if (!ownerReviewed && !approvedLimitations) throw new Error('Automated checks passed. Complete owner MFA/admin/preview review, then rerun with --owner-reviewed to attest that review.')
+  const limitations = [!performanceVerified && 'performance', !ownerReviewed && 'owner-review'].filter(Boolean)
   const report = { revision, releaseId: control.releaseId, checkedAt: new Date().toISOString(), restoreVerified: true,
-    accessVerified: true, performanceVerified: true, ownerReviewed: true, backup: backup.key }
+    accessVerified: true, performanceVerified, ownerReviewed: !!ownerReviewed, performance, backup: backup.key,
+    ...(limitations.length ? { exception: acceptanceException(approvedLimitations, revision, config.ownerEmail, limitations) } : {}) }
   await stateStore.write(`acceptance/staging/${revision}.json`, report)
   mkdirSync('dist', { recursive: true })
   writeFileSync(resolve('dist/remote-acceptance.json'), JSON.stringify(report, null, 2))
-  console.log('Staging acceptance recorded for this exact commit.')
+  console.log(`Staging acceptance recorded for this exact commit${limitations.length ? '; explicit owner exceptions: ' + limitations.join(', ') : ''}.`)
 }

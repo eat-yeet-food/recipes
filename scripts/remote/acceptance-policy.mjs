@@ -1,0 +1,32 @@
+export function performancePassed(report, origin) {
+  const paths = ['/', '/recipes', '/browse', '/learn', '/recipes/new-york-style-pizza', '/learn/mixing-dough-and-gluten-development']
+  if (report?.origin !== origin || report.results?.length !== paths.length) throw new Error('Incomplete performance evidence')
+  return paths.map((path) => {
+    const result = report.results.find((row) => row.path === path)
+    if (result?.runs?.length !== 3) throw new Error('Incomplete performance runs')
+    const median = Object.fromEntries(['performance', 'lcp', 'cls'].map((key) => {
+      const values = result.runs.map((run) => run[key])
+      if (values.some((value) => !Number.isFinite(value) || value < 0)) throw new Error('Invalid performance measurement')
+      return [key, values.sort((a, b) => a - b)[1]]
+    }))
+    return median.performance >= 0.9 && median.lcp <= 2500 && median.cls <= 0.1
+  }).every(Boolean)
+}
+
+export function acceptanceException(reason, revision, ownerEmail, limitations, now = Date.now()) {
+  if (typeof reason !== 'string' || reason.trim().length < 20) throw new Error('Record the explicit owner authorization and known limitations (20+ characters)')
+  return { revision, ownerEmail, reason: reason.trim(), limitations, recordedAt: new Date(now).toISOString(), expiresAt: new Date(now + 86400000).toISOString() }
+}
+
+export function assertProductionAcceptance(evidence, revision, ownerEmail, now = Date.now()) {
+  if (evidence?.revision !== revision || evidence.restoreVerified !== true || evidence.accessVerified !== true)
+    throw new Error('Production requires exact-commit staging Worker/security verification and tested restore; these checks cannot be excepted')
+  const missing = [!evidence.performanceVerified && 'performance', !evidence.ownerReviewed && 'owner-review'].filter(Boolean)
+  if (!missing.length) return
+  const exception = evidence.exception
+  if (exception?.revision !== revision || exception.ownerEmail !== ownerEmail || typeof exception.reason !== 'string' || exception.reason.trim().length < 20 ||
+      !Number.isFinite(Date.parse(exception.expiresAt)) || Date.parse(exception.expiresAt) <= now ||
+      Date.parse(exception.expiresAt) > now + 86400000 || !Array.isArray(exception.limitations) ||
+      missing.some((name) => !exception.limitations.includes(name)) || exception.limitations.some((name) => !['performance', 'owner-review'].includes(name)))
+    throw new Error('Production requires passing performance and owner review, or a current explicit owner exception for these exact limitations')
+}
