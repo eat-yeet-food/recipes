@@ -2,6 +2,8 @@
 
 This is the operator entry point for Eat / Yeet. [The implementation reference](payload-remote.md) explains the release protocol and recovery details. [Release evidence](changes/payload-remote/review.md) records observations and unresolved findings; historical entries are not current status. Read live release status before acting.
 
+Required post-cutover work: [address the page/image loading regression](changes/payload-remote/performance-regression.md). The owner requires this work; a deployment exception does not resolve the performance issue.
+
 ## Daily deployment
 
 Work from `/Users/phoganuci/src/recipes`. Commit and push the intended changes, then use the explicit environment commands. No deployment occurs on Git push. Local development never uses remote bindings.
