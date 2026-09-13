@@ -2,6 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { generateKeyPairSync, sign, createHmac } from 'node:crypto'
 import { remoteRequest, normalizedPath, protectedPath, verifyAccess, verifyReleaseProbe } from './remote-policy.mjs'
+import { ProjectionCache } from './projection-cache.mjs'
 
 const { publicKey, privateKey } = generateKeyPairSync('rsa', { modulusLength: 2048 })
 const jwk = { ...publicKey.export({ format: 'jwk' }), kid: 'test-key' }
@@ -64,4 +65,26 @@ test('maintenance verifier is short-lived and bound to release and origin', asyn
   assert.equal(await verifyReleaseProbe(token, env.RELEASE_VERIFY_SECRET, { releaseId: 'other' }, env.SITE_URL), false)
   assert.equal(await verifyReleaseProbe(token, env.RELEASE_VERIFY_SECRET, claims, 'https://staging.eatyeet.com'), false)
   assert.equal(await verifyReleaseProbe(token, env.RELEASE_VERIFY_SECRET, claims, env.SITE_URL, Date.now()+600000), false)
+})
+
+test('warm projections cannot bypass maintenance and retirement switches the generation before reads resume', async () => {
+  const cache = new ProjectionCache()
+  let state = { releaseId: 'test-release', generation: 'v1', status: 'ready' }
+  let published = ['pizza'], loads = 0
+  const runtime = { ...env, OPERATIONS: { get: async () => ({ json: async () => ({ ...state }) }) } }
+  const next = async (request) => Response.json(await cache.read(
+    [runtime.DEPLOY_ENV, runtime.RELEASE_ID, request.headers.get('x-eatyeet-generation')], 'recipes',
+    async () => { loads++; return [...published] },
+  ))
+  const read = () => remoteRequest(new Request(env.SITE_URL), runtime, next)
+  assert.deepEqual(await (await read()).json(), ['pizza'])
+  assert.deepEqual(await (await read()).json(), ['pizza'])
+  assert.equal(loads, 1)
+  state.status = 'maintenance'
+  published = []
+  assert.equal((await read()).status, 503)
+  assert.equal(loads, 1)
+  state = { ...state, generation: 'v2', status: 'ready' }
+  assert.deepEqual(await (await read()).json(), [])
+  assert.equal(loads, 2)
 })

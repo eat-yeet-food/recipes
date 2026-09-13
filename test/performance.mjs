@@ -5,6 +5,14 @@ import { chromium } from 'playwright'
 import { startApp } from './app-server.mjs'
 import { startStatic } from './static-server.mjs'
 const baseline = process.argv.includes('--baseline')
+const pathArgument = process.argv.indexOf('--path')
+const selectedPath = pathArgument < 0 ? undefined : process.argv[pathArgument + 1]
+const diagnostics = process.argv.includes('--diagnostics')
+const representativePaths = [
+  '/', '/recipes', '/browse', '/learn', '/recipes/new-york-style-pizza',
+  '/learn/mixing-dough-and-gluten-development',
+]
+if (pathArgument >= 0 && !representativePaths.includes(selectedPath)) throw new Error('--path must name a representative route')
 const server = baseline
   ? await startStatic('/tmp/eatyeet-before-public')
   : await startApp()
@@ -13,14 +21,7 @@ const origin = (
   process.env.TEST_ORIGIN ??
   'http://127.0.0.1:3000'
 ).replace(/\/$/, '')
-const paths = [
-  '/',
-  '/recipes',
-  '/browse',
-  '/learn',
-  '/recipes/new-york-style-pizza',
-  '/learn/mixing-dough-and-gluten-development',
-]
+const paths = selectedPath ? [selectedPath] : representativePaths
 const results = []
 try {
   for (const path of paths) {
@@ -38,6 +39,10 @@ try {
           onlyCategories: ['performance', 'accessibility', 'seo'],
         })
         if (lhr.runtimeError) throw new Error(JSON.stringify(lhr.runtimeError))
+        if (diagnostics) {
+          mkdirSync('dist/performance-diagnostics', { recursive: true })
+          writeFileSync(`dist/performance-diagnostics/${path.replaceAll('/', '_') || 'home'}-${i + 1}.json`, JSON.stringify(lhr))
+        }
         runs.push({
           performance: lhr.categories.performance.score,
           accessibility: lhr.categories.accessibility.score,
@@ -63,7 +68,7 @@ try {
 }
 mkdirSync('dist', { recursive: true })
 writeFileSync(
-  `dist/performance-${baseline ? 'before' : 'after'}.json`,
+  `dist/performance-${baseline ? 'before' : 'after'}${selectedPath ? selectedPath.replaceAll('/', '_') : ''}.json`,
   JSON.stringify({ origin, results }, null, 2),
 )
 if (

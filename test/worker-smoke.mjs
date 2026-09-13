@@ -52,6 +52,27 @@ try {
   const legacy = await get('/images/charred-crust-pizza.jpg', { redirect: 'manual' })
   assert.equal(legacy.status, 302)
   assert.match(legacy.headers.get('location'), /^https:\/\/media\.eatyeet\.com\/media\//)
+  const mediaURL = legacy.headers.get('location')
+  const image = await get(mediaURL)
+  assert.equal(image.status, 200)
+  const etag = image.headers.get('etag')
+  await image.arrayBuffer()
+  let warm
+  for (let attempt = 0; attempt < 20; attempt++) {
+    warm = await get(mediaURL)
+    await warm.arrayBuffer()
+    if (warm.headers.get('x-eatyeet-media-cache') === 'HIT') break
+    await new Promise((resolve) => setTimeout(resolve, 50))
+  }
+  assert.equal(warm.headers.get('x-eatyeet-media-cache'), 'HIT', 'public image reaches edge cache')
+  assert.equal((await get(mediaURL, { headers: { 'If-None-Match': etag } })).status, 304)
+  const database = await worker.getD1Database('D1')
+  const hash = new URL(mediaURL).pathname.split('/')[2]
+  await database.prepare('UPDATE media SET public = 0 WHERE source_id = ?').bind(hash).run()
+  const retired = await get(mediaURL)
+  assert.equal(retired.status, 404, 'live publication check blocks previously cached bytes even before generation changes')
+  assert.match(retired.headers.get('cache-control'), /no-store/)
+  await database.prepare('UPDATE media SET public = 1 WHERE source_id = ?').bind(hash).run()
   const cache = await worker.getR2Bucket('NEXT_INC_CACHE_R2_BUCKET')
   assert.ok((await cache.list()).objects.length > 0, 'public projections persist in R2')
   const initialKeys = new Set((await cache.list()).objects.map((object) => object.key))
@@ -72,7 +93,7 @@ try {
   assert.equal(verified.status, 200)
   await verified.text()
   mkdirSync('dist', { recursive: true })
-  writeFileSync('dist/worker-smoke.json', JSON.stringify({ passed: true, bundleModules: modules, checks: ['real routes/assets', 'R2 projections', 'generation change', 'alternate hosts', 'protected handlers', 'missing media', 'maintenance', 'authenticated verification'] }, null, 2))
+  writeFileSync('dist/worker-smoke.json', JSON.stringify({ passed: true, bundleModules: modules, checks: ['real routes/assets', 'R2 projections', 'generation change', 'edge image hit/304', 'retirement blocks cached bytes', 'alternate hosts', 'protected handlers', 'missing media', 'maintenance', 'authenticated verification'] }, null, 2))
   console.log('Release Worker smoke passed with isolated local D1/R2.')
 } finally {
   await worker?.dispose()

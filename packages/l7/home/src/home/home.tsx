@@ -60,7 +60,7 @@ export function HomeHero({ copy }: { copy: HomeCopy }) {
     <section className="overflow-hidden bg-brand text-ink">
       <div className="mx-auto grid max-w-[var(--layout-hero-max)] md:grid-cols-2">
         <figure className="order-2 m-0 flex min-w-0 flex-col bg-ink p-6 md:order-1 md:py-10 md:pl-10 md:pr-0">
-          <ResponsiveImage src={hero.image} alt={hero.imageAlt} className="aspect-[4/3] w-full flex-1 object-cover [clip-path:polygon(0_0,100%_0,100%_90%,0_100%)]" loading="eager" fetchPriority="high" />
+          <ResponsiveImage src={hero.image} alt={hero.imageAlt} sizes="(max-width: 767px) calc(100vw - 48px), (max-width: 1500px) calc(50vw - 40px), 710px" className="aspect-[4/3] w-full flex-1 object-cover [clip-path:polygon(0_0,100%_0,100%_90%,0_100%)]" loading="eager" fetchPriority="high" />
           {hero.imageCaption && <figcaption className="pt-5 text-sm font-bold text-white">{hero.imageCaption}</figcaption>}
         </figure>
         <div className="relative isolate order-1 overflow-hidden px-6 py-10 md:order-2 md:p-12 lg:p-14">

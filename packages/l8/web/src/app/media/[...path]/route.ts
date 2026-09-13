@@ -1,5 +1,6 @@
 import { getCloudflareContext } from '@opennextjs/cloudflare'
 import { cms, runtimeSettings } from '../../../next/cms'
+import { deliverMedia } from '../../../next/media-delivery.mjs'
 export const dynamic = 'force-dynamic'
 export async function GET(
   request: Request,
@@ -34,30 +35,14 @@ export async function GET(
     key = `${hash}/${file}`
   if (![...manifest.variants, manifest.social].some((v) => v.key === key))
     return missing()
-  const { env } = await getCloudflareContext({ async: true })
+  const { env, ctx } = await getCloudflareContext({ async: true })
   // Publication eligibility is deliberately checked before looking in edge cache.
-  const edge = (globalThis as any).caches?.default
-  const generation = request.headers.get('x-eatyeet-generation')
-  const cacheKey = new Request(new URL(`/__media-cache/${generation}/${key}`, request.url))
-  const mayCache = settings.remote && docs[0].public && edge && generation && !request.headers.has('cache-control') && !request.headers.has('if-none-match')
-  if (mayCache) {
-    const cached = await edge.match(cacheKey)
-    if (cached) return cached
-  }
-  const object = await (env as any).R2.get(key)
-  if (!object) return missing()
-  const headers = new Headers({
-    'Content-Type': object.httpMetadata.contentType,
-    'Content-Length': String(object.size),
-    ETag: object.httpEtag,
-    'X-Content-Type-Options': 'nosniff',
-    'Cache-Control': docs[0].public
-      ? 'public, max-age=31536000'
-      : 'private, no-store',
+  return deliverMedia(request, {
+    key, isPublic: Boolean(docs[0].public),
+    generation: request.headers.get('x-eatyeet-generation'),
+    bucket: (env as any).R2,
+    edge: settings.remote ? (globalThis as any).caches?.default : undefined,
+    waitUntil: (work: Promise<unknown>) => ctx.waitUntil(work),
+    releaseId: (env as any).RELEASE_ID,
   })
-  if (request.headers.get('if-none-match') === object.httpEtag)
-    return new Response(null, { status: 304, headers })
-  const response = new Response(object.body, { headers })
-  if (mayCache) await edge.put(cacheKey, response.clone())
-  return response
 }

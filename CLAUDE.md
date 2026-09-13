@@ -31,6 +31,8 @@ Run `pnpm boundaries` and `pnpm typecheck:ts`. The boundary checker covers alias
 
 Public requests must read Payload, never generated fixture JSON or source YAML. `packages/l8/web/src/next/cms.ts` is server-only. `content-cms/service.ts` returns existing view models; keep Payload types out of public contracts and UI layers. Request-driven Local API calls require `overrideAccess: false`. Privileged bootstrap/sync code stays in CLI entrypoints.
 
+The remote Worker has one narrow public-media fast path: a parameterized, indexed read of Payload's `media` table with `public = 1`, followed by manifest-variant validation, before any byte-cache lookup. Keep this publication read fresh. Private media on the site hostname falls back to Payload owner/session checks; private media on the separate media hostname is denied. All other content reads use the Payload service adapters. Test retirement against an already warm image cache when changing this path.
+
 Recipes, method variants and Learn articles share the typed Payload block definitions in `content-cms/src/blocks.ts`. The storage codec in `content-model/src/storage.ts` reconstructs the common public block model and separates authored IDs from Payload IDs. Do not fork block definitions by content collection.
 
 Author-facing metadata uses native fields generated from `content-model/src/field-shapes.ts`, including calculator defaults, learning references and SEO. Keep machine fields hidden. Keep large optional learning/calculator sections in shallow child rows: D1 limits both query columns and expression depth. Preserve null/absent fields, authored IDs and numeric/text yield types through the storage codec. Hidden legacy JSON is retained for older revisions, not used by current synchronized public reads.
@@ -79,6 +81,8 @@ pnpm parity
 Lighthouse requires three comparable mobile production-preview runs per representative route: median performance ≥90, LCP ≤2.5 seconds, CLS ≤0.1. Record local results as local lab evidence; production network/CDN performance is separate. Image delivery reports must verify selected URLs, transfer sizes, missing/private responses and hydration downloads.
 
 Use `pnpm build:worker && pnpm preview` for a local Workers smoke test. Tests may use isolated state under `.local`; never overwrite the development owner. If a required command fails, fix it or record its exact unresolved blocker. Keep security overrides scoped to affected dependency versions.
+
+Run preview-based browser checks sequentially: they share the build directory and local emulator persistence. Overlapping local previews produced intermittent media 500s during performance verification. Keep Lighthouse runs free of concurrent browser/build workloads.
 
 ## Deployment and remote handoff
 

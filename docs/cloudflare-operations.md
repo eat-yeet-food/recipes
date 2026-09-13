@@ -43,6 +43,7 @@ Inventory checked 2026-09-13. Names are descriptive; compare actual IDs against 
 | Staging R2 | `eatyeet-staging-media`, `eatyeet-staging-cache`, `eatyeet-staging-operations` |
 | Production | `https://eatyeet.com`; admin `/admin`; derivative origin `https://media.eatyeet.com` |
 | Production Worker | `eatyeet-production` |
+| Production apex route | `8296ee010a124ae9b2b0643658906d5c`, `eatyeet.com/*` → `eatyeet-production` |
 | Production D1 | `9a657ae9-d9b2-4bf4-ae3a-ac405b31cf5a`, `eatyeet-production-content` |
 | Production R2 | `eatyeet-production-media`, `eatyeet-production-cache`, `eatyeet-production-operations` |
 | Retained Pages project | `eatyeet`, ID `e835ec8d-674f-4b10-84a3-fe0c931beb5a` |
@@ -51,7 +52,9 @@ Inventory checked 2026-09-13. Names are descriptive; compare actual IDs against 
 
 The bootstrap stack owns the state bucket, Access organization, account-restricted identity provider and owner MFA enrollment launcher. Each application stack owns its D1 database, three private R2 buckets, Worker, bindings, Access apps/policies, and delivery routes. There is no shared application database, Payload secret or owner session between staging and production.
 
-Production cutover adds the apex Worker route `eatyeet.com/*` and media custom domain. It retains Pages and its DNS target for route rollback. `www` behavior remains part of the inventoried legacy configuration until deliberately migrated; do not assume an apex route also matches `www`.
+Production cutover completed on 2026-09-13 with application `8df398195b929e9503e4f74ae2e98feb5bf700b6`, release `8df398195b92-1789307349954`. Verification tooling `99d6948` reopened traffic after fixing a canonical-URL comparison in the verifier; no application redeployment was needed. The release was ready with its lock cleared. Production mobile performance failed its LCP budgets; the required optimization work remains open. Payload owner bootstrap/manual review remains pending and must not be inferred from successful Access sign-in.
+
+Production cutover added the apex Worker route `eatyeet.com/*` and media custom domain. It retains Pages and its DNS target for route rollback. `www` behavior remains part of the inventoried legacy configuration until deliberately migrated; do not assume an apex route also matches `www`.
 
 The Worker checks configured hosts, Access tokens where required, current maintenance state and publication eligibility. Public content projections use OpenNext R2 caching by environment/schema/content generation. Public HTML remains dynamic. Originals have no public delivery route. Derivatives remain privately stored and eligibility-checked before cache delivery; browser bytes already downloaded cannot be recalled.
 
@@ -140,7 +143,7 @@ For a failed restore rehearsal that already created its probe, recover the stopp
 
 Application rollback is `pnpm run deploy --env production --rollback <completed-release-id>`. It requires compatible migrations, restores retained bundle/assets, preserves current content/authentication data, advances cache generation and verifies. Database restore is a separate maintenance operation using the exact backup bookmark; see the implementation reference.
 
-For emergency return to retained Pages, first stop/recover the release writer. Save state and the production route ID from live inventory. Through Pulumi, remove only `eatyeet.com/*` (deliberately disable that route's deletion protection/retention), keeping Pages, DNS, D1, R2 and Access intact. Verify Pages HTML and its referenced assets. Reconcile `cutover` and route ownership in Git/Pulumi before another release. Do not delete the zone, replace DNS with a guessed target, or reenable legacy automatic deployments before verifying the rollback.
+For emergency return to retained Pages, first stop/recover the release writer. Save state and recheck production route `8296ee010a124ae9b2b0643658906d5c` (`eatyeet.com/*`) against live inventory. Through Pulumi, remove only `eatyeet.com/*` (deliberately disable that route's deletion protection/retention), keeping Pages, DNS, D1, R2 and Access intact. Verify Pages HTML and its referenced assets. Reconcile `cutover` and route ownership in Git/Pulumi before another release. Do not delete the zone, replace DNS with a guessed target, or reenable legacy automatic deployments before verifying the rollback.
 
 ## Troubleshooting without repeated setup
 

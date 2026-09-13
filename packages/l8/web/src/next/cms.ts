@@ -7,6 +7,8 @@ import { cache } from 'react'
 import { headers } from 'next/headers'
 import { unstable_cache } from 'next/cache'
 import { storedContent, storedSEO } from '@eat-yeet/l4-content-model/storage'
+import { ProjectionCache } from './projection-cache.mjs'
+const projections = new ProjectionCache()
 function runtimeVars(): Record<string, any> {
   try {
     const env = getCloudflareContext().env as Record<string, any>
@@ -27,7 +29,9 @@ async function publicProjection<T>(key: string, read: () => Promise<T>): Promise
   if (!runtimeSettings().remote) return read()
   const generation = (await headers()).get('x-eatyeet-generation')
   if (!generation) throw new Error('Remote request must pass the release guard')
-  return unstable_cache(read, ['public-content-v1', vars.DEPLOY_ENV, generation, key], { revalidate: false })()
+  const namespace = ['public-content-v1', vars.DEPLOY_ENV, vars.RELEASE_ID, generation]
+  return projections.read(namespace, key, () =>
+    unstable_cache(read, [...namespace, key], { revalidate: false })())
 }
 export async function cmsConfig() {
   const { env } = await getCloudflareContext({ async: true })
@@ -72,17 +76,17 @@ export const siteData = cache(async (): Promise<Record<string, any>> => publicPr
     siteUrl: runtimeSettings().siteUrl,
   }
 }))
+const contentAPI = cache(async () => contentServices(await cms()))
 export const services = cache(async () => {
-  const api = contentServices(await cms())
+  type API = Awaited<ReturnType<typeof contentAPI>>
   return {
-    recipes: { ...api.recipes,
-      listRecipes: cache((request?: Parameters<typeof api.recipes.listRecipes>[0]) => publicProjection('recipes:' + JSON.stringify(request ?? {}), () => api.recipes.listRecipes(request))),
-      getRecipe: (request: Parameters<typeof api.recipes.getRecipe>[0]) => publicProjection('recipe:' + request.slug, () => api.recipes.getRecipe(request)),
+    recipes: {
+      listRecipes: cache((request?: Parameters<API['recipes']['listRecipes']>[0]) => publicProjection('recipes:' + JSON.stringify(request ?? {}), async () => (await contentAPI()).recipes.listRecipes(request))),
+      getRecipe: (request: Parameters<API['recipes']['getRecipe']>[0]) => publicProjection('recipe:' + request.slug, async () => (await contentAPI()).recipes.getRecipe(request)),
     },
     articles: {
-      ...api.articles,
-      listArticles: cache((request?: Parameters<typeof api.articles.listArticles>[0]) => publicProjection('articles:' + JSON.stringify(request ?? {}), () => api.articles.listArticles(request))),
-      getArticle: (request: Parameters<typeof api.articles.getArticle>[0]) => publicProjection('article:' + request.slug, () => api.articles.getArticle(request)),
+      listArticles: cache((request?: Parameters<API['articles']['listArticles']>[0]) => publicProjection('articles:' + JSON.stringify(request ?? {}), async () => (await contentAPI()).articles.listArticles(request))),
+      getArticle: (request: Parameters<API['articles']['getArticle']>[0]) => publicProjection('article:' + request.slug, async () => (await contentAPI()).articles.getArticle(request)),
     },
   }
 })

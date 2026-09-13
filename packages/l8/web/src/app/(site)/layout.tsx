@@ -1,4 +1,4 @@
-import { siteData, services, publicMedia, deliveryMedia } from '../../next/cms'
+import { siteData, services, publicMedia, deliveryMedia, runtimeSettings } from '../../next/cms'
 import { SiteShell } from '../../next/providers'
 import '../../styles/global.css'
 import '../../styles/site-overrides.css'
@@ -17,6 +17,7 @@ export default async function Layout({
   return (
     <html lang="en">
       <head>
+        {runtimeSettings().mediaOrigin && <link rel="preconnect" href={runtimeSettings().mediaOrigin} />}
         <link rel="icon" href="/donut-icon.svg" type="image/svg+xml" />
         <style>
           {
@@ -39,7 +40,7 @@ export default async function Layout({
         />
       </head>
       <body>
-        <SiteShell site={site} media={deliveryMedia(media)} recipes={recipes}>
+        <SiteShell site={{ navigation: site.navigation, siteName: site.siteName, copy: { wordmark: site.copy.wordmark } }} media={deliveryMedia(media)} recipes={recipes}>
           {children}
         </SiteShell>
       </body>

@@ -2,7 +2,9 @@ import { cache } from 'react'
 import { notFound } from 'next/navigation'
 import { publicDocument, siteData, services } from '../../../next/cms'
 import { metadataFor, JsonLd } from '../../../next/seo'
-import { SearchClient, RecipeClient } from '../../../next/interactive'
+import dynamic from 'next/dynamic'
+const RecipeClient = dynamic(() => import('../../../next/interactive').then((module) => module.RecipeClient))
+const SearchClient = dynamic(() => import('../../../next/search-client').then((module) => module.SearchClient))
 import { HomePage } from '@eat-yeet/l7-home/home/home'
 import { RecipeGrid, BrowseCard } from '@eat-yeet/l6-ui-catalog/cards'
 import {
@@ -43,7 +45,9 @@ export default async function Page({
     api = await services()
   const [{ recipes }, { articles }, doc] = await Promise.all([
     api.recipes.listRecipes(),
-    api.articles.listArticles(),
+    path === '/learn' || path.startsWith('/learn/')
+      ? api.articles.listArticles()
+      : Promise.resolve({ articles: [] }),
     documentFor(path),
   ])
   const query = await searchParams
