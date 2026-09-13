@@ -10,7 +10,9 @@ if (!['bootstrap', 'staging', 'production'].includes(environment)) throw new Err
 const accountId = settings.accountId
 const provider = new cloudflare.Provider('cloudflare', { apiToken: pulumi.secret(process.env.CLOUDFLARE_API_TOKEN!) })
 const protectedOptions = { provider, protect: true, retainOnDelete: true }
-const imported = (name: string) => ({ ...protectedOptions, ...(settings.imports?.[name] ? { import: settings.imports[name] } : {}) })
+const imported = (name: string, initialId?: string) => ({ ...protectedOptions,
+  ...(!settings.adoptedResources?.includes(name) && (settings.imports?.[name] || initialId)
+    ? { import: settings.imports?.[name] || initialId } : {}) })
 const exportValues: Record<string, any> = {}
 const hash = (bytes: Buffer | string) => createHash('sha256').update(bytes).digest('hex')
 
@@ -28,10 +30,10 @@ if (environment === 'bootstrap') {
       allowedAuthenticators: old?.allowedAuthenticators?.length ? old.allowedAuthenticators : ['totp', 'security_key', 'biometrics'],
       sessionDuration: old?.sessionDuration ?? '2h', amrMatchingSessionDuration: old?.amrMatchingSessionDuration ?? '2h',
     })),
-  }, { ...protectedOptions, import: accountId })
+  }, imported('access-organization', accountId))
   const identity = new cloudflare.ZeroTrustAccessIdentityProvider('cloudflare-login', {
     accountId, name: 'Cloudflare', type: 'cloudflare', config: { restrictToAccountMembers: true },
-  }, { ...protectedOptions, ...(settings.cloudflareIdpId ? { import: `accounts/${accountId}/${settings.cloudflareIdpId}` } : {}) })
+  }, imported('cloudflare-login', settings.cloudflareIdpId ? `accounts/${accountId}/${settings.cloudflareIdpId}` : undefined))
   exportValues.cloudflareIdpId = identity.id
   // Independent MFA enrollment lives in the App Launcher. Requiring independent
   // MFA here would prevent the owner from registering their first authenticator.
@@ -43,7 +45,7 @@ if (environment === 'bootstrap') {
   const enrollment = new cloudflare.ZeroTrustAccessApplication('owner-mfa-enrollment', {
     accountId, name: 'Eat / Yeet owner MFA enrollment', type: 'app_launcher',
     domain: settings.accessTeamDomain, allowedIdps: [identity.id],
-    autoRedirectToIdentity: true, sessionDuration: '2h', allowAuthenticateViaWarp: false,
+    autoRedirectToIdentity: true, sessionDuration: '2h',
     policies: [{ id: enrollmentPolicy.id, precedence: 1 }],
   }, imported('owner-mfa-enrollment'))
   exportValues.ownerEnrollmentApplicationId = enrollment.id

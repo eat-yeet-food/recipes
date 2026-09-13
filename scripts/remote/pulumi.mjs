@@ -30,7 +30,11 @@ export async function infrastructure(config, credentials) {
     },
     secretsProvider: 'passphrase',
   })
-  await stack.setConfig('eatyeet:settings', { value: JSON.stringify(config) })
+  const state = await stack.exportStack()
+  const adoptedResources = (state.deployment?.resources ?? [])
+    .filter((resource) => resource.id && resource.type?.startsWith('cloudflare:'))
+    .map((resource) => resource.urn.split('::').at(-1))
+  await stack.setConfig('eatyeet:settings', { value: JSON.stringify({ ...config, adoptedResources }) })
   return stack
 }
 export async function saveOutputs(stack, environment) {
