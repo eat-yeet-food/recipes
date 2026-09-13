@@ -88,3 +88,49 @@ test('warm projections cannot bypass maintenance and retirement switches the gen
   assert.deepEqual(await (await read()).json(), [])
   assert.equal(loads, 2)
 })
+
+test('build assets skip release storage without bypassing host or Access protection', async () => {
+  const runtime = { ...env, OPERATIONS: { get: () => { throw new Error('Must not read release storage') } } }
+  const next = (request) => {
+    assert.equal(request.headers.get('x-eatyeet-generation'), null)
+    return new Response('script')
+  }
+  const url = env.SITE_URL + '/_next/static/chunks/page-0123456789abcdef.js'
+  const response = await remoteRequest(new Request(url, { headers: { 'x-eatyeet-generation': 'forged' } }), runtime, next)
+  assert.equal(await response.text(), 'script')
+  assert.equal(response.headers.get('cache-control'), 'public, max-age=31536000, immutable')
+  assert.equal((await remoteRequest(new Request(url.replace(env.SITE_URL, 'https://other.workers.dev')), runtime, next)).status, 404)
+  assert.equal((await remoteRequest(new Request(url), { ...runtime, DEPLOY_ENV: 'staging' }, next)).status, 403)
+  await verifyAccess(jwt(), env, certs)
+  const owner = await remoteRequest(new Request(url, { headers: { 'Cf-Access-Jwt-Assertion': jwt() } }), { ...runtime, DEPLOY_ENV: 'staging' }, next)
+  assert.equal(await owner.text(), 'script')
+  assert.equal(owner.headers.get('cache-control'), 'private, max-age=31536000, immutable')
+  assert.match(owner.headers.get('x-robots-tag'), /noindex/)
+})
+
+test('only successful public assets get a browser cache lifetime', async () => {
+  for (const [path, status, upstream, expected] of [
+    ['/fonts/avenir/font.woff2', 200, {}, 'public, max-age=86400, must-revalidate'],
+    ['/_next/static/chunks/01234567.js', 304, {}, 'public, max-age=31536000, immutable'],
+    ['/_next/static/chunks/01234567.js', 404, {}, 'private, no-store'],
+    ['/_next/static/chunks/01234567.js', 200, { 'Set-Cookie': 'session=value' }, 'private, no-store'],
+    ['/media/hash/320.avif', 200, { 'Cache-Control': 'public, max-age=31536000' }, 'public, max-age=31536000'],
+    ['/media/hash/320.avif', 200, { 'Cache-Control': 'private, no-store' }, 'private, no-store'],
+    ['/recipes', 200, { 'Cache-Control': 'public, max-age=3600' }, 'private, no-store'],
+  ]) {
+    const response = await remoteRequest(new Request(env.SITE_URL + path), env,
+      () => new Response(null, { status, headers: upstream }))
+    assert.equal(response.headers.get('cache-control'), expected, path + ':' + status)
+  }
+})
+
+test('maintenance blocks images and pages while build files remain available', async () => {
+  const runtime = { ...env, OPERATIONS: { get: async () => ({ json: async () => ({ releaseId: 'test-release', generation: 'two', status: 'maintenance' }) }) } }
+  for (const path of ['/', '/media/hash/320.avif']) {
+    const response = await remoteRequest(new Request(env.SITE_URL + path), runtime, () => { throw new Error('Must stay closed') })
+    assert.equal(response.status, 503)
+    assert.match(response.headers.get('cache-control'), /no-store/)
+  }
+  const response = await remoteRequest(new Request(env.SITE_URL + '/_next/static/chunks/01234567.js'), runtime, () => new Response('script'))
+  assert.equal(await response.text(), 'script')
+})

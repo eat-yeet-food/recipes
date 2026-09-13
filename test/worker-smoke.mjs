@@ -34,6 +34,7 @@ try {
   const state = { releaseId: 'smoke', contentRevision: 'a'.repeat(40), generation: 'one', status: 'ready' }
   await store.put('control.json', JSON.stringify(state))
   const get = (path, options) => worker.dispatchFetch(new URL(path, 'https://eatyeet.com').href, options)
+  let scriptPath
   for (const path of ['/', '/recipes/new-york-style-pizza', '/learn/mixing-dough-and-gluten-development', '/api/public/recipes', '/sitemap.xml']) {
     const response = await get(path)
     const body = await response.text()
@@ -43,9 +44,11 @@ try {
     if (path === '/') {
       const asset = body.match(/src="([^\"]*\/_next\/static\/[^\"]+\.js)"/)?.[1]
       assert.ok(asset, 'real Next script is referenced')
+      scriptPath = asset
       const script = await get(asset)
       assert.equal(script.status, 200)
       assert.match(script.headers.get('content-type'), /javascript/)
+      assert.equal(script.headers.get('cache-control'), 'public, max-age=31536000, immutable')
       await script.body?.cancel()
     }
   }
@@ -89,6 +92,10 @@ try {
   const maintenance = await get('/')
   assert.equal(maintenance.status, 503)
   assert.equal(maintenance.headers.get('retry-after'), '60')
+  const scriptDuringMaintenance = await get(scriptPath)
+  assert.equal(scriptDuringMaintenance.status, 200, 'content maintenance must not block existing build files')
+  await scriptDuringMaintenance.arrayBuffer()
+  assert.equal((await get(mediaURL)).status, 503, 'media still passes the fresh maintenance guard')
   const verified = await get('/', { headers: { 'X-Eatyeet-Verification': probeToken(credentials, 'smoke', 'https://eatyeet.com') } })
   assert.equal(verified.status, 200)
   await verified.text()

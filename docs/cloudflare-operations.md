@@ -26,6 +26,8 @@ If acceptance/recovery tooling itself needed a fix, `remote:acceptance --env sta
 
 Normal releases need no credential enrollment, password copying, API-token changes, dashboard deployment, or manual maintenance toggle. The CLI loads Keychain credentials, builds immutable assets, takes the shared remote lock and backups, publishes through Pulumi, verifies, and reopens traffic. Cloudflare may open normal Chrome when the owner Access session expires. `cloudflared` captures its token privately; do not run verbose login commands that print tokens.
 
+After a restart, ensure normal Chrome is running before refreshing Access. If a login stalls without a browser window, stop only that identified read-only login process and retry `.local/remote/bin/cloudflared access login --quiet https://staging.eatyeet.com`; `--quiet` suppresses JWT output. The browser may only need approval of the existing application's CLI session, reusing current MFA proof. Verify the resulting session before starting a release. This is not credential reenrollment or permission to change Access policies.
+
 ## Verified account and resource map
 
 Inventory checked 2026-09-13. Names are descriptive; compare actual IDs against inventory before adopting or changing resources.
@@ -57,6 +59,8 @@ Production cutover completed on 2026-09-13 with application `8df398195b929e9503e
 Production cutover added the apex Worker route `eatyeet.com/*` and media custom domain. It retains Pages and its DNS target for route rollback. `www` behavior remains part of the inventoried legacy configuration until deliberately migrated; do not assume an apex route also matches `www`.
 
 The Worker checks configured hosts, Access tokens where required, current maintenance state and publication eligibility. Public content projections use OpenNext R2 caching by environment/schema/content generation. Public HTML remains dynamic. Originals have no public delivery route. Derivatives remain privately stored and eligibility-checked before cache delivery; browser bytes already downloaded cannot be recalled.
+
+The performance candidate gives hashed Next build files a one-year immutable browser lifetime and named fonts/favicon one day with revalidation. These files contain no content/session state and skip the operations-bucket read, including during maintenance; trusted-host and staging Access checks remain. Staging uses private browser caching. Pages, APIs, private images and errors stay no-store; published derivatives retain one year without immutable. `verify:prod` checks real asset headers and repeat browser transfers without request interception. See the performance note for the exact staged candidate and measured limitations; these changes are not yet live in production.
 
 ## One-time setup and recovery enrollment
 

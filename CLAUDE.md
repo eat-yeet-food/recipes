@@ -53,6 +53,8 @@ Sharp runs only during local sync. Derivative keys include source bytes, transfo
 
 Public content-addressed derivatives have long cache lifetimes without `immutable`, retaining browser reload/revalidation behavior. Draft/private media requires authorization. Do not make the bucket public. Remote public delivery uses a custom media domain, not `r2.dev`.
 
+Successful hashed Next build assets use one-year immutable browser caching. Named fonts and the favicon use one day with revalidation. Staging uses private browser caching after Access verification. Static build files skip the content-control storage read and remain available during maintenance; they still enforce trusted hosts and staging Access. Pages, APIs and media retain the fresh release-state check. Errors, Set-Cookie responses and private media remain non-cacheable. Verify repeat transfers with a browser context without request interception, which disables Chromium's HTTP cache.
+
 Metadata is server-rendered, uses a trusted canonical origin and strips query parameters. JSON-LD reflects the authored default recipe; never invent reviews/nutrition. Local indexing is disabled by default. SEO tests explicitly enable production indexing policy on loopback. Sitemaps include published/indexable records only. Previews require owner auth and no-store/noindex.
 
 ## Styling and design

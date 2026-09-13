@@ -2,9 +2,6 @@ import { cache } from 'react'
 import { notFound } from 'next/navigation'
 import { publicDocument, siteData, services } from '../../../next/cms'
 import { metadataFor, JsonLd } from '../../../next/seo'
-import dynamic from 'next/dynamic'
-const RecipeClient = dynamic(() => import('../../../next/interactive').then((module) => module.RecipeClient))
-const SearchClient = dynamic(() => import('../../../next/search-client').then((module) => module.SearchClient))
 import { HomePage } from '@eat-yeet/l7-home/home/home'
 import { RecipeGrid, BrowseCard } from '@eat-yeet/l6-ui-catalog/cards'
 import {
@@ -15,13 +12,13 @@ import { recipesInCategory } from '@eat-yeet/l2-recipe-domain/search'
 import { imageUrl } from '@eat-yeet/l1-recipe-model/recipes'
 const pathFor = (parts?: string[]) => '/' + (parts?.join('/') || '')
 const documentFor = cache(async (path: string) => {
-  const match = path.match(/^\/(recipes|learn)\/([^/]+)$/)
+  const match = path.match(/^\/learn\/([^/]+)$/)
   if (!match) {
-    if (!['/', '/recipes', '/learn', '/browse', '/search'].includes(path))
+    if (!['/', '/recipes', '/learn', '/browse'].includes(path))
       notFound()
     return null
   }
-  const document = await publicDocument(match[1] === 'learn' ? 'articles' : 'recipes', match[2])
+  const document = await publicDocument('articles', match[1])
   if (!document) notFound()
   return document
 })
@@ -35,10 +32,8 @@ export async function generateMetadata({
 }
 export default async function Page({
   params,
-  searchParams,
 }: {
   params: Promise<{ path?: string[] }>
-  searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
   const path = pathFor((await params).path),
     site = await siteData(),
@@ -50,7 +45,6 @@ export default async function Page({
       : Promise.resolve({ articles: [] }),
     documentFor(path),
   ])
-  const query = await searchParams
   const copy = site.copy
   if (doc) {
     const content = doc.content as any
@@ -62,18 +56,7 @@ export default async function Page({
           content={content}
           modified={doc.updatedAt}
         />
-        {path.startsWith('/recipes/') ? (
-          <RecipeClient
-            recipe={content}
-            recipes={recipes}
-            siteUrl={site.siteUrl}
-            serializedConfig={
-              typeof query.config === 'string' ? query.config : undefined
-            }
-          />
-        ) : (
-          <ArticleDetailPage article={content} articles={articles} />
-        )}
+        <ArticleDetailPage article={content} articles={articles} />
       </>
     )
   }
@@ -101,7 +84,6 @@ export default async function Page({
     )
   if (path === '/learn')
     return <LearnIndexPage articles={articles} copy={copy} />
-  if (path === '/search') return <SearchClient recipes={recipes} />
   if (path === '/browse') {
     const sections = site.browseSections
     const used = new Set<string>()

@@ -56,6 +56,21 @@ export async function verifyReleaseProbe(token, secret, state, origin, now = Dat
 export function privateResponse(status, message, extra = {}) {
   return new Response(message, { status, headers: { 'Cache-Control': 'private, no-store', 'X-Robots-Tag': 'noindex', 'Content-Type': 'text/plain; charset=utf-8', ...extra } })
 }
+export function staticAsset(path) {
+  return path.startsWith('/_next/static/') || path.startsWith('/fonts/') || path === '/donut-icon.svg'
+}
+export function assetCacheControl(path, status, headers, ownerOnly) {
+  if (![200, 304].includes(status) || headers.has('set-cookie')) return 'private, no-store'
+  const visibility = ownerOnly ? 'private' : 'public'
+  if (staticAsset(path)) {
+    const versioned = path.startsWith('/_next/static/') && /[a-f0-9]{8,}\.[a-z0-9]+$/.test(path)
+    return `${visibility}, max-age=${versioned ? 31536000 : 86400}${versioned ? ', immutable' : ', must-revalidate'}`
+  }
+  // Only the publication-checked image handler can grant a media cache lifetime.
+  const mediaPolicy = headers.get('cache-control') ?? ''
+  if (path.startsWith('/media/') && /^public, max-age=31536000$/.test(mediaPolicy)) return `${visibility}, max-age=31536000`
+  return 'private, no-store'
+}
 export async function remoteRequest(request, env, next) {
   if (!env.DEPLOY_ENV || env.DEPLOY_ENV === 'local') return next(request)
   let path
@@ -68,16 +83,22 @@ export async function remoteRequest(request, env, next) {
   const needsAccess = env.DEPLOY_ENV === 'staging' || protectedPath(path)
   const access = accessToken ? await verifyAccess(accessToken, env) : false
   if (needsAccess && !access) return privateResponse(403, 'Owner Access authentication required')
+  // Build files contain no content/session data. Keep serving them during a
+  // content release without a cross-region operations-bucket read per file.
+  // Host and staging Access checks above still apply to every network request.
+  const buildAsset = ['GET', 'HEAD'].includes(request.method) && staticAsset(path)
   let state
-  try { state = await (await env.OPERATIONS.get('control.json'))?.json() }
-  catch { return privateResponse(503, 'Release state unavailable', { 'Retry-After': '60' }) }
-  if (!state?.generation || !state?.releaseId) return privateResponse(503, 'Site is not initialized', { 'Retry-After': '60' })
-  const probe = ['GET', 'HEAD'].includes(request.method) && await verifyReleaseProbe(request.headers.get('X-Eatyeet-Verification'), env.RELEASE_VERIFY_SECRET, state, env.SITE_URL)
-  if (path === '/.well-known/eatyeet-release') return Response.json({ releaseId: env.RELEASE_ID, contentRevision: state.contentRevision, generation: state.generation, status: state.status }, { headers: { 'Cache-Control': 'no-store' } })
-  if (state.status !== 'ready' && !probe) return privateResponse(503, 'We’re updating the site. Please try again shortly.', { 'Retry-After': '60' })
+  if (!buildAsset) {
+    try { state = await (await env.OPERATIONS.get('control.json'))?.json() }
+    catch { return privateResponse(503, 'Release state unavailable', { 'Retry-After': '60' }) }
+    if (!state?.generation || !state?.releaseId) return privateResponse(503, 'Site is not initialized', { 'Retry-After': '60' })
+    const probe = ['GET', 'HEAD'].includes(request.method) && await verifyReleaseProbe(request.headers.get('X-Eatyeet-Verification'), env.RELEASE_VERIFY_SECRET, state, env.SITE_URL)
+    if (path === '/.well-known/eatyeet-release') return Response.json({ releaseId: env.RELEASE_ID, contentRevision: state.contentRevision, generation: state.generation, status: state.status }, { headers: { 'Cache-Control': 'no-store' } })
+    if (state.status !== 'ready' && !probe) return privateResponse(503, 'We’re updating the site. Please try again shortly.', { 'Retry-After': '60' })
+  }
   const headers = new Headers(request.headers)
   for (const name of ['x-eatyeet-generation', 'x-eatyeet-access', 'x-eatyeet-verification']) headers.delete(name)
-  headers.set('x-eatyeet-generation', state.generation)
+  if (state) headers.set('x-eatyeet-generation', state.generation)
   if (access) headers.set('x-eatyeet-access', 'owner')
   // Bound request lifetime so the release command can drain admitted requests.
   const controller = new AbortController()
@@ -91,8 +112,9 @@ export async function remoteRequest(request, env, next) {
     const outgoing = new Headers(response.headers)
     outgoing.set('X-Eatyeet-Release', env.RELEASE_ID)
     if (env.DEPLOY_ENV !== 'production' || env.INDEXABLE !== '1') outgoing.set('X-Robots-Tag', 'noindex, nofollow')
-    const publicAsset = path.startsWith('/media/') || path.startsWith('/_next/static/') || path.startsWith('/fonts/') || path === '/donut-icon.svg'
-    if (needsAccess || !publicAsset || response.status >= 400) outgoing.set('Cache-Control', 'private, no-store')
+    outgoing.set('Cache-Control', ['GET', 'HEAD'].includes(request.method)
+      ? assetCacheControl(path, response.status, outgoing, needsAccess)
+      : 'private, no-store')
     if (!response.body) { clearTimeout(timer); return new Response(null, { status: response.status, headers: outgoing }) }
     const reader = response.body.getReader()
     const body = new ReadableStream({

@@ -6,6 +6,7 @@ const origin = (process.argv[2] ?? SITE_URL).replace(/\/$/, '')
 const expected = process.env.EATYEET_EXPECTED_RELEASE
 const mediaOrigin = process.env.EATYEET_MEDIA_ORIGIN ?? (origin === 'https://eatyeet.com' ? 'https://media.eatyeet.com' : origin)
 const results = []
+let scriptPath
 const check = (name, ok, detail = '') => { results.push({ name, ok, detail }); console.log(`${ok ? 'ok  ' : 'FAIL'} ${name}${detail ? ': ' + detail : ''}`) }
 const canonicalMatches = (href, path) => {
   try { return new URL(href).href === new URL(path, origin).href }
@@ -65,6 +66,17 @@ try {
     const html = await raw.text()
     check(`${path} server metadata`, /<title>[^<]+<\/title>/.test(html) && /property="og:title"/.test(html))
     if (path.startsWith('/recipes/')) check('Recipe JSON-LD', html.includes('application/ld+json') && html.includes('"@type":"Recipe"'))
+    if (path === '/') {
+      const asset = html.match(/src="([^\"]*\/_next\/static\/[^\"]+\.js)"/)?.[1]
+      scriptPath = asset
+      check('real Next script referenced', !!asset)
+      if (asset) {
+        const script = await get(asset)
+        check('versioned script browser cache', script.status === 200 &&
+          script.headers.get('cache-control') === `${origin.includes('staging.') ? 'private' : 'public'}, max-age=31536000, immutable`)
+        await script.body?.cancel()
+      }
+    }
     if (path === '/recipes/new-york-style-pizza') {
       for (const width of [390, 1440]) {
         await page.setViewportSize({ width, height: 900 })
@@ -84,11 +96,37 @@ try {
             ? Number(declaredLength) > 0 : Number(declaredLength) === bytes)
           check(`image delivery at ${width}px`, image.ok && /^image\//.test(image.headers.get('content-type') ?? '') && !!image.headers.get('etag') && bytes > 0 && lengthMatches,
             `${bytes} decoded bytes; Content-Length ${declaredLength ?? 'streamed'}`)
-          if (origin === 'https://eatyeet.com') check('public derivative browser cache', /max-age=31536000/.test(image.headers.get('cache-control') ?? '') && !/immutable/.test(image.headers.get('cache-control') ?? ''))
+          check('published derivative browser cache', /max-age=31536000/.test(image.headers.get('cache-control') ?? '') && !/immutable/.test(image.headers.get('cache-control') ?? ''))
         }
       }
     }
     await context.close()
+  }
+  // Request interception disables Chromium's HTTP cache. Use a separate context
+  // without routes to test actual repeat transfers, including during maintenance.
+  if (scriptPath) {
+    const repeatContext = await browser.newContext()
+    if (process.env.EATYEET_ACCESS_TOKEN) await repeatContext.addCookies([{ name: 'CF_Authorization', value: process.env.EATYEET_ACCESS_TOKEN, url: origin, secure: true, httpOnly: true }])
+    const page = await repeatContext.newPage()
+    await page.goto(origin, { waitUntil: 'domcontentloaded' })
+    check('repeat-cache browser stays on site', new URL(page.url()).origin === origin)
+    if (new URL(page.url()).origin === origin) {
+      const repeats = await page.evaluate(async (paths) => {
+        const results = []
+        for (const path of paths) {
+          const url = new URL(path, location.origin).href
+          await (await fetch(url)).arrayBuffer()
+          performance.clearResourceTimings()
+          const response = await fetch(url)
+          const bytes = (await response.arrayBuffer()).byteLength
+          const timing = performance.getEntriesByName(url).at(-1)
+          results.push({ path, status: response.status, bytes, transferred: timing?.transferSize })
+        }
+        return results
+      }, [scriptPath, '/fonts/avenir/avenirnextltpro-medium-webfont.woff2'])
+      for (const result of repeats) check('repeat asset uses browser cache', result.status === 200 && result.bytes > 0 && result.transferred === 0, `${result.path}: ${result.transferred} network bytes`)
+    }
+    await repeatContext.close()
   }
   for (const path of [`/_next/static/missing-${Date.now()}.js`, '/media/' + '0'.repeat(64) + '/320.avif']) {
     const response = await get(path)
