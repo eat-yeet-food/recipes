@@ -33,6 +33,20 @@ if (environment === 'bootstrap') {
     accountId, name: 'Cloudflare', type: 'cloudflare', config: { restrictToAccountMembers: true },
   }, { ...protectedOptions, ...(settings.cloudflareIdpId ? { import: `accounts/${accountId}/${settings.cloudflareIdpId}` } : {}) })
   exportValues.cloudflareIdpId = identity.id
+  // Independent MFA enrollment lives in the App Launcher. Requiring independent
+  // MFA here would prevent the owner from registering their first authenticator.
+  const enrollmentPolicy = new cloudflare.ZeroTrustAccessPolicy('owner-enrollment-policy', {
+    accountId, name: 'Eat / Yeet owner enrollment', decision: 'allow',
+    includes: [{ email: { email: settings.ownerEmail } }],
+    requires: [{ cloudflareAccountMember: { accountId } }, { loginMethod: { id: identity.id } }],
+  }, imported('owner-enrollment-policy'))
+  const enrollment = new cloudflare.ZeroTrustAccessApplication('owner-mfa-enrollment', {
+    accountId, name: 'Eat / Yeet owner MFA enrollment', type: 'app_launcher',
+    domain: settings.accessTeamDomain, allowedIdps: [identity.id],
+    autoRedirectToIdentity: true, sessionDuration: '2h', allowAuthenticateViaWarp: false,
+    policies: [{ id: enrollmentPolicy.id, precedence: 1 }],
+  }, imported('owner-mfa-enrollment'))
+  exportValues.ownerEnrollmentApplicationId = enrollment.id
   const state = new cloudflare.R2Bucket('pulumi-state', { accountId, name: settings.stateBucket, jurisdiction: 'default' }, imported('pulumi-state'))
   new cloudflare.R2ManagedDomain('state-no-public-domain', { accountId, bucketName: state.name, enabled: false }, protectedOptions)
   // Only backup copies expire. Pulumi checkpoints, locks, and history never do.

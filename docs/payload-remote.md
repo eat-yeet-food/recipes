@@ -73,6 +73,8 @@ Staging uses `staging.eatyeet.com`; its entire host requires Access. Production 
 
 Each environment has its own Access audience, D1 owners/sessions and Payload secret. Workers reject alternate hosts and validate Access JWT signature, issuer, audience, email and expiry before protected handlers. `workers.dev` and preview hostnames are disabled. Payload's password, HTTPS cookies, lockout, origin protection and revocable sessions remain required. Admin and REST mutations remain denied.
 
+The bootstrap stack also owns the App Launcher at the verified Access team domain. It allows only the exact owner email through the account-restricted Cloudflare identity provider and account-membership policy. Cloudflare hosts independent MFA enrollment there under Account > MFA devices > Add an MFA device. The launcher is exempt from independent MFA so the first authenticator can be enrolled; staging and protected production applications still require it. Provisioning this launcher requires Access Apps and Policies Edit on the bootstrap deployment credential. An unconfigured launcher produces “Please contact your administrator to enable the Access App Launcher” and prevents first-device enrollment.
+
 After first staging content release, bootstrap its separate owner:
 
 ```sh
