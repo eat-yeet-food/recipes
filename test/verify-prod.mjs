@@ -7,6 +7,10 @@ const expected = process.env.EATYEET_EXPECTED_RELEASE
 const mediaOrigin = process.env.EATYEET_MEDIA_ORIGIN ?? (origin === 'https://eatyeet.com' ? 'https://media.eatyeet.com' : origin)
 const results = []
 const check = (name, ok, detail = '') => { results.push({ name, ok, detail }); console.log(`${ok ? 'ok  ' : 'FAIL'} ${name}${detail ? ': ' + detail : ''}`) }
+const canonicalMatches = (href, path) => {
+  try { return new URL(href).href === new URL(path, origin).href }
+  catch { return false }
+}
 const headersFor = (url) => {
   const headers = {}
   if ([origin, mediaOrigin].includes(new URL(url).origin) && process.env.EATYEET_VERIFY_TOKEN) headers['X-Eatyeet-Verification'] = process.env.EATYEET_VERIFY_TOKEN
@@ -49,7 +53,7 @@ try {
       const box = image.getBoundingClientRect()
       return box.width > 0 && box.height > 0 && box.top < innerHeight && box.bottom > 0
     }).every((image) => image.complete && image.naturalWidth > 0)))
-    check(`${path} canonical`, await page.locator('link[rel=canonical]').getAttribute('href') === origin + path || (origin.includes('staging.') && (await page.locator('link[rel=canonical]').getAttribute('href'))?.startsWith('https://staging.eatyeet.com')))
+    check(`${path} canonical`, canonicalMatches(await page.locator('link[rel=canonical]').getAttribute('href'), path))
     if (path === '/browse') {
       let documentLoads = 0
       page.on('load', () => documentLoads++)
