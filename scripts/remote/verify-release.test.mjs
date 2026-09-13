@@ -7,9 +7,16 @@ test('deployed source accepts Cloudflare multipart text or files and still rejec
   const source = 'export default { label: "café" }', hash = createHash('sha256').update(source).digest('hex')
   for (const value of [source, new Blob([source])]) {
     const request = async () => { const body = new FormData(); body.append('worker.js', value); return new Response(body) }
-    await verifyDeployedBundle({ accountId: 'account' }, {}, { workerName: 'worker' }, hash, request)
-    await assert.rejects(verifyDeployedBundle({ accountId: 'account' }, {}, { workerName: 'worker' }, 'incorrect', request), /differs/)
+    await verifyDeployedBundle({ accountId: 'account' }, {}, { workerName: 'worker' }, { bundleHash: hash, bundle: source }, request)
+    await assert.rejects(verifyDeployedBundle({ accountId: 'account' }, {}, { workerName: 'worker' }, { bundleHash: 'incorrect', bundle: source }, request), /corrupted/)
   }
+})
+test('provider NFC transport is accounted for while other source changes are rejected', async () => {
+  const bundle = 'export default /য়/;', record = { bundle, bundleHash: createHash('sha256').update(bundle).digest('hex') }
+  const request = (source) => async () => { const form = new FormData(); form.set('worker.js', source); return new Response(form) }
+  const attestation = await verifyDeployedBundle({}, {}, {}, record, request(bundle.normalize('NFC')))
+  assert.equal(attestation.normalization, 'NFC')
+  await assert.rejects(verifyDeployedBundle({}, {}, {}, record, request(bundle + ' // changed')), /differs/)
 })
 
 class Store {
@@ -24,7 +31,8 @@ class Store {
 }
 async function fixture() {
   const operations = new Store(), stateStore = new Store(), events = []
-  const record = { id: 'release-1', revision: 'a'.repeat(40), phase: 'verify', status: 'failed', migrations: {}, backup: { key: 'original' }, assetManifest: {}, bundleHash: 'b'.repeat(64) }
+  const bundle = 'export default {}'
+  const record = { id: 'release-1', revision: 'a'.repeat(40), phase: 'verify', status: 'failed', migrations: {}, backup: { key: 'original' }, assetManifest: {}, bundle, bundleHash: createHash('sha256').update(bundle).digest('hex') }
   const control = { releaseId: record.id, contentRevision: record.revision, status: 'maintenance', migrations: {}, generation: 'same' }
   await operations.write('releases/release-1.json', record); await operations.write('control.json', control)
   const context = { config: { environment: 'staging', origin: 'https://staging.eatyeet.com' }, credentials: { RELEASE_VERIFY_SECRET: 'test-only' },

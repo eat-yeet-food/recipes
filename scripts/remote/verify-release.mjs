@@ -8,10 +8,10 @@ export function assertVerificationState(record, control, outputs, migrations) {
   if (!record || record.phase !== 'verify' || !['failed', 'running'].includes(record.status)) throw new Error('Only an interrupted verification phase can be completed without deployment')
   if (control?.status !== 'maintenance' || control.releaseId !== record.id || control.contentRevision !== record.revision || outputs.releaseId !== record.id) throw new Error('Application, content and maintenance identities must match the interrupted release')
   if (JSON.stringify(control.migrations) !== JSON.stringify(record.migrations) || JSON.stringify(migrations) !== JSON.stringify(record.migrations)) throw new Error('Verification tooling migrations differ from the deployed release')
-  if (!record.bundleHash || !record.backup || !record.assetManifest) throw new Error('Release recovery evidence is incomplete')
+  if (!record.bundleHash || !record.backup || !record.assetManifest || typeof record.bundle !== 'string' || digest(record.bundle) !== record.bundleHash) throw new Error('Release recovery evidence is incomplete or corrupted')
 }
 
-export async function verifyDeployedBundle(config, credentials, outputs, expectedHash, request = fetch) {
+export async function verifyDeployedBundle(config, credentials, outputs, record, request = fetch) {
   const response = await request(`https://api.cloudflare.com/client/v4/accounts/${config.accountId}/workers/scripts/${outputs.workerName}`, {
     headers: { Authorization: `Bearer ${credentials.CLOUDFLARE_API_TOKEN}` }, signal: AbortSignal.timeout(120000),
   })
@@ -22,7 +22,14 @@ export async function verifyDeployedBundle(config, credentials, outputs, expecte
   // platform parser return source text rather than a File object.
   const value = parts[0][1]
   const bytes = typeof value === 'string' ? Buffer.from(value) : Buffer.from(await value.arrayBuffer())
-  if (digest(bytes) !== expectedHash) throw new Error('Deployed Worker differs from recorded release')
+  if (typeof record.bundle !== 'string' || digest(record.bundle) !== record.bundleHash) throw new Error('Recorded Worker source is corrupted')
+  const actualHash = digest(bytes)
+  // Terraform's cty strings normalize to NFC. The pinned bridged provider uses
+  // a string content input, so verify that exact transport transformation as
+  // well as the raw source. Never use a loose text/whitespace comparison.
+  const normalization = actualHash === record.bundleHash ? null : 'NFC'
+  if (normalization && actualHash !== digest(record.bundle.normalize('NFC'))) throw new Error('Deployed Worker differs from recorded release')
+  return { bundleHash: actualHash, normalization }
 }
 
 export async function verifyRelease(context, releaseId) {
@@ -43,7 +50,7 @@ export async function verifyRelease(context, releaseId) {
     await lock.checkpoint('verify')
     const held = await operations.read('control.json')
     if (JSON.stringify(held?.value) !== JSON.stringify(initial)) throw new Error('Remote state changed during authentication')
-    await (context.verifyBundle ?? verifyDeployedBundle)(config, credentials, outputs, record.bundleHash)
+    const deployedSource = await (context.verifyBundle ?? verifyDeployedBundle)(config, credentials, outputs, record)
     await operations.write(`recovery/${releaseId}/${Date.now()}.json`, { record, control: held.value, verificationRevision }, { IfNoneMatch: '*' })
     await (context.command ?? command)('node', ['test/verify-prod.mjs', config.origin], {
       env: { EATYEET_EXPECTED_RELEASE: releaseId, EATYEET_EXPECTED_CONTENT_REVISION: record.revision,
@@ -55,7 +62,7 @@ export async function verifyRelease(context, releaseId) {
     if (JSON.stringify(current?.value) !== JSON.stringify(initial)) throw new Error('Remote state changed during verification')
     await operations.write('control.json', { ...current.value, status: 'ready' }, { IfMatch: current.etag })
     await operations.write(`releases/${releaseId}.json`, { ...record, status: 'complete', phase: 'complete', maintenance: false,
-      error: null, completedAt: new Date().toISOString(), verificationRevision })
+      error: null, completedAt: new Date().toISOString(), verificationRevision, deployedSource })
     await lock.release()
     console.log(`Release verification complete; traffic reopened: ${config.origin}`)
   } catch (error) {
