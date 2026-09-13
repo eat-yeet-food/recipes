@@ -1,6 +1,6 @@
 # Cloudflare remote operations
 
-Implementation is on `codex/payload-remote`. Wrangler authentication, bootstrap Keychain enrollment and its encrypted recovery export are complete. Partial inventory has identified the existing Pages deployment and DNS. **R2 and Access still require account activation; provisioning, MFA review, staging rehearsal and production cutover have not been performed.** Staging/production credential enrollment also remains necessary. Do not treat local tests as production acceptance. See `docs/changes/payload-remote/review.md` for current evidence and blockers.
+Implementation is on `codex/payload-remote`. R2 and Zero Trust Free are active, bootstrap Keychain enrollment and its encrypted recovery export are complete, and full account inventory succeeds. The protected bootstrap stack has imported the private state bucket, existing Access organization and account-restricted Cloudflare sign-in provider. Private R2 delivery, 30-day backup retention and lock cleanup are verified. **Staging/production credential enrollment, environment provisioning, MFA review, staging rehearsal and production cutover remain incomplete.** See `docs/changes/payload-remote/review.md` for evidence and blockers.
 
 Local development remains documented in `docs/payload-local.md`. Ordinary `dev`, `build`, `preview`, `content:sync` and `db:migrate` use local bindings. Remote commands require an explicit environment. No Doppler project, CLI wrapper or runtime integration is used.
 

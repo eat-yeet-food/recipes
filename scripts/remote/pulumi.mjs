@@ -6,10 +6,12 @@ import { resolve } from 'node:path'
 export async function infrastructure(config, credentials) {
   const pin = JSON.parse(readFileSync('infra/cloudflare/toolchain.json', 'utf8')).pulumi
   if (execFileSync('pulumi', ['version'], { encoding: 'utf8' }).trim() !== `v${pin}`) throw new Error(`Use pinned Pulumi ${pin}`)
-  const endpoint = `${config.accountId}.r2.cloudflarestorage.com`
+  // The pinned CLI uses Go CDK 0.37: SDK v2 accepts an explicit HTTPS endpoint,
+  // but neither of the path-style query options supported by newer versions.
+  const endpoint = encodeURIComponent(`https://${config.accountId}.r2.cloudflarestorage.com`)
   const stack = await LocalWorkspace.createOrSelectStack({ stackName: config.environment, workDir: resolve('infra/cloudflare') }, {
     envVars: {
-      PULUMI_BACKEND_URL: `s3://${config.stateBucket}/pulumi?endpoint=${endpoint}&region=auto&s3ForcePathStyle=true&awssdk=v2`,
+      PULUMI_BACKEND_URL: `s3://${config.stateBucket}/pulumi?endpoint=${endpoint}&region=auto&awssdk=v2`,
       PULUMI_CONFIG_PASSPHRASE: credentials.PULUMI_CONFIG_PASSPHRASE,
       AWS_ACCESS_KEY_ID: credentials.R2_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY: credentials.R2_SECRET_ACCESS_KEY,
       AWS_REGION: 'auto', AWS_EC2_METADATA_DISABLED: 'true',

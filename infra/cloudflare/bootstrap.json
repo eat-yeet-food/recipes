@@ -1,0 +1,12 @@
+{
+  "accountId": "82d05ba935bb2a21841b0a046d820675",
+  "zoneId": "b1a97ea6be4be417594c189eea4873f5",
+  "stateBucket": "eatyeet-pulumi-state",
+  "ownerEmail": "phoganuci@gmail.com",
+  "accessTeamDomain": "icy-fog-1d6c.cloudflareaccess.com",
+  "cloudflareIdpId": "3d5badd9-1c03-4f76-9622-73ca031d9610",
+  "cutover": false,
+  "imports": {
+    "pulumi-state": "82d05ba935bb2a21841b0a046d820675/eatyeet-pulumi-state/default"
+  }
+}

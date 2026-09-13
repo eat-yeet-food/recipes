@@ -31,7 +31,7 @@ if (environment === 'bootstrap') {
   }, { ...protectedOptions, import: accountId })
   const identity = new cloudflare.ZeroTrustAccessIdentityProvider('cloudflare-login', {
     accountId, name: 'Cloudflare', type: 'cloudflare', config: { restrictToAccountMembers: true },
-  }, { ...protectedOptions, ...(settings.cloudflareIdpId ? { import: `${accountId}/${settings.cloudflareIdpId}` } : {}) })
+  }, { ...protectedOptions, ...(settings.cloudflareIdpId ? { import: `accounts/${accountId}/${settings.cloudflareIdpId}` } : {}) })
   exportValues.cloudflareIdpId = identity.id
   const state = new cloudflare.R2Bucket('pulumi-state', { accountId, name: settings.stateBucket, jurisdiction: 'default' }, imported('pulumi-state'))
   new cloudflare.R2ManagedDomain('state-no-public-domain', { accountId, bucketName: state.name, enabled: false }, protectedOptions)

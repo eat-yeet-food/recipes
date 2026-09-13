@@ -1,6 +1,6 @@
 # Remote migration implementation and acceptance
 
-Status: implementation in progress on `codex/payload-remote`, based on `c3497c6f237ea21be62ac7253d131ba9ce6bb16e`. No infrastructure has been provisioned, no staging release has run, and production DNS/application remain untouched. These results are local evidence, not production acceptance.
+Status: implementation in progress on `codex/payload-remote`, based on `c3497c6f237ea21be62ac7253d131ba9ce6bb16e`. R2 and Zero Trust Free are active and the private state bucket exists. The protected Pulumi bootstrap stack is complete; no staging release has run, and production DNS/application remain untouched. These results are local evidence, not production acceptance.
 
 ## Implemented
 
@@ -64,3 +64,14 @@ Authenticated inventory exposed a pagination bug, not a Pages permission failure
 The remaining API errors are account activation prerequisites: R2 returns 10042, "Please enable R2 through the Cloudflare Dashboard"; Access returns 9999 with `access.api.error.not_enabled`. Thus the enrolled token is valid, but these products have not been enabled. R2 checkout displays $0 due now, 10 GB-month storage, 1 million Class A and 10 million Class B operations included monthly, then usage charges. Zero Trust Free is being prepared; accepting subscription terms requires owner confirmation before activation. No subscription has been activated by the agent.
 
 The operator guide documents conservative recovery limitations: lost-host writer recovery requires credential revocation and operation review; application rollback preserves migrations/content; older exports require verified isolated restoration before database replacement. The exact live legacy route rollback must be finalized from full inventory before cutover.
+
+
+### Activated account and bootstrap verification
+
+The owner completed R2 and Zero Trust Free activation. Full API inventory at `2026-09-13T03:03:04.937Z` has no unavailable collections. The verified Access domain is `icy-fog-1d6c.cloudflareaccess.com`; the existing Cloudflare identity provider is `3d5badd9-1c03-4f76-9622-73ca031d9610` and already restricts authentication to account members. Non-secret environment settings use these inventoried identifiers and retain `cutover: false`.
+
+The approved bootstrap created `eatyeet-pulumi-state`. Two attempts stopped before any Pulumi stack or infrastructure update because the pinned CLI embeds Go CDK 0.37, whose SDK v2 backend does not accept either path-style query option. The backend now uses an explicitly HTTPS account endpoint, region `auto`, and SDK v2 without unsupported options. Each stopped writer was checked for remaining child processes and remote state, then recovered through the normal lock command after the two-minute quiet interval. No forced lock deletion was used. Source: [Go CDK 0.37 SDK v2 configuration](https://github.com/google/go-cloud/blob/v0.37.0/aws/aws.go).
+
+The 22 remote tests and infrastructure TypeScript check pass. Staging and production Keychain entries remain absent; no environment release or production verification has run.
+
+Bootstrap subsequently completed successfully. The pinned provider requires identity-provider import IDs to start with `accounts/`; the program now uses that format. The final preview imported all three existing resources, then applied MFA configuration, the sign-in display name, disabled R2 public delivery and backup lifecycle. API and encrypted state inspection verified five protected/retained Cloudflare resources, the state bucket's public domain disabled, a 30-day `backups/` lifecycle, retained Pulumi state/history, two timestamped pre-update state backups, and no remaining release lock. No site Worker, database, staging hostname or production route has been created. Live owner MFA review remains outstanding.
