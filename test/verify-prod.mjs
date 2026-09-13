@@ -24,9 +24,16 @@ const get = (path, options = {}) => fetch(origin + path, { redirect: 'manual', s
 const browser = await chromium.launch()
 try {
   if (expected) {
-    const response = await get('/.well-known/eatyeet-release')
-    const state = response.headers.get('content-type')?.includes('application/json') ? await response.json() : null
-    check('release identity', response.status === 200 && state?.releaseId === expected)
+    let response, state
+    // The provider can report success just before the new Worker reaches this
+    // location. Wait briefly for the exact identity; never accept the old one.
+    for (let attempt = 0; attempt < 6; attempt++) {
+      response = await get('/.well-known/eatyeet-release')
+      state = response.headers.get('content-type')?.includes('application/json') ? await response.json() : null
+      if (response.status === 200 && state?.releaseId === expected) break
+      if (attempt < 5) await new Promise((resolve) => setTimeout(resolve, 2000))
+    }
+    check('release identity', response.status === 200 && state?.releaseId === expected, state?.releaseId ?? `HTTP ${response.status}`)
     check('synchronized content identity', process.env.EATYEET_EXPECTED_CONTENT_REVISION
       ? state?.contentRevision === process.env.EATYEET_EXPECTED_CONTENT_REVISION : /^[a-f0-9]{40}$/.test(state?.contentRevision ?? ''))
   }
