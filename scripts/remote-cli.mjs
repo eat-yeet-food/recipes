@@ -18,9 +18,11 @@ const { values, positionals } = parseArgs({ allowPositionals: true, options: {
   env: { type: 'string' }, resume: { type: 'string' }, rollback: { type: 'string' }, 'derive-r2': { type: 'boolean' },
   backup: { type: 'string' }, bookmark: { type: 'string' }, 'owner-reviewed': { type: 'boolean' }, 'writer-stopped': { type: 'boolean' },
   'approved-limitations': { type: 'string' },
+  'application-revision': { type: 'string' },
 } })
 const [action, operation, file] = positionals
 if (values['approved-limitations'] && (action !== 'acceptance' || values.env !== 'staging' || values['approved-limitations'].trim().length < 20)) throw new Error('--approved-limitations requires staging acceptance and the explicit owner authorization (20+ characters)')
+if (values['application-revision'] && (action !== 'acceptance' || values.env !== 'staging' || !/^[a-f0-9]{40}$/.test(values['application-revision']))) throw new Error('--application-revision requires staging acceptance and a full deployed commit SHA')
 const validCommands = { credentials: ['enroll', 'export', 'import'], inventory: [undefined], bootstrap: [undefined], status: [undefined],
   deploy: [undefined], infra: ['preview', 'up'], content: ['plan', 'sync', 'migrate', 'owner', 'recover'],
   backup: [undefined], restore: [undefined], acceptance: [undefined], rehearse: [undefined] }
@@ -124,7 +126,7 @@ if (action === 'credentials') {
             console.log(JSON.stringify(result))
           } else if (action === 'acceptance' || action === 'rehearse') {
             const context = { config, credentials, client, api, outputs: readOutputs(environment), lock, stateStore }
-            if (action === 'acceptance') await acceptStaging(context, values['owner-reviewed'], values['approved-limitations'])
+            if (action === 'acceptance') await acceptStaging(context, values['owner-reviewed'], values['approved-limitations'], values['application-revision'])
             else await rehearseRestore(context, values.backup)
           } else if (action === 'restore') {
             const outputs = readOutputs(environment)

@@ -30,3 +30,10 @@ export function assertProductionAcceptance(evidence, revision, ownerEmail, now =
       missing.some((name) => !exception.limitations.includes(name)) || exception.limitations.some((name) => !['performance', 'owner-review'].includes(name)))
     throw new Error('Production requires passing performance and owner review, or a current explicit owner exception for these exact limitations')
 }
+export function assertAcceptanceRelease(record, control, outputs, revision, migrations) {
+  if (!/^[a-f0-9]{40}$/.test(revision) || record?.revision !== revision || record.status !== 'complete' ||
+      control?.status !== 'ready' || control.contentRevision !== revision || control.releaseId !== record.id || outputs.releaseId !== record.id)
+    throw new Error('Acceptance requires a completed deployed application with matching release/content identities')
+  if (JSON.stringify(migrations) !== JSON.stringify(record.migrations) || JSON.stringify(control.migrations) !== JSON.stringify(record.migrations))
+    throw new Error('Acceptance tooling migrations differ from the deployed application')
+}

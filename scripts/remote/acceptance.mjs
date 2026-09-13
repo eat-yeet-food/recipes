@@ -2,9 +2,10 @@ import { readFileSync, writeFileSync, mkdirSync, rmSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { ObjectStore } from './storage.mjs'
 import { databaseBackup, readBackup, restoreBookmark, restoredExport } from './backups.mjs'
-import { command, cleanRevision, digest } from './process.mjs'
+import { command, cleanRevision, digest, migrationManifest } from './process.mjs'
 import { ownerAccessSession } from './access-session.mjs'
-import { performancePassed, acceptanceException } from './acceptance-policy.mjs'
+import { performancePassed, acceptanceException, assertAcceptanceRelease } from './acceptance-policy.mjs'
+import { verifyDeployedBundle } from './verify-release.mjs'
 
 export function identityDigest(rows) {
   return digest(JSON.stringify(rows.map((table) => table.map((row) => Object.fromEntries(Object.entries(row).sort(([a], [b]) => a.localeCompare(b)))))))
@@ -50,14 +51,17 @@ export async function rehearseRestore({ config, credentials, client, api, output
   console.log('Staging Time Travel and content/owner identity verification passed.')
 }
 
-export async function acceptStaging({ config, credentials, client, api, outputs, lock, stateStore }, ownerReviewed, approvedLimitations) {
+export async function acceptStaging({ config, credentials, client, api, outputs, lock, stateStore }, ownerReviewed, approvedLimitations, applicationRevision) {
   if (config.environment !== 'staging') throw new Error('Acceptance rehearsal runs against staging only')
-  const revision = cleanRevision()
+  const verifierRevision = cleanRevision()
+  const revision = applicationRevision ?? verifierRevision
   const store = new ObjectStore(client, outputs.operationsBucket)
   const control = (await store.read('control.json'))?.value
-  if (control?.status !== 'ready' || control.contentRevision !== revision) throw new Error('Staging must have a completed release of this commit')
+  const record = control?.releaseId ? (await store.read(`releases/${control.releaseId}.json`))?.value : null
+  assertAcceptanceRelease(record, control, outputs, revision, migrationManifest())
+  const deployedSource = await verifyDeployedBundle(config, credentials, outputs, record)
   const session = await ownerAccessSession(config.origin)
-  await command('node', ['test/verify-prod.mjs', config.origin], { env: { EATYEET_ACCESS_TOKEN: session, EATYEET_EXPECTED_RELEASE: control.releaseId } })
+  await command('node', ['test/verify-prod.mjs', config.origin], { env: { EATYEET_ACCESS_TOKEN: session, EATYEET_EXPECTED_RELEASE: control.releaseId, EATYEET_EXPECTED_CONTENT_REVISION: revision } })
   rmSync('dist/remote-performance.json', { force: true })
   let performanceError
   try { await command('node', ['test/remote-performance.mjs', config.origin], { env: { EATYEET_ACCESS_TOKEN: session } }) }
@@ -83,7 +87,8 @@ export async function acceptStaging({ config, credentials, client, api, outputs,
   if (!timeTravel?.timeTravelVerified) throw new Error('Encrypted export restore passed. Run remote:rehearse to verify actual staging D1 Time Travel before acceptance.')
   if (!ownerReviewed && !approvedLimitations) throw new Error('Automated checks passed. Complete owner MFA/admin/preview review, then rerun with --owner-reviewed to attest that review.')
   const limitations = [!performanceVerified && 'performance', !ownerReviewed && 'owner-review'].filter(Boolean)
-  const report = { revision, releaseId: control.releaseId, checkedAt: new Date().toISOString(), restoreVerified: true,
+  if (cleanRevision() !== verifierRevision || JSON.stringify((await store.read('control.json'))?.value) !== JSON.stringify(control)) throw new Error('Source or remote state changed during acceptance')
+  const report = { revision, verifierRevision, deployedSource, releaseId: control.releaseId, checkedAt: new Date().toISOString(), restoreVerified: true,
     accessVerified: true, performanceVerified, ownerReviewed: !!ownerReviewed, performance, backup: backup.key,
     ...(limitations.length ? { exception: acceptanceException(approvedLimitations, revision, config.ownerEmail, limitations) } : {}) }
   await stateStore.write(`acceptance/staging/${revision}.json`, report)

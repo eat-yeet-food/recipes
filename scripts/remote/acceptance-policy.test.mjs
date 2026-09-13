@@ -1,8 +1,19 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { performancePassed, acceptanceException, assertProductionAcceptance } from './acceptance-policy.mjs'
+import { performancePassed, acceptanceException, assertProductionAcceptance, assertAcceptanceRelease } from './acceptance-policy.mjs'
 
 const revision = 'a'.repeat(40), owner = 'owner@example.test', now = 1800000000000
+
+test('new acceptance tooling can verify the deployed commit only with matching live release and migrations', () => {
+  const record = { revision, id: 'release', status: 'complete', migrations: { initial: 'hash' } }
+  const control = { contentRevision: revision, releaseId: record.id, status: 'ready', migrations: record.migrations }
+  const outputs = { releaseId: record.id }
+  assert.doesNotThrow(() => assertAcceptanceRelease(record, control, outputs, revision, record.migrations))
+  assert.throws(() => assertAcceptanceRelease(record, control, outputs, 'b'.repeat(40), record.migrations), /matching/)
+  assert.throws(() => assertAcceptanceRelease(record, { ...control, status: 'maintenance' }, outputs, revision, record.migrations), /matching/)
+  assert.throws(() => assertAcceptanceRelease(record, control, { releaseId: 'other' }, revision, record.migrations), /matching/)
+  assert.throws(() => assertAcceptanceRelease(record, control, outputs, revision, {}), /migrations/)
+})
 const approved = () => ({ revision, restoreVerified: true, accessVerified: true, performanceVerified: false, ownerReviewed: false,
   exception: acceptanceException('Owner explicitly requested deployment with reported performance and pending admin review.', revision, owner, ['performance', 'owner-review'], now) })
 

@@ -22,6 +22,8 @@ node test/remote-performance.mjs https://eatyeet.com
 
 Only use `--owner-reviewed` after the identity/admin review described below. Acceptance belongs to the exact commit deployed to staging. A documentation or tooling commit also changes the SHA: finish the candidate before staging acceptance, and record post-release evidence in a later commit without misidentifying the deployed application.
 
+If acceptance/recovery tooling itself needed a fix, `remote:acceptance --env staging --application-revision <full-deployed-SHA>` can verify the existing application without redeploying it. It checks the actual downloaded Worker source against the archived release, matching release/content identities and unchanged migrations, then runs normal acceptance. Evidence records the application SHA and verifier-tooling SHA separately. Production must still deploy the accepted application commit; this option does not mark the new tooling commit as a tested application.
+
 Normal releases need no credential enrollment, password copying, API-token changes, dashboard deployment, or manual maintenance toggle. The CLI loads Keychain credentials, builds immutable assets, takes the shared remote lock and backups, publishes through Pulumi, verifies, and reopens traffic. Cloudflare may open normal Chrome when the owner Access session expires. `cloudflared` captures its token privately; do not run verbose login commands that print tokens.
 
 ## Verified account and resource map
