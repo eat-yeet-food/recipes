@@ -26,7 +26,7 @@ If acceptance/recovery tooling itself needed a fix, `remote:acceptance --env sta
 
 Normal releases need no credential enrollment, password copying, API-token changes, dashboard deployment, or manual maintenance toggle. The CLI loads Keychain credentials, builds immutable assets, takes the shared remote lock and backups, publishes through Pulumi, verifies, and reopens traffic. Cloudflare may open normal Chrome when the owner Access session expires. `cloudflared` captures its token privately; do not run verbose login commands that print tokens.
 
-For a code-only iteration against an existing healthy environment, use:
+The standard/default Git-based workflow remains the full release. For an explicitly requested code-only iteration against an existing healthy environment, use:
 
 ```sh
 pnpm run deploy --env staging --code-only
@@ -74,7 +74,9 @@ Production application `1729bc3701d6903b641f2809bcba5b3e82ab562c` was released o
 
 ## Anonymous HTML cache
 
-On 2026-09-13 the owner requested anonymous public HTML caching after the release above. Application `d03ad5725571be3459776213d4b3cc4510438d00` is staged as release `d03ad5725571-1789337824164`; it is not yet in production. The follow-up uses a one-day Worker Cache API entry for complete public HTML, capped at 1MiB, keyed by schema/environment/release/content generation/path. Every hit still reads current release state first. Maintenance closes traffic immediately; synchronization, retirement, restore and application rollback advance the generation so previous HTML cannot be reused. Old objects expire naturally; no separate zone-wide HTML purge is required.
+On 2026-09-13 the owner requested anonymous public HTML caching after the release above. Application `d03ad5725571be3459776213d4b3cc4510438d00` is now production release `d03ad5725571-1789339001713`, generation `438f330c-7f1e-4cca-ab6d-d73bd5fabd2a`, ready with no lock. Staging runs the same application as `d03ad5725571-1789337824164`. The owner explicitly approved this candidate's measured performance and pending manual-owner-review limitations; exact-commit acceptance, actual restore and Worker/security checks completed. Production verification confirmed anonymous homepage/recipe HTML hits and session/reload bypass. Cold mobile LCP remains 3.42–3.94 seconds, above budget; the loading work remains open.
+
+The cache uses a one-day Worker Cache API entry for complete public HTML, capped at 1MiB, keyed by schema/environment/release/content generation/path. Every hit still reads current release state first. Maintenance closes traffic immediately; synchronization, retirement, restore and application rollback advance the generation so previous HTML cannot be reused. Old objects expire naturally; no separate zone-wide HTML purge is required.
 
 Only production anonymous document GETs on known public routes are eligible. Any cookie or authorization/Access identity, query string, RSC/Next/prefetch header, conditional/reload/range request, preview/API path or maintenance probe bypasses caching. Cache fills use fixed public headers, so forwarding headers, user agents and locales cannot poison another visitor's page. Only complete successful HTML is retained; cookies, errors, unexpected Vary fields, streamed render failures and oversized documents are excluded. Cache failures fall back to normal rendering. Browser responses remain `private, no-store`; only the internal edge copy has a one-day lifetime. `X-Eatyeet-HTML-Cache` reports HIT/MISS/BYPASS on HTML responses.
 

@@ -2,7 +2,15 @@
 
 Status: **open, required**. On 2026-09-13 the owner reported that page and image loading had become noticeably slow after the migration, called this a regression, and required it to be addressed after production deployment. Deployment authorization and temporary acceptance exceptions do not resolve this work.
 
-## Latest production release and anonymous HTML follow-up
+## Current production: anonymous HTML caching
+
+Application `d03ad5725571be3459776213d4b3cc4510438d00` is live in production as `d03ad5725571-1789339001713`, generation `438f330c-7f1e-4cca-ab6d-d73bd5fabd2a`, ready with no lock. The owner explicitly approved this candidate's disclosed performance and pending manual-owner-review limitations. Exact-commit staging acceptance reran Worker/security/mobile checks and verified encrypted-export restore after the successful D1 Time Travel rehearsal. The code-only production release completed without migration/sync work. Standard full Git-based deployment remains the default; the faster mode is opt-in for iteration.
+
+Post-release `EATYEET_EXPECT_HTML_CACHE=1 pnpm verify:prod https://eatyeet.com` passed: actual anonymous homepage and recipe HTML edge hits, session/reload bypass, browser hydration/navigation, responsive media, repeat asset caching, public security headers and protected-route denials. Final three-run production mobile medians were Home 89/3708ms, Recipes 87/3940ms, Browse 88/3879ms, Learn 91/3422ms, pizza 89/3582ms and article 91/3479ms. All CLS passed; all LCP medians still exceed 2500ms. The regression remains open; no further optimization was started after the owner requested stopping this session.
+
+Evidence: `.local/html-cache-production-deploy.log`, `.local/html-cache-production-verification.json`, `.local/html-cache-production-mobile.json`, `.local/html-cache-staging-acceptance.json`, and `.local/html-cache-staging-rehearsal.log`. The deployed application SHA is distinct from subsequent verification/documentation commits. Both environments were open/unlocked at completion.
+
+## Previous production release and anonymous HTML follow-up
 
 On 2026-09-13 the owner explicitly directed production deployment of the staged performance candidate, followed by anonymous public HTML caching. Application `1729bc3701d6903b641f2809bcba5b3e82ab562c` is now production release `1729bc3701d6-1789335454057`, generation `fe95dc70-1d2c-41ca-8f2f-86836ae58968`, ready with no lock. Git was clean and pushed before deployment. Exact-candidate staging acceptance recorded actual failing performance and pending manual owner review with the owner's scoped exception. D1 Time Travel and encrypted-export restore passed. An initial browser timeout on staging `/recipes` was diagnosed with a successful browser retry; the exited verifier's lock was recovered after the quiet interval and the complete acceptance rerun passed its Worker/security checks.
 
