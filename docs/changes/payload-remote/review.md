@@ -1,6 +1,6 @@
 # Remote migration implementation and acceptance
 
-Status: implementation in progress on `codex/payload-remote`, based on `c3497c6f237ea21be62ac7253d131ba9ce6bb16e`. R2 and Zero Trust Free are active and the private state bucket exists. The protected Pulumi bootstrap stack is complete; no staging release has run, and production DNS/application remain untouched. These results are local evidence, not production acceptance.
+Status: staging is deployed and ready for owner review on `codex/payload-remote`. Release `3f3da9b25244-1789298041660` serves application/content commit `3f3da9b25244b7623c6a4232ab122bc233c7cff6`; verification tooling commit `cef2378` completed recovery. All 78 live Worker/browser checks passed, maintenance is off, and the R2 release lock is cleared. Fresh authenticated homepage and pizza requests without the maintenance-verification token returned 200 and real content. Regular Chrome displayed the Pollo Asado recipe. Production DNS/application remain untouched. Full staging acceptance (including performance, owner/session review and restore rehearsal) remains separate from this successful release verification.
 
 ## Implemented
 
