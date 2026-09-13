@@ -40,8 +40,11 @@ Inventory checked 2026-09-13. Names are descriptive; compare actual IDs against 
 | Staging D1 | `b9eb5162-91d3-4461-bbba-46bf5d4997f6`, `eatyeet-staging-content` |
 | Staging R2 | `eatyeet-staging-media`, `eatyeet-staging-cache`, `eatyeet-staging-operations` |
 | Production | `https://eatyeet.com`; admin `/admin`; derivative origin `https://media.eatyeet.com` |
-| Production resources | Provisioned by the production stack; read verified IDs from its outputs after provisioning |
+| Production Worker | `eatyeet-production` |
+| Production D1 | `9a657ae9-d9b2-4bf4-ae3a-ac405b31cf5a`, `eatyeet-production-content` |
+| Production R2 | `eatyeet-production-media`, `eatyeet-production-cache`, `eatyeet-production-operations` |
 | Retained Pages project | `eatyeet`, ID `e835ec8d-674f-4b10-84a3-fe0c931beb5a` |
+| Retained Pages deployment | `f7974d5e-22bd-44fe-9ee3-cf90daa9b734`, `https://f7974d5e.eatyeet.pages.dev`, commit `cb74614896e0d1ce5919072cf75127eb877156c3` |
 | Legacy DNS | Apex and `www` proxied CNAMEs to `eatyeet.pages.dev` |
 
 The bootstrap stack owns the state bucket, Access organization, account-restricted identity provider and owner MFA enrollment launcher. Each application stack owns its D1 database, three private R2 buckets, Worker, bindings, Access apps/policies, and delivery routes. There is no shared application database, Payload secret or owner session between staging and production.
@@ -74,6 +77,8 @@ On a new Mac without a legacy token entry, run `pnpm remote:setup` and enter the
 Keychain service `com.eatyeet.release` holds `operator`, `bootstrap`, `staging`, and `production` entries. `operator` supplies Cloudflare/R2 authority; the environment entries retain separate Pulumi passphrases and runtime secrets. The recovery export must cover all entries before remote operations resume. An interrupted setup preserves generated values; rerun setup to finish the export, not enrollment/rotation from scratch.
 
 The encrypted kit is `.local/remote/recovery/operator-<timestamp>.json`. Copy it to separately secured offline storage; store its passphrase separately. Restore with:
+
+This installation completed unified recovery enrollment on 2026-09-13, with kit `.local/remote/recovery/operator-1789305580747.json`. All environment entries match that completed export. The protected bootstrap update and initial production provisioning completed successfully; production was provisioned with cutover disabled before this candidate enabled it. The retained Pages homepage and four referenced CSS/JS assets returned 200 before cutover.
 
 ```sh
 pnpm remote:setup --restore /path/to/operator-recovery.json
