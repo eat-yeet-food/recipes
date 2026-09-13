@@ -29,6 +29,14 @@ Follow-up local verification passed the full application suite with 77 release/c
 
 After the hint correction, local recipe mobile median performance reached 90 but LCP remains 3532ms (previously 88/3841ms). All other local representative routes pass their performance/LCP/CLS budgets; all routes pass CLS. This local preview does not exercise production-only HTML edge caching. The follow-up still needs remote rollout measurements; no production speed claim is made from its isolated cache test.
 
+### Staged HTML/cache candidate
+
+Application `d03ad5725571be3459776213d4b3cc4510438d00` was deployed to staging using `--code-only` as `d03ad5725571-1789337824164`. Its plan was a complete no-op and existing media verification passed. The journal went from upload/maintenance directly to application/verify, without migrations or sync. The first release-identity read did not match; subsequent page identities and every browser/security check passed. After confirming the writer/children stopped and the quiet interval elapsed, verification tooling `3362546` checked the actual deployed bundle, reran verification and reopened traffic without redeploying. That tooling adds a bounded 10-second wait for the exact Worker identity, preserving the check. Staging was confirmed ready/unlocked before measurement. Evidence: `.local/html-cache-staging-deploy.log` and `.local/html-cache-staging-verify.log`.
+
+New staging three-run mobile medians: Home 87/3597ms, Recipes 89/3348ms, Browse 90/3393ms, Learn 88/3538ms, pizza 88/3598ms and article 87/3631ms. All CLS values passed. Every one of the 18 diagnostic traces contains a single HTTP 200 document request; the extra same-URL 307 is absent. Home previously measured 74/5545ms in the preceding exact-candidate acceptance. These are authenticated staging measurements of the header correction; owner requests intentionally bypass anonymous HTML caching, so they do not measure production HTML cache benefits. All six LCP medians still fail the 2500ms target. Evidence: `.local/html-cache-staging-mobile.json`, `.local/html-cache-staging-document-requests.json`, and `dist/remote-performance-diagnostics` (the latter is overwritten by future diagnostic runs).
+
+Production remains on `1729bc3701d6903b641f2809bcba5b3e82ab562c`. Deploying the caching candidate requires its own acceptance; prior performance/manual-owner-review exceptions are not silently reused for this new application commit.
+
 ## Baseline evidence
 
 The current remote baseline is staging application commit `3f3da9b25244b7623c6a4232ab122bc233c7cff6`. Each row is the median of three Lighthouse mobile runs through staging's required Cloudflare Access protection. These measurements are not production measurements.
