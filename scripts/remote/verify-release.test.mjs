@@ -1,6 +1,16 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { verifyRelease, assertVerificationState } from './verify-release.mjs'
+import { verifyRelease, assertVerificationState, verifyDeployedBundle } from './verify-release.mjs'
+import { createHash } from 'node:crypto'
+
+test('deployed source accepts Cloudflare multipart text or files and still rejects differing bytes', async () => {
+  const source = 'export default { label: "café" }', hash = createHash('sha256').update(source).digest('hex')
+  for (const value of [source, new Blob([source])]) {
+    const request = async () => { const body = new FormData(); body.append('worker.js', value); return new Response(body) }
+    await verifyDeployedBundle({ accountId: 'account' }, {}, { workerName: 'worker' }, hash, request)
+    await assert.rejects(verifyDeployedBundle({ accountId: 'account' }, {}, { workerName: 'worker' }, 'incorrect', request), /differs/)
+  }
+})
 
 class Store {
   objects = new Map(); sequence = 0

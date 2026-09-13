@@ -27,6 +27,9 @@ try {
   }
   for (const path of [...new Set([...STATIC_PATHS, '/recipes/new-york-style-pizza', '/learn/mixing-dough-and-gluten-development'])]) {
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 } })
+    // Playwright ignores Cookie overrides in route.continue; seed its cookie
+    // jar so navigation, hydration and asset requests share the owner session.
+    if (process.env.EATYEET_ACCESS_TOKEN) await context.addCookies([{ name: 'CF_Authorization', value: process.env.EATYEET_ACCESS_TOKEN, url: origin, secure: true, httpOnly: true }])
     await context.route('**/*', async (route) => route.continue({ headers: { ...route.request().headers(), ...headersFor(route.request().url()) } }))
     const page = await context.newPage(), errors = []
     page.on('pageerror', () => errors.push('uncaught page error'))

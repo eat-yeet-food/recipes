@@ -11,14 +11,18 @@ export function assertVerificationState(record, control, outputs, migrations) {
   if (!record.bundleHash || !record.backup || !record.assetManifest) throw new Error('Release recovery evidence is incomplete')
 }
 
-export async function verifyDeployedBundle(config, credentials, outputs, expectedHash) {
-  const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${config.accountId}/workers/scripts/${outputs.workerName}`, {
+export async function verifyDeployedBundle(config, credentials, outputs, expectedHash, request = fetch) {
+  const response = await request(`https://api.cloudflare.com/client/v4/accounts/${config.accountId}/workers/scripts/${outputs.workerName}`, {
     headers: { Authorization: `Bearer ${credentials.CLOUDFLARE_API_TOKEN}` }, signal: AbortSignal.timeout(120000),
   })
   if (!response.ok || !response.headers.get('content-type')?.includes('multipart/form-data')) throw new Error('Unable to verify deployed Worker source')
   const parts = [...(await response.formData()).entries()]
-  if (parts.length !== 1 || parts[0][0] !== 'worker.js' || typeof parts[0][1] === 'string') throw new Error('Unexpected deployed Worker modules')
-  if (digest(Buffer.from(await parts[0][1].arrayBuffer())) !== expectedHash) throw new Error('Deployed Worker differs from recorded release')
+  if (parts.length !== 1 || parts[0][0] !== 'worker.js') throw new Error('Unexpected deployed Worker modules')
+  // Cloudflare may omit a filename on the multipart field, which makes the
+  // platform parser return source text rather than a File object.
+  const value = parts[0][1]
+  const bytes = typeof value === 'string' ? Buffer.from(value) : Buffer.from(await value.arrayBuffer())
+  if (digest(bytes) !== expectedHash) throw new Error('Deployed Worker differs from recorded release')
 }
 
 export async function verifyRelease(context, releaseId) {
