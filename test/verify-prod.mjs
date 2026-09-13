@@ -45,7 +45,10 @@ try {
     if (expected) check(`${path} expected Worker`, response?.headers()['x-eatyeet-release'] === expected)
     check(`${path} main content`, await page.locator('#main-content').count() === 1)
     check(`${path} browser errors`, errors.length === 0, errors.join(', '))
-    check(`${path} images loaded`, await page.evaluate(() => [...document.images].filter((image) => image.getBoundingClientRect().top < innerHeight).every((image) => image.complete && image.naturalWidth > 0)))
+    check(`${path} images loaded`, await page.evaluate(() => [...document.images].filter((image) => {
+      const box = image.getBoundingClientRect()
+      return box.width > 0 && box.height > 0 && box.top < innerHeight && box.bottom > 0
+    }).every((image) => image.complete && image.naturalWidth > 0)))
     check(`${path} canonical`, await page.locator('link[rel=canonical]').getAttribute('href') === origin + path || (origin.includes('staging.') && (await page.locator('link[rel=canonical]').getAttribute('href'))?.startsWith('https://staging.eatyeet.com')))
     if (path === '/browse') {
       let documentLoads = 0
@@ -62,13 +65,22 @@ try {
       for (const width of [390, 1440]) {
         await page.setViewportSize({ width, height: 900 })
         await page.reload({ waitUntil: 'networkidle' })
-        const sources = await page.locator('picture img').evaluateAll((images) => images.filter((image) => image.getBoundingClientRect().top < innerHeight).map((image) => image.currentSrc))
-        check(`responsive derivatives at ${width}px`, sources.length > 0 && sources.every((url) => new URL(url).origin === mediaOrigin && new URL(url).pathname.startsWith('/media/')))
-        for (const url of sources.slice(0, 2)) {
+        const sources = await page.locator('picture img').evaluateAll((images) => images.filter((image) => {
+          const box = image.getBoundingClientRect()
+          return box.width > 0 && box.height > 0 && box.top < innerHeight && box.bottom > 0
+        }).map((image) => image.currentSrc))
+        check(`responsive derivatives at ${width}px`, sources.length > 0 && sources.every((url) => url && new URL(url).origin === mediaOrigin && new URL(url).pathname.startsWith('/media/')))
+        for (const url of sources.filter(Boolean).slice(0, 2)) {
           const image = await fetch(url, { headers: headersFor(url), redirect: 'manual' })
-          check(`image delivery at ${width}px`, image.ok && /^image\//.test(image.headers.get('content-type') ?? '') && !!image.headers.get('etag') && Number(image.headers.get('content-length')) > 0)
+          const bytes = (await image.arrayBuffer()).byteLength
+          const declaredLength = image.headers.get('content-length')
+          // Streaming HTTP responses may omit Content-Length. Measure the body
+          // and, when present and unencoded, check its declared length too.
+          const lengthMatches = declaredLength === null || (image.headers.get('content-encoding')
+            ? Number(declaredLength) > 0 : Number(declaredLength) === bytes)
+          check(`image delivery at ${width}px`, image.ok && /^image\//.test(image.headers.get('content-type') ?? '') && !!image.headers.get('etag') && bytes > 0 && lengthMatches,
+            `${bytes} decoded bytes; Content-Length ${declaredLength ?? 'streamed'}`)
           if (origin === 'https://eatyeet.com') check('public derivative browser cache', /max-age=31536000/.test(image.headers.get('cache-control') ?? '') && !/immutable/.test(image.headers.get('cache-control') ?? ''))
-          await image.body?.cancel()
         }
       }
     }
