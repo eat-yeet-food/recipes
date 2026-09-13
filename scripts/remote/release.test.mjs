@@ -77,6 +77,21 @@ test('failed health verification never reopens public traffic', async () => fixt
   await assert.rejects(runRelease(context), /failed at verify/)
   assert.equal((await operations.read('control.json')).value.status, 'maintenance')
 }))
+test('a new compatible commit can recover maintenance after explicit writer recovery', async () => fixture(async ({ context, operations, stateStore }) => {
+  const command = context.command
+  context.command = async (program, args) => { if (program === 'node') throw new Error('Provider verification interrupted'); return command(program, args) }
+  await assert.rejects(runRelease(context), /failed at verify/)
+  const held = await stateStore.read('locks/production.json')
+  await stateStore.remove('locks/production.json', held.etag)
+  const revision = 'b'.repeat(40)
+  context.revision = () => revision
+  await stateStore.write(`acceptance/staging/${revision}.json`, { restoreVerified: true, accessVerified: true, performanceVerified: true })
+  context.command = command
+  await runRelease(context)
+  assert.equal((await operations.read('control.json')).value.contentRevision, revision)
+  assert.equal((await operations.read('control.json')).value.status, 'ready')
+  assert.equal((await operations.read(`releases/${held.value.releaseId}.json`)).value.status, 'failed')
+}))
 test('application rollback preserves synchronized content and does not run migrations or sync', async () => fixture(async ({ context, operations, events }) => {
   await runRelease(context)
   const before = (await operations.read('control.json')).value

@@ -2,6 +2,7 @@ import * as pulumi from '@pulumi/pulumi'
 import * as cloudflare from '@pulumi/cloudflare'
 import { readFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
+import { assertDeploymentManifest } from './assets.cjs'
 
 const configuration = new pulumi.Config()
 const settings = configuration.requireObject<any>('settings')
@@ -90,6 +91,7 @@ if (environment === 'bootstrap') {
   const release = configuration.getObject<any>('release')
   const content = release ? readFileSync(release.bundleFile) : Buffer.from('export default { fetch() { return new Response("Not initialized", {status:503,headers:{"Cache-Control":"no-store"}}) } }')
   if (release && hash(content) !== release.bundleHash) throw new Error('Release bundle checksum differs')
+  if (release) assertDeploymentManifest(release.assetsDirectory, release.deploymentManifest)
   const variables = { DEPLOY_ENV: environment, SITE_URL: settings.origin, MEDIA_ORIGIN: settings.mediaOrigin,
     OWNER_EMAIL: settings.ownerEmail, ACCESS_TEAM_DOMAIN: settings.accessTeamDomain,
     RELEASE_ID: release?.id ?? 'uninitialized', INDEXABLE: settings.cutover && environment === 'production' ? '1' : '0' }
@@ -109,7 +111,9 @@ if (environment === 'bootstrap') {
         return { name, type: 'secret_text', text: pulumi.secret(process.env[name]!) }
       }),
     ],
-    ...(release ? { assets: { jwt: configuration.requireSecret('assetsJwt'), config: { runWorkerFirst: true, htmlHandling: 'none', notFoundHandling: 'none' } } } : {}),
+    // Provider 6.20 cannot resolve assetManifestSha256 with a JWT-only input.
+    // A checked directory lets its plan modifier compute the value correctly.
+    ...(release ? { assets: { directory: release.assetsDirectory, config: { runWorkerFirst: true, htmlHandling: 'none', notFoundHandling: 'none' } } } : {}),
     observability: { enabled: true, headSamplingRate: 1 },
   }, imported('application'))
   const disabled = new cloudflare.WorkersScriptSubdomain('no-alternate-hostnames', {

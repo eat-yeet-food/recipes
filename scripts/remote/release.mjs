@@ -8,6 +8,7 @@ import { uploadAssets, archiveAssets, restoreAssets } from './assets.mjs'
 import { command, cleanRevision, migrationManifest, assertCompatible, digest } from './process.mjs'
 import { databaseBackup } from './backups.mjs'
 import { ownerAccessSession } from './access-session.mjs'
+import { deploymentManifest } from '../../infra/cloudflare/assets.cjs'
 
 export function probeToken(credentials, releaseId, origin) {
   const body = Buffer.from(JSON.stringify({ releaseId, origin, exp: Math.floor(Date.now() / 1000) + 600 })).toString('base64url')
@@ -25,7 +26,7 @@ async function buildArtifacts({ directory, outputs, childEnv, abort, child, roll
   if (modules.length !== 1 || !/\.(m?js)$/.test(modules[0])) throw new Error('Worker produced additional modules; do not deploy an incomplete bundle')
   const bundleFile = resolve(bundleDirectory, modules[0])
   const assetsDirectory = resolve(directory, 'assets')
-  cpSync(resolve('packages/l8/web/.open-next/assets'), assetsDirectory, { recursive: true })
+  cpSync(resolve('packages/l8/web/.open-next/assets'), assetsDirectory, { recursive: true, filter: (source) => !source.endsWith('.map') })
   return { bundleFile, assetsDirectory }
 }
 export async function runRelease(context, { resume, rollback } = {}) {
@@ -108,6 +109,7 @@ export async function runRelease(context, { resume, rollback } = {}) {
     record.bundleHash = digest(readFileSync(bundleFile))
     record.bundle = readFileSync(bundleFile, 'utf8')
     record.assetsDirectory = assetsDirectory
+    record.deploymentManifest = deploymentManifest(assetsDirectory)
     await phase('maintenance')
     const control = { releaseId, contentRevision: rollback ? previous.contentRevision : revision, generation: randomUUID(), status: 'maintenance', migrations }
     await operations.write('control.json', control)
@@ -126,8 +128,7 @@ export async function runRelease(context, { resume, rollback } = {}) {
       if (convergence.counts.created || convergence.counts.updated || convergence.counts.retired || convergence.siteChanged || convergence.mediaChanges) throw new Error('Content did not converge after synchronization')
     }
     await phase('application')
-    await stack.setConfig('eatyeet:assetsJwt', { value: assetReceipt.jwt, secret: true })
-    await stack.setConfig('eatyeet:release', { value: JSON.stringify({ id: releaseId, bundleFile, bundleHash: record.bundleHash }) })
+    await stack.setConfig('eatyeet:release', { value: JSON.stringify({ id: releaseId, bundleFile, bundleHash: record.bundleHash, assetsDirectory, deploymentManifest: record.deploymentManifest }) })
     await lock.assertOwner()
     if (config.environment === 'production' && config.cutover && !previous) {
       const pages = (await api(`/accounts/${config.accountId}/pages/projects`)).result

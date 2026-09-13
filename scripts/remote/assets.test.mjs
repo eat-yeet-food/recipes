@@ -1,9 +1,32 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from 'node:fs'
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync, symlinkSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { archiveAssets, restoreAssets } from './assets.mjs'
+import { deploymentManifest, assertDeploymentManifest } from '../../infra/cloudflare/assets.cjs'
+
+test('Pulumi asset snapshot rejects changed, missing, extra, mapped and linked files', () => {
+  const directory = mkdtempSync(join(tmpdir(), 'eatyeet-deployment-assets-'))
+  try {
+    const file = join(directory, 'chunk.js')
+    writeFileSync(file, 'original')
+    const manifest = deploymentManifest(directory)
+    assertDeploymentManifest(directory, manifest)
+    writeFileSync(file, 'modified')
+    assert.throws(() => assertDeploymentManifest(directory, manifest), /differs/)
+    rmSync(file)
+    assert.throws(() => assertDeploymentManifest(directory, manifest), /differs/)
+    writeFileSync(file, 'original')
+    writeFileSync(join(directory, 'extra.js'), 'extra')
+    assert.throws(() => assertDeploymentManifest(directory, manifest), /differs/)
+    writeFileSync(join(directory, 'chunk.js.map'), '{}')
+    assert.throws(() => deploymentManifest(directory), /source map/)
+    rmSync(join(directory, 'chunk.js.map'))
+    symlinkSync(file, join(directory, 'linked.js'))
+    assert.throws(() => deploymentManifest(directory), /symlinks/)
+  } finally { rmSync(directory, { recursive: true, force: true }) }
+})
 
 test('archived assets restore without the original checkout and detect missing/corrupt uploads', async () => {
   const directory = mkdtempSync(join(tmpdir(), 'eatyeet-artifacts-'))
