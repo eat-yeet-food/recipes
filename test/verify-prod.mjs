@@ -22,7 +22,8 @@ try {
     const response = await get('/.well-known/eatyeet-release')
     const state = response.headers.get('content-type')?.includes('application/json') ? await response.json() : null
     check('release identity', response.status === 200 && state?.releaseId === expected)
-    check('synchronized content identity', /^[a-f0-9]{40}$/.test(state?.contentRevision ?? ''))
+    check('synchronized content identity', process.env.EATYEET_EXPECTED_CONTENT_REVISION
+      ? state?.contentRevision === process.env.EATYEET_EXPECTED_CONTENT_REVISION : /^[a-f0-9]{40}$/.test(state?.contentRevision ?? ''))
   }
   for (const path of [...new Set([...STATIC_PATHS, '/recipes/new-york-style-pizza', '/learn/mixing-dough-and-gluten-development'])]) {
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 } })

@@ -53,6 +53,7 @@
     "remote:infra": "node scripts/remote-cli.mjs infra",
     "release:status": "node scripts/remote-cli.mjs status",
     "release:recover": "node scripts/remote-cli.mjs recover-lock",
+    "release:verify": "node scripts/remote-cli.mjs verify-release",
     "remote:backup": "node scripts/remote-cli.mjs backup",
     "remote:restore": "node scripts/remote-cli.mjs restore",
     "test:remote": "node --test scripts/remote/*.test.mjs packages/l8/web/src/next/remote-policy.test.mjs",

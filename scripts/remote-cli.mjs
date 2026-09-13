@@ -12,6 +12,7 @@ import { runRelease } from './remote/release.mjs'
 import { command, cleanRevision } from './remote/process.mjs'
 import { databaseBackup, readBackup } from './remote/backups.mjs'
 import { acceptStaging, rehearseRestore } from './remote/acceptance.mjs'
+import { verifyRelease } from './remote/verify-release.mjs'
 
 const { values, positionals } = parseArgs({ allowPositionals: true, options: {
   env: { type: 'string' }, resume: { type: 'string' }, rollback: { type: 'string' }, 'derive-r2': { type: 'boolean' },
@@ -21,7 +22,7 @@ const [action, operation, file] = positionals
 const validCommands = { credentials: ['enroll', 'export', 'import'], inventory: [undefined], bootstrap: [undefined], status: [undefined],
   deploy: [undefined], infra: ['preview', 'up'], content: ['plan', 'sync', 'migrate', 'owner', 'recover'],
   backup: [undefined], restore: [undefined], acceptance: [undefined], rehearse: [undefined] }
-if (action !== 'recover-lock' && !validCommands[action]?.includes(operation)) throw new Error('Unknown remote command; see docs/payload-remote.md')
+if (!['recover-lock', 'verify-release'].includes(action) && !validCommands[action]?.includes(operation)) throw new Error('Unknown remote command; see docs/payload-remote.md')
 const environment = environmentName(values.env)
 if (action === 'credentials') {
   await credentialsCommand(environment, operation, file, { deriveR2: values['derive-r2'] })
@@ -66,6 +67,8 @@ if (action === 'credentials') {
       } else if (action === 'recover-lock') {
         await recoverLocalLock(stateStore, environment, operation, values['writer-stopped'])
         console.log('Interrupted lock recovered. Maintenance state was preserved; resume the original release.')
+      } else if (action === 'verify-release') {
+        await verifyRelease({ config, credentials, stateStore, client, outputs: readOutputs(environment) }, operation)
       } else if (action === 'deploy') {
         cleanRevision()
         let outputs
