@@ -2,31 +2,53 @@ import { DatabaseSync } from 'node:sqlite'
 import { readFileSync, writeFileSync, mkdirSync, rmSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { ObjectStore } from './storage.mjs'
-import { databaseBackup, readBackup } from './backups.mjs'
+import { databaseBackup, readBackup, restoreBookmark } from './backups.mjs'
 import { command, cleanRevision, digest } from './process.mjs'
 import { ownerAccessSession } from './access-session.mjs'
 import { performancePassed, acceptanceException } from './acceptance-policy.mjs'
 
-export async function rehearseRestore({ config, credentials, client, api, outputs, lock }) {
+export function identityDigest(rows) {
+  return digest(JSON.stringify(rows.map((table) => table.map((row) => Object.fromEntries(Object.entries(row).sort(([a], [b]) => a.localeCompare(b)))))))
+}
+
+export async function rehearseRestore({ config, credentials, client, api, outputs, lock }, resumeBackup) {
   if (config.environment !== 'staging') throw new Error('Restore rehearsal is restricted to staging')
   const store = new ObjectStore(client, outputs.operationsBucket)
   const control = (await store.read('control.json'))?.value
-  if (control?.status !== 'ready') throw new Error('A healthy staging release is required')
+  if (control?.status !== (resumeBackup ? 'maintenance' : 'ready')) throw new Error('A healthy staging release is required, or --backup for an interrupted rehearsal in maintenance')
+  let original
+  if (resumeBackup) {
+    if (!/^backups\/time-travel-\d+\/database.json$/.test(resumeBackup)) throw new Error('Resume requires an original Time Travel rehearsal backup')
+    original = await readBackup(store, credentials, resumeBackup)
+    if (original.environment !== config.environment || original.databaseId !== outputs.databaseId) throw new Error('Rehearsal backup belongs to another environment/database')
+  }
   await store.write('control.json', { ...control, status: 'maintenance' })
   await new Promise((resolve) => setTimeout(resolve, 35000))
   const endpoint = `/accounts/${config.accountId}/d1/database/${outputs.databaseId}`
   const query = async (sql) => (await api(`${endpoint}/query`, { method: 'POST', body: JSON.stringify({ sql }) })).result
   const sql = "SELECT id, source_id, source_hash FROM recipes ORDER BY id; SELECT id, source_id, source_hash FROM articles ORDER BY id; SELECT id, email FROM owners ORDER BY id;"
-  const before = digest(JSON.stringify((await query(sql)).map((result) => result.results)))
-  const backup = await databaseBackup(api, config, outputs, store, credentials, `time-travel-${Date.now()}`)
+  let before
+  if (original) {
+    const db = new DatabaseSync(':memory:')
+    try {
+      db.exec(original.sql)
+      if (db.prepare('PRAGMA integrity_check').get().integrity_check !== 'ok') throw new Error('Rehearsal backup failed integrity check')
+      if (db.prepare("SELECT name FROM sqlite_master WHERE name = 'eatyeet_restore_probe'").get()) throw new Error('Original rehearsal backup already contains the probe')
+      before = identityDigest(sql.split(';').filter((part) => part.trim()).map((part) => db.prepare(part).all()))
+    } finally { db.close() }
+    if (before !== identityDigest((await query(sql)).map((result) => result.results))) throw new Error('Rehearsal backup differs from the current content/owner identities')
+  } else before = identityDigest((await query(sql)).map((result) => result.results))
+  const safetyBackup = await databaseBackup(api, config, outputs, store, credentials, `time-travel-${Date.now()}`)
+  const backup = original ? { key: resumeBackup, bookmark: original.bookmark } : safetyBackup
   await lock.assertOwner()
-  await query('CREATE TABLE eatyeet_restore_probe (id INTEGER PRIMARY KEY); INSERT INTO eatyeet_restore_probe VALUES (1);')
-  await api(`${endpoint}/time_travel/restore`, { method: 'POST', body: JSON.stringify({ bookmark: backup.bookmark.bookmark }) })
+  if (!original) await query('CREATE TABLE eatyeet_restore_probe (id INTEGER PRIMARY KEY); INSERT INTO eatyeet_restore_probe VALUES (1);')
+  const restoration = await restoreBookmark(api, endpoint, backup.bookmark.bookmark)
   const probe = await query("SELECT name FROM sqlite_master WHERE name = 'eatyeet_restore_probe'")
-  const after = digest(JSON.stringify((await query(sql)).map((result) => result.results)))
+  const after = identityDigest((await query(sql)).map((result) => result.results))
   if (probe[0].results.length || before !== after) throw new Error('Staging Time Travel did not restore the expected content and owner identities')
   await lock.assertOwner()
-  await store.write(`rehearsals/${control.contentRevision}.json`, { timeTravelVerified: true, checkedAt: new Date().toISOString(), backup: backup.key })
+  await store.write(`rehearsals/${control.contentRevision}.json`, { timeTravelVerified: true, checkedAt: new Date().toISOString(), backup: backup.key,
+    safetyBackup: safetyBackup.key, restoration, verifierRevision: cleanRevision() })
   await store.write('control.json', { ...control, generation: `restored-${Date.now()}`, status: 'ready' })
   console.log('Staging Time Travel and content/owner identity verification passed.')
 }

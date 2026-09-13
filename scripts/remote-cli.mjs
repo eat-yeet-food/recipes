@@ -10,7 +10,7 @@ import { infrastructure, saveOutputs, readOutputs, assertInitialProvisioningResu
 import { ReleaseLock, recoverLocalLock } from './remote/lock.mjs'
 import { runRelease } from './remote/release.mjs'
 import { command, cleanRevision } from './remote/process.mjs'
-import { databaseBackup, readBackup } from './remote/backups.mjs'
+import { databaseBackup, readBackup, restoreBookmark } from './remote/backups.mjs'
 import { acceptStaging, rehearseRestore } from './remote/acceptance.mjs'
 import { verifyRelease } from './remote/verify-release.mjs'
 
@@ -125,7 +125,7 @@ if (action === 'credentials') {
           } else if (action === 'acceptance' || action === 'rehearse') {
             const context = { config, credentials, client, api, outputs: readOutputs(environment), lock, stateStore }
             if (action === 'acceptance') await acceptStaging(context, values['owner-reviewed'], values['approved-limitations'])
-            else await rehearseRestore(context)
+            else await rehearseRestore(context, values.backup)
           } else if (action === 'restore') {
             const outputs = readOutputs(environment)
             const store = new ObjectStore(client, outputs.operationsBucket)
@@ -136,7 +136,7 @@ if (action === 'credentials') {
             if (values.bookmark !== backup.bookmark.bookmark) throw new Error('Pass the exact recorded --bookmark to authorize this database restore')
             await databaseBackup(api, config, outputs, store, credentials, releaseId)
             await lock.assertOwner()
-            await api(`/accounts/${config.accountId}/d1/database/${outputs.databaseId}/time_travel/restore`, { method: 'POST', body: JSON.stringify({ bookmark: values.bookmark }) })
+            await restoreBookmark(api, `/accounts/${config.accountId}/d1/database/${outputs.databaseId}`, values.bookmark)
             await store.write('control.json', { ...control.value, generation: `restored-${Date.now()}`, status: 'maintenance' })
             console.log('Database restored. Maintenance remains active; recover owner sessions and resume a compatible release before reopening.')
           } else throw new Error('Unknown remote command; see docs/payload-remote.md')

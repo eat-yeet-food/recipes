@@ -1,6 +1,12 @@
 import { seal, unseal } from './credentials.mjs'
 import { digest } from './process.mjs'
 
+export async function restoreBookmark(api, endpoint, bookmark) {
+  if (typeof bookmark !== 'string' || !bookmark.trim()) throw new Error('An exact D1 recovery bookmark is required')
+  // D1 accepts the bookmark as a query parameter, not a JSON request body.
+  return (await api(`${endpoint}/time_travel/restore?${new URLSearchParams({ bookmark })}`, { method: 'POST' })).result
+}
+
 export async function databaseBackup(api, config, outputs, store, credentials, releaseId) {
   const endpoint = `/accounts/${config.accountId}/d1/database/${outputs.databaseId}`
   const bookmark = (await api(`${endpoint}/time_travel/bookmark`)).result
