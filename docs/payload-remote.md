@@ -1,6 +1,6 @@
 # Cloudflare remote operations
 
-Implementation is on `codex/payload-remote`. R2 and Zero Trust Free are active, bootstrap Keychain enrollment and its encrypted recovery export are complete, and full account inventory succeeds. The protected bootstrap stack has imported the private state bucket, existing Access organization and account-restricted Cloudflare sign-in provider. Private R2 delivery, 30-day backup retention and lock cleanup are verified. **Staging/production credential enrollment, environment provisioning, MFA review, staging rehearsal and production cutover remain incomplete.** See `docs/changes/payload-remote/review.md` for evidence and blockers.
+Implementation is on `codex/payload-remote`. R2 and Zero Trust Free are active, bootstrap Keychain enrollment and its encrypted recovery export are complete, and full account inventory succeeds. The protected bootstrap stack has imported the private state bucket, existing Access organization and account-restricted Cloudflare sign-in provider. Private R2 delivery, 30-day backup retention and lock cleanup are verified. Staging credentials and recovery export are enrolled, and staging infrastructure is provisioned. **The first staging content release, owner MFA review, recovery rehearsal, production credentials/provisioning and cutover remain incomplete.** See `docs/changes/payload-remote/review.md` for evidence and blockers.
 
 Local development remains documented in `docs/payload-local.md`. Ordinary `dev`, `build`, `preview`, `content:sync` and `db:migrate` use local bindings. Remote commands require an explicit environment. No Doppler project, CLI wrapper or runtime integration is used.
 
@@ -65,7 +65,7 @@ pnpm remote:infra up --env production
 
 The private R2 backend explicitly uses the account S3 endpoint and region `auto`. Bucket creation precedes the first bootstrap lock; subsequent bootstrap changes share an R2 lock. State is passphrase encrypted. Pulumi retains checkpoint history; timestamped state copies and encrypted D1 exports expire after 30 days. Media and archived build assets are retained for rollback. Initial Workers return 503; first staging release initializes content.
 
-`infra up` is only for initial provisioning. Subsequent application/infrastructure updates use the release command. Secrets are Worker secret bindings. Never put runtime credentials into plaintext Pulumi settings.
+`infra up` is only for initial provisioning. After a failed initial attempt, verify all writers and submitted operations have stopped, recover its lock, then run `pnpm remote:infra up --env staging --resume infra-<original-timestamp>`. Resume requires the original empty-stack backup, refuses any existing content release or initialized Worker, takes another backup, and converges the existing resources. Subsequent application/infrastructure updates use the release command. Secrets are Worker secret bindings. Never put runtime credentials into plaintext Pulumi settings.
 
 ## Access and owner setup
 

@@ -64,7 +64,7 @@ if (environment === 'bootstrap') {
     allowedIdps: [settings.cloudflareIdpId], sessionDuration: '2h', autoRedirectToIdentity: true,
     appLauncherVisible: false, allowAuthenticateViaWarp: false,
     policies: [{ id: policy.id, precedence: 1 }],
-    mfaConfig: { mfaDisabled: false, allowedAuthenticators: ['totp', 'securityKey', 'biometrics'], sessionDuration: '2h' },
+    mfaConfig: { mfaDisabled: false, allowedAuthenticators: ['totp', 'security_key', 'biometrics'], sessionDuration: '2h' },
   }, imported(`owner-access-${i}`)))
   if (environment === 'production') new cloudflare.ZeroTrustAccessApplication('public-api', {
     accountId, name: `${prefix}-public-api`, type: 'self_hosted', domain: `${host}/api/public`,
@@ -95,7 +95,6 @@ if (environment === 'bootstrap') {
     ],
     ...(release ? { assets: { jwt: configuration.requireSecret('assetsJwt'), config: { runWorkerFirst: true, htmlHandling: 'none', notFoundHandling: 'none' } } } : {}),
     observability: { enabled: true, headSamplingRate: 1 },
-    placement: { mode: 'smart' },
   }, imported('application'))
   const disabled = new cloudflare.WorkersScriptSubdomain('no-alternate-hostnames', {
     accountId, scriptName: worker.scriptName, enabled: false, previewsEnabled: false,

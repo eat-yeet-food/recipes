@@ -3,6 +3,16 @@ import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
 import { resolve } from 'node:path'
 
+export function assertInitialProvisioningResume(state, original, control) {
+  if (!original?.deployment || original.deployment.resources?.length > 1) throw new Error('Resume requires the original empty-stack provisioning backup')
+  if (control) throw new Error('A content release has started; recover through deploy instead of infrastructure provisioning')
+  for (const resource of state.deployment?.resources ?? []) {
+    if (!resource.type?.endsWith(':WorkersScript')) continue
+    const release = resource.inputs?.bindings?.find((binding) => binding.name === 'RELEASE_ID')
+    if (release?.text !== 'uninitialized') throw new Error('An initialized application must be changed through a release')
+  }
+}
+
 export async function infrastructure(config, credentials) {
   const pin = JSON.parse(readFileSync('infra/cloudflare/toolchain.json', 'utf8')).pulumi
   if (execFileSync('pulumi', ['version'], { encoding: 'utf8' }).trim() !== `v${pin}`) throw new Error(`Use pinned Pulumi ${pin}`)

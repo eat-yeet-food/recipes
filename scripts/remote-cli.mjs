@@ -5,7 +5,7 @@ import { environmentName, loadRemoteConfig } from './remote/config.mjs'
 import { credentialsCommand, keychain } from './remote/credentials.mjs'
 import { cloudflareAPI, inventory } from './remote/cloudflare.mjs'
 import { r2Client, ObjectStore } from './remote/storage.mjs'
-import { infrastructure, saveOutputs, readOutputs } from './remote/pulumi.mjs'
+import { infrastructure, saveOutputs, readOutputs, assertInitialProvisioningResume } from './remote/pulumi.mjs'
 import { ReleaseLock, recoverLocalLock } from './remote/lock.mjs'
 import { runRelease } from './remote/release.mjs'
 import { command } from './remote/process.mjs'
@@ -76,7 +76,8 @@ if (action === 'credentials') {
         // Public content and schema changes always use the full release/recovery path.
         await runRelease({ config, credentials, stateStore, client, api, outputs: readOutputs(environment) })
       } else {
-        const releaseId = `${action}-${Date.now()}`
+        if (values.resume && (action !== 'infra' || operation !== 'up' || !/^infra-\d+$/.test(values.resume))) throw new Error('Infrastructure resume requires the original infra-<timestamp> attempt')
+        const releaseId = values.resume ?? `${action}-${Date.now()}`
         const lock = new ReleaseLock(stateStore, environment)
         const abort = new AbortController()
         await lock.acquire(releaseId)
@@ -87,8 +88,14 @@ if (action === 'credentials') {
             if (observed.accountId !== config.accountId || observed.zoneId !== config.zoneId) throw new Error('Cloudflare inventory mismatch')
             const stack = await infrastructure(config, credentials)
             const state = await stack.exportStack()
-            if (state.deployment?.resources?.length > 1) throw new Error('Infrastructure already exists. Apply changes through a release to preserve maintenance and backup ordering.')
-            await stateStore.write(`backups/${environment}/${releaseId}.json`, state, { IfNoneMatch: '*' })
+            if (values.resume) {
+              const original = await stateStore.read(`backups/${environment}/${releaseId}.json`)
+              const operations = state.deployment?.resources?.find((resource) => resource.type?.endsWith(':R2Bucket') && resource.urn?.endsWith('::operations'))
+              const control = operations?.outputs?.name ? await new ObjectStore(client, operations.outputs.name).read('control.json') : null
+              assertInitialProvisioningResume(state, original?.value, control)
+            } else if (state.deployment?.resources?.length > 1) throw new Error('Infrastructure already exists. Resume an interrupted initial provisioning attempt explicitly, or use a release for application updates.')
+            const backupName = values.resume ? `${releaseId}-resume-${Date.now()}` : releaseId
+            await stateStore.write(`backups/${environment}/${backupName}.json`, state, { IfNoneMatch: '*' })
             await stack.preview({ onOutput: console.log })
             await lock.assertOwner()
             await stack.up({ onOutput: console.log })
