@@ -1,8 +1,7 @@
-import { DatabaseSync } from 'node:sqlite'
 import { readFileSync, writeFileSync, mkdirSync, rmSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { ObjectStore } from './storage.mjs'
-import { databaseBackup, readBackup, restoreBookmark } from './backups.mjs'
+import { databaseBackup, readBackup, restoreBookmark, restoredExport } from './backups.mjs'
 import { command, cleanRevision, digest } from './process.mjs'
 import { ownerAccessSession } from './access-session.mjs'
 import { performancePassed, acceptanceException } from './acceptance-policy.mjs'
@@ -29,10 +28,8 @@ export async function rehearseRestore({ config, credentials, client, api, output
   const sql = "SELECT id, source_id, source_hash FROM recipes ORDER BY id; SELECT id, source_id, source_hash FROM articles ORDER BY id; SELECT id, email FROM owners ORDER BY id;"
   let before
   if (original) {
-    const db = new DatabaseSync(':memory:')
+    const db = restoredExport(original.sql)
     try {
-      db.exec(original.sql)
-      if (db.prepare('PRAGMA integrity_check').get().integrity_check !== 'ok') throw new Error('Rehearsal backup failed integrity check')
       if (db.prepare("SELECT name FROM sqlite_master WHERE name = 'eatyeet_restore_probe'").get()) throw new Error('Original rehearsal backup already contains the probe')
       before = identityDigest(sql.split(';').filter((part) => part.trim()).map((part) => db.prepare(part).all()))
     } finally { db.close() }
@@ -75,10 +72,9 @@ export async function acceptStaging({ config, credentials, client, api, outputs,
   const restored = await readBackup(store, credentials, backup.key)
   // Exercise the actual encrypted export on a clean, isolated SQLite database.
   // The D1 Time Travel rehearsal is separately required below.
-  const db = new DatabaseSync(':memory:')
+  const db = restoredExport(restored.sql)
   let integrity, tables
   try {
-    db.exec(restored.sql)
     integrity = db.prepare('PRAGMA integrity_check').get().integrity_check
     tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all().map((row) => row.name)
   } finally { db.close() }

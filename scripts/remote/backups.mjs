@@ -1,5 +1,19 @@
 import { seal, unseal } from './credentials.mjs'
 import { digest } from './process.mjs'
+import { DatabaseSync } from 'node:sqlite'
+
+export function restoredExport(sql) {
+  // D1 exports may insert child rows before defining referenced parent tables.
+  // Load in isolation with FK enforcement disabled, then check the full schema.
+  const db = new DatabaseSync(':memory:', { enableForeignKeyConstraints: false })
+  try {
+    db.exec(sql)
+    db.exec('PRAGMA foreign_keys=ON')
+    if (db.prepare('PRAGMA integrity_check').get().integrity_check !== 'ok' || db.prepare('PRAGMA foreign_key_check').all().length)
+      throw new Error('Export restore integrity or foreign-key check failed')
+    return db
+  } catch (error) { db.close(); throw error }
+}
 
 export async function restoreBookmark(api, endpoint, bookmark) {
   if (typeof bookmark !== 'string' || !bookmark.trim()) throw new Error('An exact D1 recovery bookmark is required')

@@ -1,11 +1,19 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { restoreBookmark } from './backups.mjs'
+import { restoreBookmark, restoredExport } from './backups.mjs'
 import { identityDigest } from './acceptance.mjs'
 
 test('restore identity comparisons ignore JSON property order but preserve values and row order', () => {
   assert.equal(identityDigest([[{ id: 1, source_id: 'a', source_hash: 'b' }]]), identityDigest([[{ source_hash: 'b', id: 1, source_id: 'a' }]]))
   assert.notEqual(identityDigest([[{ id: 1 }]]), identityDigest([[{ id: 2 }]]))
+})
+
+test('isolated D1 export loading accepts child-first table order and still rejects broken references', () => {
+  const sql = 'PRAGMA defer_foreign_keys=TRUE; CREATE TABLE child(id INTEGER PRIMARY KEY, parent_id INTEGER REFERENCES parent(id)); INSERT INTO child VALUES(1,2); CREATE TABLE parent(id INTEGER PRIMARY KEY); INSERT INTO parent VALUES(2);'
+  const db = restoredExport(sql)
+  try { assert.equal(db.prepare('SELECT parent_id FROM child').get().parent_id, 2); assert.equal(db.prepare('PRAGMA foreign_keys').get().foreign_keys, 1) }
+  finally { db.close() }
+  assert.throws(() => restoredExport(sql.replace('INSERT INTO parent VALUES(2);', '')), /foreign-key/)
 })
 
 test('D1 restore sends an exact bookmark in the query, with no ignored JSON body', async () => {
