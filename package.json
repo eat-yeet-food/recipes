@@ -47,6 +47,7 @@
     "test:images": "node test/image-delivery.mjs",
     "test:worker": "pnpm build:worker && node test/worker-smoke.mjs",
     "remote:credentials": "node scripts/remote-cli.mjs credentials",
+    "remote:setup": "node scripts/remote-setup.mjs",
     "remote:inventory": "node scripts/remote-cli.mjs inventory",
     "remote:bootstrap": "node scripts/remote-cli.mjs bootstrap",
     "remote:infra": "node scripts/remote-cli.mjs infra",

@@ -3,14 +3,14 @@ import Security
 
 // Secret bytes travel over stdin/stdout pipes, never process arguments.
 let args = CommandLine.arguments
-guard args.count == 3, ["get", "set", "create"].contains(args[1]) else { exit(64) }
+guard args.count == 3, ["get", "get-optional", "set", "create"].contains(args[1]) else { exit(64) }
 let query: [String: Any] = [
   kSecClass as String: kSecClassGenericPassword,
   kSecAttrService as String: args[2] == "wrangler" ? "wrangler" : "com.eatyeet.release",
   kSecAttrAccount as String: args[2] == "wrangler" ? "default" : args[2],
 ]
 var status: OSStatus
-if args[1] == "get" {
+if args[1] == "get" || args[1] == "get-optional" {
   var read = query
   read[kSecReturnData as String] = true
   read[kSecMatchLimit as String] = kSecMatchLimitOne
@@ -18,6 +18,9 @@ if args[1] == "get" {
   status = SecItemCopyMatching(read as CFDictionary, &result)
   if status == errSecSuccess, let data = result as? Data {
     FileHandle.standardOutput.write(data)
+  } else if status == errSecItemNotFound && args[1] == "get-optional" {
+    FileHandle.standardOutput.write(Data("null".utf8))
+    status = errSecSuccess
   }
 } else {
   let data = FileHandle.standardInput.readDataToEndOfFile()

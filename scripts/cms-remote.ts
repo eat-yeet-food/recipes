@@ -4,12 +4,12 @@ import { resolve } from 'node:path'
 import { createCMSConfig } from '@eat-yeet/l4-content-cms/config'
 import { loadRemoteConfig, proxyConfig } from './remote/config.mjs'
 import { readOutputs } from './remote/pulumi.mjs'
-import { keychain } from './remote/credentials.mjs'
+import { deploymentCredentials } from './remote/operator.mjs'
 import { ObjectStore, r2Client } from './remote/storage.mjs'
 
 export async function openRemoteCMS(environment: string, mutation: boolean) {
   const config = loadRemoteConfig(environment)
-  const credentials = keychain('get', environment)
+  const credentials = deploymentCredentials(environment)
   const outputs = readOutputs(environment)
   const locks = new ObjectStore(r2Client(config.accountId, credentials), config.stateBucket)
   const assertLock = async () => {

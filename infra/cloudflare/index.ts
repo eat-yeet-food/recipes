@@ -43,7 +43,7 @@ if (environment === 'bootstrap') {
     requires: [{ cloudflareAccountMember: { accountId } }, { loginMethod: { id: identity.id } }],
   }, imported('owner-enrollment-policy'))
   const enrollment = new cloudflare.ZeroTrustAccessApplication('owner-mfa-enrollment', {
-    accountId, name: 'Eat / Yeet owner MFA enrollment', type: 'app_launcher',
+    accountId, name: 'App Launcher', type: 'app_launcher',
     domain: settings.accessTeamDomain, allowedIdps: [identity.id],
     autoRedirectToIdentity: true, sessionDuration: '2h',
     policies: [{ id: enrollmentPolicy.id, precedence: 1 }],

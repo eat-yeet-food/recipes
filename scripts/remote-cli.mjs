@@ -2,13 +2,14 @@ import { parseArgs } from 'node:util'
 import { writeFileSync, mkdirSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { environmentName, loadRemoteConfig } from './remote/config.mjs'
-import { credentialsCommand, keychain } from './remote/credentials.mjs'
+import { credentialsCommand } from './remote/credentials.mjs'
+import { deploymentCredentials } from './remote/operator.mjs'
 import { cloudflareAPI, inventory } from './remote/cloudflare.mjs'
 import { r2Client, ObjectStore } from './remote/storage.mjs'
 import { infrastructure, saveOutputs, readOutputs, assertInitialProvisioningResume } from './remote/pulumi.mjs'
 import { ReleaseLock, recoverLocalLock } from './remote/lock.mjs'
 import { runRelease } from './remote/release.mjs'
-import { command } from './remote/process.mjs'
+import { command, cleanRevision } from './remote/process.mjs'
 import { databaseBackup, readBackup } from './remote/backups.mjs'
 import { acceptStaging, rehearseRestore } from './remote/acceptance.mjs'
 
@@ -25,7 +26,7 @@ const environment = environmentName(values.env)
 if (action === 'credentials') {
   await credentialsCommand(environment, operation, file, { deriveR2: values['derive-r2'] })
 } else {
-  const credentials = keychain('get', environment)
+  const credentials = deploymentCredentials(environment)
   const api = cloudflareAPI(credentials.CLOUDFLARE_API_TOKEN)
   const directory = resolve('.local/remote', environment)
   mkdirSync(directory, { recursive: true, mode: 0o700 })
@@ -66,7 +67,15 @@ if (action === 'credentials') {
         await recoverLocalLock(stateStore, environment, operation, values['writer-stopped'])
         console.log('Interrupted lock recovered. Maintenance state was preserved; resume the original release.')
       } else if (action === 'deploy') {
-        await runRelease({ config, credentials, stateStore, client, api, outputs: readOutputs(environment) }, { resume: values.resume, rollback: values.rollback })
+        cleanRevision()
+        let outputs
+        try { outputs = readOutputs(environment) }
+        catch (error) {
+          if (values.resume || values.rollback) throw error
+          await command('node', ['scripts/remote-cli.mjs', 'infra', 'up', '--env', environment])
+          outputs = readOutputs(environment)
+        }
+        await runRelease({ config, credentials, stateStore, client, api, outputs }, { resume: values.resume, rollback: values.rollback })
       } else if (action === 'infra' && operation === 'preview') {
         const stack = await infrastructure(config, credentials)
         await stack.preview({ onOutput: console.log })

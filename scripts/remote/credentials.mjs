@@ -37,7 +37,7 @@ export async function hiddenInput(label) {
   })
 }
 export function keychain(action, account, value) {
-  if (!['staging', 'production', 'bootstrap', 'wrangler'].includes(account)) throw new Error('Invalid credential scope')
+  if (!['operator', 'staging', 'production', 'bootstrap', 'wrangler'].includes(account)) throw new Error('Invalid credential scope')
   const moduleCache = resolve('.local/remote/swift-module-cache')
   mkdirSync(moduleCache, { recursive: true, mode: 0o700 })
   const result = spawnSync('swift', ['-module-cache-path', moduleCache, 'scripts/remote/keychain.swift', action, account], {
@@ -45,7 +45,7 @@ export function keychain(action, account, value) {
     encoding: 'utf8', maxBuffer: 1024 * 1024,
   })
   if (result.status !== 0) throw new Error(`Keychain ${action} failed for ${account}; run remote:credentials in an interactive terminal`)
-  return action === 'get' ? JSON.parse(result.stdout) : undefined
+  return ['get', 'get-optional'].includes(action) ? JSON.parse(result.stdout) : undefined
 }
 export function seal(value, passphrase) {
   if (passphrase.length < 9) throw new Error('Recovery passphrase must contain at least 9 characters')

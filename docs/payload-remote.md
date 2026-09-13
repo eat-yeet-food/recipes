@@ -4,6 +4,37 @@ Implementation is on `codex/payload-remote`. R2 and Zero Trust Free are active, 
 
 Local development remains documented in `docs/payload-local.md`. Ordinary `dev`, `build`, `preview`, `content:sync` and `db:migrate` use local bindings. Remote commands require an explicit environment. No Doppler project, CLI wrapper or runtime integration is used.
 
+## One operator setup
+
+Use one account/zone-scoped Cloudflare operator token for local Pulumi and releases. Staging and production retain separate databases, buckets, Payload secrets, release-verification secrets, Access audiences and sessions. Existing state-encryption passphrases and runtime secrets are preserved. The operator token is shared deployment authority; it does not merge application environments.
+
+Set these permissions once, restricted to the verified account and `eatyeet.com` zone:
+
+| Scope | Permissions |
+| --- | --- |
+| Account | Workers Scripts Edit; Workers R2 Storage Edit; D1 Edit; Access: Apps and Policies Edit; Access: Organizations Edit; Access: Identity Providers Edit; Cloudflare Pages Edit; Account Settings Read; Billing Read |
+| Zone | DNS Edit; Workers Routes Edit; Zone Read |
+
+`Access: Apps` alone does not permit reusable policy creation. No API-token-management permission is needed. The setup inventory verifies accessible account/zone resources; successful reads do not prove all write permissions, so the complete permission list must be enrolled together.
+
+```sh
+pnpm remote:setup
+pnpm run deploy --env staging
+pnpm run deploy --env production
+```
+
+Setup asks for the operator token once, derives R2 credentials, generates missing environment secrets, and writes one encrypted recovery kit after a separately entered recovery passphrase. It then runs the protected Pulumi bootstrap. To reuse this installation's existing staging token after granting the complete permissions above, run `pnpm remote:setup --from staging`; no token needs copying or pasting. `--from` is for initial operator enrollment, not credential rotation.
+
+The Keychain `operator` entry supplies Cloudflare/R2 deployment credentials. The existing `bootstrap`, `staging` and `production` entries retain environment secrets. Legacy credentials remain available for recovery and are not automatically revoked. Setup retries preserve generated secrets and never overwrite an existing environment's state passphrase or Payload secret. Deployment refuses an operator/environment pair until both are included in the completed recovery export.
+
+The unified recovery file is under `.local/remote/recovery/operator-<timestamp>.json`. Store it separately from this Mac. Restore it with:
+
+```sh
+pnpm remote:setup --restore /path/to/operator-recovery.json
+```
+
+Normal deployment provisions a missing environment before releasing it. An interrupted provisioning/release still requires the explicit lock recovery/resume procedure below; expired heartbeats never authorize automatic lock removal. Production still requires exact-commit staging acceptance. MFA enrollment, owner password entry and recovery-passphrase entry remain personal steps. GitHub CI deployment is not enabled; the approved workflow continues to run locally from committed Git sources.
+
 ## Credentials and verified configuration
 
 Use Pulumi CLI **3.230.0** and the locked Cloudflare provider **6.20.0**. Infrastructure is TypeScript in `infra/cloudflare/index.ts`. Releases run from this Mac; there is no privileged HTTP synchronization endpoint or direct Wrangler deployment. Wrangler is used for local emulation, remote Node bindings and bundle-only `deploy --dry-run`.
@@ -18,9 +49,9 @@ pnpm remote:credentials export /path/to/offline/bootstrap-recovery.json --env bo
 pnpm remote:inventory --env bootstrap
 ```
 
-Repeat credential enrollment/export for `staging` and `production`. Each entry contains a scoped Cloudflare API token, R2 access key/secret, Pulumi encryption passphrase, Payload secret and release-verification secret. Enrollment refuses to overwrite an existing entry.
+For legacy per-environment recovery without an operator entry, repeat credential enrollment/export for `staging` and `production`. Each legacy entry contains a scoped Cloudflare API token, R2 access key/secret, Pulumi encryption passphrase, Payload secret and release-verification secret. Enrollment refuses to overwrite an existing entry.
 
-For user API tokens with Workers R2 Storage permissions, `pnpm remote:credentials enroll --env bootstrap --derive-r2` needs only the API token. It verifies that the token is active, derives R2 credentials using Cloudflare's documented token-ID/SHA-256 mapping, and generates the state encryption passphrase in memory. Use distinct tokens for each environment. Export a recovery copy immediately afterward; the generated state passphrase is only in Keychain and that encrypted export. This option does not create permissions or prove R2 is enabled; complete inventory before provisioning. Without the flag, enrollment continues to accept separately issued R2 credentials and a manually entered state passphrase.
+For user API tokens with Workers R2 Storage permissions, `pnpm remote:credentials enroll --env bootstrap --derive-r2` needs only the API token. It verifies that the token is active, derives R2 credentials using Cloudflare's documented token-ID/SHA-256 mapping, and generates the state encryption passphrase in memory. In legacy mode, use distinct tokens for each environment. Export a recovery copy immediately afterward; the generated state passphrase is only in Keychain and that encrypted export. This option does not create permissions or prove R2 is enabled; complete inventory before provisioning. Without the flag, enrollment continues to accept separately issued R2 credentials and a manually entered state passphrase.
 
 See [Cloudflare's R2 token derivation documentation](https://developers.cloudflare.com/r2/api/tokens/#get-s3-api-credentials-from-an-api-token).
 
