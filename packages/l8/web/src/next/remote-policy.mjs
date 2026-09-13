@@ -87,12 +87,12 @@ export async function remoteRequest(request, env, next) {
   // content release without a cross-region operations-bucket read per file.
   // Host and staging Access checks above still apply to every network request.
   const buildAsset = ['GET', 'HEAD'].includes(request.method) && staticAsset(path)
-  let state
+  let state, probe = false
   if (!buildAsset) {
     try { state = await (await env.OPERATIONS.get('control.json'))?.json() }
     catch { return privateResponse(503, 'Release state unavailable', { 'Retry-After': '60' }) }
     if (!state?.generation || !state?.releaseId) return privateResponse(503, 'Site is not initialized', { 'Retry-After': '60' })
-    const probe = ['GET', 'HEAD'].includes(request.method) && await verifyReleaseProbe(request.headers.get('X-Eatyeet-Verification'), env.RELEASE_VERIFY_SECRET, state, env.SITE_URL)
+    probe = ['GET', 'HEAD'].includes(request.method) && await verifyReleaseProbe(request.headers.get('X-Eatyeet-Verification'), env.RELEASE_VERIFY_SECRET, state, env.SITE_URL)
     if (path === '/.well-known/eatyeet-release') return Response.json({ releaseId: env.RELEASE_ID, contentRevision: state.contentRevision, generation: state.generation, status: state.status }, { headers: { 'Cache-Control': 'no-store' } })
     if (state.status !== 'ready' && !probe) return privateResponse(503, 'We’re updating the site. Please try again shortly.', { 'Retry-After': '60' })
   }
@@ -106,7 +106,7 @@ export async function remoteRequest(request, env, next) {
   let response
   try {
     response = await Promise.race([
-      next(new Request(request, { headers, signal: controller.signal })),
+      next(new Request(request, { headers, signal: controller.signal }), { status: state?.status, verification: probe }),
       new Promise((_, reject) => controller.signal.addEventListener('abort', () => reject(new Error('Request timeout')), { once: true })),
     ])
     const outgoing = new Headers(response.headers)

@@ -40,7 +40,7 @@ async function fixture(run) {
       if (program === 'node') { events.push('verify'); return }
       const action = args[3]; events.push(action)
       if (action !== 'plan') assert.equal((await operations.read('control.json')).value.status, 'maintenance')
-      if (action === 'plan') writeFileSync('dist/content-plan.json', JSON.stringify({ counts: { created: 0, updated: 0, retired: 0 }, siteChanged: false, mediaChanges: 0 }))
+      if (action === 'plan') writeFileSync('dist/content-plan.json', JSON.stringify({ status: 'complete', counts: { created: 0, updated: 0, retired: 0 }, siteChanged: false, mediaChanges: 0 }))
     },
   }
   try { await run({ context, operations, stateStore, events }) }
@@ -129,4 +129,44 @@ test('expired exceptions reject production before build or remote locking', asyn
   await assert.rejects(runRelease(context), /owner exception/)
   assert.deepEqual(events, [])
   assert.equal(await stateStore.read('locks/production.json'), null)
+}))
+
+test('code-only release verifies an unchanged plan, skips content writes, retains backups and verification', async () => fixture(async ({ context, operations, stateStore, events }) => {
+  await operations.write('control.json', { status: 'ready', generation: 'old', releaseId: 'old', contentRevision: 'b'.repeat(40), migrations: {} })
+  await runRelease(context, { codeOnly: true })
+  assert.deepEqual(events, ['build', 'plan', 'backup', 'upload', 'application', 'verify'])
+  const control = (await operations.read('control.json')).value
+  assert.equal(control.status, 'ready')
+  assert.notEqual(control.generation, 'old')
+  assert.equal((await operations.read(`releases/${control.releaseId}.json`)).value.mode, 'code-only')
+  assert.equal(await stateStore.read('locks/production.json'), null)
+}))
+
+test('code-only rejects content drift before backup, upload or maintenance', async () => fixture(async ({ context, operations, events }) => {
+  const before = { status: 'ready', generation: 'old', releaseId: 'old', migrations: {} }
+  await operations.write('control.json', before)
+  const command = context.command
+  context.command = async (program, args) => {
+    await command(program, args)
+    if (args[3] === 'plan') writeFileSync('dist/content-plan.json', JSON.stringify({ status: 'complete', counts: { created: 0, updated: 1, retired: 0 }, siteChanged: false, mediaChanges: 0 }))
+  }
+  await assert.rejects(runRelease(context, { codeOnly: true }), /unchanged content\/media plan/)
+  assert.deepEqual(events, ['build', 'plan'])
+  assert.deepEqual((await operations.read('control.json')).value, before)
+}))
+
+test('failed code-only verification stays closed and resumes the recorded mode and backup', async () => fixture(async ({ context, operations, stateStore, events }) => {
+  await operations.write('control.json', { status: 'ready', generation: 'old', releaseId: 'old', migrations: {} })
+  const command = context.command
+  context.command = async (program, args) => { if (program === 'node') throw new Error('Interrupted verification'); return command(program, args) }
+  await assert.rejects(runRelease(context, { codeOnly: true }), /failed at verify/)
+  assert.equal((await operations.read('control.json')).value.status, 'maintenance')
+  const held = await stateStore.read('locks/production.json')
+  await stateStore.remove('locks/production.json', held.etag) // Explicit stopped-writer recovery represented by fixture.
+  context.command = command
+  await runRelease(context, { resume: held.value.releaseId })
+  assert.equal(events.filter((event) => event === 'backup').length, 1)
+  assert.ok(!events.includes('migrate') && !events.includes('sync'))
+  assert.equal((await operations.read(`releases/${held.value.releaseId}.json`)).value.mode, 'code-only')
+  assert.equal((await operations.read('control.json')).value.status, 'ready')
 }))

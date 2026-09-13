@@ -6,6 +6,7 @@ import { resolve, join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { command } from '../scripts/remote/process.mjs'
 import { probeToken } from '../scripts/remote/release.mjs'
+import { chromium } from 'playwright'
 
 // Use the same workerd engine pinned transitively by Wrangler.
 const { Miniflare, convertV4MiniflareOptions } = createRequire(import.meta.resolve('wrangler'))('miniflare')
@@ -41,6 +42,7 @@ try {
     assert.equal(response.status, 200, `${path}: ${body.slice(0, 180)}`)
     assert.equal(response.headers.get('x-eatyeet-release'), 'smoke')
     assert.match(response.headers.get('cache-control'), /no-store/)
+    assert.equal(response.headers.get('critical-ch'), null, 'public routes do not restart navigation for an admin theme hint')
     if (path === '/') {
       const asset = body.match(/src="([^\"]*\/_next\/static\/[^\"]+\.js)"/)?.[1]
       assert.ok(asset, 'real Next script is referenced')
@@ -51,6 +53,44 @@ try {
       assert.equal(script.headers.get('cache-control'), 'public, max-age=31536000, immutable')
       await script.body?.cancel()
     }
+  }
+  let warmHTML
+  for (let attempt = 0; attempt < 20; attempt++) {
+    warmHTML = await get('/')
+    const body = await warmHTML.text()
+    assert.ok(body.includes('id="main-content"'))
+    if (warmHTML.headers.get('x-eatyeet-html-cache') === 'HIT') break
+    await new Promise((resolve) => setTimeout(resolve, 50))
+  }
+  assert.equal(warmHTML.headers.get('x-eatyeet-html-cache'), 'HIT', 'anonymous complete HTML reaches edge cache')
+  assert.match(warmHTML.headers.get('cache-control'), /no-store/, 'browser HTML remains fresh on navigation')
+  const browser = await chromium.launch()
+  try {
+    const page = await browser.newPage()
+    const errors = []
+    page.on('pageerror', (error) => errors.push(error.message))
+    await page.route('**/*', async (route) => {
+      const request = route.request()
+      if (!['https://eatyeet.com', 'https://media.eatyeet.com'].includes(new URL(request.url()).origin)) return route.abort()
+      const result = await worker.dispatchFetch(request.url(), { method: request.method(), headers: request.headers() })
+      await route.fulfill({ status: result.status, headers: Object.fromEntries(result.headers), body: Buffer.from(await result.arrayBuffer()) })
+    })
+    const document = await page.goto('https://eatyeet.com/', { waitUntil: 'networkidle' })
+    assert.equal(document.headers()['x-eatyeet-html-cache'], 'HIT', 'browser hydrates cached HTML')
+    assert.equal(await page.locator('#main-content').count(), 1)
+    assert.ok(await page.evaluate(() => [...document.images].some((image) => image.complete && image.naturalWidth > 0)))
+    await page.goto('https://eatyeet.com/browse', { waitUntil: 'networkidle' })
+    let documentLoads = 0
+    page.on('load', () => documentLoads++)
+    await page.locator('a[href^="/search?"]').first().click()
+    await page.waitForURL('**/search?**')
+    assert.equal(documentLoads, 0, 'cached HTML preserves client navigation and query-specific search')
+    assert.deepEqual(errors, [], 'cached HTML hydrates without browser errors')
+  } finally { await browser.close() }
+  for (const [path, headers] of [['/?config=custom', {}], ['/', { cookie: 'payload-token=owner' }], ['/', { rsc: '1' }]]) {
+    const bypass = await get(path, { headers })
+    assert.notEqual(bypass.headers.get('x-eatyeet-html-cache'), 'HIT', path)
+    await bypass.text()
   }
   const legacy = await get('/images/charred-crust-pizza.jpg', { redirect: 'manual' })
   assert.equal(legacy.status, 302)
@@ -80,15 +120,25 @@ try {
   assert.ok((await cache.list()).objects.length > 0, 'public projections persist in R2')
   const initialKeys = new Set((await cache.list()).objects.map((object) => object.key))
   await store.put('control.json', JSON.stringify({ ...state, generation: 'two' }))
-  await (await get('/')).text()
+  const newGeneration = await get('/')
+  assert.equal(newGeneration.headers.get('x-eatyeet-html-cache'), 'MISS', 'new content generation cannot reuse old HTML')
+  await newGeneration.text()
   assert.ok((await cache.list()).objects.some((object) => !initialKeys.has(object.key)), 'generation change gets independent cache entries')
+  await store.put('control.json', JSON.stringify({ ...state, generation: 'two', status: 'maintenance' }))
+  assert.equal((await get('/recipes/new-york-style-pizza')).status, 503, 'warm recipe HTML is blocked before retirement')
+  await database.prepare("UPDATE recipes SET status = 'archived' WHERE slug = 'new-york-style-pizza'").run()
+  await store.put('control.json', JSON.stringify({ ...state, generation: 'retired' }))
+  const retiredRecipe = await get('/recipes/new-york-style-pizza')
+  assert.equal(retiredRecipe.status, 404, 'new generation excludes retired recipe HTML and projections')
+  assert.notEqual(retiredRecipe.headers.get('x-eatyeet-html-cache'), 'HIT')
+  await retiredRecipe.text()
   assert.equal((await get('https://alternate.workers.dev/')).status, 404)
   assert.equal((await get('/admin')).status, 403)
   assert.equal((await get('/api/owners', { headers: { 'Cf-Access-Jwt-Assertion': 'forged' } })).status, 403)
   const missing = await get('/media/' + '0'.repeat(64) + '/320.avif')
   assert.equal(missing.status, 404)
   assert.match(missing.headers.get('cache-control'), /no-store/)
-  await store.put('control.json', JSON.stringify({ ...state, status: 'maintenance' }))
+  await store.put('control.json', JSON.stringify({ ...state, generation: 'retired', status: 'maintenance' }))
   const maintenance = await get('/')
   assert.equal(maintenance.status, 503)
   assert.equal(maintenance.headers.get('retry-after'), '60')
@@ -98,9 +148,10 @@ try {
   assert.equal((await get(mediaURL)).status, 503, 'media still passes the fresh maintenance guard')
   const verified = await get('/', { headers: { 'X-Eatyeet-Verification': probeToken(credentials, 'smoke', 'https://eatyeet.com') } })
   assert.equal(verified.status, 200)
+  assert.equal(verified.headers.get('x-eatyeet-html-cache'), 'BYPASS', 'maintenance verification does not populate HTML cache')
   await verified.text()
   mkdirSync('dist', { recursive: true })
-  writeFileSync('dist/worker-smoke.json', JSON.stringify({ passed: true, bundleModules: modules, checks: ['real routes/assets', 'R2 projections', 'generation change', 'edge image hit/304', 'retirement blocks cached bytes', 'alternate hosts', 'protected handlers', 'missing media', 'maintenance', 'authenticated verification'] }, null, 2))
+  writeFileSync('dist/worker-smoke.json', JSON.stringify({ passed: true, bundleModules: modules, checks: ['real routes/assets', 'R2 projections', 'generation change', 'anonymous HTML hit and browser hydration/navigation', 'HTML session/query/RSC bypass', 'edge image hit/304', 'retirement blocks cached bytes', 'alternate hosts', 'protected handlers', 'missing media', 'maintenance', 'authenticated verification'] }, null, 2))
   console.log('Release Worker smoke passed with isolated local D1/R2.')
 } finally {
   await worker?.dispose()

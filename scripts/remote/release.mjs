@@ -10,6 +10,7 @@ import { databaseBackup } from './backups.mjs'
 import { ownerAccessSession } from './access-session.mjs'
 import { deploymentManifest } from '../../infra/cloudflare/assets.cjs'
 import { assertProductionAcceptance } from './acceptance-policy.mjs'
+import { assertCodeOnly, verifyExistingMedia } from './code-only.mjs'
 
 export function probeToken(credentials, releaseId, origin) {
   const body = Buffer.from(JSON.stringify({ releaseId, origin, exp: Math.floor(Date.now() / 1000) + 600 })).toString('base64url')
@@ -30,7 +31,7 @@ async function buildArtifacts({ directory, outputs, childEnv, abort, child, roll
   cpSync(resolve('packages/l8/web/.open-next/assets'), assetsDirectory, { recursive: true, filter: (source) => !source.endsWith('.map') })
   return { bundleFile, assetsDirectory }
 }
-export async function runRelease(context, { resume, rollback } = {}) {
+export async function runRelease(context, { resume, rollback, codeOnly = false } = {}) {
   const { config, credentials, stateStore, client, api, outputs } = context
   const run = context.command ?? command
   const storeFor = context.storeFor ?? ((bucket) => new ObjectStore(client, bucket))
@@ -47,9 +48,17 @@ export async function runRelease(context, { resume, rollback } = {}) {
   const child = (action) => run('pnpm', ['exec', 'tsx', 'scripts/content-cli.ts', action, '--env', config.environment], { env: childEnv, signal: abort.signal })
   let record = resume ? (await operations.read(`releases/${releaseId}.json`))?.value : null
   if (resume && (!record || record.revision !== revision)) throw new Error('Resume requires the original release commit')
+  if (resume) {
+    if (codeOnly && record.mode !== 'code-only') throw new Error('Cannot change release mode during resume')
+    codeOnly = record.mode === 'code-only'
+  }
   if (resume) previous = record.previous
   const migrations = (context.migrations ?? migrationManifest)()
   assertCompatible(previous?.migrations, migrations)
+  if (codeOnly) {
+    if (rollback) throw new Error('Code-only mode cannot be combined with rollback')
+    assertCodeOnly(previous, migrations)
+  }
   const rollbackRecord = rollback ? (await operations.read(`releases/${rollback}.json`))?.value : null
   if (rollback && (!rollbackRecord || rollbackRecord.status !== 'complete' || JSON.stringify(rollbackRecord.migrations) !== JSON.stringify(previous?.migrations))) throw new Error('Application rollback requires a completed release with the currently applied migration set')
   let acceptance
@@ -62,7 +71,7 @@ export async function runRelease(context, { resume, rollback } = {}) {
   await lock.acquire(releaseId)
   childEnv.EATYEET_RELEASE_LOCK = lock.value.token
   lock.startHeartbeat((error) => abort.abort(error))
-  record = { ...record, ...(acceptance ? { acceptance } : {}), id: releaseId, revision, migrations, previous, startedAt: record?.startedAt ?? new Date().toISOString(), status: 'running', phase: 'prepared' }
+  record = { ...record, ...(acceptance ? { acceptance } : {}), id: releaseId, revision, migrations, previous, mode: codeOnly ? 'code-only' : 'full', startedAt: record?.startedAt ?? new Date().toISOString(), status: 'running', phase: 'prepared' }
   const phase = async (name) => {
     await lock.checkpoint(name)
     record.phase = name
@@ -78,6 +87,7 @@ export async function runRelease(context, { resume, rollback } = {}) {
       await phase('plan')
       await child('plan')
       record.contentPlan = JSON.parse(readFileSync('dist/content-plan.json', 'utf8'))
+      if (codeOnly) assertCodeOnly(previous, migrations, record.contentPlan)
     }
     await phase('backup')
     if (config.environment === 'production' && config.cutover && !previous) {
@@ -95,10 +105,16 @@ export async function runRelease(context, { resume, rollback } = {}) {
     await phase('upload')
     const prepared = rollback ? { images: [] } : JSON.parse(readFileSync('dist/content-prepared.json', 'utf8'))
     const media = storeFor(outputs.mediaBucket)
-    for (const { manifest } of prepared.images) for (const variant of [...manifest.variants, manifest.social]) {
+    const mediaObjects = prepared.images.flatMap(({ manifest }) => [...manifest.variants, manifest.social].map((variant) => ({
+      key: variant.key, contentType: `image/${variant.format}`,
+      bytes: () => readFileSync(resolve('.local/remote', config.environment, 'images', manifest.hash, basename(variant.key))),
+    })))
+    if (codeOnly) await verifyExistingMedia(media, mediaObjects)
+    else for (const object of mediaObjects) {
       await lock.assertOwner()
-      await media.upload(variant.key, readFileSync(resolve('.local/remote', config.environment, 'images', manifest.hash, basename(variant.key))), `image/${variant.format}`)
+      await media.upload(object.key, object.bytes(), object.contentType)
     }
+    await lock.assertOwner()
     if (rollbackRecord) {
       await restoreAssets(operations, rollbackRecord.assetManifest, assetsDirectory)
       writeFileSync(bundleFile, rollbackRecord.bundle, { mode: 0o600 })
@@ -117,7 +133,7 @@ export async function runRelease(context, { resume, rollback } = {}) {
     await operations.write('control.json', control)
     maintenance = true
     await (context.sleep ?? ((ms) => new Promise((resolve) => setTimeout(resolve, ms))))(35000)
-    if (!rollback) {
+    if (!rollback && !codeOnly) {
       await phase('migrate')
       await child('migrate')
       await phase('plan')

@@ -56,7 +56,7 @@
     "release:verify": "node scripts/remote-cli.mjs verify-release",
     "remote:backup": "node scripts/remote-cli.mjs backup",
     "remote:restore": "node scripts/remote-cli.mjs restore",
-    "test:remote": "node --test scripts/remote/*.test.mjs packages/l8/web/src/next/remote-policy.test.mjs packages/l8/web/src/next/projection-cache.test.mjs packages/l8/web/src/next/media-delivery.test.mjs packages/l8/web/src/next/worker-media.test.mjs",
+    "test:remote": "node --test scripts/remote/*.test.mjs packages/l8/web/src/next/remote-policy.test.mjs packages/l8/web/src/next/projection-cache.test.mjs packages/l8/web/src/next/media-delivery.test.mjs packages/l8/web/src/next/worker-media.test.mjs packages/l8/web/src/next/html-cache.test.mjs packages/l8/web/src/next/config-headers.test.mjs",
     "typecheck:infra": "tsc -p infra/cloudflare/tsconfig.json",
     "remote:acceptance": "node scripts/remote-cli.mjs acceptance",
     "remote:rehearse": "node scripts/remote-cli.mjs rehearse"

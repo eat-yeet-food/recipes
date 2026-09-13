@@ -46,7 +46,8 @@ try {
     })
     const response = await page.goto(origin + path, { waitUntil: 'networkidle' })
     check(`${path} HTTP 200`, response?.status() === 200)
-    check(`${path} dynamic HTML not cached`, /no-store/.test(response?.headers()['cache-control'] ?? ''))
+    check(`${path} browser HTML stays no-store`, /no-store/.test(response?.headers()['cache-control'] ?? ''))
+    check(`${path} no admin theme navigation handshake`, !response?.headers()['critical-ch'])
     if (expected) check(`${path} expected Worker`, response?.headers()['x-eatyeet-release'] === expected)
     check(`${path} main content`, await page.locator('#main-content').count() === 1)
     check(`${path} browser errors`, errors.length === 0, errors.join(', '))
@@ -101,6 +102,25 @@ try {
       }
     }
     await context.close()
+  }
+  if (process.env.EATYEET_EXPECT_HTML_CACHE === '1') {
+    if (origin !== 'https://eatyeet.com' || process.env.EATYEET_VERIFY_TOKEN || process.env.EATYEET_ACCESS_TOKEN)
+      throw new Error('HTML cache verification requires open anonymous production traffic')
+    for (const path of ['/', '/recipes/new-york-style-pizza']) {
+      let hit
+      for (let attempt = 0; attempt < 5; attempt++) {
+        hit = await get(path)
+        await hit.text()
+        if (hit.headers.get('x-eatyeet-html-cache') === 'HIT') break
+        await new Promise((resolve) => setTimeout(resolve, 500))
+      }
+      check(`${path} anonymous HTML edge hit`, hit.headers.get('x-eatyeet-html-cache') === 'HIT')
+      for (const headers of [{ Cookie: 'payload-token=invalid' }, { 'Cache-Control': 'no-cache' }]) {
+        const bypass = await get(path, { headers })
+        check(`${path} session/reload HTML bypass`, bypass.headers.get('x-eatyeet-html-cache') === 'BYPASS')
+        await bypass.text()
+      }
+    }
   }
   // Request interception disables Chromium's HTTP cache. Use a separate context
   // without routes to test actual repeat transfers, including during maintenance.

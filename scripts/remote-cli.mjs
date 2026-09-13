@@ -19,8 +19,10 @@ const { values, positionals } = parseArgs({ allowPositionals: true, options: {
   backup: { type: 'string' }, bookmark: { type: 'string' }, 'owner-reviewed': { type: 'boolean' }, 'writer-stopped': { type: 'boolean' },
   'approved-limitations': { type: 'string' },
   'application-revision': { type: 'string' },
+  'code-only': { type: 'boolean' },
 } })
 const [action, operation, file] = positionals
+if (values['code-only'] && action !== 'deploy') throw new Error('--code-only is only available for deploy')
 if (values['approved-limitations'] && (action !== 'acceptance' || values.env !== 'staging' || values['approved-limitations'].trim().length < 20)) throw new Error('--approved-limitations requires staging acceptance and the explicit owner authorization (20+ characters)')
 if (values['application-revision'] && (action !== 'acceptance' || values.env !== 'staging' || !/^[a-f0-9]{40}$/.test(values['application-revision']))) throw new Error('--application-revision requires staging acceptance and a full deployed commit SHA')
 const validCommands = { credentials: ['enroll', 'export', 'import'], inventory: [undefined], bootstrap: [undefined], status: [undefined],
@@ -78,11 +80,11 @@ if (action === 'credentials') {
         let outputs
         try { outputs = readOutputs(environment) }
         catch (error) {
-          if (values.resume || values.rollback) throw error
+          if (values.resume || values.rollback || values['code-only']) throw error
           await command('node', ['scripts/remote-cli.mjs', 'infra', 'up', '--env', environment])
           outputs = readOutputs(environment)
         }
-        await runRelease({ config, credentials, stateStore, client, api, outputs }, { resume: values.resume, rollback: values.rollback })
+        await runRelease({ config, credentials, stateStore, client, api, outputs }, { resume: values.resume, rollback: values.rollback, codeOnly: values['code-only'] })
       } else if (action === 'infra' && operation === 'preview') {
         const stack = await infrastructure(config, credentials)
         await stack.preview({ onOutput: console.log })

@@ -26,6 +26,16 @@ If acceptance/recovery tooling itself needed a fix, `remote:acceptance --env sta
 
 Normal releases need no credential enrollment, password copying, API-token changes, dashboard deployment, or manual maintenance toggle. The CLI loads Keychain credentials, builds immutable assets, takes the shared remote lock and backups, publishes through Pulumi, verifies, and reopens traffic. Cloudflare may open normal Chrome when the owner Access session expires. `cloudflared` captures its token privately; do not run verbose login commands that print tokens.
 
+For a code-only iteration against an existing healthy environment, use:
+
+```sh
+pnpm run deploy --env staging --code-only
+# After exact-commit staging acceptance:
+pnpm run deploy --env production --code-only
+```
+
+This mode still requires a clean committed checkout, the shared lock, a fresh remote content plan, backups, an immutable asset manifest, Pulumi and Worker/browser verification. It rejects migration differences or any planned recipe/article/site/media changes before maintenance. It verifies existing derivative sizes, SHA-256 metadata and MIME types with up to eight concurrent reads, skips media uploads and skips migrations/content synchronization. Missing or mismatched media requires a full release. A brief drain/verification maintenance window remains; no untracked hot patch or direct Wrangler deployment is introduced. The journal records `mode: code-only`; resume retains that mode and rechecks actual content/media state. It cannot provision a new environment or recover an unrelated maintenance release. Production acceptance and its exact-commit limitations policy are unchanged.
+
 After a restart, ensure normal Chrome is running before refreshing Access. If a login stalls without a browser window, stop only that identified read-only login process and retry `.local/remote/bin/cloudflared access login --quiet https://staging.eatyeet.com`; `--quiet` suppresses JWT output. The browser may only need approval of the existing application's CLI session, reusing current MFA proof. Verify the resulting session before starting a release. This is not credential reenrollment or permission to change Access policies.
 
 ## Verified account and resource map
@@ -58,9 +68,26 @@ Production cutover completed on 2026-09-13 with application `8df398195b929e9503e
 
 Production cutover added the apex Worker route `eatyeet.com/*` and media custom domain. It retains Pages and its DNS target for route rollback. `www` behavior remains part of the inventoried legacy configuration until deliberately migrated; do not assume an apex route also matches `www`.
 
-The Worker checks configured hosts, Access tokens where required, current maintenance state and publication eligibility. Public content projections use OpenNext R2 caching by environment/schema/content generation. Public HTML remains dynamic. Originals have no public delivery route. Derivatives remain privately stored and eligibility-checked before cache delivery; browser bytes already downloaded cannot be recalled.
+The Worker checks configured hosts, Access tokens where required, current maintenance state and publication eligibility. Public content projections use OpenNext R2 caching by environment/schema/content generation. The deployed application below still renders HTML dynamically; the separately implemented anonymous HTML cache is described below. Originals have no public delivery route. Derivatives remain privately stored and eligibility-checked before cache delivery; browser bytes already downloaded cannot be recalled.
 
-The performance candidate gives hashed Next build files a one-year immutable browser lifetime and named fonts/favicon one day with revalidation. These files contain no content/session state and skip the operations-bucket read, including during maintenance; trusted-host and staging Access checks remain. Staging uses private browser caching. Pages, APIs, private images and errors stay no-store; published derivatives retain one year without immutable. `verify:prod` checks real asset headers and repeat browser transfers without request interception. See the performance note for the exact staged candidate and measured limitations; these changes are not yet live in production.
+Production application `1729bc3701d6903b641f2809bcba5b3e82ab562c` was released on 2026-09-13 as `1729bc3701d6-1789335454057`, generation `fe95dc70-1d2c-41ca-8f2f-86836ae58968`. It is ready with its lock cleared. It gives hashed Next build files a one-year immutable browser lifetime and named fonts/favicon one day with revalidation. These files contain no content/session state and skip the operations-bucket read, including during maintenance; trusted-host and staging Access checks remain. Staging uses private browser caching. Pages, APIs, private images and errors stay no-store; published derivatives retain one year without immutable. Worker/browser verification passed, including actual repeat asset transfers. Cold mobile performance remains below target; see the performance note for measurements and the explicit deployment exception.
+
+## Anonymous HTML cache
+
+On 2026-09-13 the owner requested anonymous public HTML caching after the release above. The follow-up implementation uses a one-day Worker Cache API entry for complete public HTML, capped at 1MiB, keyed by schema/environment/release/content generation/path. It is not yet deployed. Every hit still reads current release state first. Maintenance closes traffic immediately; synchronization, retirement, restore and application rollback advance the generation so previous HTML cannot be reused. Old objects expire naturally; no separate zone-wide HTML purge is required.
+
+Only production anonymous document GETs on known public routes are eligible. Any cookie or authorization/Access identity, query string, RSC/Next/prefetch header, conditional/reload/range request, preview/API path or maintenance probe bypasses caching. Cache fills use fixed public headers, so forwarding headers, user agents and locales cannot poison another visitor's page. Only complete successful HTML is retained; cookies, errors, unexpected Vary fields, streamed render failures and oversized documents are excluded. Cache failures fall back to normal rendering. Browser responses remain `private, no-store`; only the internal edge copy has a one-day lifetime. `X-Eatyeet-HTML-Cache` reports HIT/MISS/BYPASS on HTML responses.
+
+The same candidate scopes Payload's color-scheme client-hint headers to `/admin/:path*`. Its default all-route `Critical-CH` causes an extra first navigation in Chromium, while the public site has no server-rendered theme variants. Admin theme negotiation and public security headers remain intact.
+
+Staging's owner Access session bypasses anonymous HTML caching. The isolated production Worker smoke tests actual edge hits, hydration/navigation and maintenance/generation behavior. After the HTML-cache candidate is accepted, deployed and reopened, verify real anonymous production with:
+
+```sh
+EATYEET_EXPECT_HTML_CACHE=1 pnpm verify:prod https://eatyeet.com
+node test/remote-performance.mjs https://eatyeet.com
+```
+
+Do not run that cache-hit assertion during maintenance or with an owner/verification token: those requests intentionally bypass it. [Cloudflare Cache API entries are local to the serving data center and may be evicted](https://developers.cloudflare.com/workers/runtime-apis/cache/); a hit in one location does not imply a globally warm site. Keep mobile results separate from raw response timing, and do not claim the loading regression resolved from a cache hit alone.
 
 ## One-time setup and recovery enrollment
 

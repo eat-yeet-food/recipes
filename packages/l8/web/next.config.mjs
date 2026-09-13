@@ -3,6 +3,7 @@ import { initOpenNextCloudflareForDev } from '@opennextjs/cloudflare'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { ACTIVE_APP } from '../../../site.config.mjs'
+import { scopePayloadClientHints } from './src/next/config-headers.mjs'
 const root = fileURLToPath(new URL('../../../', import.meta.url))
 await initOpenNextCloudflareForDev({
   configPath: resolve(root, 'packages/l8/web/wrangler.jsonc'),
@@ -15,7 +16,7 @@ await initOpenNextCloudflareForDev({
   },
   remoteBindings: false,
 })
-export default withPayload({
+const payloadConfig = withPayload({
   agentRules: false,
   htmlLimitedBots: /.*/,
   output: 'standalone',
@@ -55,3 +56,7 @@ export default withPayload({
     ]
   },
 })
+export default {
+  ...payloadConfig,
+  headers: async () => scopePayloadClientHints(await payloadConfig.headers()),
+}

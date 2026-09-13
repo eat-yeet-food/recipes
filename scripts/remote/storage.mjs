@@ -30,13 +30,18 @@ export class ObjectStore {
     await this.client.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: key, IfMatch: etag }))
   }
   async upload(key, bytes, contentType) {
+    if (await this.matches(key, bytes, contentType)) return
+    const digest = createHash('sha256').update(bytes).digest('hex')
+    await this.client.send(new PutObjectCommand({ Bucket: this.bucket, Key: key, Body: bytes,
+      ContentType: contentType, Metadata: { sha256: digest } }))
+  }
+  async matches(key, bytes, contentType) {
     const digest = createHash('sha256').update(bytes).digest('hex')
     try {
       const old = await this.client.send(new HeadObjectCommand({ Bucket: this.bucket, Key: key }))
-      if (old.ContentLength === bytes.length && old.Metadata?.sha256 === digest) return
+      return old.ContentLength === bytes.length && old.Metadata?.sha256 === digest && old.ContentType === contentType
     } catch (error) { if (error.$metadata?.httpStatusCode !== 404) throw error }
-    await this.client.send(new PutObjectCommand({ Bucket: this.bucket, Key: key, Body: bytes,
-      ContentType: contentType, Metadata: { sha256: digest } }))
+    return false
   }
   async list(prefix) {
     let token
