@@ -85,7 +85,7 @@ export const TargetBatch: Story = { args: { target: true } }
 export const Pizza: Story = { args: { pizza: true, target: true }, play: async ({ canvasElement }) => {
   const screen = within(canvasElement.ownerDocument.body)
   await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))
-  await expect(screen.getByRole('textbox', { name: 'SAF gold instant yeast' })).toHaveValue('0.25')
+  await expect(screen.getByRole('textbox', { name: 'SAF red instant yeast' })).toHaveValue('0.25')
 } }
 export const RoundedBatchAndPercentages: Story = { args: { target: true }, play: async ({ canvasElement }) => {
   const screen = within(canvasElement.ownerDocument.body)

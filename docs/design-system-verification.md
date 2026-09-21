@@ -27,7 +27,7 @@ Verification for this change:
 
 Reviewed axe incomplete results include modal focus guards/hidden background content and clipped text in scrolled panels. The mixed-process stories report only the modal focus-guard/background finding; native keyboard movement and existing Escape/focus-return checks pass. Visible process fields and labels were reviewed on yellow/ink surfaces. Physical mobile keyboards, screen-reader behavior, and a full forced-colors matrix were not tested for this change. Historical pause statements below describe earlier work, not the September 8 checks above.
 
-The September 8 release also standardizes baking/pastry ingredients and instructions on fine sea salt and both pizza variants on SAF gold instant yeast. Runtime calculator labels, ingredient previews, and generated mixing instructions use the same names. A recursive content audit covered all 12 baking/pastry recipes; desktop and 320px pizza previews were reviewed in `dist/ingredient-review`. Mac and cheese retains its authored 4g salt weight instead of carrying forward the kosher-salt teaspoon equivalent.
+The September 8 release also standardizes baking/pastry ingredients and instructions on fine sea salt and both pizza variants on SAF red instant yeast. Runtime calculator labels, ingredient previews, and generated mixing instructions use the same names. A recursive content audit covered all 12 baking/pastry recipes; desktop and 320px pizza previews were reviewed in `dist/ingredient-review`. Mac and cheese retains its authored 4g salt weight instead of carrying forward the kosher-salt teaspoon equivalent.
 
 ## Subsequent September 7 refinements
 

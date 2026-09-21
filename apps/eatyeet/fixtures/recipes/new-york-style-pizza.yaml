@@ -194,7 +194,7 @@ methodOptions:
               - id: dough-item-3
                 text: 17.2g canola oil
               - id: dough-item-4
-                text: '2.15g [SAF gold instant yeast](https://a.co/d/j9mxG9d)'
+                text: '2.15g [SAF red instant yeast](https://www.amazon.com/LeSaffre-LEAVENING_AGENT/dp/B0CFDPMWWC)'
               - id: dough-item-5
                 text: 17.2g fine sea salt
           - id: sauce-batch
@@ -399,7 +399,7 @@ blocks:
           - id: dough-item-2
             text: 560g cold water
           - id: dough-item-3
-            text: '2.15g [SAF gold instant yeast](https://a.co/d/j9mxG9d)'
+            text: '2.15g [SAF red instant yeast](https://www.amazon.com/LeSaffre-LEAVENING_AGENT/dp/B0CFDPMWWC)'
           - id: dough-item-4
             text: 17.2g fine sea salt
       - id: sauce-batch
