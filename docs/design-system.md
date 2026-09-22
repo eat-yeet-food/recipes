@@ -63,6 +63,8 @@ Navigation and footer retain their respective wordmark sizes, separator, and yel
 
 The Filters button may indicate the number of active filters; individual options omit recipe counts. The matching recipe total sits above the result grid. These are distinct quantities and must not be mixed into option labels.
 
+The global search palette opens and accepts typing immediately. Its published recipe index loads from the existing public API on first open, with a named loading status and a retry action for failures. Keep the typed query when data arrives or a retry succeeds; do not briefly announce an empty result while loading. Search/Palette stories cover both states, and the app interaction test delays the index response to exercise typing before it arrives.
+
 ## Recipe layout
 
 Print Recipe, Pin Recipe, and Cooking view appear once in the main page header. The recipe body starts with facts and the Your recipe adjustment summary; do not add a second action row or Cook Mode switch.
@@ -76,6 +78,16 @@ The image-to-body gap is 32px on desktop and 24px on mobile. In Cooking view, wh
 The recipe title and description appear once in the main page header, including print output; breadcrumbs and interactive header controls remain hidden in print. Below the image, the recipe body starts with facts and the adjustment summary; do not repeat a Recipe eyebrow, title, or description, including in Cooking view. Body sections use level-two headings and ingredient/instruction subsections use level three.
 
 Recipe descriptions and the recipe body use the shared `layout-recipe-copy` measure and matching outer page gutters. The unbordered recipe body has no extra horizontal card padding or rounded enclosure; its facts, ingredient lists, and instructions align with the description on desktop and mobile. Ingredient and instruction subsection headings, such as “Dough,” use bold 13px uppercase text. The “Your recipe” summary label uses the actual bold action font, rather than relying on a synthesized weight of the regular body face. Recipes/Actions and Recipes/Sections render the production owners for these treatments.
+
+## Recipe ratings
+
+`RecipeRating` in `packages/l7/recipes` follows Yeet's element placement below the recipe rather than inserting ratings among the title utilities. It uses a 28px bold section heading with a continuing rule, compact aggregate summary, and a white bordered form card with the same soft shadow and inline star picker. Eat / Yeet's approved yellow remains the full-width submit action and `brand-alt` fills selected stars. Empty and unavailable states remain explicit, and print omits the interactive section. The form retains five 44px star targets at narrow widths.
+
+The inline form uses native labeled radios: Tab enters/leaves the group, arrow keys change the score, and Space selects. Hover previews the filled stars; keyboard focus outlines the focused target. Submission is explicit and disabled without a selection or during loading/saving. Save errors retain the draft, and success is visible and announced. Visitors may update their browser's existing vote. Stories cover empty, aggregate, previous vote, keyboard submission, editing, failed save and unavailable reads. Actual device touch and assistive-technology review remain manual.
+
+## Video blocks
+
+YouTube content blocks use a labeled video title and the shared outlined “Watch on YouTube” link. They navigate to the hosted video; the reading page does not embed the third-party player. The Page Blocks stories exercise this same responsive row.
 
 ## Saved formulas
 

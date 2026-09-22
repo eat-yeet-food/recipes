@@ -12,6 +12,7 @@ import { contentBlocks, methodOptions } from './blocks'
 import { contentDetails, authoredField } from './authored-fields'
 import { seoShape } from '@eat-yeet/l4-content-model/field-shapes'
 import { r2Storage, type R2StorageOptions } from '@payloadcms/storage-r2'
+import { ratingRepliesCollection, ratingsCollection } from './ratings'
 
 export const deny: Access = () => false
 export const isOwner = (user: any, email = process.env.OWNER_EMAIL) =>
@@ -182,6 +183,8 @@ export function createCMSConfig(
         fields: [],
       },
       contentCollection('recipes'),
+      ratingsCollection,
+      ratingRepliesCollection,
       contentCollection('articles'),
       contentCollection('categories'),
       {

@@ -1,4 +1,5 @@
 'use client'
+import type { ReactNode } from 'react'
 import { RecipeCard } from '@eat-yeet/l6-ui-catalog/cards'
 import type { PageBlockRegistry } from '@eat-yeet/l6-ui-content-blocks/page-blocks'
 import type { RecipeSummary } from '@eat-yeet/l1-recipe-model/recipes'
@@ -44,6 +45,7 @@ export function RecipeDetail({
   workbench,
   onWorkbenchApply,
   storageScope,
+  rating,
 }: {
   recipe: Recipe
   browseRecipes: RecipeSummary[]
@@ -52,6 +54,7 @@ export function RecipeDetail({
   workbench?: ActiveRecipeWorkbench | null
   onWorkbenchApply?: (state: unknown) => void
   storageScope?: string
+  rating?: ReactNode
 }) {
   return (
     <RecipeArticle
@@ -61,6 +64,7 @@ export function RecipeDetail({
       workbench={workbench}
       onWorkbenchApply={onWorkbenchApply}
       storageScope={storageScope}
+      rating={rating}
       aside={({ page, focusedCooking }) => {
         const suggestions = getBrowseRecipeSuggestions(page, browseRecipes)
 

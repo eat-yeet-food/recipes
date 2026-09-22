@@ -23,7 +23,7 @@ try {
       try {
         await page.goto(`${server.url}iframe.html?id=${story.id}&viewMode=story`, { waitUntil:'load' })
         await page.waitForFunction(id => document.documentElement.dataset.storyReady === id, story.id, { timeout:20000 })
-        if (story.id.startsWith('recipes-dough-workbench--') && !story.id.endsWith('apply-and-close')) await page.getByRole('dialog', { name: 'Adjust recipe' }).waitFor()
+        if (story.id.startsWith('recipes-dough-workbench--') && !story.id.endsWith('apply-and-close')) await page.locator('[data-workbench-drawer]').waitFor()
         await page.evaluate(()=>document.fonts.ready)
         if (story.id === 'search-palette--results') await page.getByRole('option', { name: /New York Style Pizza/ }).waitFor()
         if (story.id === 'search-palette--keyboard-selection') await page.locator('[data-palette-all][data-selected=true]').waitFor()

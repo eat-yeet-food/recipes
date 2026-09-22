@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { CookModeSwitch, RecipeAction } from './recipe-actions'
+import { RecipeAction } from './recipe-actions'
 import { RecipeArticleHeader } from './recipe-article'
 
 const HEADER_WIDTHS = { full: '', phone: 'max-w-[350px]', tablet: 'max-w-[480px]' } as const
@@ -17,7 +17,7 @@ function ActionsExample({ width = 'full', title = 'New York Style Pizza' }: { wi
 
 }
 
-const meta = { title: 'Recipes/Actions', component: ActionsExample, subcomponents: { RecipeArticleHeader, RecipeAction, CookModeSwitch }, parameters: { docs: { description: { component: 'The production header gives narrow titles the full row, with the byline and Cooking view beneath. At a header width of 52rem, the switch moves beside the title. Compact, thin ink-bordered Pin and Print actions retain their icons and never stretch across the mobile row. Print, Pin, and Cooking view appear once in the main header; the recipe body does not repeat them. Switch labels sit 12px from their tracks without surrounding button fill.' } } } } satisfies Meta<typeof ActionsExample>
+const meta = { title: 'Recipes/Actions', component: ActionsExample, subcomponents: { RecipeArticleHeader, RecipeAction }, parameters: { docs: { description: { component: 'The production header keeps the title and byline together. Pin, Print, and Cooking view use one compact action row; Cooking view fills yellow while active.' } } } } satisfies Meta<typeof ActionsExample>
 export default meta
 export const Header: StoryObj<typeof meta> = {}
 export const PhoneHeader: StoryObj<typeof meta> = { args: { width: 'phone' } }

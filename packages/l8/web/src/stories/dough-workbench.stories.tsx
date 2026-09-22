@@ -72,7 +72,7 @@ export const IncompleteFlourBlend: Story = {
   args: { target: true },
   play: async ({ canvasElement }) => {
     const screen = within(canvasElement.ownerDocument.body)
-  await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))
+  await waitFor(() => { expect(screen.getByRole('dialog')).toHaveAttribute('data-workbench-drawer'); expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto') })
     const field = await screen.findByRole('textbox', { name: /High-protein.*percentage/ })
     await userEvent.clear(field)
     await userEvent.type(field, '60')
@@ -84,12 +84,12 @@ export const IncompleteFlourBlend: Story = {
 export const TargetBatch: Story = { args: { target: true } }
 export const Pizza: Story = { args: { pizza: true, target: true }, play: async ({ canvasElement }) => {
   const screen = within(canvasElement.ownerDocument.body)
-  await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))
+  await waitFor(() => { expect(screen.getByRole('dialog')).toHaveAttribute('data-workbench-drawer'); expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto') })
   await expect(screen.getByRole('textbox', { name: 'SAF red instant yeast' })).toHaveValue('0.25')
 } }
 export const RoundedBatchAndPercentages: Story = { args: { target: true }, play: async ({ canvasElement }) => {
   const screen = within(canvasElement.ownerDocument.body)
-  await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))
+  await waitFor(() => { expect(screen.getByRole('dialog')).toHaveAttribute('data-workbench-drawer'); expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto') })
   await expect(screen.getByRole('textbox', { name: 'loaf weight' })).toHaveValue('908')
   await expect(screen.getByRole('textbox', { name: 'Total dough weight' })).toHaveValue('1815')
   await expect(screen.getByRole('textbox', { name: 'Hydration' })).toHaveValue('77')
@@ -98,7 +98,7 @@ export const RoundedBatchAndPercentages: Story = { args: { target: true }, play:
 
 async function editEveryNumber(canvasElement: HTMLElement) {
   const screen = within(canvasElement.ownerDocument.body)
-  await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))
+  await waitFor(() => { expect(screen.getByRole('dialog')).toHaveAttribute('data-workbench-drawer'); expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto') })
   await userEvent.click(screen.getByRole('button', { name: 'Build this levain' }))
   const fields = Array.from(screen.getByRole('dialog').querySelectorAll<HTMLInputElement>('input'))
     .filter((field) => field.inputMode === 'numeric' || field.inputMode === 'decimal')
@@ -121,7 +121,7 @@ export const EditableTargetFields: Story = { args: { target: true }, play: async
 export const EditableWeightFields: Story = { play: async ({ canvasElement }) => editEveryNumber(canvasElement) }
 export const EditQuantityAndTotal: Story = { args: { pizza: true, target: true }, play: async ({ canvasElement }) => {
   const screen = within(canvasElement.ownerDocument.body)
-  await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))
+  await waitFor(() => { expect(screen.getByRole('dialog')).toHaveAttribute('data-workbench-drawer'); expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto') })
   const count = screen.getByRole('textbox', { name: 'balls' })
   await userEvent.clear(count)
   await expect(count).toHaveValue('')
@@ -133,11 +133,11 @@ export const EditQuantityAndTotal: Story = { args: { pizza: true, target: true }
   await expect(screen.getByRole('textbox', { name: 'ball weight' })).toHaveValue('500')
   await expect(screen.getByRole('button', { name: 'Apply to recipe' })).toBeEnabled()
 } }
-export const ApplyAndClose: Story = { play: async ({ canvasElement }) => { const screen = within(canvasElement.ownerDocument.body); await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto')); await userEvent.click(await screen.findByRole('button', { name: 'Apply to recipe' })); await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument()); await expect(screen.getByRole('status')).toHaveTextContent('Recipe updated') } }
+export const ApplyAndClose: Story = { play: async ({ canvasElement }) => { const screen = within(canvasElement.ownerDocument.body); await waitFor(() => { expect(screen.getByRole('dialog')).toHaveAttribute('data-workbench-drawer'); expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto') }); await userEvent.click(await screen.findByRole('button', { name: 'Apply to recipe' })); await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument()); await expect(screen.getByRole('status')).toHaveTextContent('Recipe updated') } }
 
 export const SavedFormula: Story = { play: async ({ canvasElement }) => {
   const screen = within(canvasElement.ownerDocument.body)
-  await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))
+  await waitFor(() => { expect(screen.getByRole('dialog')).toHaveAttribute('data-workbench-drawer'); expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto') })
   await expect(screen.queryByRole('textbox', { name: 'Formula preset name' })).not.toBeInTheDocument()
   await userEvent.click(screen.getByRole('button', { name: /Saved formulas/ }))
   await userEvent.type(await screen.findByRole('textbox', { name: 'Formula preset name' }), 'Weekend batch')
@@ -151,7 +151,7 @@ export const SavedFormula: Story = { play: async ({ canvasElement }) => {
 
 export const DuplicateFormulaName: Story = { play: async ({ canvasElement }) => {
   const screen = within(canvasElement.ownerDocument.body)
-  await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))
+  await waitFor(() => { expect(screen.getByRole('dialog')).toHaveAttribute('data-workbench-drawer'); expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto') })
   await userEvent.click(screen.getByRole('button', { name: /Saved formulas/ }))
   const panel = within(screen.getByRole('region', { name: 'Saved formulas' }))
   const name = panel.getByRole('textbox', { name: 'Formula preset name' })
@@ -169,7 +169,7 @@ export const DuplicateFormulaName: Story = { play: async ({ canvasElement }) => 
 
 export const DuplicateFormulaValues: Story = { play: async ({ canvasElement }) => {
   const screen = within(canvasElement.ownerDocument.body)
-  await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))
+  await waitFor(() => { expect(screen.getByRole('dialog')).toHaveAttribute('data-workbench-drawer'); expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto') })
   await userEvent.click(screen.getByRole('button', { name: /Saved formulas/ }))
   const panel = within(screen.getByRole('region', { name: 'Saved formulas' }))
   const name = panel.getByRole('textbox', { name: 'Formula preset name' })
@@ -184,7 +184,7 @@ export const DuplicateFormulaValues: Story = { play: async ({ canvasElement }) =
 
 export const RenameSavedFormula: Story = { play: async ({ canvasElement }) => {
   const screen = within(canvasElement.ownerDocument.body)
-  await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))
+  await waitFor(() => { expect(screen.getByRole('dialog')).toHaveAttribute('data-workbench-drawer'); expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto') })
   await userEvent.click(screen.getByRole('button', { name: /Saved formulas/ }))
   const panel = within(screen.getByRole('region', { name: 'Saved formulas' }))
   const name = panel.getByRole('textbox', { name: 'Formula preset name' })
@@ -200,7 +200,7 @@ export const RenameSavedFormula: Story = { play: async ({ canvasElement }) => {
 
 export const DeleteWithoutLoading: Story = { play: async ({ canvasElement }) => {
   const screen = within(canvasElement.ownerDocument.body)
-  await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))
+  await waitFor(() => { expect(screen.getByRole('dialog')).toHaveAttribute('data-workbench-drawer'); expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto') })
   await userEvent.click(screen.getByRole('button', { name: /Saved formulas/ }))
   const panel = within(screen.getByRole('region', { name: 'Saved formulas' }))
   const name = panel.getByRole('textbox', { name: 'Formula preset name' })
@@ -215,7 +215,7 @@ export const DeleteWithoutLoading: Story = { play: async ({ canvasElement }) => 
 
 export const SourdoughProcessAndSavedStarter: Story = { args: { target: true }, play: async ({ canvasElement }) => {
   const screen = within(canvasElement.ownerDocument.body)
-  await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))
+  await waitFor(() => { expect(screen.getByRole('dialog')).toHaveAttribute('data-workbench-drawer'); expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto') })
   await userEvent.click(screen.getByRole('button', { name: /Saved formulas/ }))
   await expect(screen.getByRole('textbox', { name: 'Formula preset name' })).toHaveAttribute('placeholder', 'e.g. Everyday sourdough')
   await expect(screen.queryByRole('textbox', { name: 'Starter profile name' })).not.toBeInTheDocument()
@@ -320,7 +320,7 @@ export const PluginProcessProjection: Story = { play: async () => {
 
 export const PizzaSizeAndSugar: Story = { args: { pizza: true, target: true }, play: async ({ canvasElement }) => {
   const screen = within(canvasElement.ownerDocument.body)
-  await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))
+  await waitFor(() => { expect(screen.getByRole('dialog')).toHaveAttribute('data-workbench-drawer'); expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto') })
   await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Pizza size' }), '12')
   await expect(screen.getByRole('textbox', { name: 'ball weight' })).toHaveValue('270')
   await expect(screen.getByRole('textbox', { name: 'Total dough weight' })).toHaveValue('810')
@@ -331,7 +331,7 @@ export const PizzaSizeAndSugar: Story = { args: { pizza: true, target: true }, p
   await userEvent.click(screen.getByRole('button', { name: 'Apply to recipe' }))
   await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
   await userEvent.click(screen.getByRole('button', { name: 'Open workbench' }))
-  await waitFor(() => expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto'))
+  await waitFor(() => { expect(screen.getByRole('dialog')).toHaveAttribute('data-workbench-drawer'); expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto') })
   await expect(screen.getByRole('combobox', { name: 'Pizza size' })).toHaveValue('12')
   await userEvent.clear(screen.getByRole('textbox', { name: 'ball weight' }))
   await userEvent.type(screen.getByRole('textbox', { name: 'ball weight' }), '300')

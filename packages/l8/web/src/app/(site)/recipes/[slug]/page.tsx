@@ -24,7 +24,7 @@ export default async function RecipePage({ params, searchParams }: RouteProps) {
   ])
   return <>
     <JsonLd site={site} path={`/recipes/${slug}`} content={doc.content} modified={doc.updatedAt} />
-    <RecipeClient recipe={doc.content} recipes={recipes} siteUrl={site.siteUrl}
+    <RecipeClient recipe={{ ...doc.content, searchText: '' }} recipes={recipes.filter((recipe) => recipe.slug !== slug).slice(0, 4).map((recipe) => ({ ...recipe, searchText: '' }))} siteUrl={site.siteUrl}
       serializedConfig={typeof query.config === 'string' ? query.config : undefined} />
   </>
 }

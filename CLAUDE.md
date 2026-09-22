@@ -43,6 +43,8 @@ Sync validates all sources before writes and uploads required media before publi
 
 Payload admin and APIs are read-only even for the owner. Owner bootstrap and recovery are CLI-only. Do not enable first-user registration, public signup, web uploads, editing, or GraphQL. Preserve origin checks, owner allowlisting, revocable sessions and lockout rules. Local security assumes a trusted OS account. Remote hosting requires owner-only Cloudflare Access with MFA and alternate-hostname protection, enforced by the Worker request guard.
 
+The dedicated `/api/public/ratings/<slug>` endpoint permits anonymous recipe ratings separately from Git content. Keep raw rating collections inaccessible through Payload REST/admin, request-driven calls at `overrideAccess: false`, and the internal service capability unforgeable from JSON. Check publication afresh and enforce same-origin, bounded integer-only writes. Rating cookies are HttpOnly and scoped to the rating API so recipe HTML remains publicly cacheable. Never cache personalized rating responses in content projections or invent aggregate ratings in JSON-LD.
+
 Local launchers bind `127.0.0.1`; remote bindings are disabled. Wrangler's CLI persistence path is the parent of the `v3` directory used by `getPlatformProxy`. Keep those paths aligned. Server startup never pushes the schema; use tracked migrations and `pnpm db:migrate`.
 
 `site.config.mjs` discovers `apps/<app>/app.config.mjs`. Root orchestration selects the active app. Runtime components must not import root config. Next's build config resolves the selected app's executable modules. Authored site configuration arrives through Payload. Vite and generated JSON are retained for Storybook and historical tooling only.

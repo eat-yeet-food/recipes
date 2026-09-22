@@ -24,6 +24,13 @@ const check = (name, ok, detail = '') => results.push({ name, ok: !!ok, detail: 
 const browser = await chromium.launch()
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 })
 const errors = []
+let searchIndexRequests = 0
+await page.route('**/api/public/recipes', async (route) => {
+  searchIndexRequests++
+  // Exercise typing before the on-demand index arrives.
+  await new Promise((resolve) => setTimeout(resolve, 800))
+  await route.continue()
+})
 page.on('pageerror', (e) => errors.push(e.message))
 page.on('console', (m) => m.type() === 'error' && errors.push(m.text()))
 
@@ -37,6 +44,7 @@ check('home prerenders its hero', await page.getByRole('heading', { name: 'BIG D
 
 // --- palette opens from the nav button ---------------------------------
 check('palette starts hidden', await dialog().isHidden())
+check('search index is not fetched during initial page load', searchIndexRequests === 0)
 
 await navPaletteTrigger().click()
 await page.waitForTimeout(200)
@@ -48,7 +56,9 @@ check(
 
 // --- typing produces results -------------------------------------------
 await page.keyboard.type('pizza')
-await page.waitForTimeout(250)
+check('search accepts typing while its index loads', await page.getByRole('combobox').inputValue() === 'pizza' && await page.getByRole('status', { name: '' }).filter({ hasText: 'Loading recipes' }).isVisible())
+await page.locator('[data-palette-hit]').first().waitFor()
+check('search index loads once on demand', searchIndexRequests === 1)
 const hits = await page.locator('[data-palette-hit]').count()
 check('typing yields results', hits > 0, `hits=${hits}`)
 await page.screenshot({ path: join(SHOTS, 'palette.png') })

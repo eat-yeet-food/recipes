@@ -3,7 +3,7 @@ status: published
 slug: new-york-style-pizza
 title: New York Style Pizza
 order: 3
-description: Cold-fermented New York-style pizza dough for an outdoor pizza oven or an indoor baking steel.
+description: 'A crisp, foldable New York-style pizza with a chewy crust, bright tomato sauce, and bubbling cheese.'
 category: savory
 prepMinutes: 4590
 cookMinutes: 6
@@ -113,9 +113,7 @@ defaultMethod: outdoor-oven
 methodOptions:
   - id: outdoor-oven
     label: Outdoor Oven
-    description: >-
-      A 65% hydration New York-style pizza dough mixed cold, fermented for 2-3 days, and baked hot with tomato sauce,
-      Trader Joe's low moisture whole milk mozzarella, pecorino romano, and oregano.
+    description: 'A crisp, foldable New York-style pizza with a blistered, chewy crust and bubbling cheese.'
     prepMinutes: 4590
     cookMinutes: 6
     totalMinutes: 4596
@@ -123,9 +121,7 @@ methodOptions:
     yieldUnit: 16-inch pizzas
   - id: indoor-steel
     label: Indoor Steel
-    description: >-
-      A home-oven New York-style pizza dough for a baking steel: 63% hydration, 2% canola oil, a 2-3 day cold ferment,
-      tomato sauce, Trader Joe's low moisture whole milk mozzarella, pecorino romano, and oregano.
+    description: 'A crisp, foldable New York-style pizza with a deeply browned crust and bubbling cheese, adapted for a home oven.'
     prepMinutes: 4590
     cookMinutes: 7
     totalMinutes: 4597

@@ -8,8 +8,8 @@ import {
   realpathSync,
 } from 'node:fs'
 import { resolve, relative, join } from 'node:path'
-const widths = [160, 320, 480, 640, 800, 960, 1440, 1920]
-const pipeline = `v4-widths${widths.join('-')}-sharp${sharp.versions.sharp}-vips${sharp.versions.vips}-avif50-webp80-jpeg82-srgb-oriented-focal`
+const widths = [160, 320, 480, 640, 720, 800, 960, 1440, 1920]
+const pipeline = `v5-widths${widths.join('-')}-sharp${sharp.versions.sharp}-vips${sharp.versions.vips}-avif35-webp80-jpeg82-srgb-oriented-focal`
 export function safeImagePath(imagesDir, name) {
   const root = realpathSync(imagesDir)
   const path = realpathSync(resolve(root, name))
@@ -65,7 +65,7 @@ export async function prepareImage(path, cacheDir, focalPoint) {
       const filename = `${width}.${format}`
       const { data: bytes, info: out } = await sharp(data)
         .resize({ width, withoutEnlargement: true })
-        [format]({ quality: format === 'avif' ? 50 : 80 })
+        [format]({ quality: format === 'avif' ? 35 : 80 })
         .toBuffer({ resolveWithObject: true })
       writeFileSync(join(dir, filename), bytes)
       variants.push({

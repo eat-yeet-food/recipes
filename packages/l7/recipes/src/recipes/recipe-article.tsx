@@ -2,13 +2,13 @@
 import { ResponsiveImage } from '@eat-yeet/l5-ui-primitives/primitives/responsive-image'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 
-import { Printer, Share2 } from 'lucide-react'
+import { ChefHat, Printer, Share2 } from 'lucide-react'
 import { cn } from '@eat-yeet/l0-foundation/utils'
 import { imageUrl } from '@eat-yeet/l1-recipe-model/recipes'
 import { ContentPageArticle } from '@eat-yeet/l6-ui-content-blocks/page-article'
 import type { PageBlockRegistry } from '@eat-yeet/l6-ui-content-blocks/page-blocks'
 import type { RecipeContent } from '@eat-yeet/l4-content-model/recipes'
-import { CookModeSwitch, RecipeAction } from './recipe-actions'
+import { RecipeAction } from './recipe-actions'
 import type { RecipePageBlockContext } from './recipe-blocks'
 import { RecipeWorkbenchHost } from './recipe-workbench'
 import type { ActiveRecipeWorkbench } from './workbench-registry'
@@ -51,10 +51,9 @@ export function RecipeArticleHeader({
         <span>&gt;</span>
         <span>{page.title}</span>
       </nav>
-      <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-2">
-        <h1 className="col-span-2 m-0 min-w-0 max-w-[var(--layout-recipe-copy)] text-[34px] leading-[1.25] tracking-[1.2px] font-bold @min-[52rem]:col-span-1">{page.title}</h1>
-        <div className="col-start-1 row-start-2 self-center text-xs uppercase text-[var(--color-primary)]">By Patrick Hogan</div>
-        <div className="col-start-2 row-start-2 self-center justify-self-end @min-[52rem]:row-span-2 @min-[52rem]:row-start-1 print:hidden"><CookModeSwitch variant="hero" label="Cooking view" checked={focusedCooking} onCheckedChange={toggleFocusedCooking} /></div>
+      <div>
+        <h1 className="m-0 min-w-0 max-w-[var(--layout-recipe-copy)] text-[34px] leading-[1.15] tracking-[1.2px] font-bold">{page.title}</h1>
+        <div className="mt-1.5 text-xs uppercase text-[var(--color-primary)]">By Patrick Hogan</div>
       </div>
       <div className="mb-6 mt-4 flex flex-wrap gap-3 print:hidden" role="group" aria-label="Page actions">
         <RecipeAction variant="hero" href={pinUrl.toString()} target="_blank" rel="noreferrer">
@@ -64,6 +63,10 @@ export function RecipeArticleHeader({
         <RecipeAction variant="hero" onClick={printPage}>
           <Printer className="size-3.5" />
           Print Recipe
+        </RecipeAction>
+        <RecipeAction variant="hero" onClick={toggleFocusedCooking} pressed={focusedCooking}>
+          <ChefHat className="size-3.5" />
+          Cooking view
         </RecipeAction>
       </div>
       {page.description && <p className="max-w-[var(--layout-recipe-copy)] m-0 text-base leading-[1.625]">{page.description}</p>}
@@ -79,6 +82,7 @@ export function RecipeArticle({
   workbench,
   onWorkbenchApply,
   storageScope = 'eat-yeet',
+  rating,
 }: {
   page: RecipeContent
   siteUrl: string
@@ -87,6 +91,7 @@ export function RecipeArticle({
   workbench?: ActiveRecipeWorkbench | null
   onWorkbenchApply?: (state: unknown) => void
   storageScope?: string
+  rating?: ReactNode
 }) {
   const [cookMode, setCookMode] = useState(false)
   const [focusedCooking, setFocusedCooking] = useState(false)
@@ -95,7 +100,8 @@ export function RecipeArticle({
   const wakeLockRef = useRef<ScreenWakeLockSentinel | null>(null)
   const photo = imageUrl(page)
   const heroAlt = `${page.title} hero image`
-  const pageUrl = typeof window === 'undefined' ? `${siteUrl}/recipes/${page.slug}` : window.location.href
+  const [pageUrl, setPageUrl] = useState(`${siteUrl}/recipes/${page.slug}`)
+  useEffect(() => { setPageUrl(window.location.href) }, [page])
   const pinUrl = new URL('https://www.pinterest.com/pin/create/button/')
   const firstRecipeBlockIndex = page.blocks.findIndex((block) => block.type === 'recipe')
   const hasRecipeBlock = firstRecipeBlockIndex >= 0
@@ -204,6 +210,7 @@ export function RecipeArticle({
       )}
       aside={aside?.({ page, focusedCooking })}
     />
+    {rating && <div className="mx-auto -mt-8 max-w-[960px] px-8 pb-12 max-[640px]:px-4 print:hidden">{rating}</div>}
     {workbench && onWorkbenchApply && (
       <RecipeWorkbenchHost
         recipe={page}

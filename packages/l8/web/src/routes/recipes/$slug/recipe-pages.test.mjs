@@ -47,7 +47,9 @@ for (const recipe of INDEX) {
       printButtons: Array.from(document.querySelectorAll('button')).filter((button) =>
         button.textContent?.includes('Print'),
       ).length,
-      cookSwitches: document.querySelectorAll('[role="switch"]').length,
+      cookingButtons: Array.from(document.querySelectorAll('button')).filter((button) =>
+        button.textContent?.includes('Cooking view'),
+      ).length,
       browseCards: document.querySelectorAll('[data-yeet-browse] a[href^="/recipes/"]').length,
       sidebarDisplay: getComputedStyle(document.querySelector('[data-yeet-browse]')).display,
       titleVisible: text('h1') === expectedTitle,
@@ -58,7 +60,7 @@ for (const recipe of INDEX) {
   check(`${recipe.slug} has matching h1`, facts.titleVisible, `${facts.h1} !== ${recipe.title}`)
   check(`${recipe.slug} renders recipe card`, facts.hasRecipeCard)
   check(`${recipe.slug} does not render duplicate side actions`, facts.shareRailCount === 0, JSON.stringify(facts))
-  check(`${recipe.slug} has one print control and one dedicated cooking switch`, facts.printButtons === 1 && facts.cookSwitches === 1, JSON.stringify(facts))
+  check(`${recipe.slug} has one print control and one dedicated cooking button`, facts.printButtons === 1 && facts.cookingButtons === 1, JSON.stringify(facts))
   check(`${recipe.slug} shows desktop browse sidebar`, facts.sidebarDisplay === 'block' && facts.browseCards === 4, JSON.stringify(facts))
 
   await page.close()
@@ -77,11 +79,12 @@ check('pizza links the recommended mozzarella', await desktop.locator('#recipe-c
 check('pizza recommends the selected mozzarella', (await desktop.locator('#recipe-card').textContent()).includes('is a particularly good choice for this pizza'))
 check('jump to recipe is removed', await desktop.getByRole('link', { name: 'Jump to Recipe' }).count() === 0)
 check('adjust recipe appears only beside the recipe', await desktop.getByRole('button', { name: 'Adjust Recipe' }).count() === 1)
-check('recipe controls appear once in the header', await desktop.getByRole('switch', { name: 'Cooking view' }).count() === 1 && await desktop.getByRole('button', { name: 'Print Recipe' }).count() === 1 && await desktop.getByRole('link', { name: 'Pin Recipe' }).count() === 1 && await desktop.getByRole('switch', { name: 'Cook Mode' }).count() === 0)
+check('recipe controls appear once in the header', await desktop.getByRole('button', { name: 'Cooking view' }).count() === 1 && await desktop.getByRole('button', { name: 'Print Recipe' }).count() === 1 && await desktop.getByRole('link', { name: 'Pin Recipe' }).count() === 1 && await desktop.getByRole('switch', { name: 'Cook Mode' }).count() === 0)
 const authoredPizzaText = await desktop.locator('#recipe-card').textContent()
 check('pizza toppings show readable per-pizza and batch totals', authoredPizzaText.includes('6 oz pizza sauce (18 oz total)') && authoredPizzaText.includes('28 g pecorino romano (84 g total)') && authoredPizzaText.includes('⅛ tsp dried oregano (⅜ tsp total)'))
 check('outdoor mixing omits unused optional ingredients', authoredPizzaText.includes('Add the water, flour, fine sea salt, and SAF red instant yeast to the spiral mixer'))
 await desktop.getByRole('button', { name: 'Adjust Recipe' }).first().click()
+await desktop.locator('[data-workbench-drawer]').waitFor()
 check('workbench opens as a dialog', await desktop.getByRole('dialog', { name: 'Adjust recipe' }).isVisible())
 check('target inputs pin percent units', (await desktop.getByText('%', { exact: true }).count()) >= 3)
 const workbenchEdge = await desktop.getByRole('dialog', { name: 'Adjust recipe' }).evaluate((drawer) => ({ borderLeft: getComputedStyle(drawer).borderLeftWidth, hasPinkOffsetShadow: drawer.className.includes('shadow-[-18px') }))
@@ -108,6 +111,7 @@ await desktop.waitForURL('**/recipes/new-york-style-pizza')
 const outdoorFacts = await desktop.evaluate(() => document.body.textContent ?? '')
 check('browser Back restores authored formula', outdoorFacts.includes('861g Kirkland Organic All-Purpose Flour') && outdoorFacts.includes('560g water') && outdoorFacts.includes('2.15g SAF red instant yeast') && outdoorFacts.includes('17.2g fine sea salt'), outdoorFacts.slice(outdoorFacts.indexOf('Ingredients'), outdoorFacts.indexOf('Instructions')))
 await desktop.getByRole('button', { name: 'Adjust Recipe' }).first().click()
+await desktop.locator('[data-workbench-drawer]').waitFor()
 await desktop.getByLabel('Hydration').fill('71')
 await desktop.getByRole('button', { name: 'Cancel' }).click()
 check('cancel discards draft', (await desktop.locator('text=65% hydration').count()) > 0)
@@ -115,11 +119,11 @@ const readingLayout = await desktop.evaluate(() => ['.yeet > header', '.yeet mai
   const rect = document.querySelector(selector).getBoundingClientRect()
   return { selector, left: rect.left, width: rect.width }
 }))
-await desktop.getByRole('switch', { name: 'Cooking view' }).click()
+await desktop.getByRole('button', { name: 'Cooking view' }).click()
 await desktop.waitForTimeout(200)
 check('cooking view enables cook mode', await desktop.locator('.yeet[data-cook-mode="true"]').count() === 1)
 check('start cooking hides browse sidebar', await desktop.locator('[data-yeet-browse]').count() === 0)
-check('focused cooking offers a switch back to the article', await desktop.getByRole('switch', { name: 'Cooking view' }).getAttribute('aria-checked') === 'true')
+check('focused cooking exposes the active button state', await desktop.getByRole('button', { name: 'Cooking view' }).getAttribute('aria-pressed') === 'true')
 check('Cooking view preserves horizontal page geometry', await desktop.evaluate((before) => before.every(({ selector, left, width }) => {
   const rect = document.querySelector(selector).getBoundingClientRect()
   return Math.abs(rect.left - left) <= 1 && Math.abs(rect.width - width) <= 1
@@ -179,6 +183,7 @@ check(
   await phone.locator('[data-yeet-browse]').evaluate((el) => getComputedStyle(el).display === 'none'),
 )
 await phone.getByRole('button', { name: 'Adjust Recipe' }).first().click()
+await phone.locator('[data-workbench-drawer]').waitFor()
 await phone.waitForTimeout(150)
 const phoneDrawer = await phone.getByRole('dialog', { name: 'Adjust recipe' }).evaluate((dialog) => ({
   width: dialog.getBoundingClientRect().width,

@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "exports": {
+    "./primitives/number-field-format": "./src/primitives/number-field-format.ts",
     "./primitives/*": "./src/primitives/*.tsx"
   },
   "dependencies": {

@@ -1,8 +1,7 @@
 'use client'
-import { useId, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
-import { Switch } from '@eat-yeet/l5-ui-primitives/primitives/switch'
 
 type RecipeActionProps = {
   variant: 'hero' | 'card'
@@ -10,6 +9,7 @@ type RecipeActionProps = {
   target?: string
   rel?: string
   onClick?: () => void
+  pressed?: boolean
   children: ReactNode
 }
 
@@ -19,22 +19,16 @@ export function RecipeAction({
   target,
   rel,
   onClick,
+  pressed,
   children,
 }: RecipeActionProps) {
-  const buttonVariant = variant === 'hero' ? 'utility' : 'default'
+  const buttonVariant = pressed ? 'on-ink' : variant === 'hero' ? 'utility' : 'default'
   const size = variant === 'hero' ? 'sm' : 'default'
   if (href) return <Button asChild variant={buttonVariant} size={size}><a href={href} target={target} rel={rel}>{children}</a></Button>
-  return <Button variant={buttonVariant} size={size} onClick={onClick}>{children}</Button>
-}
-
-const SWITCH_SPACING = { hero: 'gap-3', card: 'gap-2' } as const
-
-export function CookModeSwitch({ checked, onCheckedChange, label = 'Cook Mode', variant = 'card' }: { checked: boolean; onCheckedChange: () => void; label?: string; variant?: keyof typeof SWITCH_SPACING }) {
-  const id = useId()
-  return (
-    <div className={`inline-flex min-h-11 w-fit shrink-0 items-center justify-self-end ${SWITCH_SPACING[variant]}`}>
-      <label htmlFor={id} className="cursor-pointer whitespace-nowrap font-action text-sm font-bold text-ink">{label}</label>
-      <Switch id={id} checked={checked} onCheckedChange={onCheckedChange} />
-    </div>
-  )
+  return <Button
+    variant={buttonVariant}
+    size={size}
+    onClick={onClick}
+    aria-pressed={pressed}
+  >{children}</Button>
 }

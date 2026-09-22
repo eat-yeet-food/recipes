@@ -1,5 +1,6 @@
 import { toStoredRecord, storedSEO } from '@eat-yeet/l4-content-model/storage'
 import { encodeFields, seoShape } from '@eat-yeet/l4-content-model/field-shapes'
+import { verifyRatings } from '../packages/l4/content-cms/src/ratings.integration'
 import assert from 'node:assert/strict'
 import { resolve } from 'node:path'
 import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs'
@@ -240,6 +241,8 @@ try {
     data: { status: 'published' },
   })
   assert.equal((await request(`/recipes/${initial.slug}`)).status, 200)
+  await verifyRatings(p, origin, String(initial.slug), initial.id)
+  evidence.push('Public ratings persist and update per browser, aggregate across visitors, reject invalid/cross-origin writes, and protect draft recipes and raw voter records')
   assert(
     (await (await request('/sitemap.xml')).text()).includes(
       String(initial.slug),

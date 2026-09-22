@@ -1,4 +1,4 @@
-import { siteData, services, publicMedia, deliveryMedia, runtimeSettings } from '../../next/cms'
+import { siteData, publicMedia, deliveryMedia, runtimeSettings } from '../../next/cms'
 import { SiteShell } from '../../next/providers'
 import '../../styles/global.css'
 import '../../styles/site-overrides.css'
@@ -8,12 +8,10 @@ export default async function Layout({
 }: {
   children: React.ReactNode
 }) {
-  const [site, media, api] = await Promise.all([
+  const [site, media] = await Promise.all([
     siteData(),
     publicMedia(),
-    services(),
   ])
-  const { recipes } = await api.recipes.listRecipes()
   return (
     <html lang="en">
       <head>
@@ -40,7 +38,7 @@ export default async function Layout({
         />
       </head>
       <body>
-        <SiteShell site={{ navigation: site.navigation, siteName: site.siteName, copy: { wordmark: site.copy.wordmark } }} media={deliveryMedia(media)} recipes={recipes}>
+        <SiteShell site={{ navigation: site.navigation, siteName: site.siteName, copy: { wordmark: site.copy.wordmark } }} media={deliveryMedia(media)}>
           {children}
         </SiteShell>
       </body>

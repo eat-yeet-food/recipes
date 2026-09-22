@@ -17,16 +17,28 @@ export function SiteShell({
   children,
   site,
   media,
-  recipes,
 }: {
   children: ReactNode
   site: any
   media: MediaMap
-  recipes: RecipeSummary[]
 }) {
   const router = useRouter()
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
+  const [recipes, setRecipes] = useState<RecipeSummary[] | null>(null)
+  const [searchError, setSearchError] = useState('')
+  useEffect(() => {
+    if (!open || recipes || searchError) return
+    const controller = new AbortController()
+    fetch('/api/public/recipes', { signal: controller.signal }).then(async (response) => {
+      if (!response.ok) throw new Error('Search is unavailable. Please try again.')
+      const data = await response.json()
+      setRecipes(data.recipes)
+    }).catch(() => {
+      if (!controller.signal.aborted) setSearchError('Search is unavailable. Please try again.')
+    })
+    return () => controller.abort()
+  }, [open, recipes, searchError])
   const navigate = useCallback(
     (d: Destination) => {
       const href = hrefFor(d)
@@ -74,7 +86,10 @@ export function SiteShell({
             wordmark={site.copy.wordmark}
           />
           <SearchPalette
-            recipes={recipes}
+            recipes={recipes ?? []}
+            loading={!recipes && !searchError}
+            error={searchError}
+            onRetry={() => setSearchError('')}
             open={open}
             onClose={() => setOpen(false)}
           />

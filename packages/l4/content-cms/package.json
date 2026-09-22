@@ -4,7 +4,8 @@
   "type": "module",
   "exports": {
     "./config": "./src/config.ts",
-    "./service": "./src/service.ts"
+    "./service": "./src/service.ts",
+    "./ratings": "./src/ratings.ts"
   },
   "dependencies": {
     "payload": "3.89.0",

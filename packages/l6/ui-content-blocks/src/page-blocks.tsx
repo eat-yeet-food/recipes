@@ -1,6 +1,7 @@
 'use client'
 import { ResponsiveImage } from '@eat-yeet/l5-ui-primitives/primitives/responsive-image'
 import { Fragment, type ReactNode } from 'react'
+import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
 
 import type {
   CalloutBlock,
@@ -317,17 +318,9 @@ function FootnotesBlockView({ block, index }: { block: FootnotesBlock; index: nu
 
 function YouTubeBlockView({ block }: { block: YouTubeBlock }) {
   return (
-    <section className="my-8">
-      <div className="aspect-video overflow-hidden bg-[var(--color-tint)]">
-        <iframe
-          src={`https://www.youtube-nocookie.com/embed/${block.id}`}
-          title={block.title}
-          loading="lazy"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen
-          className="size-full border-0"
-        />
-      </div>
+    <section className="my-8 flex flex-wrap items-center justify-between gap-4 border-y border-border py-6" aria-label={block.title}>
+      <p className="m-0 font-action">{block.title}</p>
+      <Button asChild variant="utility"><a href={`https://www.youtube.com/watch?v=${block.id}`}>Watch on YouTube</a></Button>
     </section>
   )
 }

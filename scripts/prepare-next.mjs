@@ -19,7 +19,9 @@ async function fonts(dir){for(const entry of readdirSync(dir,{withFileTypes:true
  const file=resolve(dir,entry.name)
  if(entry.isDirectory())await fonts(file)
  else if(/\.(woff2|otf)$/.test(entry.name)){
-  const source=readFileSync(file),subset=await subsetFont(source,characters,{targetFormat:'woff2',keepFeatures:['kern','liga','clig','calt','locl','mark','mkmk','tnum','lnum','pnum','onum','frac','sups','subs']})
+  // Retain glyph outlines, metrics and OpenType features; omit legacy grid-
+  // fitting bytecode from the web derivatives. Keep the source fonts intact.
+  const source=readFileSync(file),subset=await subsetFont(source,characters,{targetFormat:'woff2',noHinting:true,keepFeatures:['kern','liga','clig','calt','locl','mark','mkmk','tnum','lnum','pnum','onum','frac','sups','subs']})
   const destination=file.replace(/\.otf$/,'.woff2')
   if(destination!==file || subset.length<source.length)writeFileSync(destination,subset)
   if(destination!==file)rmSync(file)

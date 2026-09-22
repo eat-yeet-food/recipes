@@ -55,6 +55,19 @@ export async function capture(outDir) {
     if (shot.workbench) await page.getByRole('button', { name: 'Adjust recipe', exact: true }).first().click()
     if (shot.summary) await page.locator('[aria-labelledby=preview-heading]').scrollIntoViewIfNeeded()
     await page.evaluate(() => document.fonts.ready)
+    if (shot.full) {
+      // A full-page screenshot does not trigger native lazy loading below the
+      // viewport. Visit the whole page before capturing its visual baseline.
+      const height = await page.evaluate(() => document.documentElement.scrollHeight)
+      for (let top = 0; top < height; top += (shot.viewport?.height ?? 900)) {
+        await page.evaluate((y) => window.scrollTo(0, y), top)
+        await page.waitForTimeout(100)
+      }
+      await page.waitForFunction(() => [...document.images].every((image) =>
+        image.getClientRects().length === 0 || (image.complete && image.naturalWidth > 0),
+      ))
+      await page.evaluate(() => window.scrollTo(0, 0))
+    }
     // Hydration settles layout; fonts and lazy images need a beat to land.
     await page.waitForTimeout(800)
     await page.screenshot({ path: join(outDir, `${shot.name}.png`), fullPage: shot.full })

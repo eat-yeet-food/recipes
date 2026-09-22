@@ -63,6 +63,12 @@ Public `<picture>` elements use AVIF with WebP fallback, layout-specific sizes, 
 
 Remote delivery will use a custom R2/CDN media domain for deliberately public derivatives. Do not use `r2.dev` for production delivery. Private media and originals must remain separate from public delivery.
 
+## Public recipe ratings
+
+Ratings live in the separate `recipe-ratings` collection and survive Git content synchronization. Apply the tracked `recipe_ratings` migration before serving this version. The public `/api/public/ratings/<slug>` route returns only the average, count, and requesting browser's vote. Its HttpOnly, SameSite=Strict cookie is scoped to the ratings API; responses are private/no-store. POST requires a matching trusted Origin, JSON of at most 128 bytes, an existing visitor cookie, and an integer score from 1 to 5. Payload REST cannot read or modify the raw collection. The service rechecks publication on every read/write and uses a unique recipe/visitor key to update votes without adding to the count.
+
+This is anonymous browser identity, not a verified-person voting system: clearing cookies or using another browser permits another vote. No name, email, or IP address is collected. Ratings are fetched outside release-generation projections and are not added to Recipe JSON-LD. The aggregate is computed from stored votes; large-scale traffic would warrant a dedicated aggregate/rate-limit strategy.
+
 ## Owner security and recovery
 
 The OS account and local secret files are trusted. Payload hashes passwords and uses revocable, HTTP-only SameSite=Lax sessions with a two-hour expiry. Five failed logins cause a ten-minute lockout. Future HTTPS hosting must use secure cookies and Cloudflare Access with owner identity and MFA, including protection against alternate-hostname bypasses.

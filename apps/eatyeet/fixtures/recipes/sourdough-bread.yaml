@@ -3,7 +3,7 @@ status: published
 slug: sourdough-bread
 title: Sourdough Bread
 order: 4
-description: 'Traditional sourdough bread, featuring a long fermentation process for complex flavor and perfect texture.'
+description: 'Crackling, deeply browned loaves with an open crumb, gentle tang, and satisfying chew.'
 category: savory
 prepMinutes: 60
 cookMinutes: 39
@@ -26,7 +26,7 @@ defaultMethod: dutch-oven
 methodOptions:
   - id: dutch-oven
     label: Dutch Oven
-    description: 'Traditional sourdough bread, featuring a long fermentation process for complex flavor and perfect texture.'
+    description: 'Crackling, deeply browned loaves with an open crumb, gentle tang, and satisfying chew.'
     prepMinutes: 60
     cookMinutes: 39
     totalMinutes: 1869

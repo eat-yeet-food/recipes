@@ -2,7 +2,7 @@ import { createRecipeWorkbenchRegistry } from '@eat-yeet/l7-recipes/recipes/work
 import {
   createPizzaWorkbenchPlugin,
   createSourdoughWorkbenchPlugin,
-} from './workbenches/dough-formula-workbench'
+} from './workbenches/dough-workbench-plugin'
 
 /**
  * The app owns the set of executable workbenches. Recipe content only names a

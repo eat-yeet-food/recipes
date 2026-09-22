@@ -2,7 +2,7 @@
 import { ResponsiveImage } from '@eat-yeet/l5-ui-primitives/primitives/responsive-image'
 /**
  * Global search palette. Opens from the nav search button or Cmd/Ctrl-K and
- * filters the local generated recipe index.
+ * filters the supplied published recipe index.
  *
  * Built on real shadcn/Radix primitives (Command + Dialog, via cmdk) rather
  * than custom dialog state: focus trap, `inert`-ing the rest of the page,
@@ -18,6 +18,7 @@ import { Command, CommandDialog, CommandInput, CommandList, CommandGroup, Comman
 import { humanizeMinutes, labelize } from '@eat-yeet/l2-recipe-domain/format'
 import { matchesQuery } from '@eat-yeet/l2-recipe-domain/search'
 import { imageUrl, type RecipeSummary } from '@eat-yeet/l1-recipe-model/recipes'
+import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
 
 const MIN_QUERY = 2
 const MAX_RESULTS = 8
@@ -51,10 +52,16 @@ export function SearchPalette({
   recipes,
   open,
   onClose,
+  loading = false,
+  error = '',
+  onRetry,
 }: {
   recipes: RecipeSummary[]
   open: boolean
   onClose: () => void
+  loading?: boolean
+  error?: string
+  onRetry?: () => void
 }) {
   const [query, setQuery] = useState('')
   const lastFocusRef = useRef<HTMLElement | null>(null)
@@ -126,6 +133,8 @@ export function SearchPalette({
             </>
           }
         />
+        {loading && <p role="status" className="px-4 py-6 text-sm text-muted-foreground">Loading recipes…</p>}
+        {error && <div role="alert" className="px-4 py-6 text-sm"><p className="mb-2 text-danger">{error}</p><Button variant="link" onClick={onRetry}>Try again</Button></div>}
         <CommandList className="max-h-[min(60vh,300px)] sm:max-h-[300px]">
           {/* Not cmdk's own <CommandEmpty>: it shows only when zero
               CommandItems are mounted at all, but the "view all" item below
@@ -133,7 +142,7 @@ export function SearchPalette({
               would never reach zero and the message could never appear.
               A plain conditional, driven by hits.length like the rest of
               this file's data flow, styled to match. */}
-          {showFooter && hits.length === 0 && (
+          {!loading && !error && showFooter && hits.length === 0 && (
             <p data-slot="command-empty" className="py-6 text-center text-sm">
               No recipes found for &ldquo;{query}&rdquo;
             </p>
@@ -181,7 +190,7 @@ export function SearchPalette({
               handles Enter-selects-active-item, so this is the one remaining
               piece of bespoke behavior (§5.3), expressed the same way as
               every other result instead of a parallel onKeyDown branch. */}
-          {showFooter && (
+          {showFooter && !loading && !error && (
             <CommandGroup>
               <CommandItem value="__view-all__" onSelect={openAll} data-palette-all className="px-4 py-2 text-xs font-medium text-ink/65 data-selected:text-action-label">
                 View all results for &ldquo;{query}&rdquo;
