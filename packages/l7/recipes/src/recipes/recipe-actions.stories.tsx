@@ -17,7 +17,7 @@ function ActionsExample({ width = 'full', title = 'New York Style Pizza' }: { wi
 
 }
 
-const meta = { title: 'Recipes/Actions', component: ActionsExample, subcomponents: { RecipeArticleHeader, RecipeAction }, parameters: { docs: { description: { component: 'The production header keeps the title and byline together. Pin, Print, and Cooking view use one compact action row; Cooking view fills yellow while active.' } } } } satisfies Meta<typeof ActionsExample>
+const meta = { title: 'Recipes/Actions', component: ActionsExample, subcomponents: { RecipeArticleHeader, RecipeAction }, parameters: { docs: { description: { component: 'The production header keeps the title and byline together. Pin, Print, and Cooking view use equal-width buttons that retain their size when the action row wraps; Cooking view fills yellow while active.' } } } } satisfies Meta<typeof ActionsExample>
 export default meta
 export const Header: StoryObj<typeof meta> = {}
 export const PhoneHeader: StoryObj<typeof meta> = { args: { width: 'phone' } }
