@@ -59,7 +59,7 @@ function RatingExample({ count = 0, ownRating = null, fail = false, unavailable 
   return <div className="max-w-[var(--layout-recipe-copy)] bg-white p-6 text-ink"><RecipeRating title="New York Style Pizza" client={client} /></div>
 }
 const meta = { title: 'Recipes/Ratings', component: RatingExample,
-  parameters: { docs: { description: { component: 'Yeet-style rating and review section with local reviewer details, aggregate scoring, and threaded replies.' } } },
+  parameters: { docs: { description: { component: 'Shared recipe rating form on the workbench yellow surface, with ink fields, ink selected stars and an ink submit action. Local reviewer details, aggregate scoring, and threaded replies retain their existing behavior. Aggregate stars remain orange on the white reading surface.' } } },
 } satisfies Meta<typeof RatingExample>
 export default meta
 type Story = StoryObj<typeof meta>

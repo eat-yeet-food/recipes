@@ -14,12 +14,17 @@ export interface RecipeWorkbenchDrawerProps {
   onOpenChange: (open: boolean) => void
 }
 
+export interface RecipeWorkbenchSummary {
+  heading: string
+  details: string
+}
+
 export interface RecipeWorkbenchPlugin {
   id: string
   defaultState: (config: unknown) => unknown | null
   decodeState: (value: unknown, config: unknown, recipe: RecipeContent) => unknown | null
   resolveRecipe: (recipe: RecipeContent, config: unknown, state: unknown) => RecipeContent
-  summary: (recipe: RecipeContent, config: unknown, state: unknown) => string
+  summary: (recipe: RecipeContent, config: unknown, state: unknown) => RecipeWorkbenchSummary | null
   Drawer: ComponentType<RecipeWorkbenchDrawerProps>
 }
 

@@ -4,7 +4,7 @@ import type { DoughFormula } from '@eat-yeet/l2-recipe-domain/formula'
 import { selectedRecipeMethod } from '@eat-yeet/l4-content-model/recipes'
 import { Dialog, DialogDescription, DialogTitle } from '@eat-yeet/l5-ui-primitives/primitives/dialog'
 import type { RecipeWorkbenchDrawerProps, RecipeWorkbenchPlugin } from '@eat-yeet/l7-recipes/recipes/workbench-registry'
-import { clone, completeFormula, isDoughConfig, decodeDoughState, resolveWorkbenchRecipe, selectionSummary, formatAppliedGrams } from './dough-workbench-model'
+import { clone, completeFormula, isDoughConfig, decodeDoughState, resolveWorkbenchRecipe, selectionOverview } from './dough-workbench-model'
 
 const DoughFormulaWorkbench = lazy(() => import('./dough-formula-workbench').then(({ DoughFormulaWorkbench }) => ({ default: DoughFormulaWorkbench })))
 
@@ -32,7 +32,7 @@ function createDoughWorkbenchPlugin(id: string, family: DoughFormula['family']):
     },
     summary: (recipe, config, state) => {
       const decoded = isDoughConfig(config) ? decodeDoughState(state, config, recipe) : null
-      return decoded?.formula.family === family ? selectionSummary(decoded, selectedRecipeMethod(recipe, decoded.methodId), formatAppliedGrams) : ''
+      return decoded?.formula.family === family ? selectionOverview(decoded, selectedRecipeMethod(recipe, decoded.methodId)) : null
     },
     Drawer: (props) => DoughWorkbenchDrawer(props, family),
   }

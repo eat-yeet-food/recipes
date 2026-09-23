@@ -32,13 +32,13 @@ export type RatingClient = {
 }
 
 const identityStorageKey = 'eatyeet:reviewer'
-function RatingStar({ filled, className }: { filled: boolean; className?: string }) {
+function RatingStar({ filled, className, onBrand = false }: { filled: boolean; className?: string; onBrand?: boolean }) {
   return <Star
     aria-hidden="true"
     strokeWidth={1.5}
     className={cn(
       'size-6',
-      filled ? 'fill-brand-alt text-brand-alt' : 'fill-transparent text-muted-foreground',
+      onBrand ? filled ? 'fill-ink text-ink' : 'fill-transparent text-ink' : filled ? 'fill-brand-alt text-brand-alt' : 'fill-transparent text-muted-foreground',
       className,
     )}
   />
@@ -273,7 +273,7 @@ export function RecipeRating({ title: _title, client }: { title: string; client:
       <span className="h-px flex-1 bg-border" aria-hidden="true" />
     </h2>
 
-    <div className="mb-8 rounded-lg border border-ink/10 bg-card p-6 shadow-md">
+    <div className="mb-8 rounded-surface bg-brand p-6 max-[360px]:p-4">
       <h3 className="mb-5 text-lg font-semibold text-ink">{summary?.ownRating ? 'Update your rating' : 'Rate this recipe'}</h3>
       <form onSubmit={(event) => { event.preventDefault(); void submit() }} className="flex flex-col gap-5">
         <fieldset disabled={saving} className="m-0 min-w-0 border-0 p-0">
@@ -283,7 +283,7 @@ export function RecipeRating({ title: _title, client }: { title: string; client:
               <input className="peer sr-only" type="radio" name={id} value={star} checked={score === star} onChange={() => { setScore(star); setHover(null); setError(''); setMessage('') }} />
               <span className="sr-only">{star} {star === 1 ? 'star' : 'stars'}</span>
               <span className="flex size-7 items-center justify-center rounded-control transition-transform hover:scale-110 peer-focus-visible:outline-2 peer-focus-visible:outline-ink peer-focus-visible:outline-offset-0 peer-disabled:opacity-50 max-[640px]:size-11">
-                <RatingStar filled={star <= (hover ?? score ?? 0)} />
+                <RatingStar onBrand filled={star <= (hover ?? score ?? 0)} />
               </span>
             </label>)}
           </div>
@@ -309,7 +309,7 @@ export function RecipeRating({ title: _title, client }: { title: string; client:
           <span>{error}</span>
           {!summary && <Button variant="link" onClick={() => void refresh()} disabled={loading}>Try again</Button>}
         </div> : null}
-        <Button variant="on-ink" className="w-full disabled:bg-brand disabled:text-ink disabled:opacity-50" type="submit"
+        <Button className="w-full" type="submit"
           disabled={!score || !summary || loading || saving || !identity.name.trim() || !identity.email.trim()}>
           {saving ? 'Submitting...' : summary?.ownRating ? 'Update Rating' : 'Submit Rating'}
         </Button>

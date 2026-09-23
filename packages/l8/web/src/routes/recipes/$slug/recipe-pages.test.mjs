@@ -72,7 +72,7 @@ check(
   'variant selector is removed',
   await desktop.locator('[aria-label="Recipe variants"]').count() === 0,
 )
-check('pizza shows applied configuration', (await desktop.locator('text=3 balls × 480g').count()) > 0)
+check('pizza shows applied configuration', (await desktop.locator('[data-recipe-adjustment]').textContent()).includes('3 × 16-inch pizzas') && (await desktop.locator('[data-recipe-adjustment]').textContent()).includes('480g each'))
 check('pizza uses the authored mozzarella', (await desktop.locator('#recipe-card').textContent()).includes("Trader Joe's whole milk low moisture mozzarella"))
 check('pizza no longer requires frozen provolone', !(await desktop.locator('#recipe-card').textContent()).toLowerCase().includes('provolone'))
 check('pizza links the recommended mozzarella', await desktop.locator('#recipe-card a[href*="traderjoes.com/home/search"]').count() === 1)

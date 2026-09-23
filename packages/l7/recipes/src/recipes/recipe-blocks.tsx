@@ -3,7 +3,8 @@ import { formatYield, humanizeMinutes } from '@eat-yeet/l2-recipe-domain/format'
 import type { RecipeBlock, Section } from '@eat-yeet/l4-content-model/blocks'
 import type { RecipeContent } from '@eat-yeet/l4-content-model/recipes'
 import { createPageBlockRegistry, registerSharedPageBlocks, type PageBlockRegistry } from '@eat-yeet/l6-ui-content-blocks/page-blocks'
-import { AdjustRecipeButton } from './recipe-workbench'
+import { RecipeAdjustmentSummary } from './recipe-workbench'
+import type { RecipeWorkbenchSummary } from './workbench-registry'
 import { RecipeFacts } from './recipe-facts'
 
 const Html = ({ as: Tag = 'div', html, ...rest }: { as?: any; html: string } & Record<string, unknown>) => (
@@ -14,7 +15,7 @@ export type RecipePageBlockContext = {
   page: RecipeContent
   siteUrl: string
   firstRecipeBlockIndex: number
-  workbenchSummary?: string
+  workbenchSummary?: RecipeWorkbenchSummary | null
   onOpenWorkbench?: () => void
 }
 
@@ -97,13 +98,7 @@ function RecipeBlockView({
       {block.ingredients.length > 0 && (
         <section>
           {context.workbenchSummary && context.onOpenWorkbench && (
-            <div className="mb-6 flex items-start justify-between gap-4 rounded-field bg-brand px-4 py-3 print:border print:bg-white">
-              <div>
-                <div className="font-action text-[11px] font-bold uppercase tracking-[0.8px] text-[var(--color-primary)]">Your recipe</div>
-                <div className="mt-1 text-sm font-bold">{context.workbenchSummary}</div>
-              </div>
-              <AdjustRecipeButton compact onClick={context.onOpenWorkbench} />
-            </div>
+            <RecipeAdjustmentSummary summary={context.workbenchSummary} onOpen={context.onOpenWorkbench} />
           )}
           <h2 className="m-0 pt-[30px] pb-3 border-t border-[var(--color-border)] text-[34px] leading-none font-bold">
             Ingredients

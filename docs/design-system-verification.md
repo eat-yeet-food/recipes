@@ -2,6 +2,18 @@
 
 Reviewed September 7, 2026. The approved usage contract is [design-system.md](design-system.md); runtime tokens and production components remain the implementation source of truth.
 
+## September 23 recipe adjustment toolbar and ratings
+
+Implemented approved proposal 01 for pizza and sourdough: an unfilled summary with a separate yield heading and configuration details, plus the shared ink Adjust recipe button. Recipe rating forms now use workbench yellow, ink picker stars, ink fields and an ink submit action. Aggregate stars remain orange on white.
+
+- `pnpm test` passed, including design policy, units, remote tooling checks, TypeScript, package boundaries, production build/class availability, isolated content integration, HTTP/SEO, 40 interactions, 134 recipe checks and 103 production stories at both 1280 and 390 pixels.
+- `pnpm test:a11y` passed all 39 page/state checks at 1366, 390 and 320 pixels. `pnpm test:security` found no known vulnerabilities.
+- `pnpm test:lighthouse` met accessibility and SEO scores of 100 on all six routes and performance scores of 97–100. It did **not** pass the LCP budget: pizza's three-run median was 2621ms against the 2500ms limit. A focused three-run diagnostic reproduced 2618ms and identified the unchanged pizza hero image as the LCP element. Other routes met the budgets. Reports are in `dist/performance-after.json`, `dist/performance-after_recipes_new-york-style-pizza.json` and `dist/performance-diagnostics`; these are local lab results, not production measurements.
+- `pnpm shots` completed without page errors. `pnpm parity` matched 11/15 baselines. Reviewed recipe old/new images, desktop workbench old/new/diffs and the mobile recipe diff. The recipe height and blurred background behind desktop workbench captures reflect the new toolbar/rating layout. The mobile recipe diff shows existing header utility width differences outside this change. No baselines were replaced; parity remains nonzero.
+- Browser review confirmed the sourdough summary at desktop and 320px, pizza at 320px, no horizontal overflow on either narrow recipe, the yellow rating form with ink selected stars, visible field focus, keyboard workbench opening, Escape dismissal and focus return to Adjust recipe.
+
+The touched summary stories' axe incomplete results concern isolated-page bypass landmarks; rating stories have none. App incompletes include the rating heading's continuing rule, modal focus guards/hidden background, clipped scroll content and image/emoji contrast. Visible rating and summary surfaces were inspected, and the existing dialog keyboard checks pass. A physical-device and screen-reader audit was not performed. No deployment was performed.
+
 ## September 10 sourdough hours and minutes
 
 Sourdough timing now uses paired hr/min inputs and compact recipe timestamps such as 1h, 1:30h, and 4:50h. Saved process values remain whole minutes.

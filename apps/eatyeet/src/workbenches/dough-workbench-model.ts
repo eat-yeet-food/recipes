@@ -51,6 +51,20 @@ export function selectionSummary(selection: DoughWorkbenchState, method?: Recipe
   return [pieces, batch.diameterInches ? `${batch.diameterInches}-inch pizzas` : undefined, method?.label, `${formatPercent(formula.hydrationPercent)} hydration`, formula.process ? formula.process.mixingMethod === 'hand' ? 'Hand mixed' : 'Spiral mixer' : undefined].filter(Boolean).join(' · ')
 }
 
+export function selectionOverview(selection: DoughWorkbenchState, method?: RecipeContentMethod | null) {
+  const { batch, formula } = selection
+  const heading = formula.family === 'pizza' && batch.diameterInches
+    ? `${batch.count} × ${batch.diameterInches}-inch ${batch.count === 1 ? 'pizza' : 'pizzas'}`
+    : `${batch.count} ${pieceCountLabel(batch.count, batch.pieceLabel)}`
+  const details = [
+    `${formatAppliedGrams(batch.pieceWeightGrams)} each`,
+    method?.label,
+    `${formatPercent(formula.hydrationPercent)} hydration`,
+    formula.process ? formula.process.mixingMethod === 'hand' ? 'Hand mixed' : 'Spiral mixer' : undefined,
+  ].filter(Boolean).join(' · ')
+  return { heading, details }
+}
+
 export function dynamicDoughItems(selection: DoughWorkbenchState, formatWeight = formatWorkbenchGrams) {
   const result = calculateFormula(selection.formula, selection.batch)
   const items = result.freshFlour.filter((part) => part.grams > 0.005).map((part) => `${formatWeight(part.grams)} ${part.name}`)
