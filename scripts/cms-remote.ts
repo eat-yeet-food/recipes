@@ -6,6 +6,7 @@ import { loadRemoteConfig, proxyConfig } from './remote/config.mjs'
 import { readOutputs } from './remote/pulumi.mjs'
 import { deploymentCredentials } from './remote/operator.mjs'
 import { ObjectStore, r2Client } from './remote/storage.mjs'
+import { contentDatabase, contentSnapshot } from './remote/atomic-content.mjs'
 
 export async function openRemoteCMS(environment: string, mutation: boolean) {
   const config = loadRemoteConfig(environment)
@@ -21,15 +22,35 @@ export async function openRemoteCMS(environment: string, mutation: boolean) {
   Object.assign(process.env, { CLOUDFLARE_API_TOKEN: credentials.CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID: config.accountId,
     PAYLOAD_SECRET: credentials.PAYLOAD_SECRET, OWNER_EMAIL: config.ownerEmail, DISABLE_PAYLOAD_HMR: 'true' })
   const proxy = await getPlatformProxy<any>({ configPath: proxyConfig(config, outputs), remoteBindings: true })
-  const payload = await getPayload({ config: createCMSConfig(proxy.env, {
-    secret: credentials.PAYLOAD_SECRET, origin: config.origin, migrationDir: resolve('packages/l8/web/migrations'), push: false,
-  }) })
-  for (const name of ['create', 'update', 'updateGlobal', 'delete'] as const) {
-    const original = (payload[name] as any).bind(payload)
-    ;(payload as any)[name] = async (...args: any[]) => { await assertLock(); return original(...args) }
+  let atomic: ReturnType<typeof contentDatabase> | null = null
+  try {
+    atomic = mutation && process.env.EATYEET_ATOMIC_CONTENT === '1'
+      ? contentDatabase(await contentSnapshot(proxy.env.D1), { remote: proxy.env.D1, assertOwner: assertLock })
+      : null
+    const payload = await getPayload({ config: createCMSConfig({ ...proxy.env, ...(atomic ? { D1: atomic.binding } : {}) }, {
+      secret: credentials.PAYLOAD_SECRET, origin: config.origin, migrationDir: resolve('packages/l8/web/migrations'), push: false,
+    }) })
+    if (atomic) {
+      // Git content is serialized by the release lock. Payload's admin editing
+      // locks are unrelated and must never be replayed from a content snapshot.
+      for (const name of ['recipes', 'articles', 'categories', 'media']) payload.collections[name].config.lockDocuments = false
+      for (const global of payload.config.globals) if (global.slug === 'site') global.lockDocuments = false
+    }
+    for (const name of ['create', 'update', 'updateGlobal', 'delete'] as const) {
+      const original = (payload[name] as any).bind(payload)
+      ;(payload as any)[name] = async (...args: any[]) => {
+        await assertLock()
+        return atomic ? atomic.atomic(() => original(...args)) : original(...args)
+      }
+    }
+    const bucket = proxy.env.R2
+    const guardedBucket = { head: bucket.head.bind(bucket), get: bucket.get.bind(bucket),
+      put: async (...args: any[]) => { await assertLock(); return bucket.put(...args) } }
+    return { payload, bucket: guardedBucket, close: async () => {
+      try { await payload.destroy() } finally { atomic?.close(); await proxy.dispose(); locks.client.destroy() }
+    } }
+  } catch (error) {
+    atomic?.close(); await proxy.dispose(); locks.client.destroy()
+    throw error
   }
-  const bucket = proxy.env.R2
-  const guardedBucket = { head: bucket.head.bind(bucket), get: bucket.get.bind(bucket),
-    put: async (...args: any[]) => { await assertLock(); return bucket.put(...args) } }
-  return { payload, bucket: guardedBucket, close: async () => { await payload.destroy(); await proxy.dispose(); locks.client.destroy() } }
 }

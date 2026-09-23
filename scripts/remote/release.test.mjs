@@ -4,12 +4,12 @@ import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { runRelease } from './release.mjs'
-import { acceptanceException } from './acceptance-policy.mjs'
 
 class Store {
   objects = new Map(); sequence = 0
   async read(key) { return structuredClone(this.objects.get(key) ?? null) }
   async write(key, value, condition = {}) {
+    if (key === 'control.json') assert.equal(value.status, 'ready', 'releases must never close traffic')
     const old = this.objects.get(key)
     if ((condition.IfNoneMatch && old) || (condition.IfMatch && old?.etag !== condition.IfMatch)) throw new Error('Precondition failed')
     const etag = String(++this.sequence); this.objects.set(key, { value: structuredClone(value), etag }); return etag
@@ -23,6 +23,10 @@ async function fixture(run) {
   const operations = new Store(), stateStore = new Store(), events = []
   const revision = 'a'.repeat(40)
   await stateStore.write(`acceptance/staging/${revision}.json`, { revision, restoreVerified: true, accessVerified: true, performanceVerified: true, ownerReviewed: true })
+  const previous = { status: 'ready', generation: 'old', releaseId: 'old', contentRevision: 'b'.repeat(40), migrations: {} }
+  await operations.write('control.json', previous)
+  await operations.write('releases/old.json', { id: 'old', status: 'complete', migrations: {}, bundle: 'export default {}', assetManifest: {} })
+  let changed = false
   const context = {
     config: { environment: 'production', origin: 'https://eatyeet.com' }, credentials: { RELEASE_VERIFY_SECRET: 'fixture-only-secret-longer-than-32' },
     stateStore, outputs: { operationsBucket: 'ops', mediaBucket: 'media', workerName: 'app' },
@@ -35,157 +39,149 @@ async function fixture(run) {
     },
     infrastructure: async () => ({ exportStack: async () => ({}), setConfig: async () => {}, preview: async () => {}, up: async () => { events.push('application') } }),
     saveOutputs: async () => {}, backup: async () => { events.push('backup'); return { key: 'backup' } },
-    uploadAssets: async () => { events.push('upload'); return { jwt: 'fixture-receipt', manifest: {} } },
+    archiveAssets: async () => { events.push('archive'); return {} },
     command: async (program, args) => {
       if (program === 'node') { events.push('verify'); return }
       const action = args[3]; events.push(action)
-      if (action !== 'plan') assert.equal((await operations.read('control.json')).value.status, 'maintenance')
-      if (action === 'plan') writeFileSync('dist/content-plan.json', JSON.stringify({ status: 'complete', counts: { created: 0, updated: 0, retired: 0 }, siteChanged: false, mediaChanges: 0 }))
+      if (action === 'sync') changed = false
+      if (action === 'plan') writeFileSync('dist/content-plan.json', JSON.stringify({ status: 'complete', counts: { created: 0, updated: changed ? 1 : 0, retired: 0 }, siteChanged: false, mediaChanges: 0 }))
     },
   }
-  try { await run({ context, operations, stateStore, events }) }
+  try { await run({ context, operations, stateStore, events, previous, changeContent: () => { changed = true } }) }
   finally { process.chdir(original); rmSync(directory, { recursive: true, force: true }) }
 }
-test('release uploads before mutation and opens traffic only after convergence and verification', async () => fixture(async ({ context, operations, stateStore, events }) => {
+test('normal unchanged deploy is automatically fast and never enters maintenance', async () => fixture(async ({ context, operations, stateStore, events }) => {
   await runRelease(context)
-  assert.deepEqual(events, ['build','backup','upload','migrate','plan','sync','plan','application','verify'])
-  assert.equal((await operations.read('control.json')).value.status, 'ready')
+  assert.deepEqual(events, ['build', 'plan', 'archive', 'application', 'verify'])
+  const control = (await operations.read('control.json')).value
+  assert.equal(control.status, 'ready')
+  assert.equal((await operations.read(`releases/${control.releaseId}.json`)).value.dataChanges, false)
   assert.equal(await stateStore.read('locks/production.json'), null)
 }))
-test('staging authenticates before build or remote mutation and reuses that session for verification', async () => fixture(async ({ context, operations, stateStore, events }) => {
-  context.config.environment = 'staging'
-  context.config.origin = 'https://staging.eatyeet.com'
-  context.accessSession = async (origin) => {
-    assert.equal(origin, context.config.origin)
-    assert.equal(await operations.read('control.json'), null)
+
+test('production deploy does not require manual acceptance, performance exceptions or restore drills', async () => fixture(async ({ context, stateStore }) => {
+  stateStore.objects.clear()
+  await runRelease(context)
+}))
+
+test('staging authenticates once before builds and locks and reuses the session', async () => fixture(async ({ context, operations, stateStore, events, previous }) => {
+  context.config = { environment: 'staging', origin: 'https://staging.eatyeet.com' }
+  context.accessSession = async () => {
     assert.equal(await stateStore.read('locks/staging.json'), null)
-    events.push('auth')
-    return 'fixture-access-session'
+    assert.deepEqual((await operations.read('control.json')).value, previous)
+    events.push('auth'); return 'private-test-session'
   }
   const command = context.command
   context.command = async (program, args, options) => {
-    if (program === 'node') assert.equal(options.env.EATYEET_ACCESS_TOKEN, 'fixture-access-session')
+    if (program === 'node') assert.equal(options.env.EATYEET_ACCESS_TOKEN, 'private-test-session')
     return command(program, args, options)
   }
   await runRelease(context)
-  assert.deepEqual(events, ['auth','build','backup','upload','migrate','plan','sync','plan','application','verify'])
-  assert.equal((await operations.read('control.json')).value.status, 'ready')
+  assert.deepEqual(events, ['auth', 'build', 'plan', 'archive', 'application', 'verify'])
 }))
-test('failed upload preserves previous public state and retains the release lock', async () => fixture(async ({ context, operations, stateStore }) => {
-  const before = { status: 'ready', generation: 'old', releaseId: 'old', contentRevision: 'b'.repeat(40), migrations: {} }
-  await operations.write('control.json', before)
-  context.uploadAssets = async () => { throw new Error('Upload unavailable') }
-  await assert.rejects(runRelease(context), /failed at upload/)
-  assert.deepEqual((await operations.read('control.json')).value, before)
-  assert.ok(await stateStore.read('locks/production.json'))
+
+test('failed authentication leaves serving state untouched and never locks', async () => fixture(async ({ context, operations, stateStore, previous, events }) => {
+  context.config.environment = 'staging'
+  context.accessSession = async () => { throw new Error('login failed') }
+  await assert.rejects(runRelease(context), /login failed/)
+  assert.deepEqual((await operations.read('control.json')).value, previous)
+  assert.equal(await stateStore.read('locks/staging.json'), null)
+  assert.deepEqual(events, [])
 }))
-test('partial sync failure remains in maintenance and resumes using the original backup', async () => fixture(async ({ context, operations, stateStore, events }) => {
+
+test('content changes get a backup and atomic sync while old application keeps serving', async () => fixture(async ({ context, operations, events, changeContent }) => {
+  changeContent()
   const command = context.command
-  context.command = async (program, args) => { if (args[3] === 'sync') throw new Error('Interrupted sync'); return command(program,args) }
+  context.command = async (program, args, options) => {
+    if (args[3] === 'sync') {
+      assert.equal(options.env.EATYEET_ATOMIC_CONTENT, '1')
+      assert.equal(options.env.EATYEET_MEDIA_PREUPLOADED, '1')
+      assert.equal((await operations.read('control.json')).value.releaseId, 'old')
+    }
+    return command(program, args, options)
+  }
+  await runRelease(context)
+  assert.deepEqual(events, ['build', 'plan', 'backup', 'archive', 'sync', 'plan', 'application', 'verify'])
+}))
+
+test('partial content failure keeps traffic open, changes cache generation, and resumes original backup', async () => fixture(async ({ context, operations, stateStore, events, changeContent }) => {
+  changeContent()
+  const command = context.command
+  context.command = async (program, args, options) => {
+    if (args[3] === 'sync') throw new Error('D1 interrupted')
+    return command(program, args, options)
+  }
   await assert.rejects(runRelease(context), /failed at sync/)
-  assert.equal((await operations.read('control.json')).value.status, 'maintenance')
-  const held = await stateStore.read('locks/production.json')
-  await stateStore.remove('locks/production.json', held.etag) // Represents completed explicit writer recovery.
-  context.command = command
-  await runRelease(context, { resume: held.value.releaseId })
-  assert.equal(events.filter((event) => event === 'backup').length, 1)
-  assert.equal((await operations.read('control.json')).value.status, 'ready')
-}))
-test('failed health verification never reopens public traffic', async () => fixture(async ({ context, operations }) => {
-  const command = context.command
-  context.command = async (program,args) => { if (program === 'node') throw new Error('Broken chunks'); return command(program,args) }
-  await assert.rejects(runRelease(context), /failed at verify/)
-  assert.equal((await operations.read('control.json')).value.status, 'maintenance')
-}))
-test('a new compatible commit can recover maintenance after explicit writer recovery', async () => fixture(async ({ context, operations, stateStore }) => {
-  const command = context.command
-  context.command = async (program, args) => { if (program === 'node') throw new Error('Provider verification interrupted'); return command(program, args) }
-  await assert.rejects(runRelease(context), /failed at verify/)
+  const failed = (await operations.read('control.json')).value
+  assert.equal(failed.status, 'ready'); assert.notEqual(failed.generation, 'old')
   const held = await stateStore.read('locks/production.json')
   await stateStore.remove('locks/production.json', held.etag)
-  const revision = 'b'.repeat(40)
-  context.revision = () => revision
-  await stateStore.write(`acceptance/staging/${revision}.json`, { revision, restoreVerified: true, accessVerified: true, performanceVerified: true, ownerReviewed: true })
-  context.command = command
-  await runRelease(context)
-  assert.equal((await operations.read('control.json')).value.contentRevision, revision)
-  assert.equal((await operations.read('control.json')).value.status, 'ready')
-  assert.equal((await operations.read(`releases/${held.value.releaseId}.json`)).value.status, 'failed')
-}))
-test('application rollback preserves synchronized content and does not run migrations or sync', async () => fixture(async ({ context, operations, events }) => {
-  await runRelease(context)
-  const before = (await operations.read('control.json')).value
-  events.length = 0
-  await runRelease(context, { rollback: before.releaseId })
-  assert.ok(!events.includes('migrate') && !events.includes('sync'))
-  assert.equal((await operations.read('control.json')).value.contentRevision, before.contentRevision)
-}))
-
-test('migration failure keeps maintenance and never synchronizes or deploys', async () => fixture(async ({ context, operations, events }) => {
-  const command = context.command
-  context.command = async (program, args) => { if (args[3] === 'migrate') throw new Error('Migration failed'); return command(program,args) }
-  await assert.rejects(runRelease(context), /failed at migrate/)
-  assert.equal((await operations.read('control.json')).value.status, 'maintenance')
-  assert.ok(!events.includes('sync') && !events.includes('application'))
-}))
-
-test('production records authorized limitations without reporting them as passes', async () => fixture(async ({ context, operations, stateStore }) => {
-  const revision = context.revision()
-  context.config.ownerEmail = 'owner@example.test'
-  const evidence = { revision, restoreVerified: true, accessVerified: true, performanceVerified: false, ownerReviewed: false,
-    exception: acceptanceException('Owner directed production deployment despite the disclosed measured limitations.', revision, context.config.ownerEmail, ['performance', 'owner-review']) }
-  await stateStore.write(`acceptance/staging/${revision}.json`, evidence)
-  await runRelease(context)
-  const control = (await operations.read('control.json')).value
-  assert.deepEqual((await operations.read(`releases/${control.releaseId}.json`)).value.acceptance, evidence)
-}))
-
-test('expired exceptions reject production before build or remote locking', async () => fixture(async ({ context, stateStore, events }) => {
-  const revision = context.revision()
-  context.config.ownerEmail = 'owner@example.test'
-  await stateStore.write(`acceptance/staging/${revision}.json`, { revision, restoreVerified: true, accessVerified: true, performanceVerified: false, ownerReviewed: false,
-    exception: acceptanceException('Owner directed production deployment despite the disclosed measured limitations.', revision, context.config.ownerEmail, ['performance', 'owner-review'], Date.now() - 86401000) })
-  await assert.rejects(runRelease(context), /owner exception/)
-  assert.deepEqual(events, [])
-  assert.equal(await stateStore.read('locks/production.json'), null)
-}))
-
-test('code-only release verifies an unchanged plan, skips content writes, retains backups and verification', async () => fixture(async ({ context, operations, stateStore, events }) => {
-  await operations.write('control.json', { status: 'ready', generation: 'old', releaseId: 'old', contentRevision: 'b'.repeat(40), migrations: {} })
-  await runRelease(context, { codeOnly: true })
-  assert.deepEqual(events, ['build', 'plan', 'backup', 'upload', 'application', 'verify'])
-  const control = (await operations.read('control.json')).value
-  assert.equal(control.status, 'ready')
-  assert.notEqual(control.generation, 'old')
-  assert.equal((await operations.read(`releases/${control.releaseId}.json`)).value.mode, 'code-only')
-  assert.equal(await stateStore.read('locks/production.json'), null)
-}))
-
-test('code-only rejects content drift before backup, upload or maintenance', async () => fixture(async ({ context, operations, events }) => {
-  const before = { status: 'ready', generation: 'old', releaseId: 'old', migrations: {} }
-  await operations.write('control.json', before)
-  const command = context.command
-  context.command = async (program, args) => {
-    await command(program, args)
-    if (args[3] === 'plan') writeFileSync('dist/content-plan.json', JSON.stringify({ status: 'complete', counts: { created: 0, updated: 1, retired: 0 }, siteChanged: false, mediaChanges: 0 }))
-  }
-  await assert.rejects(runRelease(context, { codeOnly: true }), /unchanged content\/media plan/)
-  assert.deepEqual(events, ['build', 'plan'])
-  assert.deepEqual((await operations.read('control.json')).value, before)
-}))
-
-test('failed code-only verification stays closed and resumes the recorded mode and backup', async () => fixture(async ({ context, operations, stateStore, events }) => {
-  await operations.write('control.json', { status: 'ready', generation: 'old', releaseId: 'old', migrations: {} })
-  const command = context.command
-  context.command = async (program, args) => { if (program === 'node') throw new Error('Interrupted verification'); return command(program, args) }
-  await assert.rejects(runRelease(context, { codeOnly: true }), /failed at verify/)
-  assert.equal((await operations.read('control.json')).value.status, 'maintenance')
-  const held = await stateStore.read('locks/production.json')
-  await stateStore.remove('locks/production.json', held.etag) // Explicit stopped-writer recovery represented by fixture.
   context.command = command
   await runRelease(context, { resume: held.value.releaseId })
   assert.equal(events.filter((event) => event === 'backup').length, 1)
-  assert.ok(!events.includes('migrate') && !events.includes('sync'))
-  assert.equal((await operations.read(`releases/${held.value.releaseId}.json`)).value.mode, 'code-only')
+}))
+
+test('failed application health restores prior bundle, preserves live data and releases lock', async () => fixture(async ({ context, operations, stateStore, events }) => {
+  const command = context.command
+  context.command = async (program, args, options) => {
+    if (program === 'node' && options.env.EATYEET_EXPECTED_RELEASE !== 'old') throw new Error('Broken app')
+    return command(program, args, options)
+  }
+  await assert.rejects(runRelease(context), /Previous application restored/)
+  const control = (await operations.read('control.json')).value
+  assert.equal(control.releaseId, 'old'); assert.equal(control.status, 'ready')
+  assert.equal(control.contentRevision, context.revision())
+  assert.equal(events.filter((event) => event === 'application').length, 2)
+  assert.equal(await stateStore.read('locks/production.json'), null)
+}))
+
+test('failed rollback health retains ownership and never pretends recovery succeeded', async () => fixture(async ({ context, operations, stateStore }) => {
+  context.command = async (program) => { if (program === 'node') throw new Error('Unhealthy')
+    writeFileSync('dist/content-plan.json', JSON.stringify({ status: 'complete', counts: { created: 0, updated: 0, retired: 0 }, siteChanged: false, mediaChanges: 0 })) }
+  await assert.rejects(runRelease(context), /Lock retained/)
+  assert.equal((await operations.read('control.json')).value.status, 'ready')
+  assert.ok(await stateStore.read('locks/production.json'))
+}))
+
+test('failed asset archive preserves public state and permits a direct retry without lock recovery', async () => fixture(async ({ context, operations, stateStore, previous, events }) => {
+  context.archiveAssets = async () => { throw new Error('Archive failure') }
+  await assert.rejects(runRelease(context), /failed at upload/)
+  assert.deepEqual((await operations.read('control.json')).value, previous)
+  assert.ok(!events.includes('application'))
+  assert.equal(await stateStore.read('locks/production.json'), null)
+}))
+
+test('explicit code-only remains an assertion against content drift', async () => fixture(async ({ context, operations, previous, changeContent }) => {
+  changeContent()
+  await assert.rejects(runRelease(context, { codeOnly: true }), /unchanged content/)
+  assert.deepEqual((await operations.read('control.json')).value, previous)
+}))
+
+test('application rollback is online and never synchronizes shared data', async () => fixture(async ({ context, operations, events, previous }) => {
+  await runRelease(context, { rollback: 'old' })
+  assert.ok(!events.includes('sync') && !events.includes('migrate') && !events.includes('backup'))
+  assert.equal((await operations.read('control.json')).value.contentRevision, previous.contentRevision)
+}))
+
+test('new schema must explicitly support online old/new application coexistence before building', async () => fixture(async ({ context, events }) => {
+  mkdirSync('packages/l8/web/migrations', { recursive: true })
+  writeFileSync('packages/l8/web/migrations/20260923_example.ts', 'export async function up() {}')
+  context.migrations = () => ({ '20260923_example.ts': 'new' })
+  await assert.rejects(runRelease(context), /onlineCompatible/)
+  assert.deepEqual(events, [])
+  writeFileSync('packages/l8/web/migrations/20260923_example.ts', 'export const onlineCompatible = true; export async function up() {}')
+  await runRelease(context)
+  assert.ok(events.includes('migrate') && events.includes('backup'))
+}))
+
+test('resume preserves the explicit code-only assertion', async () => fixture(async ({ context, operations, stateStore, changeContent }) => {
+  const up = context.infrastructure
+  context.infrastructure = async () => ({ ...(await up()), up: async () => { throw new Error('deployment interrupted') } })
+  await assert.rejects(runRelease(context, { codeOnly: true }), /failed at application/)
+  const held = await stateStore.read('locks/production.json')
+  await stateStore.remove('locks/production.json', held.etag)
+  context.infrastructure = up
+  changeContent()
+  await assert.rejects(runRelease(context, { resume: held.value.releaseId, codeOnly: true }), /unchanged content/)
   assert.equal((await operations.read('control.json')).value.status, 'ready')
 }))

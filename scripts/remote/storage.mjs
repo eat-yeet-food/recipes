@@ -30,10 +30,11 @@ export class ObjectStore {
     await this.client.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: key, IfMatch: etag }))
   }
   async upload(key, bytes, contentType) {
-    if (await this.matches(key, bytes, contentType)) return
+    if (await this.matches(key, bytes, contentType)) return false
     const digest = createHash('sha256').update(bytes).digest('hex')
     await this.client.send(new PutObjectCommand({ Bucket: this.bucket, Key: key, Body: bytes,
       ContentType: contentType, Metadata: { sha256: digest } }))
+    return true
   }
   async matches(key, bytes, contentType) {
     const digest = createHash('sha256').update(bytes).digest('hex')

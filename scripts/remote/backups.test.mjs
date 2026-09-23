@@ -1,7 +1,20 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { restoreBookmark, restoredExport } from './backups.mjs'
+import { restoreBookmark, restoredExport, recoveryBookmark, readBackup } from './backups.mjs'
 import { identityDigest } from './acceptance.mjs'
+
+test('online recovery points use Time Travel without a blocking SQL export', async () => {
+  const objects = new Map(), api = async (path) => {
+    assert.equal(path, '/accounts/account/d1/database/db/time_travel/bookmark')
+    return { result: { bookmark: 'exact-point' } }
+  }
+  const store = { write: async (key, value) => objects.set(key, { value }), read: async (key) => objects.get(key) }
+  const point = await recoveryBookmark(api, { accountId: 'account', environment: 'production' }, { databaseId: 'db' }, store, {}, 'release')
+  assert.equal(point.kind, 'time-travel')
+  const recovered = await readBackup(store, {}, point.key)
+  assert.equal(recovered.bookmark.bookmark, 'exact-point')
+  assert.equal(recovered.databaseId, 'db')
+})
 
 test('restore identity comparisons ignore JSON property order but preserve values and row order', () => {
   assert.equal(identityDigest([[{ id: 1, source_id: 'a', source_hash: 'b' }]]), identityDigest([[{ source_hash: 'b', id: 1, source_id: 'a' }]]))

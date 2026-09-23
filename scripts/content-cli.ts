@@ -251,6 +251,7 @@ try {
           old,
           changed,
           resolve(contentStateDir, 'images'),
+          { preuploaded: Boolean(remoteEnvironment && process.env.EATYEET_RELEASE_LOCK && process.env.EATYEET_MEDIA_PREUPLOADED === '1') },
         )
     }
 

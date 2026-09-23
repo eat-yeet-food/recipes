@@ -44,6 +44,7 @@
     "generate:importmap": "tsx scripts/generate-import-map.ts",
     "build:worker": "pnpm run build && node scripts/local.mjs worker",
     "test:content": "tsx test/content-integration.ts",
+    "test:deploy-content": "tsx test/atomic-content-integration.ts",
     "test:images": "node test/image-delivery.mjs",
     "test:worker": "pnpm build:worker && node test/worker-smoke.mjs",
     "remote:credentials": "node scripts/remote-cli.mjs credentials",

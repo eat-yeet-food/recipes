@@ -6,37 +6,31 @@ Required post-cutover work: [address the page/image loading regression](changes/
 
 ## Daily deployment
 
-Work from `/Users/phoganuci/src/recipes`. Commit and push the intended changes, then use the explicit environment commands. No deployment occurs on Git push. Local development never uses remote bindings.
+From the intended clean commit in `/Users/phoganuci/src/recipes`:
 
 ```sh
-git status --short --branch
-pnpm run deploy --env staging
-pnpm release:status --env staging
-pnpm remote:rehearse --env staging
-pnpm remote:acceptance --env staging --owner-reviewed
-pnpm run deploy --env production
-pnpm release:status --env production
-pnpm verify:prod https://eatyeet.com
-node test/remote-performance.mjs https://eatyeet.com
+pnpm run deploy --env both
 ```
 
-Only use `--owner-reviewed` after the identity/admin review described below. Acceptance belongs to the exact commit deployed to staging. A documentation or tooling commit also changes the SHA: finish the candidate before staging acceptance, and record post-release evidence in a later commit without misidentifying the deployed application.
+This preflights staging and production credentials immediately, authenticates staging in the normal browser if needed, deploys staging, then deploys production using the same verified build. A failed staging deploy stops the sequence. Production's public apex does not need an Access login. Git push alone does not deploy. To target one environment, use `--env staging` or `--env production`.
 
-If acceptance/recovery tooling itself needed a fix, `remote:acceptance --env staging --application-revision <full-deployed-SHA>` can verify the existing application without redeploying it. It checks the actual downloaded Worker source against the archived release, matching release/content identities and unchanged migrations, then runs normal acceptance. Evidence records the application SHA and verifier-tooling SHA separately. Production must still deploy the accepted application commit; this option does not mark the new tooling commit as a tested application.
+There is no deployment maintenance window, drain timer, manual acceptance, performance waiver, restore rehearsal, or second verification command. The CLI performs a short health check of the deployed identity, homepage, recipe, JavaScript assets, ratings API and anonymous owner-API protection. Full browser audits, performance measurements, SQL exports and recovery drills are separate operator tasks.
 
-Normal releases need no credential enrollment, password copying, API-token changes, dashboard deployment, or manual maintenance toggle. The CLI loads Keychain credentials, builds immutable assets, takes the shared remote lock and backups, publishes through Pulumi, verifies, and reopens traffic. Cloudflare may open normal Chrome when the owner Access session expires. `cloudflared` captures its token privately; do not run verbose login commands that print tokens.
+The release automatically detects content/schema changes. Unchanged data skips migrations, sync and database backup work. Data changes record a Time Travel bookmark; SQL export is excluded because Cloudflare blocks database requests during export. Content writes are atomic per Payload operation, so readers see a complete recipe before or after the update. Live ratings/replies and authentication data are never replayed from a snapshot. Content may become visible before the new Worker; migrations and new content features must support both versions during rollout. Cache generations change around synchronization.
 
-The standard/default Git-based workflow remains the full release. For an explicitly requested code-only iteration against an existing healthy environment, use:
+Media and rollback archives use SHA-256/size/MIME checks with bounded parallel requests and upload only missing or changed objects. Existing local archived assets are reused after checksum verification. Pulumi alone uploads Worker static assets using Cloudflare's missing-hash negotiation; the former duplicate upload session is removed. Identical commits reuse a verified local build across environments. The journal records phase timings and uploaded/reused media counts; measure these rather than guessing where time went.
+
+`--code-only` remains an optional assertion that content and migrations are unchanged. It is no longer necessary to get the fast path. Application rollback restores archived bundle/assets without rebuilding or reversing shared data:
 
 ```sh
-pnpm run deploy --env staging --code-only
-# After exact-commit staging acceptance:
-pnpm run deploy --env production --code-only
+pnpm run deploy --env production --rollback <completed-release-id>
 ```
 
-This mode still requires a clean committed checkout, the shared lock, a fresh remote content plan, backups, an immutable asset manifest, Pulumi and Worker/browser verification. It rejects migration differences or any planned recipe/article/site/media changes before maintenance. It verifies existing derivative sizes, SHA-256 metadata and MIME types with up to eight concurrent reads, skips media uploads and skips migrations/content synchronization. Missing or mismatched media requires a full release. A brief drain/verification maintenance window remains; no untracked hot patch or direct Wrangler deployment is introduced. The journal records `mode: code-only`; resume retains that mode and rechecks actual content/media state. It cannot provision a new environment or recover an unrelated maintenance release. Production acceptance and its exact-commit limitations policy are unchanged.
+New migrations must declare `export const onlineCompatible = true` after compatibility review. Add nullable/defaulted fields and introduce replacements before retiring old fields in a later change. A rolling Worker deploy cannot make an incompatible shared-database migration safe. Destructive migrations are rejected before mutation; explicit database recovery is a separate operation.
 
-After a restart, ensure normal Chrome is running before refreshing Access. If a login stalls without a browser window, stop only that identified read-only login process and retry `.local/remote/bin/cloudflared access login --quiet https://staging.eatyeet.com`; `--quiet` suppresses JWT output. The browser may only need approval of the existing application's CLI session, reusing current MFA proof. Verify the resulting session before starting a release. This is not credential reenrollment or permission to change Access policies.
+Cloudflare supports [versioned and gradual deployments](https://developers.cloudflare.com/workers/versions-and-deployments/). This workflow uses normal Worker replacement with traffic kept open, not a percentage canary. Old static chunks are retained for open browser tabs. A failed health check attempts to restore and verify the prior application automatically, preserving all live data. Successful rollback clears the lock but still reports the candidate as failed. Failures before database mutation/Worker deployment clear the lock so they can be retried directly. Otherwise inspect the retained journal/lock before recovery.
+
+After a restart, use normal Chrome for Access. If a login stalls, stop only the identified read-only login and retry `.local/remote/bin/cloudflared access login --quiet https://staging.eatyeet.com`; `--quiet` suppresses JWT output. Do not reenroll credentials or change Access policies for a routine deploy.
 
 ## Verified account and resource map
 
@@ -82,7 +76,7 @@ Only production anonymous document GETs on known public routes are eligible. Any
 
 The same candidate scopes Payload's color-scheme client-hint headers to `/admin/:path*`. Its default all-route `Critical-CH` causes an extra first navigation in Chromium, while the public site has no server-rendered theme variants. Admin theme negotiation and public security headers remain intact.
 
-Staging's owner Access session bypasses anonymous HTML caching. The isolated production Worker smoke tests actual edge hits, hydration/navigation and maintenance/generation behavior. After the HTML-cache candidate is accepted, deployed and reopened, verify real anonymous production with:
+Staging's owner Access session bypasses anonymous HTML caching. The isolated production Worker smoke tests actual edge hits, hydration/navigation and maintenance/generation behavior. For a separately requested HTML-cache audit, verify real anonymous production with:
 
 ```sh
 EATYEET_EXPECT_HTML_CACHE=1 pnpm verify:prod https://eatyeet.com
@@ -131,9 +125,9 @@ Pulumi state uses R2's S3 endpoint with explicit `region=auto`, `awssdk=v2` and 
 1. Enroll and export recovery credentials. Refresh `pnpm remote:inventory --env bootstrap`; verify account/zone, plans, DNS, Pages, hooks and existing resources. Save a timestamped copy of the sanitized inventory.
 2. Provision production with `infra/cloudflare/production.json` `cutover: false`: `pnpm remote:infra preview --env production`, then `pnpm remote:infra up --env production`. Initial Worker returns 503 and no apex route is created.
 3. Set `cutover: true`, finish documentation/tooling changes, run applicable repository checks, commit and push the candidate. Deploy that exact SHA to staging.
-4. Run staging restore rehearsal and acceptance. Bootstrap/review its separate owner as described below, or record an explicitly authorized pending-review exception. Do not fabricate an owner-review attestation.
+4. Complete one-time owner setup and recovery readiness as applicable to the initial cutover; keep those tasks separate from future routine deploys.
 5. Run `pnpm run deploy --env production`. The release saves cutover inventory, rejects outstanding legacy deploy hooks, disables matching Pages Git production builds if present, and publishes the Worker route only after compatible schema/content preparation.
-6. Verify raw HTML, referenced Next assets, hydration/navigation, images, protected/public cache behavior and release identity. Measure production mobile performance separately. Record actual production resource/route IDs and the Pages deployment used for rollback.
+6. Record actual production resource/route IDs and the Pages deployment retained for emergency rollback. Broader cutover/security review is separate from the routine health check.
 
 Initial provisioning does not need the final cutover commit. All content releases require a clean immutable commit. Never change `cutover` in an uncommitted checkout just to get a release past this sequence.
 
@@ -141,7 +135,7 @@ Initial provisioning does not need the final cutover commit. All content release
 
 Cloudflare Access protects all staging requests and production admin/API/preview surfaces; `/api/public` remains public. The account-restricted Cloudflare sign-in provider, exact owner email, independent MFA, disabled default/preview Worker hostnames, and in-handler JWT checks remain enforced even when a review is pending.
 
-Release authentication is a preflight, not a verification-phase task. A staging deploy obtains or refreshes its owner Access session before build work, the remote writer lock and maintenance, then reuses that session for final verification. Production deployment credentials are loaded and validated from Keychain before release work begins; the public production apex is not an Access application and must not trigger an apex login. If any required preflight fails, stop while the currently ready release is still serving traffic.
+Release authentication is a preflight, not a verification-phase task. A staging deploy obtains or refreshes its owner Access session before build work or the remote writer lock, then reuses that session for final verification. Production deployment credentials are loaded and validated from Keychain before release work begins; the public production apex is not an Access application and must not trigger an apex login. If any required preflight fails, stop while the currently ready release is still serving traffic.
 
 Use normal Chrome for authentication. Enroll an independent authenticator at `https://icy-fog-1d6c.cloudflareaccess.com/#/Account`. If a Touch ID choice opens a phone QR but the phone has no passkey, cancel that challenge and select an enrolled method in normal Chrome. Do not disable MFA or reset devices merely to finish a deployment. The owner-only App Launcher permits first-device enrollment without requiring that new device in advance; site apps retain MFA.
 
@@ -149,19 +143,15 @@ After a database is initialized, run `pnpm owner:bootstrap --env staging` or `--
 
 Owner review includes allowed identity/MFA, denied identity/account, Payload login and read-only admin, denied writes, preview/draft handling, expired/forged JWTs, session revocation, alternate-hostname protection and environment session isolation. Automated Worker checks cover only part of this list. An empty owners table means Payload admin cannot be used until bootstrap; it does not enable signup.
 
-### Explicitly authorized limitations
+### Optional audits
 
-Default acceptance requires performance ≥90, LCP ≤2.5 seconds and CLS ≤0.1 using three mobile runs per route, plus completed owner review. If the owner explicitly directs deployment despite disclosed performance shortfalls or deferred manual owner review, record that authorization with:
+`pnpm verify:prod <origin>` runs the full Worker/browser audit. `node test/remote-performance.mjs <origin>` measures mobile performance. `remote:acceptance` and `remote:rehearse` remain explicit audit/recovery tools, including their legacy evidence format. They are not prerequisites for deploying to production. Do not invent passes or carry an old exception into new reports.
 
-```sh
-pnpm remote:acceptance --env staging --approved-limitations 'Record the owner request, date, and the specific disclosed limitations here.'
-```
-
-This is an exceptional, audited path, never the default. It still executes exact-commit staging Worker/security checks, all performance measurements, encrypted-export restore and the D1 recovery rehearsal. Actual failing metrics and `ownerReviewed: false` remain in evidence. Exceptions are bound to the owner and commit, expire after 24 hours, and are copied into the production release journal. They cannot waive restore, failed Worker/security verification, missing credentials, locks or MFA enforcement. A new commit needs new acceptance and authorization; a prior exception is not blanket approval for future releases.
+Full exports and actual restore drills can interrupt database service. Run them only as deliberately requested backup/recovery work, never automatically before an application deployment. Routine data changes retain Time Travel bookmarks in `backups/<release-id>/bookmark.json`; retention is the database plan's Time Travel window, not the R2 object's lifetime.
 
 ## Failure recovery and rollback
 
-First run `pnpm release:status --env <environment>`. `ready` plus a cleared lock indicates a completed release. A browser sign-in page is Access; “We’re updating the site” is application maintenance. Signing in alone does not clear maintenance. Inspect the journal phase before selecting recovery.
+After a failed or ambiguous operation, run `pnpm release:status --env <environment>`. For online releases, `ready` means traffic is admitted; also inspect journal completion or verified rollback and the cleared lock to determine the result. A browser sign-in page is Access; “We’re updating the site” is application maintenance. Signing in alone does not clear maintenance. Inspect the journal phase before selecting recovery.
 
 All mutations use a conditional R2 ownership lock and Pulumi locking. A stale heartbeat means interrupted work, not permission to steal ownership. Verify the process, its child writers and outstanding remote operations are stopped; the local recovery tool additionally checks host, dead PID and a two-minute quiet interval.
 
@@ -170,13 +160,13 @@ pnpm release:recover <release-id> --env staging --writer-stopped
 pnpm run deploy --env staging --resume <release-id>
 ```
 
-Resume uses the original commit and backup. If the application is already deployed and only its verification failed, use `pnpm release:verify <release-id> --env staging` after ownership recovery. It validates deployed source and migrations, runs Worker checks, and reopens on success. Verification tooling may have a different clean SHA; the application SHA remains unchanged and both are recorded.
+Resume uses the original commit and backup. If the application is already deployed and only its verification failed, use `pnpm release:verify <release-id> --env staging` after ownership recovery. It validates deployed source and migrations, runs the appropriate health check, and completes recovery. Legacy maintenance recovery reopens on success; online recovery never closes traffic. Verification tooling may have a different clean SHA; the application SHA remains unchanged and both are recorded.
 
 For failed initial provisioning, use `pnpm remote:infra up --env <environment> --resume infra-<timestamp>` after recovery. Do not use initial provisioning against a content-initialized stack. If code must change to fix a failed release, preserve the former journal, recover its writer, commit the fix and start a new compatible release. Never rewrite the failed release's SHA.
 
 For a failed restore rehearsal that already created its probe, recover the stopped writer, then run `pnpm remote:rehearse --env staging --backup backups/time-travel-<original-timestamp>/database.json`. Use the original encrypted pre-probe backup, not the subsequent safety snapshot. Resume requires maintenance, validates the export and matching content/owner identities, saves another safety backup, restores the exact bookmark and verifies probe removal before reopening. D1's restore bookmark is a [query parameter](https://developers.cloudflare.com/api/resources/d1/subresources/database/subresources/time_travel/methods/restore/); a JSON-body bookmark is ignored and returns error 7400. Rehearsal evidence records the recovery-tooling SHA separately from the unchanged deployed application SHA.
 
-Application rollback is `pnpm run deploy --env production --rollback <completed-release-id>`. It requires compatible migrations, restores retained bundle/assets, preserves current content/authentication data, advances cache generation and verifies. Database restore is a separate maintenance operation using the exact backup bookmark; see the implementation reference.
+Application rollback is `pnpm run deploy --env production --rollback <completed-release-id>`. It requires compatible migrations, restores retained bundle/assets, preserves current content/authentication data, advances cache generation and verifies. Database restore is a separate explicitly requested recovery operation using the exact backup bookmark, never automatic application rollback; see the implementation reference.
 
 For emergency return to retained Pages, first stop/recover the release writer. Save state and recheck production route `8296ee010a124ae9b2b0643658906d5c` (`eatyeet.com/*`) against live inventory. Through Pulumi, remove only `eatyeet.com/*` (deliberately disable that route's deletion protection/retention), keeping Pages, DNS, D1, R2 and Access intact. Verify Pages HTML and its referenced assets. Reconcile `cutover` and route ownership in Git/Pulumi before another release. Do not delete the zone, replace DNS with a guessed target, or reenable legacy automatic deployments before verifying the rollback.
 

@@ -18,18 +18,6 @@ export function acceptanceException(reason, revision, ownerEmail, limitations, n
   return { revision, ownerEmail, reason: reason.trim(), limitations, recordedAt: new Date(now).toISOString(), expiresAt: new Date(now + 86400000).toISOString() }
 }
 
-export function assertProductionAcceptance(evidence, revision, ownerEmail, now = Date.now()) {
-  if (evidence?.revision !== revision || evidence.restoreVerified !== true || evidence.accessVerified !== true)
-    throw new Error('Production requires exact-commit staging Worker/security verification and tested restore; these checks cannot be excepted')
-  const missing = [!evidence.performanceVerified && 'performance', !evidence.ownerReviewed && 'owner-review'].filter(Boolean)
-  if (!missing.length) return
-  const exception = evidence.exception
-  if (exception?.revision !== revision || exception.ownerEmail !== ownerEmail || typeof exception.reason !== 'string' || exception.reason.trim().length < 20 ||
-      !Number.isFinite(Date.parse(exception.expiresAt)) || Date.parse(exception.expiresAt) <= now ||
-      Date.parse(exception.expiresAt) > now + 86400000 || !Array.isArray(exception.limitations) ||
-      missing.some((name) => !exception.limitations.includes(name)) || exception.limitations.some((name) => !['performance', 'owner-review'].includes(name)))
-    throw new Error('Production requires passing performance and owner review, or a current explicit owner exception for these exact limitations')
-}
 export function assertAcceptanceRelease(record, control, outputs, revision, migrations) {
   if (!/^[a-f0-9]{40}$/.test(revision) || record?.revision !== revision || record.status !== 'complete' ||
       control?.status !== 'ready' || control.contentRevision !== revision || control.releaseId !== record.id || outputs.releaseId !== record.id)

@@ -15,6 +15,8 @@ export function assertCompatible(previous, next) {
   for (const name of Object.keys(next).filter((name) => !previous?.[name])) {
     const up = readFileSync(`packages/l8/web/migrations/${name}`, 'utf8').split('export async function down')[0]
     if (/\bDROP\s+(?:TABLE|COLUMN)|\bDELETE\s+FROM|\bTRUNCATE\b/i.test(up)) throw new Error(`Destructive migration requires a separately reviewed maintenance procedure: ${name}`)
+    if (previous && !/export\s+const\s+onlineCompatible\s*=\s*true\b/.test(up))
+      throw new Error(`New migration must declare onlineCompatible = true after review for old/new Worker compatibility: ${name}. Use expand/contract changes; deployments never enable maintenance.`)
   }
 }
 export function command(program, args, { env = {}, cwd, signal, input, capture = false } = {}) {

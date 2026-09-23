@@ -6,9 +6,9 @@ import { cleanRevision, migrationManifest, digest, command } from './process.mjs
 
 export function assertVerificationState(record, control, outputs, migrations) {
   if (!record || record.phase !== 'verify' || !['failed', 'running'].includes(record.status)) throw new Error('Only an interrupted verification phase can be completed without deployment')
-  if (control?.status !== 'maintenance' || control.releaseId !== record.id || control.contentRevision !== record.revision || outputs.releaseId !== record.id) throw new Error('Application, content and maintenance identities must match the interrupted release')
+  if (!['maintenance', 'ready'].includes(control?.status) || control.releaseId !== record.id || control.contentRevision !== record.revision || outputs.releaseId !== record.id) throw new Error('Application and content identities must match the interrupted release')
   if (JSON.stringify(control.migrations) !== JSON.stringify(record.migrations) || JSON.stringify(migrations) !== JSON.stringify(record.migrations)) throw new Error('Verification tooling migrations differ from the deployed release')
-  if (!record.bundleHash || !record.backup || !record.assetManifest || typeof record.bundle !== 'string' || digest(record.bundle) !== record.bundleHash) throw new Error('Release recovery evidence is incomplete or corrupted')
+  if (!record.bundleHash || (!record.backup && record.mode !== 'online') || !record.assetManifest || typeof record.bundle !== 'string' || digest(record.bundle) !== record.bundleHash) throw new Error('Release recovery evidence is incomplete or corrupted')
 }
 
 export async function verifyDeployedBundle(config, credentials, outputs, record, request = fetch) {
@@ -52,7 +52,7 @@ export async function verifyRelease(context, releaseId) {
     if (JSON.stringify(held?.value) !== JSON.stringify(initial)) throw new Error('Remote state changed during authentication')
     const deployedSource = await (context.verifyBundle ?? verifyDeployedBundle)(config, credentials, outputs, record)
     await operations.write(`recovery/${releaseId}/${Date.now()}.json`, { record, control: held.value, verificationRevision }, { IfNoneMatch: '*' })
-    await (context.command ?? command)('node', ['test/verify-prod.mjs', config.origin], {
+    await (context.command ?? command)('node', [initial.status === 'ready' ? 'scripts/remote/health.mjs' : 'test/verify-prod.mjs', config.origin], {
       env: { EATYEET_EXPECTED_RELEASE: releaseId, EATYEET_EXPECTED_CONTENT_REVISION: record.revision,
         EATYEET_VERIFY_TOKEN: probeToken(credentials, releaseId, config.origin), EATYEET_MEDIA_ORIGIN: config.mediaOrigin,
         ...(session ? { EATYEET_ACCESS_TOKEN: session } : {}) }, signal: abort.signal,

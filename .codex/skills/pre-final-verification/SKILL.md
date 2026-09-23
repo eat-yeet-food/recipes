@@ -17,8 +17,12 @@ changes:
 - `pnpm run test:a11y`
 - `pnpm run test:lighthouse`
 
-For deploy or production-edge changes, also run `pnpm run verify:prod [origin]`
-after deployment.
+For deployment tooling changes, run focused remote tests, the isolated
+`pnpm test:deploy-content` integration when atomic content sync changes, boundaries
+and TypeScript checks. Do not run UI/Storybook/Lighthouse suites for tooling-only
+changes. Routine deployment runs its own short health check; do not append a
+second verification or performance gate. Run the full `verify:prod` browser audit
+when specifically needed for a production-edge behavior change.
 
 If a command cannot be run, record the exact blocker before closing out.
 

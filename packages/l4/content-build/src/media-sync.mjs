@@ -8,9 +8,10 @@ export async function syncMediaItem(
   old,
   changed,
   cacheDir,
+  { preuploaded = false } = {},
 ) {
   const { manifest } = item
-  for (const variant of [...manifest.variants, manifest.social]) {
+  for (const variant of preuploaded ? [] : [...manifest.variants, manifest.social]) {
     const existing = await bucket.head(variant.key)
     if (existing?.size !== variant.bytes) {
       const bytes = readFileSync(

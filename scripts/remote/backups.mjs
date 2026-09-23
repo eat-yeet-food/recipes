@@ -21,9 +21,8 @@ export async function restoreBookmark(api, endpoint, bookmark) {
   return (await api(`${endpoint}/time_travel/restore?${new URLSearchParams({ bookmark })}`, { method: 'POST' })).result
 }
 
-export async function databaseBackup(api, config, outputs, store, credentials, releaseId) {
+export async function databaseExport(api, config, outputs) {
   const endpoint = `/accounts/${config.accountId}/d1/database/${outputs.databaseId}`
-  const bookmark = (await api(`${endpoint}/time_travel/bookmark`)).result
   let current
   for (let attempt = 0; attempt < 120; attempt++) {
     const result = (await api(`${endpoint}/export`, { method: 'POST', body: JSON.stringify({ output_format: 'polling', ...(current ? { current_bookmark: current } : {}) }) })).result
@@ -31,22 +30,39 @@ export async function databaseBackup(api, config, outputs, store, credentials, r
     if (result.result?.signed_url) {
       const response = await fetch(result.result.signed_url, { signal: AbortSignal.timeout(120000) })
       if (!response.ok) throw new Error('D1 export download failed')
-      const sql = await response.text()
-      const payload = { version: 1, environment: config.environment, databaseId: outputs.databaseId,
-        releaseId, bookmark, sha256: digest(sql), sql, createdAt: new Date().toISOString() }
-      const key = `backups/${releaseId}/database.json`
-      await store.write(key, seal(payload, credentials.PULUMI_CONFIG_PASSPHRASE), { IfNoneMatch: '*' })
-      return { key, bookmark, sha256: payload.sha256 }
+      return response.text()
     }
     current = result.at_bookmark
     await new Promise((resolve) => setTimeout(resolve, 1000))
   }
   throw new Error('D1 export timed out')
 }
+export async function databaseBackup(api, config, outputs, store, credentials, releaseId) {
+  const bookmark = (await api(`/accounts/${config.accountId}/d1/database/${outputs.databaseId}/time_travel/bookmark`)).result
+  const sql = await databaseExport(api, config, outputs)
+  const payload = { version: 1, environment: config.environment, databaseId: outputs.databaseId,
+    releaseId, bookmark, sha256: digest(sql), sql, createdAt: new Date().toISOString() }
+  const key = `backups/${releaseId}/database.json`
+  await store.write(key, seal(payload, credentials.PULUMI_CONFIG_PASSPHRASE), { IfNoneMatch: '*' })
+  return { key, bookmark, sha256: payload.sha256 }
+}
+// Taking a Time Travel bookmark is read-only and does not suspend D1 traffic.
+// Full SQL exports and restore drills remain explicit operator operations.
+export async function recoveryBookmark(api, config, outputs, store, _credentials, releaseId) {
+  const bookmark = (await api(`/accounts/${config.accountId}/d1/database/${outputs.databaseId}/time_travel/bookmark`)).result
+  if (!bookmark?.bookmark) throw new Error('D1 did not return a recovery bookmark')
+  const key = `backups/${releaseId}/bookmark.json`
+  await store.write(key, { environment: config.environment, databaseId: outputs.databaseId, releaseId, bookmark, createdAt: new Date().toISOString() }, { IfNoneMatch: '*' })
+  return { key, bookmark, kind: 'time-travel' }
+}
 export async function readBackup(store, credentials, key) {
-  if (!/^backups\/[a-zA-Z0-9_-]+\/database\.json$/.test(key)) throw new Error('Invalid backup key')
+  if (!/^backups\/[a-zA-Z0-9_-]+\/(database|bookmark)\.json$/.test(key)) throw new Error('Invalid backup key')
   const object = await store.read(key)
   if (!object) throw new Error('Backup not found')
+  if (key.endsWith('/bookmark.json')) {
+    if (!object.value.bookmark?.bookmark || !object.value.databaseId || !['staging', 'production'].includes(object.value.environment)) throw new Error('Invalid recovery bookmark')
+    return object.value
+  }
   const backup = unseal(object.value, credentials.PULUMI_CONFIG_PASSPHRASE)
   if (digest(backup.sql) !== backup.sha256) throw new Error('Backup checksum mismatch')
   return backup

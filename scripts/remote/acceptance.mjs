@@ -3,7 +3,6 @@ import { resolve } from 'node:path'
 import { ObjectStore } from './storage.mjs'
 import { databaseBackup, readBackup, restoreBookmark, restoredExport } from './backups.mjs'
 import { command, cleanRevision, digest, migrationManifest } from './process.mjs'
-import { ownerAccessSession } from './access-session.mjs'
 import { performancePassed, acceptanceException, assertAcceptanceRelease } from './acceptance-policy.mjs'
 import { verifyDeployedBundle } from './verify-release.mjs'
 
@@ -51,7 +50,7 @@ export async function rehearseRestore({ config, credentials, client, api, output
   console.log('Staging Time Travel and content/owner identity verification passed.')
 }
 
-export async function acceptStaging({ config, credentials, client, api, outputs, lock, stateStore }, ownerReviewed, approvedLimitations, applicationRevision) {
+export async function acceptStaging({ config, credentials, client, api, outputs, lock, stateStore, accessToken }, ownerReviewed, approvedLimitations, applicationRevision) {
   if (config.environment !== 'staging') throw new Error('Acceptance rehearsal runs against staging only')
   const verifierRevision = cleanRevision()
   const revision = applicationRevision ?? verifierRevision
@@ -60,7 +59,8 @@ export async function acceptStaging({ config, credentials, client, api, outputs,
   const record = control?.releaseId ? (await store.read(`releases/${control.releaseId}.json`))?.value : null
   assertAcceptanceRelease(record, control, outputs, revision, migrationManifest())
   const deployedSource = await verifyDeployedBundle(config, credentials, outputs, record)
-  const session = await ownerAccessSession(config.origin)
+  const session = accessToken
+  if (!session) throw new Error('Authenticate before taking the audit lock')
   await command('node', ['test/verify-prod.mjs', config.origin], { env: { EATYEET_ACCESS_TOKEN: session, EATYEET_EXPECTED_RELEASE: control.releaseId, EATYEET_EXPECTED_CONTENT_REVISION: revision } })
   rmSync('dist/remote-performance.json', { force: true })
   let performanceError

@@ -81,3 +81,15 @@ test('a competing release or changed remote generation cannot be reopened by ver
   await assert.rejects(verifyRelease(two.context, two.record.id), /changed during verification/)
   assert.equal((await two.operations.read('control.json')).value.status, 'maintenance')
 })
+
+test('online verification recovery needs no SQL export and never closes serving traffic', async () => {
+  const { context, operations, record, control } = await fixture()
+  await operations.write('control.json', { ...control, status: 'ready' })
+  await operations.write(`releases/${record.id}.json`, { ...record, mode: 'online', backup: undefined })
+  context.command = async (_program, args) => {
+    assert.equal(args[0], 'scripts/remote/health.mjs')
+    assert.equal((await operations.read('control.json')).value.status, 'ready')
+  }
+  await verifyRelease(context, record.id)
+  assert.equal((await operations.read(`releases/${record.id}.json`)).value.status, 'complete')
+})

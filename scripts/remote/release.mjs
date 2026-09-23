@@ -4,32 +4,41 @@ import { createHmac, randomUUID } from 'node:crypto'
 import { ReleaseLock } from './lock.mjs'
 import { ObjectStore } from './storage.mjs'
 import { infrastructure, saveOutputs } from './pulumi.mjs'
-import { uploadAssets, archiveAssets, restoreAssets } from './assets.mjs'
+import { archiveAssets, restoreAssets } from './assets.mjs'
 import { command, cleanRevision, migrationManifest, assertCompatible, digest } from './process.mjs'
-import { databaseBackup } from './backups.mjs'
+import { recoveryBookmark } from './backups.mjs'
 import { ownerAccessSession } from './access-session.mjs'
 import { deploymentManifest } from '../../infra/cloudflare/assets.cjs'
-import { assertProductionAcceptance } from './acceptance-policy.mjs'
-import { assertCodeOnly, verifyExistingMedia } from './code-only.mjs'
+import { assertCodeOnly } from './code-only.mjs'
+import { concurrent } from './concurrency.mjs'
+import { cachedBuild } from './build-cache.mjs'
 
 export function probeToken(credentials, releaseId, origin) {
   const body = Buffer.from(JSON.stringify({ releaseId, origin, exp: Math.floor(Date.now() / 1000) + 600 })).toString('base64url')
   return `${body}.${createHmac('sha256', credentials.RELEASE_VERIFY_SECRET).update(body).digest('base64url')}`
 }
-async function buildArtifacts({ directory, outputs, childEnv, abort, child, rollback, command }) {
+async function buildArtifacts({ directory, outputs, childEnv, abort, child, rollback, command, revision }) {
   // Builds and source preparation happen before acquiring the remote writer lock.
-  if (!rollback) await child('prepare')
-  await command('pnpm', ['run', 'build:worker'], { signal: abort.signal })
-  const buildConfig = resolve(directory, 'wrangler-build.json')
-  writeFileSync(buildConfig, JSON.stringify({ name: outputs.workerName, main: resolve('packages/l8/web/worker.mjs'), compatibility_date: '2026-09-12', compatibility_flags: ['nodejs_compat', 'global_fetch_strictly_public'], workers_dev: false, preview_urls: false }), { mode: 0o600 })
-  const bundleDirectory = resolve(directory, 'bundle')
-  await command('pnpm', ['exec', 'wrangler', 'deploy', '--dry-run', '--config', buildConfig, '--outdir', bundleDirectory], { env: childEnv, signal: abort.signal })
-  const modules = readdirSync(bundleDirectory).filter((name) => !name.endsWith('.map') && !name.startsWith('README'))
-  if (modules.length !== 1 || !/\.(m?js)$/.test(modules[0])) throw new Error('Worker produced additional modules; do not deploy an incomplete bundle')
-  const bundleFile = resolve(bundleDirectory, modules[0])
-  const assetsDirectory = resolve(directory, 'assets')
-  cpSync(resolve('packages/l8/web/.open-next/assets'), assetsDirectory, { recursive: true, filter: (source) => !source.endsWith('.map') })
-  return { bundleFile, assetsDirectory }
+  if (rollback) {
+    const bundleFile = resolve(directory, 'worker.js'), assetsDirectory = resolve(directory, 'assets')
+    mkdirSync(assetsDirectory, { recursive: true })
+    return { bundleFile, assetsDirectory }
+  }
+  await child('prepare')
+  return cachedBuild(revision, directory, async () => {
+    await command('pnpm', ['run', 'build:worker'], { signal: abort.signal })
+    const buildConfig = resolve(directory, 'wrangler-build.json')
+    writeFileSync(buildConfig, JSON.stringify({ name: outputs.workerName, main: resolve('packages/l8/web/worker.mjs'), compatibility_date: '2026-09-12', compatibility_flags: ['nodejs_compat', 'global_fetch_strictly_public'], workers_dev: false, preview_urls: false }), { mode: 0o600 })
+    const bundleDirectory = resolve(directory, 'bundle')
+    await command('pnpm', ['exec', 'wrangler', 'deploy', '--dry-run', '--config', buildConfig, '--outdir', bundleDirectory], { env: childEnv, signal: abort.signal })
+    const modules = readdirSync(bundleDirectory).filter((name) => !name.endsWith('.map') && !name.startsWith('README'))
+    if (modules.length !== 1 || !/\.(m?js)$/.test(modules[0])) throw new Error('Worker produced additional modules; do not deploy an incomplete bundle')
+    const bundleFile = resolve(bundleDirectory, modules[0])
+    const assetsDirectory = resolve(directory, 'assets')
+    cpSync(resolve('packages/l8/web/.open-next/assets'), assetsDirectory, { recursive: true, filter: (source) => !source.endsWith('.map') })
+    if (cleanRevision() !== revision) throw new Error('Source commit changed during the build; refusing to cache artifacts')
+    return { bundleFile, assetsDirectory }
+  })
 }
 export async function runRelease(context, { resume, rollback, codeOnly = false } = {}) {
   const { config, credentials, stateStore, client, api, outputs } = context
@@ -38,6 +47,7 @@ export async function runRelease(context, { resume, rollback, codeOnly = false }
   const revision = (context.revision ?? cleanRevision)()
   const operations = storeFor(outputs.operationsBucket)
   let previous = (await operations.read('control.json'))?.value
+  if (previous && previous.status !== 'ready' && !resume) throw new Error('Recover the existing maintenance operation before deploying; normal releases keep traffic open')
   const releaseId = resume ?? `${revision.slice(0, 12)}-${Date.now()}`
   if (!/^[a-zA-Z0-9_-]+$/.test(releaseId)) throw new Error('Invalid release identity')
   const directory = resolve('.local/remote', config.environment, 'releases', releaseId)
@@ -49,8 +59,9 @@ export async function runRelease(context, { resume, rollback, codeOnly = false }
   let record = resume ? (await operations.read(`releases/${releaseId}.json`))?.value : null
   if (resume && (!record || record.revision !== revision)) throw new Error('Resume requires the original release commit')
   if (resume) {
-    if (codeOnly && record.mode !== 'code-only') throw new Error('Cannot change release mode during resume')
-    codeOnly = record.mode === 'code-only'
+    const assertion = record.codeOnly ?? record.mode === 'code-only'
+    if (codeOnly && !assertion) throw new Error('Cannot change release mode during resume')
+    codeOnly = assertion
   }
   if (resume) previous = record.previous
   const migrations = (context.migrations ?? migrationManifest)()
@@ -61,33 +72,39 @@ export async function runRelease(context, { resume, rollback, codeOnly = false }
   }
   const rollbackRecord = rollback ? (await operations.read(`releases/${rollback}.json`))?.value : null
   if (rollback && (!rollbackRecord || rollbackRecord.status !== 'complete' || JSON.stringify(rollbackRecord.migrations) !== JSON.stringify(previous?.migrations))) throw new Error('Application rollback requires a completed release with the currently applied migration set')
-  let acceptance
-  if (config.environment === 'production' && !rollback && !resume) {
-    acceptance = (await stateStore.read(`acceptance/staging/${revision}.json`))?.value
-    assertProductionAcceptance(acceptance, revision, config.ownerEmail)
-  }
-  // Complete interactive staging authentication before build work, the remote
-  // writer lock, or maintenance. Reuse this session during final verification
-  // so a login failure can never strand an otherwise healthy site in maintenance.
+  // Complete interactive staging authentication before build work or the remote
+  // writer lock; reuse the session during the final online health check.
   const accessSession = config.environment === 'staging' ? await (context.accessSession ?? ownerAccessSession)(config.origin) : undefined
-  const { bundleFile, assetsDirectory } = await (context.build ?? buildArtifacts)({ directory, outputs, childEnv, abort, child, rollback, command: run })
+  const buildStarted = Date.now()
+  const { bundleFile, assetsDirectory } = await (context.build ?? buildArtifacts)({ directory, outputs, childEnv, abort, child, rollback, command: run, revision })
+  const buildMs = Date.now() - buildStarted
   if ((context.revision ?? cleanRevision)() !== revision) throw new Error('Source commit changed during the build')
   await lock.acquire(releaseId)
   childEnv.EATYEET_RELEASE_LOCK = lock.value.token
   lock.startHeartbeat((error) => abort.abort(error))
-  record = { ...record, ...(acceptance ? { acceptance } : {}), id: releaseId, revision, migrations, previous, mode: codeOnly ? 'code-only' : 'full', startedAt: record?.startedAt ?? new Date().toISOString(), status: 'running', phase: 'prepared' }
+  record = { ...record, id: releaseId, revision, migrations, previous, mode: 'online', codeOnly, startedAt: record?.startedAt ?? new Date().toISOString(), status: 'running', phase: 'prepared', timings: { build: buildMs } }
+  let phaseStarted = Date.now()
   const phase = async (name) => {
+    record.timings[record.phase] = (record.timings[record.phase] ?? 0) + Date.now() - phaseStarted
+    phaseStarted = Date.now()
     await lock.checkpoint(name)
     record.phase = name
     await operations.write(`releases/${releaseId}.json`, record)
     console.log(`Release ${releaseId}: ${name}`)
   }
-  let maintenance = false
+  let stack, control, previousRecord, contentStarted = false
+  let dataMutationsStarted = Boolean(record.dataMutationsStarted), applicationStarted = false
+  const schemaChanged = !previous || JSON.stringify(previous.migrations) !== JSON.stringify(migrations)
+  const hasChanges = (plan) => {
+    if (plan?.status !== 'complete' || !plan.counts || !['created', 'updated', 'retired'].every((key) => Number.isInteger(plan.counts[key]) && plan.counts[key] >= 0) || typeof plan.siteChanged !== 'boolean' || !Number.isInteger(plan.mediaChanges)) throw new Error('Incomplete content plan')
+    return plan.counts.created > 0 || plan.counts.updated > 0 || plan.counts.retired > 0 || plan.siteChanged || plan.mediaChanges > 0
+  }
   try {
     const current = (await operations.read('control.json'))?.value
     if (!resume && JSON.stringify(current) !== JSON.stringify(previous)) throw new Error('Remote content changed while building; replan the release')
-    const stack = await (context.infrastructure ?? infrastructure)(config, credentials)
-    if (previous && !rollback) {
+    stack = await (context.infrastructure ?? infrastructure)(config, credentials)
+    previousRecord = previous?.releaseId ? (await operations.read(`releases/${previous.releaseId}.json`))?.value : null
+    if (previous && !rollback && !schemaChanged) {
       await phase('plan')
       await child('plan')
       record.contentPlan = JSON.parse(readFileSync('dist/content-plan.json', 'utf8'))
@@ -105,50 +122,61 @@ export async function runRelease(context, { resume, rollback, codeOnly = false }
     const state = await stack.exportStack()
     const stateBackupKey = `backups/${config.environment}/${releaseId}.json`
     if (!(await stateStore.read(stateBackupKey))) await stateStore.write(stateBackupKey, state, { IfNoneMatch: '*' })
-    if (!record.backup) record.backup = await (context.backup ?? databaseBackup)(api, config, outputs, operations, credentials, releaseId)
+    const dataChanges = !rollback && (schemaChanged || hasChanges(record.contentPlan))
+    record.dataChanges = dataChanges
+    if (dataChanges && !record.backup) record.backup = await (context.backup ?? recoveryBookmark)(api, config, outputs, operations, credentials, releaseId)
     await phase('upload')
     const prepared = rollback ? { images: [] } : JSON.parse(readFileSync('dist/content-prepared.json', 'utf8'))
     const media = storeFor(outputs.mediaBucket)
-    const mediaObjects = prepared.images.flatMap(({ manifest }) => [...manifest.variants, manifest.social].map((variant) => ({
+    const mediaObjects = [...new Map(prepared.images.flatMap(({ manifest }) => [...manifest.variants, manifest.social].map((variant) => ({
       key: variant.key, contentType: `image/${variant.format}`,
       bytes: () => readFileSync(resolve('.local/remote', config.environment, 'images', manifest.hash, basename(variant.key))),
-    })))
-    if (codeOnly) await verifyExistingMedia(media, mediaObjects)
-    else for (const object of mediaObjects) {
+    }))).map((object) => [object.key, object])).values()]
+    const mediaReceipt = { uploaded: 0, reused: 0 }
+    await concurrent(mediaObjects, async (object) => {
       await lock.assertOwner()
-      await media.upload(object.key, object.bytes(), object.contentType)
-    }
+      const uploaded = await media.upload(object.key, object.bytes(), object.contentType)
+      mediaReceipt[uploaded ? 'uploaded' : 'reused']++
+    })
+    record.media = mediaReceipt
+    console.log(`Media: ${mediaReceipt.uploaded} uploaded, ${mediaReceipt.reused} reused`)
     await lock.assertOwner()
     if (rollbackRecord) {
       await restoreAssets(operations, rollbackRecord.assetManifest, assetsDirectory)
       writeFileSync(bundleFile, rollbackRecord.bundle, { mode: 0o600 })
     }
-    const previousRecord = previous?.releaseId ? (await operations.read(`releases/${previous.releaseId}.json`))?.value : null
     await restoreAssets(operations, previousRecord?.assetManifest, assetsDirectory, { retainStaticOnly: true })
-    await archiveAssets(operations, assetsDirectory)
-    const assetReceipt = await (context.uploadAssets ?? uploadAssets)(api, config.accountId, outputs.workerName, assetsDirectory)
-    record.assetManifest = assetReceipt.manifest
+    // Pulumi's provider creates the upload session and transfers missing hashes.
+    // Starting another session here only repeats that provider work.
+    record.assetManifest = await (context.archiveAssets ?? archiveAssets)(operations, assetsDirectory)
     record.bundleHash = digest(readFileSync(bundleFile))
     record.bundle = readFileSync(bundleFile, 'utf8')
     record.assetsDirectory = assetsDirectory
     record.deploymentManifest = deploymentManifest(assetsDirectory)
-    await phase('maintenance')
-    const control = { releaseId, contentRevision: rollback ? previous.contentRevision : revision, generation: randomUUID(), status: 'maintenance', migrations }
-    await operations.write('control.json', control)
-    maintenance = true
-    await (context.sleep ?? ((ms) => new Promise((resolve) => setTimeout(resolve, ms))))(35000)
-    if (!rollback && !codeOnly) {
+    control = { releaseId, contentRevision: rollback ? previous.contentRevision : revision, generation: randomUUID(), status: 'ready', migrations }
+    if (!rollback && schemaChanged) {
+      dataMutationsStarted = record.dataMutationsStarted = true
       await phase('migrate')
       await child('migrate')
       await phase('plan')
       await child('plan')
       record.contentPlan = JSON.parse(readFileSync('dist/content-plan.json', 'utf8'))
+    }
+    if (!rollback && hasChanges(record.contentPlan)) {
+      // Invalidate before and after sync. In-flight readers can finish on the
+      // old generation, but cannot populate the completed content generation.
+      contentStarted = true
+      dataMutationsStarted = record.dataMutationsStarted = true
+      if (previous) await operations.write('control.json', { ...previous, generation: randomUUID(), status: 'ready' })
       await phase('sync')
+      childEnv.EATYEET_ATOMIC_CONTENT = '1'
+      childEnv.EATYEET_MEDIA_PREUPLOADED = '1'
       await child('sync')
       await child('plan')
       const convergence = JSON.parse(readFileSync('dist/content-plan.json', 'utf8'))
-      if (convergence.counts.created || convergence.counts.updated || convergence.counts.retired || convergence.siteChanged || convergence.mediaChanges) throw new Error('Content did not converge after synchronization')
+      if (hasChanges(convergence)) throw new Error('Content did not converge after synchronization')
     }
+    if (previous) await operations.write('control.json', { ...control, releaseId: previous.releaseId })
     await phase('application')
     await stack.setConfig('eatyeet:release', { value: JSON.stringify({ id: releaseId, bundleFile, bundleHash: record.bundleHash, assetsDirectory, deploymentManifest: record.deploymentManifest }) })
     await lock.assertOwner()
@@ -159,23 +187,47 @@ export async function runRelease(context, { resume, rollback, codeOnly = false }
         await api(`/accounts/${config.accountId}/pages/projects/${project.name}`, { method: 'PATCH', body: JSON.stringify({ source: { ...project.source, config: { ...project.source.config, production_deployments_enabled: false } } }) })
       }
     }
-    await stack.preview({ onOutput: console.log })
+    applicationStarted = true
     await stack.up({ onOutput: console.log })
     await (context.saveOutputs ?? saveOutputs)(stack, config.environment)
+    await operations.write('control.json', control)
     await phase('verify')
-    const token = probeToken(credentials, releaseId, config.origin)
-    await run('node', ['test/verify-prod.mjs', config.origin], { env: { EATYEET_EXPECTED_RELEASE: releaseId, EATYEET_VERIFY_TOKEN: token, EATYEET_MEDIA_ORIGIN: config.mediaOrigin, ...(accessSession ? { EATYEET_ACCESS_TOKEN: accessSession } : {}) }, signal: abort.signal })
+    await run('node', ['scripts/remote/health.mjs', config.origin], { env: { EATYEET_EXPECTED_RELEASE: releaseId, EATYEET_EXPECTED_CONTENT_REVISION: control.contentRevision, ...(accessSession ? { EATYEET_ACCESS_TOKEN: accessSession } : {}) }, signal: abort.signal })
     await lock.assertOwner()
-    await operations.write('control.json', { ...control, status: 'ready' })
-    maintenance = false
     record.status = 'complete'; record.completedAt = new Date().toISOString()
     await phase('complete')
     await lock.release()
     console.log(`Release complete: ${config.origin} (${releaseId})`)
+    console.log('Phase timings (seconds): ' + Object.entries(record.timings).map(([name, ms]) => `${name}=${(ms / 1000).toFixed(1)}`).join(', '))
   } catch (error) {
-    record.status = 'failed'; record.error = error.message; record.maintenance = maintenance
+    record.status = 'failed'; record.error = error.message; record.maintenance = false
+    // A bad application can revert while the site continues serving. Shared
+    // database writes are never rolled back: migrations must support both apps.
+    if (record.phase === 'verify' && previousRecord?.bundle && previousRecord?.assetManifest) {
+      try {
+        await lock.assertOwner()
+        const fallback = resolve(directory, 'fallback'), fallbackAssets = resolve(fallback, 'assets'), fallbackBundle = resolve(fallback, 'worker.js')
+        mkdirSync(fallbackAssets, { recursive: true })
+        await restoreAssets(operations, previousRecord.assetManifest, fallbackAssets)
+        await restoreAssets(operations, record.assetManifest, fallbackAssets, { retainStaticOnly: true })
+        writeFileSync(fallbackBundle, previousRecord.bundle, { mode: 0o600 })
+        await stack.setConfig('eatyeet:release', { value: JSON.stringify({ id: previousRecord.id, bundleFile: fallbackBundle, bundleHash: digest(previousRecord.bundle), assetsDirectory: fallbackAssets, deploymentManifest: deploymentManifest(fallbackAssets) }) })
+        await stack.up({ onOutput: console.log })
+        await (context.saveOutputs ?? saveOutputs)(stack, config.environment)
+        await operations.write('control.json', { ...control, releaseId: previousRecord.id, generation: randomUUID() })
+        await run('node', ['scripts/remote/health.mjs', config.origin], { env: { EATYEET_EXPECTED_RELEASE: previousRecord.id, EATYEET_EXPECTED_CONTENT_REVISION: control.contentRevision, ...(accessSession ? { EATYEET_ACCESS_TOKEN: accessSession } : {}) } })
+        record.revertedTo = previousRecord.id
+      } catch (recoveryError) { record.recoveryError = recoveryError.message }
+    } else if (contentStarted && record.phase !== 'application') {
+      await lock.assertOwner().then(async () => {
+        const current = (await operations.read('control.json'))?.value
+        if (current) await operations.write('control.json', { ...current, generation: randomUUID() })
+      }).catch(() => {})
+    }
     await lock.assertOwner().then(() => operations.write(`releases/${releaseId}.json`, record)).catch(() => {})
     await lock.stop()
-    throw new Error(`Release ${releaseId} failed at ${record.phase}. Lock retained; ${maintenance ? 'maintenance remains active' : 'inspect release status before recovery'}. ${error.message}`)
+    const safeToUnlock = record.revertedTo || (!dataMutationsStarted && !applicationStarted)
+    if (safeToUnlock) await lock.release()
+    throw new Error(`Release ${releaseId} failed at ${record.phase}. ${record.revertedTo ? `Previous application restored (${record.revertedTo}); lock cleared.` : safeToUnlock ? 'Serving application unchanged; lock cleared, retry directly.' : 'Lock retained; inspect release status before recovery.'} No maintenance window was enabled. ${error.message}`)
   }
 }

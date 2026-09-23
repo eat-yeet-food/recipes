@@ -13,6 +13,7 @@ import { command, cleanRevision } from './remote/process.mjs'
 import { databaseBackup, readBackup, restoreBookmark } from './remote/backups.mjs'
 import { acceptStaging, rehearseRestore } from './remote/acceptance.mjs'
 import { verifyRelease } from './remote/verify-release.mjs'
+import { ownerAccessSession } from './remote/access-session.mjs'
 
 const { values, positionals } = parseArgs({ allowPositionals: true, options: {
   env: { type: 'string' }, resume: { type: 'string' }, rollback: { type: 'string' }, 'derive-r2': { type: 'boolean' },
@@ -96,6 +97,7 @@ if (action === 'credentials') {
       } else {
         if (values.resume && (action !== 'infra' || operation !== 'up' || !/^infra-\d+$/.test(values.resume))) throw new Error('Infrastructure resume requires the original infra-<timestamp> attempt')
         const releaseId = values.resume ?? `${action}-${Date.now()}`
+        const accessToken = action === 'acceptance' ? await ownerAccessSession(config.origin) : undefined
         const lock = new ReleaseLock(stateStore, environment)
         const abort = new AbortController()
         await lock.acquire(releaseId)
@@ -127,7 +129,7 @@ if (action === 'credentials') {
             const result = await databaseBackup(api, config, outputs, new ObjectStore(client, outputs.operationsBucket), credentials, releaseId)
             console.log(JSON.stringify(result))
           } else if (action === 'acceptance' || action === 'rehearse') {
-            const context = { config, credentials, client, api, outputs: readOutputs(environment), lock, stateStore }
+            const context = { config, credentials, client, api, outputs: readOutputs(environment), lock, stateStore, accessToken }
             if (action === 'acceptance') await acceptStaging(context, values['owner-reviewed'], values['approved-limitations'], values['application-revision'])
             else await rehearseRestore(context, values.backup)
           } else if (action === 'restore') {
