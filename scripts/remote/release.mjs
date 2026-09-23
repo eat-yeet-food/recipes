@@ -66,6 +66,10 @@ export async function runRelease(context, { resume, rollback, codeOnly = false }
     acceptance = (await stateStore.read(`acceptance/staging/${revision}.json`))?.value
     assertProductionAcceptance(acceptance, revision, config.ownerEmail)
   }
+  // Complete interactive staging authentication before build work, the remote
+  // writer lock, or maintenance. Reuse this session during final verification
+  // so a login failure can never strand an otherwise healthy site in maintenance.
+  const accessSession = config.environment === 'staging' ? await (context.accessSession ?? ownerAccessSession)(config.origin) : undefined
   const { bundleFile, assetsDirectory } = await (context.build ?? buildArtifacts)({ directory, outputs, childEnv, abort, child, rollback, command: run })
   if ((context.revision ?? cleanRevision)() !== revision) throw new Error('Source commit changed during the build')
   await lock.acquire(releaseId)
@@ -159,7 +163,6 @@ export async function runRelease(context, { resume, rollback, codeOnly = false }
     await stack.up({ onOutput: console.log })
     await (context.saveOutputs ?? saveOutputs)(stack, config.environment)
     await phase('verify')
-    const accessSession = config.environment === 'staging' ? await (context.accessSession ?? ownerAccessSession)(config.origin) : undefined
     const token = probeToken(credentials, releaseId, config.origin)
     await run('node', ['test/verify-prod.mjs', config.origin], { env: { EATYEET_EXPECTED_RELEASE: releaseId, EATYEET_VERIFY_TOKEN: token, EATYEET_MEDIA_ORIGIN: config.mediaOrigin, ...(accessSession ? { EATYEET_ACCESS_TOKEN: accessSession } : {}) }, signal: abort.signal })
     await lock.assertOwner()

@@ -141,6 +141,8 @@ Initial provisioning does not need the final cutover commit. All content release
 
 Cloudflare Access protects all staging requests and production admin/API/preview surfaces; `/api/public` remains public. The account-restricted Cloudflare sign-in provider, exact owner email, independent MFA, disabled default/preview Worker hostnames, and in-handler JWT checks remain enforced even when a review is pending.
 
+Release authentication is a preflight, not a verification-phase task. A staging deploy obtains or refreshes its owner Access session before build work, the remote writer lock and maintenance, then reuses that session for final verification. Production deployment credentials are loaded and validated from Keychain before release work begins; the public production apex is not an Access application and must not trigger an apex login. If any required preflight fails, stop while the currently ready release is still serving traffic.
+
 Use normal Chrome for authentication. Enroll an independent authenticator at `https://icy-fog-1d6c.cloudflareaccess.com/#/Account`. If a Touch ID choice opens a phone QR but the phone has no passkey, cancel that challenge and select an enrolled method in normal Chrome. Do not disable MFA or reset devices merely to finish a deployment. The owner-only App Launcher permits first-device enrollment without requiring that new device in advance; site apps retain MFA.
 
 After a database is initialized, run `pnpm owner:bootstrap --env staging` or `--env production` in an interactive terminal. Enter a distinct owner password. Never copy the development database/owner. `owner:recover` is explicit password/session recovery and revokes existing sessions; it is not a routine deployment step.

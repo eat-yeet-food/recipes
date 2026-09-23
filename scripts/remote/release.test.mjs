@@ -52,6 +52,25 @@ test('release uploads before mutation and opens traffic only after convergence a
   assert.equal((await operations.read('control.json')).value.status, 'ready')
   assert.equal(await stateStore.read('locks/production.json'), null)
 }))
+test('staging authenticates before build or remote mutation and reuses that session for verification', async () => fixture(async ({ context, operations, stateStore, events }) => {
+  context.config.environment = 'staging'
+  context.config.origin = 'https://staging.eatyeet.com'
+  context.accessSession = async (origin) => {
+    assert.equal(origin, context.config.origin)
+    assert.equal(await operations.read('control.json'), null)
+    assert.equal(await stateStore.read('locks/staging.json'), null)
+    events.push('auth')
+    return 'fixture-access-session'
+  }
+  const command = context.command
+  context.command = async (program, args, options) => {
+    if (program === 'node') assert.equal(options.env.EATYEET_ACCESS_TOKEN, 'fixture-access-session')
+    return command(program, args, options)
+  }
+  await runRelease(context)
+  assert.deepEqual(events, ['auth','build','backup','upload','migrate','plan','sync','plan','application','verify'])
+  assert.equal((await operations.read('control.json')).value.status, 'ready')
+}))
 test('failed upload preserves previous public state and retains the release lock', async () => fixture(async ({ context, operations, stateStore }) => {
   const before = { status: 'ready', generation: 'old', releaseId: 'old', contentRevision: 'b'.repeat(40), migrations: {} }
   await operations.write('control.json', before)
