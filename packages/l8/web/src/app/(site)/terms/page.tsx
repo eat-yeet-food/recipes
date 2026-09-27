@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { LegalPage } from '@eat-yeet/l6-ui-shell/shell/legal'
 import { siteData } from '../../../next/cms'
 
-const CONTACT = 'phoganuci@gmail.com'
+const CONTACT = 'eat.yeet.food@gmail.com'
 export async function generateMetadata(): Promise<Metadata> {
   return { title: `Terms of Use | ${(await siteData()).siteName}` }
 }

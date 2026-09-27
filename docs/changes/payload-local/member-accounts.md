@@ -6,7 +6,7 @@ Readers can create accounts with email/password or Google. Accounts replace the 
 - **Google** uses OAuth with PKCE directly (no new dependency) and accepts only Google-verified emails. It can claim an existing address; an unconfirmed password registered on that address is discarded.
 - **Email** goes through Resend's HTTP API remotely and is printed to the terminal locally. Each address gets at most one account email per minute and five per day. Registration and reset responses don't reveal whether an account exists. Credential endpoints also have a Worker rate-limit binding.
 - **Account settings** covers public name, changing or adding a password, signing out everywhere and account deletion (removes the member's reviews, replies, saved formulas and sessions).
-- **Legal:** Privacy Policy and Terms of Use pages were added, linked from the footer and the create-account form. They are a template for review, not legal advice.
+- **Legal:** Privacy Policy and Terms of Use pages were added, linked from the footer and the create-account form. Contact: eat.yeet.food@gmail.com.
 - **Retired data:** the old anonymous `recipe-ratings` tables remain declared and fully denied so the migration stays additive; nothing reads them.
 - **Design:** underline fields became the standard page-form surface; filled fields remain for the workbench, dialogs and nested yellow/ink panels. Learn category headings lost their icon badges.
 
