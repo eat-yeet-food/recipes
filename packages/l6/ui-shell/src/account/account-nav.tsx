@@ -84,17 +84,15 @@ export function AccountNav({ linkClassName }: { linkClassName: string }) {
   </div>
 }
 
-/** Mobile menu variant: a plain row link or the member's name with Sign out. */
+/** Mobile menu variant: Sign in, or Settings, Sign out and the member as plain stacked rows. */
 export function AccountMenuRow({ className, onNavigate }: { className: string; onNavigate: () => void }) {
   const { member, signOut } = useAccount()
   if (!member) return <SignInLink className={className} onNavigate={onNavigate} />
-  return <div className="flex min-h-11 items-center justify-between gap-3 px-2 py-2">
-    <span className="flex min-w-0 items-center gap-2 font-nav text-sm font-bold"><AccountAvatar name={member.displayName} className="size-8" /><span className="truncate">{member.displayName}</span></span>
-    <span className="flex items-center gap-4">
-      <Button asChild variant="link"><Link to="/account/settings" onClick={onNavigate}>Settings</Link></Button>
-      <Button variant="link" onClick={() => { onNavigate(); void signOut().catch(() => {}) }}>Sign out</Button>
-    </span>
-  </div>
+  return <>
+    <Link to="/account/settings" onClick={onNavigate} className={className}>Settings</Link>
+    <button type="button" className={cn(className, 'w-full text-left')} onClick={() => { onNavigate(); void signOut().catch(() => {}) }}>Sign out</button>
+    <span className={cn(className, 'gap-2 hover:bg-transparent')}><AccountAvatar name={member.displayName} className="size-8" /><span className="truncate">{member.displayName}</span></span>
+  </>
 }
 
 /**
