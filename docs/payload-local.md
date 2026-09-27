@@ -63,17 +63,25 @@ Public `<picture>` elements use AVIF with WebP fallback, layout-specific sizes, 
 
 Remote delivery will use a custom R2/CDN media domain for deliberately public derivatives. Do not use `r2.dev` for production delivery. Private media and originals must remain separate from public delivery.
 
-## Public recipe ratings
+## Member accounts, ratings and saved formulas
 
-Ratings live in the separate `recipe-ratings` collection and survive Git content synchronization. Apply the tracked `recipe_ratings` migration before serving this version. The public `/api/public/ratings/<slug>` route returns only the average, count, and requesting browser's vote. Its HttpOnly, SameSite=Strict cookie is scoped to the ratings API; responses are private/no-store. POST requires a matching trusted Origin, JSON of at most 128 bytes, an existing visitor cookie, and an integer score from 1 to 5. Payload REST cannot read or modify the raw collection. The service rechecks publication on every read/write and uses a unique recipe/visitor key to update votes without adding to the count.
+Readers can sign up with email/password or Google. Members are a separate `members` collection with no admin or REST access; owners are unaffected. Apply the `member_accounts` migration with `pnpm db:migrate` before serving this version.
 
-This is anonymous browser identity, not a verified-person voting system: clearing cookies or using another browser permits another vote. No name, email, or IP address is collected. Ratings are fetched outside release-generation projections and are not added to Recipe JSON-LD. The aggregate is computed from stored votes; large-scale traffic would warrant a dedicated aggregate/rate-limit strategy.
+Locally there is no email provider: confirmation and reset emails are printed to the server terminal as `[account email]` lines with their links. Open the printed `/account/verify?token=…` link to confirm a new account. Google sign-in appears only when `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are set in `packages/l8/web/.dev.vars`; register `http://127.0.0.1:3000/api/public/account/google/callback` (matching `LOCAL_ORIGIN`) as an authorized redirect URI on that OAuth client.
+
+- Email accounts must confirm their address before signing in. Five failed sign-ins lock the account for ten minutes. A completed password reset confirms the address and revokes every session. Registration and reset responses are identical whether or not an address exists, and each address receives at most one account email per minute and five per day.
+- Google accounts require a Google-verified email. Google can claim an existing address; an unconfirmed password registered on that address is discarded. New Google members confirm their public name once before it appears on reviews.
+- Sessions are 30-day revocable tokens in an HttpOnly, SameSite=Lax cookie scoped to `/api/public/account`, so recipe pages remain anonymous and cacheable. The shell reads the session after hydration only when this browser has signed in before.
+- One rating per member per recipe. Members edit or delete their own rating, review and replies; deleting a rating removes its reply thread. `/api/public/account/ratings/<slug>` rechecks publication and returns the aggregate to anyone. Ratings are not added to Recipe JSON-LD.
+- Signed-in saved dough formulas are stored per member and site (`member-workbenches`, at most 64 KB and 200 presets). Formulas saved while signed out stay in this browser and are copied into the account once per device at sign-in.
+
+The previous anonymous name/email ratings are retired: their tables remain only so schema changes stay additive and nothing reads them.
 
 ## Owner security and recovery
 
 The OS account and local secret files are trusted. Payload hashes passwords and uses revocable, HTTP-only SameSite=Lax sessions with a two-hour expiry. Five failed logins cause a ten-minute lockout. Future HTTPS hosting must use secure cookies and Cloudflare Access with owner identity and MFA, including protection against alternate-hostname bypasses.
 
-The configured email is the only owner identity. Bootstrap/recovery are isolated CLI operations; public registration, first-user creation, password-reset email flows, and additional administrator creation are blocked. Web content creation, updates, uploads, deletion, publishing, and version restoration are denied even for the owner. Collections expose read-only fields; previews and versions require the owner. Request-driven Local API calls explicitly use `overrideAccess: false`. Privileged sync/bootstrap calls are never imported by HTTP entrypoints. GraphQL is disabled. Invalid request origins are rejected.
+The configured email is the only owner identity. Bootstrap/recovery are isolated CLI operations; owner registration, first-user creation, owner password-reset email flows, and additional administrator creation are blocked. Member accounts cannot reach the admin or owner APIs. Web content creation, updates, uploads, deletion, publishing, and version restoration are denied even for the owner. Collections expose read-only fields; previews and versions require the owner. Request-driven Local API calls explicitly use `overrideAccess: false`. Privileged sync/bootstrap calls are never imported by HTTP entrypoints. GraphQL is disabled. Invalid request origins are rejected.
 
 Run `pnpm owner:recover` with the existing owner's email and a new hidden password. Recovery resets the password, clears lockout, and revokes every existing session. It requires no email provider. Restart servers after changing owner configuration. Environment-based `OWNER_BOOTSTRAP_EMAIL` and `OWNER_BOOTSTRAP_PASSWORD` are supported for isolated automation; do not put passwords in command-line arguments or checked-in files.
 

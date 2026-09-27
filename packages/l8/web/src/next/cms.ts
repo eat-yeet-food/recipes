@@ -2,6 +2,7 @@ import 'server-only'
 import { getCloudflareContext } from '@opennextjs/cloudflare'
 import { getPayload } from 'payload'
 import { createCMSConfig } from '@eat-yeet/l4-content-cms/config'
+import type { AccountEmailSettings } from '@eat-yeet/l4-content-cms/email'
 import { contentServices } from '@eat-yeet/l4-content-cms/service'
 import { cache } from 'react'
 import { headers } from 'next/headers'
@@ -33,6 +34,22 @@ async function publicProjection<T>(key: string, read: () => Promise<T>): Promise
   return projections.read(namespace, key, () =>
     unstable_cache(read, [...namespace, key], { revalidate: false })())
 }
+/** Local development logs account links; remote delivery requires Resend credentials. */
+export function accountEmailSettings(): AccountEmailSettings {
+  const vars = runtimeVars()
+  if (!runtimeSettings().remote) return { mode: 'log' }
+  return vars.RESEND_API_KEY && vars.ACCOUNT_EMAIL_FROM
+    ? { mode: 'resend', resendApiKey: vars.RESEND_API_KEY, from: vars.ACCOUNT_EMAIL_FROM }
+    : { mode: 'disabled' }
+}
+export function googleSettings() {
+  const vars = runtimeVars()
+  return vars.GOOGLE_CLIENT_ID && vars.GOOGLE_CLIENT_SECRET
+    ? { clientId: String(vars.GOOGLE_CLIENT_ID), clientSecret: String(vars.GOOGLE_CLIENT_SECRET) } : null
+}
+export function accountRateLimiter(): { limit: (options: { key: string }) => Promise<{ success: boolean }> } | null {
+  try { return (getCloudflareContext().env as any).ACCOUNT_RATE_LIMIT ?? null } catch { return null }
+}
 export async function cmsConfig() {
   const { env } = await getCloudflareContext({ async: true })
   const vars = env as Record<string, any>
@@ -45,6 +62,7 @@ export async function cmsConfig() {
     origin: runtimeSettings().origin,
     migrationDir: './migrations',
     push: false,
+    email: accountEmailSettings(),
   })
 }
 export const cms = cache(async () => getPayload({ config: await cmsConfig() }))

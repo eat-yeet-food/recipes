@@ -58,8 +58,8 @@ try {
           if (corners.some(radius => parseFloat(radius) !== 0)) errors.push('Viewport sheet must have square corners')
         }
         if (await page.locator('[data-wordmark-size=nav] img').count()) errors.push('App bar must use the text-only wordmark')
-        for (const field of await page.locator('[data-slot=input], [data-slot=select], [data-slot=textarea]').all()) {
-          if (await field.evaluate(el => parseFloat(getComputedStyle(el).borderBottomWidth) > 0)) errors.push('Fields must not have decorative bottom edges')
+        for (const field of await page.locator('[data-slot=input]:not([data-surface=underline]), [data-slot=select]:not([data-surface=underline]), [data-slot=textarea]').all()) {
+          if (await field.evaluate(el => parseFloat(getComputedStyle(el).borderBottomWidth) > 0)) errors.push('Filled fields must not have bottom edges')
         }
         const overflow = await page.evaluate(()=>document.documentElement.scrollWidth > innerWidth)
         const result = {id:story.id,width,overflow,errors,violations:audit.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))})),incomplete:audit.incomplete.map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)}))}

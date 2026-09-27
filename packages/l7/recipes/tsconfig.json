@@ -29,6 +29,9 @@
     },
     {
       "path": "../../l6/ui-content-blocks/tsconfig.json"
+    },
+    {
+      "path": "../../l6/ui-shell/tsconfig.json"
     }
   ],
   "include": [

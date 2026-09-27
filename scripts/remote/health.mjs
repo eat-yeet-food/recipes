@@ -11,7 +11,7 @@ export async function releaseHealth(origin, { releaseId, contentRevision, access
     if (attempt === 5) throw new Error('Deployed release identity is not ready')
     await pause(2000)
   }
-  const results = await Promise.allSettled(['/', '/recipes/new-york-style-pizza', '/api/public/ratings/new-york-style-pizza'].map(async (path) => {
+  const results = await Promise.allSettled(['/', '/recipes/new-york-style-pizza', '/api/public/account/ratings/new-york-style-pizza'].map(async (path) => {
     const response = await get(path)
     if (!response.ok || response.headers.get('x-eatyeet-release') !== releaseId) throw new Error(`Release health failed: ${path} (HTTP ${response.status})`)
     if (path.startsWith('/api/')) {

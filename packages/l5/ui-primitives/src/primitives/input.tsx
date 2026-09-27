@@ -5,6 +5,8 @@ export const fieldClassName = 'min-h-11 w-full min-w-0 rounded-field border-0 bg
 export const fieldSurfaceClasses = {
   default: '',
   'on-ink': 'bg-action-label text-ink placeholder:text-muted-foreground aria-invalid:placeholder:text-white',
+  // Unboxed settings field on white: ink text over a single ink rule that thickens on focus.
+  underline: 'rounded-none border-b border-ink bg-transparent px-0 text-ink placeholder:text-muted-foreground focus-visible:outline-none focus-visible:border-b-2 focus-visible:pb-[11px] disabled:bg-transparent aria-invalid:bg-transparent aria-invalid:text-ink aria-invalid:border-danger',
 } as const
 export type FieldSurface = keyof typeof fieldSurfaceClasses
 

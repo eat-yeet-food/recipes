@@ -12,7 +12,9 @@ import { contentBlocks, methodOptions } from './blocks'
 import { contentDetails, authoredField } from './authored-fields'
 import { seoShape } from '@eat-yeet/l4-content-model/field-shapes'
 import { r2Storage, type R2StorageOptions } from '@payloadcms/storage-r2'
-import { ratingRepliesCollection, ratingsCollection } from './ratings'
+import { ratingRepliesCollection, ratingsCollection, retiredRatingCollections } from './ratings'
+import { memberSessionsCollection, membersCollection, memberWorkbenchesCollection } from './members'
+import { accountEmailAdapter, type AccountEmailSettings } from './email'
 
 export const deny: Access = () => false
 export const isOwner = (user: any, email = process.env.OWNER_EMAIL) =>
@@ -115,6 +117,7 @@ export function createCMSConfig(
     origin: string
     migrationDir: string
     push?: boolean
+    email?: AccountEmailSettings
   },
 ) {
   if (!options.secret || options.secret.length < 32)
@@ -125,6 +128,7 @@ export function createCMSConfig(
     csrf: [options.origin],
     cors: [options.origin],
     graphQL: { disable: true },
+    email: accountEmailAdapter(options.email),
     telemetry: false,
     admin: {
       user: 'owners',
@@ -183,6 +187,13 @@ export function createCMSConfig(
         fields: [],
       },
       contentCollection('recipes'),
+      membersCollection({
+        verify: (token) => `${options.origin}/account/verify?token=${encodeURIComponent(token)}`,
+        reset: (token) => `${options.origin}/account/reset?token=${encodeURIComponent(token)}`,
+      }),
+      memberSessionsCollection,
+      memberWorkbenchesCollection,
+      ...retiredRatingCollections,
       ratingsCollection,
       ratingRepliesCollection,
       contentCollection('articles'),

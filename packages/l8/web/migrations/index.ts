@@ -4,6 +4,7 @@ import * as migration_20260912_115557_named_content_fields from './20260912_1155
 import * as migration_20260921_110936_recipe_ratings from './20260921_110936_recipe_ratings';
 import * as migration_20260922_103348_recipe_rating_reviews from './20260922_103348_recipe_rating_reviews';
 import * as migration_20260922_111220_recipe_rating_identities_and_replies from './20260922_111220_recipe_rating_identities_and_replies';
+import * as migration_20260927_122353_member_accounts from './20260927_122353_member_accounts';
 
 export const migrations = [
   {
@@ -34,6 +35,11 @@ export const migrations = [
   {
     up: migration_20260922_111220_recipe_rating_identities_and_replies.up,
     down: migration_20260922_111220_recipe_rating_identities_and_replies.down,
-    name: '20260922_111220_recipe_rating_identities_and_replies'
+    name: '20260922_111220_recipe_rating_identities_and_replies',
+  },
+  {
+    up: migration_20260927_122353_member_accounts.up,
+    down: migration_20260927_122353_member_accounts.down,
+    name: '20260927_122353_member_accounts'
   },
 ];

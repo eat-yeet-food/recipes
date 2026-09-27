@@ -23,7 +23,7 @@ function transport({ badPath, stale = false, openOwner = false } = {}) {
 const options = { releaseId: 'new', contentRevision: 'sha', accessToken: 'private-session', pause: async () => {} }
 test('deploy health checks exact release, rendered pages, assets, ratings and owner protection', async () => {
   await releaseHealth(origin, { ...options, request: transport({ stale: true }) })
-  for (const badPath of ['/', '/recipes/new-york-style-pizza', '/api/public/ratings/new-york-style-pizza', '/_next/static/chunk.js'])
+  for (const badPath of ['/', '/recipes/new-york-style-pizza', '/api/public/account/ratings/new-york-style-pizza', '/_next/static/chunk.js'])
     await assert.rejects(releaseHealth(origin, { ...options, request: transport({ badPath }) }), /health failed/)
   await assert.rejects(releaseHealth(origin, { ...options, request: transport({ openOwner: true }) }), /admitted/)
 })

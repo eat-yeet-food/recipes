@@ -32,6 +32,9 @@ const paths = [
   '/search?courses=mains',
   '/search?q=does-not-exist',
   '/learn',
+  '/account/sign-in',
+  '/account/sign-in?mode=create',
+  '/account/forgot',
   `/recipes/${INDEX[0].slug}`,
   ...(ARTICLE_INDEX[0] ? [`/learn/${ARTICLE_INDEX[0].slug}`] : []),
 ]

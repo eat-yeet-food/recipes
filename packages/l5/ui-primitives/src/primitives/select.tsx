@@ -3,7 +3,7 @@ import { ChevronDown } from 'lucide-react'
 import { cn } from '@eat-yeet/l0-foundation/utils'
 import { fieldClassName, fieldSurfaceClasses, type FieldSurface } from './input'
 
-const CARET_COLORS = { default: 'text-action-label', 'on-ink': 'text-ink', invalid: 'text-white' } as const
+const CARET_COLORS = { default: 'text-action-label', 'on-ink': 'text-ink', underline: 'text-ink', invalid: 'text-white' } as const
 
 /** Native select retains platform keyboard and assistive-technology behavior. */
 export function Select({ className, surface = 'default', ...props }: ComponentProps<'select'> & { surface?: FieldSurface }) {

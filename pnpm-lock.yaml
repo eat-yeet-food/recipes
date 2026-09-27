@@ -232,6 +232,9 @@ importers:
       '@eat-yeet/l5-ui-primitives':
         specifier: workspace:*
         version: link:../../packages/l5/ui-primitives
+      '@eat-yeet/l6-ui-shell':
+        specifier: workspace:*
+        version: link:../../packages/l6/ui-shell
       '@eat-yeet/l7-recipes':
         specifier: workspace:*
         version: link:../../packages/l7/recipes
@@ -506,6 +509,9 @@ importers:
       '@eat-yeet/l6-ui-content-blocks':
         specifier: workspace:*
         version: link:../../l6/ui-content-blocks
+      '@eat-yeet/l6-ui-shell':
+        specifier: workspace:*
+        version: link:../../l6/ui-shell
       lucide-react:
         specifier: ^1.33.0
         version: 1.33.0(react@19.2.8)

@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./shell/*": "./src/shell/*.tsx"
+    "./shell/*": "./src/shell/*.tsx",
+    "./account/*": "./src/account/*.tsx"
   },
   "dependencies": {
     "@eat-yeet/l0-foundation": "workspace:*",

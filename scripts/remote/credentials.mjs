@@ -62,6 +62,7 @@ export function unseal(envelope, passphrase) {
   decipher.setAuthTag(decode('tag'))
   return JSON.parse(Buffer.concat([decipher.update(decode('ciphertext')), decipher.final()]).toString())
 }
+export const accountCredentialNames = ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'RESEND_API_KEY']
 export async function credentialsCommand(environment, action, path, { deriveR2 = false } = {}) {
   if (action === 'export') {
     const password = await hiddenInput('Separate recovery passphrase (9+ characters)')
@@ -88,5 +89,18 @@ export async function credentialsCommand(environment, action, path, { deriveR2 =
     if (credentials.PULUMI_CONFIG_PASSPHRASE.length < 16) throw new Error('State encryption passphrase must contain at least 16 characters')
     keychain('create', environment, credentials)
     console.log(`Credentials enrolled for ${environment}. Export a recovery copy before bootstrap.`)
-  } else throw new Error('Use credentials enroll, export <file>, or import <file>')
+  } else if (action === 'account') {
+    // Optional member sign-in providers. Blank input keeps the enrolled value;
+    // "-" removes it. Re-export the recovery kit afterwards.
+    const credentials = { ...keychain('get', environment) }
+    for (const name of accountCredentialNames) {
+      const value = (await hiddenInput(`${name} (blank keeps, - removes)`)).trim()
+      if (value === '-') delete credentials[name]
+      else if (value) credentials[name] = value
+    }
+    // The recovery kit no longer covers this entry; deploys wait for a new export.
+    delete credentials.RECOVERY_EXPORTED_AT
+    keychain('set', environment, credentials)
+    console.log(`Account providers for ${environment}: ${accountCredentialNames.filter((name) => credentials[name]).join(', ') || 'none'}. Run pnpm remote:setup to export a new recovery kit before deploying.`)
+  } else throw new Error('Use credentials enroll, account, export <file>, or import <file>')
 }

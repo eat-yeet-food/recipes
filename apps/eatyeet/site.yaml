@@ -171,6 +171,14 @@ navigation:
     desktop: false
   - label: Learn
     href: /learn
+  - label: Privacy
+    href: /privacy
+    desktop: false
+    mobile: false
+  - label: Terms
+    href: /terms
+    desktop: false
+    mobile: false
 browseSections:
   - facet: courses
     title: By Course

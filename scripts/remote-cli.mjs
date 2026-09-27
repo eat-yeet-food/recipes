@@ -26,7 +26,7 @@ const [action, operation, file] = positionals
 if (values['code-only'] && action !== 'deploy') throw new Error('--code-only is only available for deploy')
 if (values['approved-limitations'] && (action !== 'acceptance' || values.env !== 'staging' || values['approved-limitations'].trim().length < 20)) throw new Error('--approved-limitations requires staging acceptance and the explicit owner authorization (20+ characters)')
 if (values['application-revision'] && (action !== 'acceptance' || values.env !== 'staging' || !/^[a-f0-9]{40}$/.test(values['application-revision']))) throw new Error('--application-revision requires staging acceptance and a full deployed commit SHA')
-const validCommands = { credentials: ['enroll', 'export', 'import'], inventory: [undefined], bootstrap: [undefined], status: [undefined],
+const validCommands = { credentials: ['enroll', 'account', 'export', 'import'], inventory: [undefined], bootstrap: [undefined], status: [undefined],
   deploy: [undefined], infra: ['preview', 'up'], content: ['plan', 'sync', 'migrate', 'owner', 'recover'],
   backup: [undefined], restore: [undefined], acceptance: [undefined], rehearse: [undefined] }
 if (!['recover-lock', 'verify-release'].includes(action) && !validCommands[action]?.includes(operation)) throw new Error('Unknown remote command; see docs/payload-remote.md')

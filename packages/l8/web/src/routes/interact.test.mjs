@@ -32,6 +32,8 @@ await page.route('**/api/public/recipes', async (route) => {
   await route.continue()
 })
 page.on('pageerror', (e) => errors.push(e.message))
+let sessionReads = 0
+page.on('request', (r) => { if (r.url().includes('/api/public/account/session')) sessionReads++ })
 page.on('console', (m) => m.type() === 'error' && errors.push(m.text()))
 
 const dialog = () => page.locator('[data-slot="dialog-content"]')
@@ -122,8 +124,16 @@ await page.waitForTimeout(200)
 const href = await page.locator('a[href*="/search?"]').first().getAttribute('href')
 check('browse links use plain params', /\/search\?\w+=[\w,-]+$/.test(href ?? ''), String(href))
 
-// --- no sign in button --------------------------------------------------
-check('no sign-in button', (await page.locator('text=Sign in').count()) === 0)
+// --- member sign-in -----------------------------------------------------
+// Anonymous visitors see a Sign in link that returns to the current page,
+// and never trigger a session read (its cookie is scoped to the account API).
+const signIn = page.locator('[data-site-nav] a', { hasText: 'Sign in' }).first()
+check('sign-in link visible', await signIn.isVisible())
+check('anonymous visits read no session', sessionReads === 0, String(sessionReads))
+await signIn.click()
+await page.waitForURL(/\/account\/sign-in\?returnTo=%2Fbrowse/)
+check('sign-in returns to the current page', page.url().includes('returnTo=%2Fbrowse'), page.url())
+check('sign-in page offers email sign-in', await page.getByRole('button', { name: 'Sign in', exact: true }).isVisible())
 
 // --- browse lists each category once ------------------------------------
 // It once rendered the eight featured categories in a photo grid *and* again

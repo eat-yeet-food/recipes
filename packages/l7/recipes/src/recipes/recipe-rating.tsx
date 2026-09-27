@@ -3,7 +3,8 @@ import { useEffect, useId, useState } from 'react'
 import { Star } from 'lucide-react'
 import { cn } from '@eat-yeet/l0-foundation/utils'
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
-import { Input } from '@eat-yeet/l5-ui-primitives/primitives/input'
+import { SignInLink } from '@eat-yeet/l6-ui-shell/account/account-nav'
+import { useAccount } from '@eat-yeet/l6-ui-shell/account/account'
 import { Textarea } from '@eat-yeet/l5-ui-primitives/primitives/textarea'
 
 export type RatingReply = { id: string; name: string; body: string; own: boolean }
@@ -24,14 +25,14 @@ export type RatingSummary = {
   ownReview: string
   reviews: RatingReview[]
 }
-export type RatingIdentity = { name: string; email: string }
 export type RatingClient = {
   read: () => Promise<RatingSummary>
-  save: (input: RatingIdentity & { score: number; reviewText: string }) => Promise<RatingSummary>
-  reply: (input: RatingIdentity & { reviewId: string; body: string }) => Promise<RatingSummary>
+  save: (input: { score: number; reviewText: string }) => Promise<RatingSummary>
+  remove: () => Promise<RatingSummary>
+  reply: (input: { reviewId: string; body: string }) => Promise<RatingSummary>
+  removeReply: (replyId: string) => Promise<RatingSummary>
 }
 
-const identityStorageKey = 'eatyeet:reviewer'
 function RatingStar({ filled, className, onBrand = false }: { filled: boolean; className?: string; onBrand?: boolean }) {
   return <Star
     aria-hidden="true"
@@ -50,51 +51,11 @@ function RatingDisplay({ value }: { value: number }) {
   </span>
 }
 
-function IdentityFields({ prefix, identity, onChange, disabled = false }: {
-  prefix: string
-  identity: RatingIdentity
-  onChange: (identity: RatingIdentity) => void
-  disabled?: boolean
-}) {
-  return <div className="grid grid-cols-2 gap-4 max-[640px]:grid-cols-1">
-    <div>
-      <label htmlFor={`${prefix}-name`} className="mb-2 block text-sm font-medium text-muted-foreground">Name</label>
-      <Input
-        id={`${prefix}-name`}
-        name="name"
-        autoComplete="name"
-        value={identity.name}
-        onChange={(event) => onChange({ ...identity, name: event.target.value })}
-        placeholder="Your name"
-        maxLength={80}
-        required
-        disabled={disabled}
-      />
-    </div>
-    <div>
-      <label htmlFor={`${prefix}-email`} className="mb-2 block text-sm font-medium text-muted-foreground">Email</label>
-      <Input
-        id={`${prefix}-email`}
-        name="email"
-        type="email"
-        inputMode="email"
-        autoComplete="email"
-        value={identity.email}
-        onChange={(event) => onChange({ ...identity, email: event.target.value })}
-        placeholder="you@example.com"
-        maxLength={320}
-        required
-        disabled={disabled}
-      />
-    </div>
-  </div>
-}
-
-function ReviewSummary({ summary, identity, onIdentityChange, onReply }: {
+function ReviewSummary({ summary, signedIn, onReply, onDeleteReply }: {
   summary: RatingSummary
-  identity: RatingIdentity
-  onIdentityChange: (identity: RatingIdentity) => void
+  signedIn: boolean
   onReply: (reviewId: string, body: string) => Promise<void>
+  onDeleteReply: (replyId: string) => Promise<void>
 }) {
   const id = useId()
   const [replyingTo, setReplyingTo] = useState<string | null>(null)
@@ -104,7 +65,7 @@ function ReviewSummary({ summary, identity, onIdentityChange, onReply }: {
   if (!summary.count) return <p className="text-sm text-muted-foreground">No reviews yet. Be the first!</p>
 
   async function submitReply(reviewId: string) {
-    if (!body.trim() || !identity.name.trim() || !identity.email.trim() || saving) return
+    if (!body.trim() || saving) return
     setSaving(true)
     setError('')
     try {
@@ -118,6 +79,12 @@ function ReviewSummary({ summary, identity, onIdentityChange, onReply }: {
     }
   }
 
+  async function deleteReply(replyId: string) {
+    setError('')
+    try { await onDeleteReply(replyId) }
+    catch (cause) { setError(cause instanceof Error ? cause.message : 'Your reply could not be deleted. Please try again.') }
+  }
+
   return <div>
     <div className="mb-6 flex flex-wrap items-center gap-4">
       <div className="flex items-center gap-2">
@@ -129,6 +96,7 @@ function ReviewSummary({ summary, identity, onIdentityChange, onReply }: {
       </span>
       <span className="text-sm text-muted-foreground">{summary.count} {summary.count === 1 ? 'rating' : 'ratings'}</span>
     </div>
+    {error && !replyingTo ? <div role="alert" className="mb-4 rounded-lg bg-danger-soft px-4 py-3 text-sm text-danger">{error}</div> : null}
 
     <div className="space-y-5">
       {summary.reviews.map((review) => <article key={review.id} className="flex gap-4 border-b border-border pb-5 last:border-0">
@@ -139,23 +107,26 @@ function ReviewSummary({ summary, identity, onIdentityChange, onReply }: {
           <div className="mb-1 flex flex-wrap items-center gap-2">
             <strong className="font-action text-sm">{review.name}</strong>
             <span className="rounded-control bg-brand-soft px-2.5 py-0.5 font-action text-xs font-bold text-ink">{review.score >= 4 ? 'EAT' : 'YEET'}</span>
+            {review.own ? <span className="text-xs text-muted-foreground">Your review</span> : null}
           </div>
           <div className="mb-2"><RatingDisplay value={review.score} /></div>
-          <p className="text-sm leading-relaxed text-ink">{review.reviewText}</p>
+          <p className="break-words text-sm leading-relaxed text-ink">{review.reviewText}</p>
 
           {review.replies.length ? <div className="mt-4 space-y-4 border-l-2 border-brand pl-4">
             {review.replies.map((reply) => <div key={reply.id} className="flex gap-3">
               <span aria-hidden="true" className="flex size-8 shrink-0 items-center justify-center rounded-control bg-brand-soft font-action text-xs font-bold text-ink">
                 {(reply.name[0] || 'C').toUpperCase()}
               </span>
-              <div>
+              <div className="min-w-0">
                 <strong className="font-action text-xs">{reply.name}</strong>
-                <p className="mt-1 text-sm leading-relaxed text-ink">{reply.body}</p>
+                <p className="mt-1 break-words text-sm leading-relaxed text-ink">{reply.body}</p>
+                {reply.own ? <Button variant="link" className="mt-2 text-xs" aria-label={`Delete your reply to ${review.name}`}
+                  onClick={() => void deleteReply(reply.id)}>Delete</Button> : null}
               </div>
             </div>)}
           </div> : null}
 
-          <Button
+          {signedIn ? <Button
             variant="link"
             className="mt-3"
             aria-expanded={replyingTo === review.id}
@@ -166,13 +137,12 @@ function ReviewSummary({ summary, identity, onIdentityChange, onReply }: {
             }}
           >
             {replyingTo === review.id ? 'Cancel reply' : review.replies.length ? 'Reply again' : 'Reply'}
-          </Button>
+          </Button> : <SignInLink className="mt-3 inline-flex min-h-6 text-sm font-bold underline decoration-1 underline-offset-4 hover:decoration-2">Sign in to reply</SignInLink>}
 
           {replyingTo === review.id ? <form
             className="mt-4 flex flex-col gap-4 rounded-lg bg-brand-soft p-4"
             onSubmit={(event) => { event.preventDefault(); void submitReply(review.id) }}
           >
-            <IdentityFields prefix={`${id}-reply-${review.id}`} identity={identity} onChange={onIdentityChange} disabled={saving} />
             <div>
               <label htmlFor={`${id}-reply-body-${review.id}`} className="mb-2 block text-sm font-medium text-muted-foreground">Reply</label>
               <Textarea
@@ -188,7 +158,7 @@ function ReviewSummary({ summary, identity, onIdentityChange, onReply }: {
               />
             </div>
             {error ? <div role="alert" className="text-sm text-danger">{error}</div> : null}
-            <Button variant="on-ink" className="self-start" type="submit" disabled={saving || !body.trim() || !identity.name.trim() || !identity.email.trim()}>
+            <Button variant="on-ink" className="self-start" type="submit" disabled={saving || !body.trim()}>
               {saving ? 'Posting...' : 'Post Reply'}
             </Button>
           </form> : null}
@@ -198,18 +168,19 @@ function ReviewSummary({ summary, identity, onIdentityChange, onReply }: {
   </div>
 }
 
-/** Yeet's rating and review module with an anonymous transport supplied by the page. */
+/** Yeet's rating and review module; the page supplies the transport and the signed-in member. */
 export function RecipeRating({ title: _title, client }: { title: string; client: RatingClient }) {
   const id = useId()
+  const { status, member } = useAccount()
   const [summary, setSummary] = useState<RatingSummary | null>(null)
   const [score, setScore] = useState<number | null>(null)
   const [hover, setHover] = useState<number | null>(null)
   const [reviewText, setReviewText] = useState('')
-  const [identity, setIdentity] = useState<RatingIdentity>({ name: '', email: '' })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
+  const signedIn = Boolean(member)
 
   function applySummary(value: RatingSummary) {
     setSummary(value)
@@ -217,27 +188,16 @@ export function RecipeRating({ title: _title, client }: { title: string; client:
     setReviewText(value.ownReview)
   }
 
-  function persistIdentity() {
-    try { localStorage.setItem(identityStorageKey, JSON.stringify({ name: identity.name.trim(), email: identity.email.trim() })) }
-    catch {}
-  }
-
+  // Reload when the account changes so ownership flags match the member.
   useEffect(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem(identityStorageKey) ?? 'null')
-      if (stored && typeof stored.name === 'string' && typeof stored.email === 'string')
-        setIdentity({ name: stored.name, email: stored.email })
-    } catch {}
-  }, [])
-
-  useEffect(() => {
+    if (status === 'unknown') return
     let active = true
     setLoading(true)
     client.read().then((value) => { if (active) { applySummary(value); setError('') } })
       .catch(() => { if (active) setError('Ratings are unavailable. Please try again.') })
       .finally(() => { if (active) setLoading(false) })
     return () => { active = false }
-  }, [client])
+  }, [client, status, member?.id])
 
   async function refresh() {
     setLoading(true)
@@ -248,25 +208,30 @@ export function RecipeRating({ title: _title, client }: { title: string; client:
   }
 
   async function submit() {
-    if (!score || !identity.name.trim() || !identity.email.trim() || saving || loading) return
+    if (!score || saving || loading || !signedIn) return
     setSaving(true)
     setError('')
     setMessage('')
     try {
-      const value = await client.save({ score, reviewText, name: identity.name, email: identity.email })
-      applySummary(value)
-      persistIdentity()
+      applySummary(await client.save({ score, reviewText }))
       setMessage(`Your ${score}-star rating${reviewText.trim() ? ' and review are' : ' is'} saved.`)
     } catch (cause) { setError(cause instanceof Error ? cause.message : 'Your rating could not be saved. Please try again.') }
     finally { setSaving(false) }
   }
 
-  async function submitReply(reviewId: string, body: string) {
-    const value = await client.reply({ reviewId, body, name: identity.name, email: identity.email })
-    applySummary(value)
-    persistIdentity()
+  async function remove() {
+    if (saving) return
+    setSaving(true)
+    setError('')
+    setMessage('')
+    try {
+      applySummary(await client.remove())
+      setMessage('Your rating was deleted.')
+    } catch (cause) { setError(cause instanceof Error ? cause.message : 'Your rating could not be deleted. Please try again.') }
+    finally { setSaving(false) }
   }
 
+  const rated = Boolean(summary?.ownRating)
   return <section aria-label="Ratings & Reviews" className="text-ink print:hidden">
     <h2 className="mb-6 flex items-center gap-4 font-display text-[28px] font-extrabold leading-tight text-ink">
       Ratings &amp; Reviews
@@ -274,9 +239,16 @@ export function RecipeRating({ title: _title, client }: { title: string; client:
     </h2>
 
     <div className="mb-8 rounded-surface bg-brand p-6 max-[360px]:p-4">
-      <h3 className="mb-5 text-lg font-semibold text-ink">{summary?.ownRating ? 'Update your rating' : 'Rate this recipe'}</h3>
-      <form onSubmit={(event) => { event.preventDefault(); void submit() }} className="flex flex-col gap-5">
-        <fieldset disabled={saving} className="m-0 min-w-0 border-0 p-0">
+      <h3 className="mb-5 text-lg font-semibold text-ink">{rated ? 'Update your rating' : 'Rate this recipe'}</h3>
+      {status !== 'unknown' && !signedIn ? <div className="flex flex-col gap-4">
+        <p className="text-sm text-ink">Sign in to rate this recipe, write a review, or reply to other cooks.</p>
+        <Button asChild className="w-full"><SignInLink>Sign in to rate</SignInLink></Button>
+        {error ? <div role="alert" className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg bg-danger-soft px-4 py-3 text-sm text-danger">
+          <span>{error}</span>
+          {!summary && <Button variant="link" onClick={() => void refresh()} disabled={loading}>Try again</Button>}
+        </div> : null}
+      </div> : <form onSubmit={(event) => { event.preventDefault(); void submit() }} className="flex flex-col gap-5">
+        <fieldset disabled={saving || !signedIn} className="m-0 min-w-0 border-0 p-0">
           <legend className="mb-2 text-sm font-medium text-muted-foreground">Star rating</legend>
           <div className="flex gap-1" onMouseLeave={() => setHover(null)}>
             {[1, 2, 3, 4, 5].map((star) => <label key={star} className="relative inline-flex size-7 cursor-pointer items-center justify-center max-[640px]:size-11" onMouseEnter={() => setHover(star)}>
@@ -289,8 +261,6 @@ export function RecipeRating({ title: _title, client }: { title: string; client:
           </div>
         </fieldset>
 
-        <IdentityFields prefix={`${id}-rating`} identity={identity} onChange={(value) => { setIdentity(value); setError(''); setMessage('') }} disabled={saving} />
-
         <div>
           <label htmlFor={`${id}-review`} className="mb-2 block text-sm font-medium text-muted-foreground">Review (optional)</label>
           <Textarea
@@ -300,23 +270,26 @@ export function RecipeRating({ title: _title, client }: { title: string; client:
             placeholder="Share your experience..."
             maxLength={2000}
             rows={4}
-            disabled={saving}
+            disabled={saving || !signedIn}
             className="min-h-32 resize-y"
           />
+          {member ? <p className="mt-2 text-xs text-muted-foreground">Posting as {member.displayName}.</p> : null}
         </div>
 
         {error ? <div role="alert" className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg bg-danger-soft px-4 py-3 text-sm text-danger">
           <span>{error}</span>
           {!summary && <Button variant="link" onClick={() => void refresh()} disabled={loading}>Try again</Button>}
         </div> : null}
-        <Button className="w-full" type="submit"
-          disabled={!score || !summary || loading || saving || !identity.name.trim() || !identity.email.trim()}>
-          {saving ? 'Submitting...' : summary?.ownRating ? 'Update Rating' : 'Submit Rating'}
+        <Button className="w-full" type="submit" disabled={!score || !summary || loading || saving || !signedIn}>
+          {saving ? 'Submitting...' : rated ? 'Update Rating' : 'Submit Rating'}
         </Button>
+        {rated ? <Button variant="link" className="self-start" disabled={saving} onClick={() => void remove()}>Delete my rating</Button> : null}
         {message ? <div className="text-sm text-muted-foreground" role="status">{message}</div> : null}
-      </form>
+      </form>}
     </div>
 
-    {summary ? <ReviewSummary summary={summary} identity={identity} onIdentityChange={setIdentity} onReply={submitReply} /> : null}
+    {summary ? <ReviewSummary summary={summary} signedIn={signedIn}
+      onReply={async (reviewId, body) => applySummary(await client.reply({ reviewId, body }))}
+      onDeleteReply={async (replyId) => applySummary(await client.removeReply(replyId))} /> : null}
   </section>
 }

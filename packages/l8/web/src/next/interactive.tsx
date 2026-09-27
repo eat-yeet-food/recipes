@@ -5,6 +5,7 @@ import { activateRecipeWorkbench } from '@eat-yeet/l7-recipes/recipes/workbench-
 import { pageBlockRegistry } from '@app/page-blocks'
 import { recipeWorkbenchRegistry } from '@app/recipe-workbenches'
 import { useMemo } from 'react'
+import { accountRequest } from './account-client'
 import { RecipeRating, type RatingClient } from '@eat-yeet/l7-recipes/recipes/recipe-rating'
 export function RecipeClient({
   recipe,
@@ -20,19 +21,13 @@ export function RecipeClient({
   const router = useRouter()
   const params = useSearchParams()
   const ratingClient = useMemo<RatingClient>(() => {
-    const url = `/api/public/ratings/${encodeURIComponent(recipe.slug)}`
-    async function request(input?: Record<string, unknown>) {
-      const response = await fetch(url, { method: input === undefined ? 'GET' : 'POST', cache: 'no-store',
-        credentials: 'same-origin', headers: input === undefined ? undefined : { 'Content-Type': 'application/json' },
-        body: input === undefined ? undefined : JSON.stringify(input) })
-      const body = await response.json().catch(() => { throw new Error('Ratings are unavailable. Please try again.') })
-      if (!response.ok) throw new Error(body.error || 'Your rating could not be saved. Please try again.')
-      return body
-    }
+    const path = `/ratings/${encodeURIComponent(recipe.slug)}`
     return {
-      read: () => request(),
-      save: (input) => request({ kind: 'rating', ...input }),
-      reply: (input) => request({ kind: 'reply', ...input }),
+      read: () => accountRequest(path, 'GET', undefined, 'Ratings are unavailable. Please try again.'),
+      save: (input) => accountRequest(path, 'PUT', input, 'Your rating could not be saved. Please try again.'),
+      remove: () => accountRequest(path, 'DELETE', undefined, 'Your rating could not be deleted. Please try again.'),
+      reply: (input) => accountRequest(`${path}/replies`, 'POST', input, 'Your reply could not be posted. Please try again.'),
+      removeReply: (replyId) => accountRequest(`${path}/replies/${encodeURIComponent(replyId)}`, 'DELETE', undefined, 'Your reply could not be deleted. Please try again.'),
     }
   }, [recipe.slug])
   // Browser Back updates the URL before a new server response arrives. Read the

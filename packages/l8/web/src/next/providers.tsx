@@ -12,6 +12,8 @@ import {
 } from '@eat-yeet/l5-ui-primitives/primitives/responsive-image'
 import { Nav, Footer } from '@eat-yeet/l6-ui-shell/shell/layout'
 import { SearchPalette } from '@eat-yeet/l7-search/search/palette'
+import { AccountProvider } from '@eat-yeet/l6-ui-shell/account/account'
+import { accountClient } from './account-client'
 import type { RecipeSummary } from '@eat-yeet/l1-recipe-model/recipes'
 export function SiteShell({
   children,
@@ -62,6 +64,7 @@ export function SiteShell({
   }, [])
   return (
     <NavigationProvider navigate={navigate}>
+      <AccountProvider client={accountClient}>
       <MediaProvider media={media}>
         <div className="flex min-h-screen flex-col">
           <a
@@ -95,6 +98,7 @@ export function SiteShell({
           />
         </div>
       </MediaProvider>
+      </AccountProvider>
     </NavigationProvider>
   )
 }

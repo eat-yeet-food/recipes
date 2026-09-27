@@ -9,6 +9,7 @@ import { Select } from '@eat-yeet/l5-ui-primitives/primitives/select'
 import { ChoiceGroup } from '@eat-yeet/l5-ui-primitives/primitives/choice-group'
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react'
+import { useAccount } from '@eat-yeet/l6-ui-shell/account/account'
 
 import {
   calculateFormula,
@@ -71,15 +72,17 @@ function presetSummary(formula: DoughFormula) {
   return parts.join(' · ')
 }
 
+function normalizeStore(value: any): WorkbenchStore {
+  return value && typeof value === 'object'
+    ? { ...EMPTY_STORE, ...value, modes: value.modes ?? {}, defaults: value.defaults ?? {}, presets: Array.isArray(value.presets) ? value.presets.filter((preset: FormulaPreset) => preset && typeof preset.id === 'string' && typeof preset.name === 'string' && isDoughFormula(preset.formula)) : [], starterProfiles: value.starterProfiles ?? [] }
+    : clone(EMPTY_STORE)
+}
+
 function readStore(key: string): { store: WorkbenchStore; error: string } {
   try {
     const serialized = localStorage.getItem(key)
     if (!serialized) return { store: clone(EMPTY_STORE), error: '' }
-    const value = JSON.parse(serialized)
-    const store = value && typeof value === 'object'
-      ? { ...EMPTY_STORE, ...value, modes: value.modes ?? {}, defaults: value.defaults ?? {}, presets: Array.isArray(value.presets) ? value.presets.filter((preset: FormulaPreset) => preset && typeof preset.id === 'string' && typeof preset.name === 'string' && isDoughFormula(preset.formula)) : [], starterProfiles: value.starterProfiles ?? [] }
-      : clone(EMPTY_STORE)
-    return { store, error: '' }
+    return { store: normalizeStore(JSON.parse(serialized)), error: '' }
   } catch {
     return { store: clone(EMPTY_STORE), error: 'Saved formulas could not be read. The calculator is using the authored recipe.' }
   }
@@ -92,6 +95,18 @@ function saveStore(key: string, store: WorkbenchStore) {
   } catch {
     return 'This browser could not save your presets. The calculator still works.'
   }
+}
+
+// Each device copies its signed-out formulas into an account once. Later
+// account reads replace the device view, so deletions elsewhere stay deleted.
+const importedKey = (key: string, memberId: string) => `${key}:imported:${memberId}`
+function importLocal(remote: WorkbenchStore, local: WorkbenchStore): WorkbenchStore {
+  const ids = new Set(remote.presets.map((preset) => preset.id))
+  const names = new Set(remote.presets.map((preset) => `${preset.formula.family}:${presetNameKey(preset.name)}`))
+  const presets = [...remote.presets, ...local.presets.filter((preset) => !ids.has(preset.id) && !names.has(`${preset.formula.family}:${presetNameKey(preset.name)}`))]
+  const kept = new Set(presets.map((preset) => preset.id))
+  return { ...remote, presets, modes: { ...local.modes, ...remote.modes },
+    defaults: { ...Object.fromEntries(Object.entries(local.defaults).filter(([, id]) => kept.has(id))), ...remote.defaults } }
 }
 
 const NumericFields = createContext<{ report: NumberFieldValidation; resetKey: number } | null>(null)
@@ -180,6 +195,9 @@ export function DoughFormulaWorkbench({
   const [mode, setMode] = useState<InputMode>(config.defaultInputMode)
   const [store, setStore] = useState<WorkbenchStore>(EMPTY_STORE)
   const [storeError, setStoreError] = useState('')
+  const { status: accountStatus, member, client: account } = useAccount()
+  const memberId = member?.id ?? null
+  const [storeReady, setStoreReady] = useState(false)
   const [presetsOpen, setPresetsOpen] = useState(false)
   const [presetName, setPresetName] = useState('')
   const [chosenPresetId, setChosenPresetId] = useState('')
@@ -235,16 +253,45 @@ export function DoughFormulaWorkbench({
   const presetNameDescription = showPresetNameError ? 'formula-preset-name-error' : !normalizedPresetName ? 'formula-preset-name-hint' : undefined
 
   useEffect(() => {
-    const { store: saved, error } = readStore(storageKey)
-    setStore(saved)
-    setStoreError(error)
-    setMode(saved.modes[recipe.slug] ?? config.defaultInputMode)
-    if (!hasSharedConfiguration) {
-      const defaultId = saved.defaults[recipe.slug]
-      const preset = saved.presets.find((item) => item.id === defaultId && item.formula.family === selection.formula.family)
-      if (preset) onApply({ ...selection, formula: completeFormula(clone(preset.formula), config.defaultSelection.formula) })
+    if (accountStatus === 'unknown') return
+    let active = true
+    const load = (saved: WorkbenchStore, error: string) => {
+      if (!active) return
+      setStore(saved)
+      setStoreError(error)
+      setStoreReady(true)
+      setMode(saved.modes[recipe.slug] ?? config.defaultInputMode)
+      if (!hasSharedConfiguration) {
+        const defaultId = saved.defaults[recipe.slug]
+        const preset = saved.presets.find((item) => item.id === defaultId && item.formula.family === selection.formula.family)
+        if (preset) onApply({ ...selection, formula: completeFormula(clone(preset.formula), config.defaultSelection.formula) })
+      }
     }
-  }, [storageKey, recipe.slug])
+    setStoreReady(false)
+    if (!memberId) {
+      const { store: saved, error } = readStore(storageKey)
+      load(saved, error)
+      return () => { active = false }
+    }
+    ;(async () => {
+      try {
+        let saved = normalizeStore(await account.readWorkbench(storageKey))
+        let imported = false
+        try { imported = localStorage.getItem(importedKey(storageKey, memberId)) === '1' } catch {}
+        if (!imported) {
+          const merged = importLocal(saved, readStore(storageKey).store)
+          if (merged.presets.length !== saved.presets.length || JSON.stringify(merged) !== JSON.stringify(saved)) await account.writeWorkbench(storageKey, merged)
+          saved = merged
+          try { localStorage.setItem(importedKey(storageKey, memberId), '1') } catch {}
+        }
+        load(saved, '')
+      } catch {
+        load(clone(EMPTY_STORE), 'Saved formulas could not be loaded from your account. The calculator is using the authored recipe.')
+        if (active) setStoreReady(false)
+      }
+    })()
+    return () => { active = false }
+  }, [storageKey, recipe.slug, accountStatus, memberId])
 
   useEffect(() => {
     if (!open) setPresetsOpen(false)
@@ -257,7 +304,21 @@ export function DoughFormulaWorkbench({
     setFieldResetKey((current) => current + 1)
   }, [open, selection])
 
-  const persist = (next: WorkbenchStore) => {
+  const [persisting, setPersisting] = useState(false)
+  const persist = async (next: WorkbenchStore) => {
+    if (memberId) {
+      if (!storeReady) return false
+      setPersisting(true)
+      try {
+        await account.writeWorkbench(storageKey, next)
+        setStoreError('')
+        setStore(next)
+        return true
+      } catch {
+        setStoreError('Your formulas could not be saved to your account. Please try again.')
+        return false
+      } finally { setPersisting(false) }
+    }
     const error = saveStore(storageKey, next)
     setStoreError(error)
     if (error) return false
@@ -267,7 +328,7 @@ export function DoughFormulaWorkbench({
   const changeMode = (next: InputMode) => {
     setMode(next)
     setWeightDraft(null)
-    persist({ ...store, modes: { ...store.modes, [recipe.slug]: next } })
+    void persist({ ...store, modes: { ...store.modes, [recipe.slug]: next } })
   }
   const updateBatch = (changes: Partial<DoughBatch>) => {
     setWeightDraft(null)
@@ -297,7 +358,7 @@ export function DoughFormulaWorkbench({
     if (reversed.errors.length) return
     setDraft((currentDraft) => ({ ...currentDraft, formula: { ...currentDraft.formula, ...reversed.formula }, batch: { ...currentDraft.batch, diameterInches: undefined, pieceWeightGrams: reversed.totalDoughGrams / currentDraft.batch.count } }))
   }
-  const savePreset = () => {
+  const savePreset = async () => {
     setPresetAttempted(true)
     setPresetNotice('')
     if (presetNameError || presetFormulaError) {
@@ -305,15 +366,15 @@ export function DoughFormulaWorkbench({
       return
     }
     const item = { id: selectedPreset?.id ?? crypto.randomUUID(), name: normalizedPresetName, formula: clone(draft.formula) }
-    if (!persist({ ...store, presets: selectedPreset ? store.presets.map((preset) => preset.id === selectedPreset.id ? item : preset) : [...store.presets, item] })) return
+    if (!(await persist({ ...store, presets: selectedPreset ? store.presets.map((preset) => preset.id === selectedPreset.id ? item : preset) : [...store.presets, item] }))) return
     setSelectedPresetId(item.id)
     setChosenPresetId(item.id)
     setPresetName(item.name)
     setPresetAttempted(false)
     setPresetNotice(selectedPreset ? 'Formula updated.' : 'Formula saved.')
   }
-  const deletePreset = (preset: FormulaPreset) => {
-    if (!persist({ ...store, presets: store.presets.filter((item) => item.id !== preset.id), defaults: Object.fromEntries(Object.entries(store.defaults).filter(([, id]) => id !== preset.id)) })) return
+  const deletePreset = async (preset: FormulaPreset) => {
+    if (!(await persist({ ...store, presets: store.presets.filter((item) => item.id !== preset.id), defaults: Object.fromEntries(Object.entries(store.defaults).filter(([, id]) => id !== preset.id)) }))) return
     if (selectedPresetId === preset.id) {
       setSelectedPresetId('')
       setPresetName('')
@@ -358,7 +419,7 @@ export function DoughFormulaWorkbench({
             <div id="saved-formulas-panel" hidden={!presetsOpen}>
             <WorkbenchPanel headingId="presets-heading" title="Saved formulas" summary={<span className="text-xs text-action-label">{compatiblePresets.length} saved</span>}>
               <div className="mt-3 grid gap-3">
-              <p className="text-xs leading-relaxed text-action-label">{copy.saved}</p>
+              <p className="text-xs leading-relaxed text-action-label">{copy.saved} {memberId ? 'Saved to your account.' : accountStatus === 'signed-out' ? 'Saved in this browser. Sign in to keep them on every device.' : ''}</p>
               {chosenPreset ? (
                 <div className="grid gap-2">
                   <label htmlFor="saved-formula-picker" className="text-xs font-semibold">Load a saved formula</label>
@@ -378,12 +439,12 @@ export function DoughFormulaWorkbench({
                   </div>
                   <div className="flex items-center justify-between gap-3">
                     <p className="min-w-0 text-xs leading-relaxed text-action-label">{presetSummary(chosenPreset.formula)}</p>
-                    <Button variant="quiet-on-ink" type="button" size="sm" aria-label={`Delete ${chosenPreset.name}`} onClick={() => deletePreset(chosenPreset)}><Trash2 className="size-4" aria-hidden="true" />Delete</Button>
+                    <Button variant="quiet-on-ink" type="button" size="sm" aria-label={`Delete ${chosenPreset.name}`} disabled={persisting} onClick={() => void deletePreset(chosenPreset)}><Trash2 className="size-4" aria-hidden="true" />Delete</Button>
                   </div>
                 </div>
               ) : <p className="text-sm text-action-label">No saved formulas yet.</p>}
 
-              <form noValidate className="grid gap-3 border-t border-border-on-ink pt-4" onSubmit={(event) => { event.preventDefault(); savePreset() }}>
+              <form noValidate className="grid gap-3 border-t border-border-on-ink pt-4" onSubmit={(event) => { event.preventDefault(); void savePreset() }}>
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <h4 className="min-w-0 flex-1 break-words text-sm font-semibold">{selectedPreset ? `Editing ${selectedPreset.name}` : 'Save current formula'}</h4>
                   {selectedPreset && <span className="text-xs text-action-label">{activePresetId ? 'Loaded' : 'Modified'}</span>}
@@ -396,7 +457,7 @@ export function DoughFormulaWorkbench({
                 </div>
                 {!presetNameError && presetFormulaError && <p id="formula-preset-error" role="alert" className="break-words rounded-field bg-danger-soft p-3 text-xs text-danger">{presetFormulaError}</p>}
                 <div className="flex flex-wrap items-center gap-2">
-                  <Button variant="on-ink" type="submit" size="sm" disabled={Boolean(presetNameError || presetFormulaError)} aria-describedby={presetNameError ? presetNameDescription : presetFormulaError ? 'formula-preset-error' : undefined}>{selectedPreset ? 'Update formula' : 'Save new'}</Button>
+                  <Button variant="on-ink" type="submit" size="sm" disabled={Boolean(presetNameError || presetFormulaError) || persisting || (Boolean(memberId) && !storeReady)} aria-describedby={presetNameError ? presetNameDescription : presetFormulaError ? 'formula-preset-error' : undefined}>{selectedPreset ? 'Update formula' : 'Save new'}</Button>
                   {selectedPreset && <Button variant="quiet-on-ink" type="button" size="sm" onClick={() => {
                     setSelectedPresetId('')
                     setPresetName('')
@@ -408,8 +469,8 @@ export function DoughFormulaWorkbench({
               </form>
               {selectedPreset && (
                 <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border-on-ink pt-3">
-                  <Button variant="quiet-on-ink" type="button" size="sm" disabled={store.defaults[recipe.slug] === selectedPreset.id} onClick={() => {
-                    if (persist({ ...store, defaults: { ...store.defaults, [recipe.slug]: selectedPreset.id } })) setPresetNotice('Default formula updated.')
+                  <Button variant="quiet-on-ink" type="button" size="sm" disabled={store.defaults[recipe.slug] === selectedPreset.id || persisting} onClick={async () => {
+                    if (await persist({ ...store, defaults: { ...store.defaults, [recipe.slug]: selectedPreset.id } })) setPresetNotice('Default formula updated.')
                   }}>{store.defaults[recipe.slug] === selectedPreset.id ? 'Default for this recipe' : 'Make default'}</Button>
                 </div>
               )}

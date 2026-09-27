@@ -10,6 +10,7 @@ import { Menu, Search } from 'lucide-react'
 import { Wordmark, type WordmarkCopy } from './wordmark'
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
 import { cn } from '@eat-yeet/l0-foundation/utils'
+import { AccountMenuRow, AccountNav } from '../account/account-nav'
 
 /** Routes with a hero, where the nav starts transparent. */
 function routeHasHero(pathname: string): boolean {
@@ -107,6 +108,7 @@ export function Nav({
             >
               <Search className="size-4" />
             </Button>
+            <AccountNav linkClassName={linkClass} />
           </div>
           <div className="flex items-center gap-1 md:gap-3 md:hidden">
             <Button
@@ -140,6 +142,7 @@ export function Nav({
       <div id="mobile-nav-menu" hidden={!menuOpen} className="border-t border-ink/10 bg-white px-4 py-3 md:hidden">
         <div className="mx-auto flex max-w-[var(--max-width)] flex-col gap-1">
           {navigation.filter(item=>item.mobile!==false).map(item=><Link key={item.href} to={item.href} onClick={()=>setMenuOpen(false)} className="rounded px-2 py-3 min-h-11 inline-flex items-center font-nav text-sm font-bold text-ink hover:bg-ink/5">{item.label}</Link>)}
+          <AccountMenuRow onNavigate={()=>setMenuOpen(false)} className="rounded px-2 py-3 min-h-11 inline-flex items-center font-nav text-sm font-bold text-ink hover:bg-ink/5" />
         </div>
       </div>
     </nav>

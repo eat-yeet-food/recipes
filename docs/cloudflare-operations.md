@@ -120,6 +120,25 @@ Setup runs protected bootstrap after enrollment. No Doppler, GitHub CI secrets, 
 
 Pulumi state uses R2's S3 endpoint with explicit `region=auto`, `awssdk=v2` and passphrase encryption. Keep the passphrase stable. The bootstrap stack protects the bucket; checkpoint history is retained. Timestamped state backups and encrypted database exports expire after 30 days. That retention does not extend D1's account-specific Time Travel window.
 
+## Member sign-in providers
+
+Member accounts ship with both providers optional. Until a provider is enrolled, the sign-in page hides it; email sign-up and password reset report themselves unavailable, and deploys continue to work. Every Worker has an `ACCOUNT_RATE_LIMIT` binding (20 requests per client per minute for each credential action).
+
+**Google.** In Google Cloud, create an OAuth client of type *Web application* and add authorized redirect URIs for each origin: `https://staging.eatyeet.com/api/public/account/google/callback` and `https://eatyeet.com/api/public/account/google/callback`. The consent screen needs only `openid`, `email` and `profile`. Staging remains behind owner Access, so only the owner can exercise it there.
+
+**Email (Resend).** Add and verify the sending domain in Resend. Copy its DNS records into `infra/cloudflare/<env>.json` as `"accountEmailDns": [{ "type": "TXT", "name": "…", "content": "…" }, { "type": "MX", "name": "…", "content": "…", "priority": 10 }]`, and set `"accountEmailFrom": "Eat / Yeet <accounts@eatyeet.com>"`. Pulumi owns those records.
+
+Enroll the secrets for each environment, answering the hidden prompts (blank keeps the current value, `-` removes it), then export a new recovery kit and deploy:
+
+```sh
+pnpm remote:credentials account --env staging
+pnpm remote:credentials account --env production
+pnpm remote:setup            # re-export the recovery kit
+pnpm run deploy --env both
+```
+
+The secrets reach the Worker only as `secret_text` bindings (`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `RESEND_API_KEY`). Removing a secret and redeploying disables that provider without affecting existing sessions or reviews.
+
 ## First production cutover
 
 1. Enroll and export recovery credentials. Refresh `pnpm remote:inventory --env bootstrap`; verify account/zone, plans, DNS, Pages, hooks and existing resources. Save a timestamped copy of the sanitized inventory.

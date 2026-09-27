@@ -29,6 +29,9 @@
     },
     {
       "path": "../../packages/l7/recipes/tsconfig.json"
+    },
+    {
+      "path": "../../packages/l6/ui-shell/tsconfig.json"
     }
   ]
 }

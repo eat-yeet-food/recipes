@@ -92,6 +92,13 @@ if (environment === 'bootstrap') {
   const content = release ? readFileSync(release.bundleFile) : Buffer.from('export default { fetch() { return new Response("Not initialized", {status:503,headers:{"Cache-Control":"no-store"}}) } }')
   if (release && hash(content) !== release.bundleHash) throw new Error('Release bundle checksum differs')
   if (release) assertDeploymentManifest(release.assetsDirectory, release.deploymentManifest)
+  const accountSecretNames = ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'RESEND_API_KEY']
+  // Sending-domain records supplied by the email provider (SPF/DKIM/return path).
+  for (const record of settings.accountEmailDns ?? []) {
+    const key = `account-email-${record.type}-${record.name}`.toLowerCase().replace(/[^a-z0-9-]/g, '-')
+    new cloudflare.DnsRecord(key, { zoneId: settings.zoneId, name: record.name, type: record.type, content: record.content, ttl: 1,
+      ...(record.priority != null ? { priority: record.priority } : {}) }, imported(key))
+  }
   const variables = { DEPLOY_ENV: environment, SITE_URL: settings.origin, MEDIA_ORIGIN: settings.mediaOrigin,
     OWNER_EMAIL: settings.ownerEmail, ACCESS_TEAM_DOMAIN: settings.accessTeamDomain,
     RELEASE_ID: release?.id ?? 'uninitialized', INDEXABLE: settings.cutover && environment === 'production' ? '1' : '0' }
@@ -110,6 +117,12 @@ if (environment === 'bootstrap') {
         if (!process.env[name]) throw new Error(`Missing Keychain runtime secret ${name}`)
         return { name, type: 'secret_text', text: pulumi.secret(process.env[name]!) }
       }),
+      // Member sign-in providers are optional until enrolled with remote:credentials account.
+      // Without them the site offers only the providers that are configured.
+      ...accountSecretNames.filter((name) => process.env[name]).map((name) => ({ name, type: 'secret_text', text: pulumi.secret(process.env[name]!) })),
+      ...(settings.accountEmailFrom ? [{ name: 'ACCOUNT_EMAIL_FROM', type: 'plain_text', text: settings.accountEmailFrom }] : []),
+      // Per-client bound on sign-in, registration and reset requests.
+      { name: 'ACCOUNT_RATE_LIMIT', type: 'ratelimit', namespaceId: environment === 'production' ? '4101' : '4102', simple: { limit: 20, period: 60 } },
     ],
     // Provider 6.20 cannot resolve assetManifestSha256 with a JWT-only input.
     // A checked directory lets its plan modifier compute the value correctly.

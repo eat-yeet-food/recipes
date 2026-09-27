@@ -1,6 +1,5 @@
 'use client'
 import { ResponsiveImage } from '@eat-yeet/l5-ui-primitives/primitives/responsive-image'
-import { BookOpen, SlidersHorizontal, Thermometer, UtensilsCrossed } from 'lucide-react'
 import { cn } from '@eat-yeet/l0-foundation/utils'
 import { articleImageUrl, type ArticleSummary } from '@eat-yeet/l1-article-model/articles'
 import { labelize } from '@eat-yeet/l2-recipe-domain/format'
@@ -23,30 +22,16 @@ const ARTICLE_TYPE_LABELS = {
   reference: 'Reference',
 } satisfies Record<ArticleSummary['type'], string>
 
-const CATEGORY_ICONS = {
-  dough: SlidersHorizontal,
-  sourdough: BookOpen,
-  pizza: UtensilsCrossed,
-  temperature: Thermometer,
-} as const
-
 function categoryLabel(category: string) {
   return category ? labelize(category) : 'Learning'
 }
 
 function ArticleGroup({ category, articles, priority=false }: { category: string; articles: ArticleSummary[]; priority?:boolean }) {
-  const Icon = CATEGORY_ICONS[category as keyof typeof CATEGORY_ICONS] ?? BookOpen
-
   return (
     <section className="border-t border-border-light pt-10">
-      <div className="mb-6 flex items-center gap-3">
-        <div className="grid size-10 place-items-center rounded-md bg-tint text-brand-strong">
-          <Icon className="size-5" />
-        </div>
-        <h2 className="font-display text-[28px] font-extrabold leading-tight text-ink">
-          {categoryLabel(category)}
-        </h2>
-      </div>
+      <h2 className="mb-6 font-display text-[28px] font-extrabold leading-tight text-ink">
+        {categoryLabel(category)}
+      </h2>
       <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
         {articles.map((article,index) => (
           <ArticleCard key={article.slug} article={article} priority={priority&&index===0} />

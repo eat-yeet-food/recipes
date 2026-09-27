@@ -33,6 +33,8 @@ export const SHOTS = [
   { name: 'browse', path: '/browse', full: true },
   { name: 'recipes-index', path: '/recipes', full: true },
   { name: 'recipe-mobile', path: '/recipes/new-york-style-pizza', full: false, viewport: { width: 390, height: 844 } },
+  { name: 'account-sign-in', path: '/account/sign-in', full: false },
+  { name: 'account-sign-in-mobile', path: '/account/sign-in?mode=create', full: false, viewport: { width: 390, height: 844 } },
 ]
 
 export async function capture(outDir) {

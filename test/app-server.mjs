@@ -21,6 +21,8 @@ export async function startApp() {
   let output = ''
   child.stdout.on('data', (b) => (output += b))
   child.stderr.on('data', (b) => (output += b))
+  // APP_LOG=1 streams server output while debugging integration failures.
+  if (process.env.APP_LOG) { child.stdout.pipe(process.stderr); child.stderr.pipe(process.stderr) }
   const close = async () => {
     if (child.exitCode !== null || child.signalCode !== null) return
     const exited = new Promise((r) => child.once('exit', r))
