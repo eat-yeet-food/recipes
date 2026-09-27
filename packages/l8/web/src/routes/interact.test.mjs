@@ -133,7 +133,7 @@ check('anonymous visits read no session', sessionReads === 0, String(sessionRead
 await signIn.click()
 await page.waitForURL(/\/account\/sign-in\?returnTo=%2Fbrowse/)
 check('sign-in returns to the current page', page.url().includes('returnTo=%2Fbrowse'), page.url())
-check('sign-in page offers email sign-in', await page.getByRole('button', { name: 'Sign in', exact: true }).isVisible())
+check('sign-in page renders', await page.getByRole('heading', { name: 'Sign in' }).isVisible())
 
 // --- browse lists each category once ------------------------------------
 // It once rendered the eight featured categories in a photo grid *and* again

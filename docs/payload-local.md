@@ -65,17 +65,17 @@ Remote delivery will use a custom R2/CDN media domain for deliberately public de
 
 ## Member accounts, ratings and saved formulas
 
-Readers can sign up with email/password or Google. Members are a separate `members` collection with no admin or REST access; owners are unaffected. Apply the `member_accounts` migration with `pnpm db:migrate` before serving this version.
+Readers sign in with Google; the first sign-in creates the account. Members are a separate `members` collection with no admin or REST access; owners are unaffected. There is no email/password sign-in and the site sends no email. Apply the `member_accounts` migration with `pnpm db:migrate` before serving this version.
 
-Locally there is no email provider: confirmation and reset emails are printed to the server terminal as `[account email]` lines with their links. Open the printed `/account/verify?token=…` link to confirm a new account. Google sign-in appears only when `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are set in `packages/l8/web/.dev.vars`; register `http://127.0.0.1:3000/api/public/account/google/callback` (matching `LOCAL_ORIGIN`) as an authorized redirect URI on that OAuth client.
+Google sign-in works locally only with a Google OAuth client: set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in `packages/l8/web/.dev.vars` and register `http://127.0.0.1:3000/api/public/account/google/callback` (matching `LOCAL_ORIGIN`) as a redirect URI. Without one, the sign-in page reports sign-in as unavailable. Browser test suites instead sign in as a local test member through `test/member-session.mjs`.
 
-- Email accounts must confirm their address before signing in. Five failed sign-ins lock the account for ten minutes. A completed password reset confirms the address and revokes every session. Registration and reset responses are identical whether or not an address exists, and each address receives at most one account email per minute and five per day.
-- Google accounts require a Google-verified email. Google can claim an existing address; an unconfirmed password registered on that address is discarded. New Google members confirm their public name once before it appears on reviews.
+- Google must report the email as verified. A member is matched by Google subject, then by email. New members confirm their public name once before it appears on reviews.
 - Sessions are 30-day revocable tokens in an HttpOnly, SameSite=Lax cookie scoped to `/api/public/account`, so recipe pages remain anonymous and cacheable. The shell reads the session after hydration only when this browser has signed in before.
 - One rating per member per recipe. Members edit or delete their own rating, review and replies; deleting a rating removes its reply thread. `/api/public/account/ratings/<slug>` rechecks publication and returns the aggregate to anyone. Ratings are not added to Recipe JSON-LD.
-- Signed-in saved dough formulas are stored per member and site (`member-workbenches`, at most 64 KB and 200 presets). Formulas saved while signed out stay in this browser and are copied into the account once per device at sign-in.
+- Adjust recipe requires sign-in: signed-out readers go to sign-in and return to the recipe. Saved dough formulas are stored per member and site (`member-workbenches`, at most 64 KB and 200 presets). Shared `?config=` recipe links still render for everyone.
+- Account settings change the public name, sign out everywhere, or delete the account with everything it owns.
 
-The previous anonymous name/email ratings are retired: their tables remain only so schema changes stay additive and nothing reads them.
+The previous anonymous ratings and the brief email/password accounts are retired: their tables and columns remain only so schema changes stay additive, and nothing reads them.
 
 ## Owner security and recovery
 

@@ -5,5 +5,5 @@ export const generateMetadata = accountMetadata('Sign in')
 
 export default async function Page({ searchParams }: { searchParams: AccountSearch }) {
   const params = await searchParams
-  return <SignInPage mode={first(params.mode) === 'create' ? 'create' : 'sign-in'} returnTo={first(params.returnTo)} error={first(params.error)} />
+  return <SignInPage returnTo={first(params.returnTo)} error={first(params.error)} />
 }

@@ -62,7 +62,7 @@ export function unseal(envelope, passphrase) {
   decipher.setAuthTag(decode('tag'))
   return JSON.parse(Buffer.concat([decipher.update(decode('ciphertext')), decipher.final()]).toString())
 }
-export const accountCredentialNames = ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'RESEND_API_KEY']
+export const accountCredentialNames = ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET']
 export async function credentialsCommand(environment, action, path, { deriveR2 = false } = {}) {
   if (action === 'export') {
     const password = await hiddenInput('Separate recovery passphrase (9+ characters)')
@@ -90,7 +90,7 @@ export async function credentialsCommand(environment, action, path, { deriveR2 =
     keychain('create', environment, credentials)
     console.log(`Credentials enrolled for ${environment}. Export a recovery copy before bootstrap.`)
   } else if (action === 'account') {
-    // Optional member sign-in providers. Blank input keeps the enrolled value;
+    // Optional Google sign-in client. Blank input keeps the enrolled value;
     // "-" removes it. Re-export the recovery kit afterwards.
     const credentials = { ...keychain('get', environment) }
     for (const name of accountCredentialNames) {

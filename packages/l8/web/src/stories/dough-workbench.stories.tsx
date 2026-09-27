@@ -5,6 +5,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 
 import type { RecipeContent } from '@eat-yeet/l4-content-model/recipes'
 import { recipeWorkbenchRegistry } from '@app/recipe-workbenches'
+import { AccountProvider } from '@eat-yeet/l6-ui-shell/account/account'
+import { fixtureMember, memoryAccountClient } from '@eat-yeet/l6-ui-shell/account/account-fixture'
 
 const plugin = recipeWorkbenchRegistry.get('sourdough')!
 
@@ -55,7 +57,9 @@ function WorkbenchPreview({ target = false, pizza = false }: { target?: boolean;
   const config = { ...(pizza ? { pizzaSizing: { referenceDiameterInches: 16, referenceBallWeightGrams: 480, diametersInches: [10, 12, 14, 16] } } : {}), defaultInputMode: target ? 'target' : 'weights', defaultSelection: selected, recommendedFormulas: {}, doughIngredientSectionId: 'dough', initialWaterPercent: 97 }
   const Drawer = (pizza ? recipeWorkbenchRegistry.get('pizza')! : plugin).Drawer
   const initial = pizza ? { ...selected, batch: { count: 3, pieceWeightGrams: 480, diameterInches: 16, pieceLabel: 'ball' }, formula: { ...selected.formula, family: 'pizza', levainPercent: 0, yeastPercent: 0.25 } } : selected
-  return <div className="p-6"><Button ref={trigger} onClick={() => setOpen(true)}>Open workbench</Button><p role="status">{applied ? "Recipe updated" : "Preview your batch"}</p><Drawer recipe={recipe} config={{ ...config, defaultSelection: initial }} state={saved ?? initial} onApply={(next) => { setSaved(next); setApplied(true) }} hasSharedConfiguration={false} storageScope={scope} open={open} onOpenChange={changeOpen} /></div>
+  const [account] = useState(() => memoryAccountClient({ member: fixtureMember }))
+  // Saved formulas belong to the signed-in member; each story gets an isolated in-memory account.
+  return <AccountProvider client={account} initialSession={{ member: fixtureMember, providers: { google: true } }}><div className="p-6"><Button ref={trigger} onClick={() => setOpen(true)}>Open workbench</Button><p role="status">{applied ? "Recipe updated" : "Preview your batch"}</p><Drawer recipe={recipe} config={{ ...config, defaultSelection: initial }} state={saved ?? initial} onApply={(next) => { setSaved(next); setApplied(true) }} hasSharedConfiguration={false} storageScope={scope} open={open} onOpenChange={changeOpen} /></div></AccountProvider>
 }
 
 const meta = {

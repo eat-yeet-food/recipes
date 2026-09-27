@@ -13,7 +13,7 @@ export default function Page() {
     sections={[
       { heading: 'Accounts', body: <ul>
         <li>You must be at least 13 years old (16 in the EU and UK) to create an account.</li>
-        <li>Give an email address you control, and keep your password to yourself. You’re responsible for activity on your account.</li>
+        <li>You sign in with your Google account and are responsible for activity on your Eat / Yeet account.</li>
         <li>One person per account. Don’t impersonate anyone or pick a public name that misleads or offends.</li>
         <li>You can delete your account at any time from Account settings.</li>
       </ul> },
@@ -33,7 +33,7 @@ export default function Page() {
       { heading: 'Copyright complaints', body: <p>If you believe content on the site infringes your copyright, email <a href={`mailto:${CONTACT}`}>{CONTACT}</a> with the work, where it appears, your contact details, and a statement that you have a good-faith belief the use isn’t authorized. We’ll review it and remove infringing material.</p> },
       { heading: 'Disclaimers', body: <p>The site is provided “as is” and “as available,” without warranties of any kind, to the extent permitted by law. We don’t guarantee it will always be available, error-free or that saved data will never be lost.</p> },
       { heading: 'Limitation of liability', body: <p>To the extent permitted by law, Eat / Yeet and its operator are not liable for indirect, incidental or consequential damages arising from your use of the site. Our total liability for any claim is limited to US$50. Some jurisdictions don’t allow these limits, so they may not apply to you.</p> },
-      { heading: 'Changes and ending', body: <p>We may update these terms; the date above will change and significant updates will be announced on the site or by email. We may change or discontinue features, or the site, at any time. You may stop using the site whenever you like.</p> },
+      { heading: 'Changes and ending', body: <p>We may update these terms; the date above will change and significant updates will be announced on the site. We may change or discontinue features, or the site, at any time. You may stop using the site whenever you like.</p> },
       { heading: 'Governing law', body: <p>These terms are governed by the laws of the State of California, USA, without regard to conflict-of-law rules, except where your local consumer protection law gives you rights that can’t be waived.</p> },
       { heading: 'Contact', body: <p>Questions about these terms: <a href={`mailto:${CONTACT}`}>{CONTACT}</a>. See also our <a href="/privacy">Privacy Policy</a>.</p> },
     ]} />

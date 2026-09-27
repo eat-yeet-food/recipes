@@ -4,7 +4,8 @@
   "type": "module",
   "imports": {
     "#web-test/app-paths": "./test-support.mjs",
-    "#web-test/static-server": "./test-support.mjs"
+    "#web-test/static-server": "./test-support.mjs",
+    "#web-test/member-session": "./test-support.mjs"
   },
   "dependencies": {
     "@eat-yeet/l1-article-model": "workspace:*",

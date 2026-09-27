@@ -6,6 +6,7 @@
  * registered recipe block, desktop-only browse sidebar, and mobile/cook-mode
  * behavior.
  */
+import { signIn } from '#web-test/member-session'
 import { chromium } from 'playwright'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -27,6 +28,8 @@ const check = (name, ok, detail = '') => results.push({ name, ok: !!ok, detail: 
 
 async function newPage(viewport = { width: 1440, height: 1000 }) {
   const page = await browser.newPage({ viewport, deviceScaleFactor: viewport.width < 700 ? 2 : 1 })
+  // Adjust recipe is a member feature.
+  await signIn(page.context(), BASE)
   page.on('pageerror', (e) => errors.push(e.message))
   page.on('console', (m) => m.type() === 'error' && errors.push(m.text()))
   return page
@@ -94,6 +97,8 @@ await desktop.getByRole('button', { name: /Saved formulas/ }).click()
 check('saved formula disclosure reveals the form', await desktop.getByRole('heading', { name: 'Saved formulas' }).isVisible())
 await desktop.getByLabel('Formula preset name').fill('Outdoor favorite')
 await desktop.getByRole('button', { name: 'Save new' }).click()
+// Saving writes to the member's account; wait for the server round trip.
+await desktop.getByRole('button', { name: 'Load Outdoor favorite' }).waitFor({ timeout: 10000 }).catch(() => {})
 check('saved formula has an explicit recall action', await desktop.getByRole('button', { name: 'Load Outdoor favorite' }).isVisible())
 check('saved formula reports when its exact values are loaded', await desktop.getByText('Loaded', { exact: true }).isVisible())
 await desktop.getByLabel('Oven method').selectOption('indoor-steel')

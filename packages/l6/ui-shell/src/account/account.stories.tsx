@@ -5,10 +5,10 @@ import { NavigationProvider } from '@eat-yeet/l5-ui-primitives/primitives/naviga
 import { AccountProvider, type AccountMember, type AccountProviders } from './account'
 import { fixtureMember, memoryAccountClient } from './account-fixture'
 import { AccountSettingsPage } from './account-settings'
-import { ForgotPasswordPage, ResetPasswordPage, SignInPage, VerifyEmailPage } from './account-pages'
+import { SignInPage } from './account-pages'
 import { Nav } from '../shell/layout'
 
-function Account({ member = null, providers = { google: true, email: true }, children }: {
+function Account({ member = null, providers = { google: true }, children }: {
   member?: AccountMember | null; providers?: AccountProviders; children: ReactNode
 }) {
   const client = useMemo(() => memoryAccountClient({ member, providers }), [member, providers])
@@ -65,7 +65,7 @@ export const NavSignedInMenu: Story = { render: () => <Account member={fixtureMe
   } }
 
 export const PublicNamePrompt: Story = {
-  render: () => <Account member={{ ...fixtureMember, displayName: 'Jordan Q. Public', displayNameConfirmed: false, google: true, hasPassword: false }}><div className="min-h-80 pt-20">{nav}</div></Account>,
+  render: () => <Account member={{ ...fixtureMember, displayName: 'Jordan Q. Public', displayNameConfirmed: false }}><div className="min-h-80 pt-20">{nav}</div></Account>,
   play: async ({ canvasElement }) => {
     const body = within(canvasElement.ownerDocument.body)
     const field = await body.findByRole('textbox', { name: 'Public name' })
@@ -81,97 +81,31 @@ export const PublicNamePrompt: Story = {
 export const SignIn: Story = { render: () => <Account><SignInPage returnTo="/recipes/new-york-style-pizza" /></Account>,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await expect(await canvas.findByRole('link', { name: 'Continue with Google' })).toBeVisible()
-    await userEvent.click(canvas.getByRole('button', { name: 'Sign in' }))
-    await expect(canvas.getByText('Enter a valid email address.')).toBeVisible()
-    await expect(canvas.getByRole('textbox', { name: 'Email' })).toHaveAttribute('aria-invalid', 'true')
-    await userEvent.type(canvas.getByRole('textbox', { name: 'Email' }), 'jordan@example.com')
-    await userEvent.type(canvas.getByLabelText('Password'), 'correct-horse')
-    await userEvent.click(canvas.getByRole('button', { name: 'Sign in' }))
-    await expect(await canvas.findByRole('heading', { name: 'You’re signed in' })).toBeVisible()
+    await expect(await canvas.findByRole('link', { name: 'Continue with Google' })).toHaveAttribute('href', '#google')
+    await expect(canvas.getByRole('link', { name: 'Privacy Policy' })).toHaveAttribute('href', '/privacy')
   } }
-
-export const WrongPassword: Story = { render: () => <Account><SignInPage /></Account>,
+export const SignInUnavailable: Story = { render: () => <Account providers={{ google: false }}><SignInPage /></Account>,
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await userEvent.type(await canvas.findByRole('textbox', { name: 'Email' }), 'jordan@example.com')
-    await userEvent.type(canvas.getByLabelText('Password'), 'wrong-password')
-    await userEvent.click(canvas.getByRole('button', { name: 'Sign in' }))
-    await expect(await canvas.findByRole('alert')).toHaveTextContent('don’t match')
-    await expect(canvas.getByRole('textbox', { name: 'Email' })).toHaveValue('jordan@example.com')
+    await expect(await within(canvasElement).findByRole('alert')).toHaveTextContent('Sign-in is unavailable')
   } }
-
-export const CreateAccount: Story = { render: () => <Account><SignInPage mode="create" /></Account>,
+export const GoogleFailed: Story = { render: () => <Account><SignInPage error="google" /></Account>,
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await userEvent.type(await canvas.findByRole('textbox', { name: 'Public name' }), 'Jordan')
-    await userEvent.type(canvas.getByRole('textbox', { name: 'Email' }), 'new@example.com')
-    await userEvent.type(canvas.getByLabelText('Password'), 'short')
-    await userEvent.click(canvas.getByRole('button', { name: 'Create account' }))
-    await expect(canvas.getAllByText('Use at least 10 characters.').at(-1)).toBeVisible()
-    await userEvent.type(canvas.getByLabelText('Password'), '-but-now-long')
-    await userEvent.click(canvas.getByRole('button', { name: 'Create account' }))
-    await expect(await canvas.findByRole('heading', { name: 'Check your email' })).toBeVisible()
-    await expect(canvas.getByText('new@example.com')).toBeVisible()
+    await expect(await within(canvasElement).findByRole('alert')).toHaveTextContent('didn’t complete')
   } }
-
-export const EmailUnavailable: Story = { render: () => <Account providers={{ google: true, email: false }}><SignInPage mode="create" /></Account>,
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await expect(await canvas.findByText(/Email sign-up isn’t available right now/)).toBeVisible()
-    await expect(canvas.getByRole('button', { name: 'Create account' })).toBeDisabled()
-  } }
-
-export const GoogleFailed: Story = { render: () => <Account><SignInPage error="google" /></Account> }
-export const ForgotPassword: Story = { render: () => <Account><ForgotPasswordPage /></Account>,
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await userEvent.type(await canvas.findByRole('textbox', { name: 'Email' }), 'jordan@example.com')
-    await userEvent.click(canvas.getByRole('button', { name: 'Send reset link' }))
-    await expect(await canvas.findByRole('heading', { name: 'Check your email' })).toBeVisible()
-  } }
-export const ResetPassword: Story = { render: () => <Account><ResetPasswordPage token="valid" /></Account>,
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await userEvent.type(await canvas.findByLabelText('New password'), 'a-new-long-password')
-    await userEvent.click(canvas.getByRole('button', { name: 'Change password' }))
-    await expect(await canvas.findByRole('heading', { name: 'Password updated' })).toBeVisible()
-  } }
-export const ResetExpired: Story = { render: () => <Account><ResetPasswordPage token="expired" /></Account>,
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await userEvent.type(await canvas.findByLabelText('New password'), 'a-new-long-password')
-    await userEvent.click(canvas.getByRole('button', { name: 'Change password' }))
-    await expect(await canvas.findByRole('alert')).toHaveTextContent('invalid or has expired')
-    await expect(canvas.getByRole('link', { name: 'Request a new link' })).toBeVisible()
-  } }
-export const VerifyEmail: Story = { render: () => <Account><VerifyEmailPage token="valid" /></Account>,
-  play: async ({ canvasElement }) => {
-    await expect(await within(canvasElement).findByRole('heading', { name: 'Email confirmed' })).toBeVisible()
-  } }
-export const VerifyInvalid: Story = { render: () => <Account><VerifyEmailPage token="used" /></Account>,
-  play: async ({ canvasElement }) => {
-    await expect(await within(canvasElement).findByRole('alert')).toHaveTextContent('invalid or was already used')
-  } }
+export const AlreadySignedIn: Story = { render: () => <Account member={fixtureMember}><SignInPage /></Account> }
 
 export const Settings: Story = { render: () => <Account member={fixtureMember}><AccountSettingsPage /></Account>,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     await expect(await canvas.findByRole('heading', { name: 'Account settings' })).toBeVisible()
-    await userEvent.type(canvas.getByLabelText('Current password'), 'wrong-password')
-    await userEvent.type(canvas.getByLabelText('New password'), 'another-long-password')
-    await userEvent.click(canvas.getByRole('button', { name: 'Change password' }))
-    await expect(await canvas.findByRole('alert')).toHaveTextContent('current password is incorrect')
-    await userEvent.clear(canvas.getByLabelText('Current password'))
-    await userEvent.type(canvas.getByLabelText('Current password'), 'correct-horse')
-    await userEvent.click(canvas.getByRole('button', { name: 'Change password' }))
-    await expect(await canvas.findByText('Password changed. Other devices were signed out.')).toBeVisible()
+    const name = canvas.getByRole('textbox', { name: 'Public name' })
+    await waitFor(() => expect(canvas.getByRole('button', { name: 'Save name' })).toBeDisabled())
+    await userEvent.clear(name)
+    await userEvent.type(name, 'Jordan B.')
+    await userEvent.click(canvas.getByRole('button', { name: 'Save name' }))
+    await expect(await canvas.findByText('Public name saved.')).toBeVisible()
     await expect(canvas.getByRole('button', { name: 'Delete my account' })).toBeDisabled()
-  } }
-export const SettingsGoogleOnly: Story = { render: () => <Account member={{ ...fixtureMember, google: true, hasPassword: false }}><AccountSettingsPage /></Account>,
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await expect(await canvas.findByRole('heading', { name: 'Add a password' })).toBeVisible()
-    await expect(canvas.queryByLabelText('Current password')).toBeNull()
+    await userEvent.type(canvas.getByRole('textbox', { name: /to confirm/ }), 'jordan@example.com')
+    await expect(canvas.getByRole('button', { name: 'Delete my account' })).toBeEnabled()
   } }
 export const SettingsSignedOut: Story = { render: () => <Account><AccountSettingsPage /></Account> }

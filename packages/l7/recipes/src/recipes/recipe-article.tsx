@@ -1,4 +1,6 @@
 'use client'
+import { useAccount } from '@eat-yeet/l6-ui-shell/account/account'
+import { useNavigate } from '@eat-yeet/l5-ui-primitives/primitives/navigation'
 import { ResponsiveImage } from '@eat-yeet/l5-ui-primitives/primitives/responsive-image'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 
@@ -96,6 +98,8 @@ export function RecipeArticle({
   const [cookMode, setCookMode] = useState(false)
   const [focusedCooking, setFocusedCooking] = useState(false)
   const [workbenchOpen, setWorkbenchOpen] = useState(false)
+  const account = useAccount()
+  const navigate = useNavigate()
   const workbenchTriggerRef = useRef<HTMLElement | null>(null)
   const wakeLockRef = useRef<ScreenWakeLockSentinel | null>(null)
   const photo = imageUrl(page)
@@ -115,6 +119,11 @@ export function RecipeArticle({
     })
   }
   const openWorkbench = () => {
+    // The calculator is a member feature; signed-out readers sign in, then return here.
+    if (!account.member) {
+      navigate({ to: '/account/sign-in', search: { returnTo: window.location.pathname + window.location.search } })
+      return
+    }
     workbenchTriggerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
     setWorkbenchOpen(true)
   }

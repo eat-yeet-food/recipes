@@ -1,9 +1,8 @@
 import 'server-only'
 import { createHash, randomBytes } from 'node:crypto'
 import { NextResponse, type NextRequest } from 'next/server'
-import { accountEmailAvailable } from '@eat-yeet/l4-content-cms/email'
 import { createSession, sessionMember, SESSION_DAYS, type Member } from '@eat-yeet/l4-content-cms/members'
-import { accountEmailSettings, accountRateLimiter, cms, googleSettings, runtimeSettings } from './cms'
+import { accountRateLimiter, cms, googleSettings, runtimeSettings } from './cms'
 
 // The member cookie is scoped to the account API. It never reaches document
 // requests, so anonymous HTML caching stays effective for signed-in readers.
@@ -43,7 +42,7 @@ export async function readJSON(request: NextRequest, keys: string[], limit = 819
   } catch { return null }
 }
 
-/** Bound credential/email endpoints per client address when the Worker binding exists. */
+/** Bound sign-in attempts per client address when the Worker binding exists. */
 export async function rateLimited(request: NextRequest, action: string) {
   const limiter = accountRateLimiter()
   if (!limiter) return false
@@ -68,7 +67,7 @@ export function clearSession(response: NextResponse) {
   return response
 }
 
-export const accountProviders = () => ({ google: Boolean(googleSettings()), email: accountEmailAvailable(accountEmailSettings()) })
+export const accountProviders = () => ({ google: Boolean(googleSettings()) })
 
 /** Accept only same-site relative destinations. */
 export function safeReturnTo(value: unknown) {

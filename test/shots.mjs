@@ -4,6 +4,7 @@
  * Usage: node test/shots.mjs [outDir]
  */
 import { chromium } from 'playwright'
+import { signIn } from './member-session.mjs'
 import { mkdirSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -34,7 +35,7 @@ export const SHOTS = [
   { name: 'recipes-index', path: '/recipes', full: true },
   { name: 'recipe-mobile', path: '/recipes/new-york-style-pizza', full: false, viewport: { width: 390, height: 844 } },
   { name: 'account-sign-in', path: '/account/sign-in', full: false },
-  { name: 'account-sign-in-mobile', path: '/account/sign-in?mode=create', full: false, viewport: { width: 390, height: 844 } },
+  { name: 'account-sign-in-mobile', path: '/account/sign-in', full: false, viewport: { width: 390, height: 844 } },
 ]
 
 export async function capture(outDir) {
@@ -48,6 +49,7 @@ export async function capture(outDir) {
       viewport: shot.viewport ?? { width: 1440, height: 900 },
       deviceScaleFactor: 2,
     })
+    if (shot.workbench) await signIn(page.context(), server.url.replace(/\/$/, ''))
     page.on('pageerror', (e) => errors.push(`${shot.name}: ${e.message}`))
     page.on('console', (m) => {
       if (m.type() === 'error') errors.push(`${shot.name} console: ${m.text()}`)

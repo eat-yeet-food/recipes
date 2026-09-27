@@ -65,7 +65,7 @@ function RatingExample({ count = 0, ownRating = null, fail = false, unavailable 
       }),
     }
   }, [count, ownRating, fail, unavailable, slow])
-  return <AccountProvider client={account} initialSession={{ member: signedIn ? fixtureMember : null, providers: { google: true, email: true } }}>
+  return <AccountProvider client={account} initialSession={{ member: signedIn ? fixtureMember : null, providers: { google: true } }}>
     <div className="max-w-[var(--layout-recipe-copy)] bg-white p-6 text-ink"><RecipeRating title="New York Style Pizza" client={client} /></div>
   </AccountProvider>
 }

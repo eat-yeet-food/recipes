@@ -17,15 +17,9 @@ export async function accountRequest<T>(path: string, method = 'GET', body?: unk
 
 export const accountClient: AccountClient = {
   session: () => accountRequest<AccountSession>('/session'),
-  signIn: (email, password) => accountRequest<AccountSession>('/login', 'POST', { email, password }),
-  register: async (input) => { await accountRequest('/register', 'POST', input) },
-  verify: async (token) => { await accountRequest('/verify', 'POST', { token }) },
-  forgot: async (email) => { await accountRequest('/forgot', 'POST', { email }) },
-  reset: async (token, password) => { await accountRequest('/reset', 'POST', { token, password }) },
   updateDisplayName: (displayName) => accountRequest<AccountSession>('/session', 'PATCH', { displayName }),
   signOut: async () => { await accountRequest('/session', 'DELETE') },
   googleURL: (returnTo) => `${ACCOUNT_API}/google?returnTo=${encodeURIComponent(returnTo)}`,
-  changePassword: (currentPassword, password) => accountRequest<AccountSession>('/password', 'POST', { currentPassword, password }),
   signOutEverywhere: async () => { await accountRequest('/sessions', 'DELETE') },
   deleteAccount: async (email) => { await accountRequest('/delete', 'POST', { email }) },
   readWorkbench: async (scope) => (await accountRequest<{ store: unknown }>(`/workbench/${encodeURIComponent(scope)}`, 'GET', undefined,

@@ -7,6 +7,8 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@eat-yeet
 import { cn } from '@eat-yeet/l0-foundation/utils'
 import { initials, useAccount, type AccountMember } from './account'
 
+// Menu rows: full-width 44px targets without the underlined text-action treatment.
+const menuItem = '-mx-2 flex min-h-11 items-center rounded-control px-2 text-left font-action text-sm font-bold text-ink hover:bg-ink/5 focus-visible:outline-2 focus-visible:outline-ink focus-visible:-outline-offset-2'
 const currentPath = () => typeof window === 'undefined' ? '/' : window.location.pathname + window.location.search
 
 /** Navigates to sign-in, returning to the current page (including its query) afterwards. */
@@ -68,13 +70,13 @@ export function AccountNav({ linkClassName }: { linkClassName: string }) {
       className="absolute right-0 top-full z-[var(--z-nav)] mt-2 w-64 rounded-surface bg-white p-4 text-ink shadow-[0_8px_24px_color-mix(in_srgb,var(--color-ink)_16%,transparent)]">
       <p className="truncate font-action text-sm font-bold">{member.displayName}</p>
       <p className="truncate text-xs text-muted-foreground">{member.email}</p>
-      <div className="mt-4 grid justify-items-start gap-3 border-t border-border pt-3">
-        <Button asChild variant="link"><Link to="/account/settings" onClick={() => setOpen(false)}>Account settings</Link></Button>
-        <Button variant="link" onClick={async () => {
+      <div className="mt-3 grid border-t border-border pt-2">
+        <Link to="/account/settings" onClick={() => setOpen(false)} className={menuItem}>Account settings</Link>
+        <button type="button" className={menuItem} onClick={async () => {
           setError('')
           try { await signOut(); setOpen(false) }
           catch { setError('You could not be signed out. Please try again.') }
-        }}>Sign out</Button>
+        }}>Sign out</button>
         {error ? <p role="alert" className="mt-2 text-xs text-danger">{error}</p> : null}
       </div>
     </div>

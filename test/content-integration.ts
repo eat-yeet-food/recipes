@@ -242,7 +242,7 @@ try {
   })
   assert.equal((await request(`/recipes/${initial.slug}`)).status, 200)
   await verifyAccounts(p, origin, String(initial.slug), initial.id)
-  evidence.push('Member accounts require email confirmation, lock out repeated failures, reset and revoke sessions, link Google only by verified email, and own their ratings, replies and saved formulas; member and review records are unreachable through Payload REST')
+  evidence.push('Google-only member accounts: verified email required, revocable sessions, deletion, and member-owned ratings, replies and saved formulas; email/password endpoints are gone and member records are unreachable through Payload REST')
   assert(
     (await (await request('/sitemap.xml')).text()).includes(
       String(initial.slug),

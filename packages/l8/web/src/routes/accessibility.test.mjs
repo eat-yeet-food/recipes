@@ -9,6 +9,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import AxeBuilder from '@axe-core/playwright'
+import { signIn } from '#web-test/member-session'
 import { chromium } from 'playwright'
 
 import { RESOLVED_APP_PATHS } from '#web-test/app-paths'
@@ -33,8 +34,7 @@ const paths = [
   '/search?q=does-not-exist',
   '/learn',
   '/account/sign-in',
-  '/account/sign-in?mode=create',
-  '/account/forgot',
+  '/account/settings',
   `/recipes/${INDEX[0].slug}`,
   ...(ARTICLE_INDEX[0] ? [`/learn/${ARTICLE_INDEX[0].slug}`] : []),
 ]
@@ -73,6 +73,8 @@ try {
     await audit(page, 'Search palette / empty', width)
     await page.keyboard.press('Escape')
     if (INDEX.some(recipe => recipe.slug === 'sourdough-bread')) {
+      // Adjust recipe is a member feature; the rest of this pass stays anonymous.
+      await signIn(context, server.url.replace(/\/$/, ''))
       await page.goto(new URL('/recipes/sourdough-bread', server.url).href, { waitUntil: 'networkidle' })
       await page.getByRole('button', { name: 'Adjust recipe', exact: true }).first().click()
       await audit(page, 'Dough workbench / open', width)

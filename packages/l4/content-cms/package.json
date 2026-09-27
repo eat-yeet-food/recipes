@@ -6,8 +6,7 @@
     "./config": "./src/config.ts",
     "./service": "./src/service.ts",
     "./ratings": "./src/ratings.ts",
-    "./members": "./src/members.ts",
-    "./email": "./src/email.ts"
+    "./members": "./src/members.ts"
   },
   "dependencies": {
     "payload": "3.89.0",

@@ -6,27 +6,17 @@ export type AccountMember = {
   email: string
   displayName: string
   displayNameConfirmed: boolean
-  hasPassword: boolean
-  google: boolean
 }
-export type AccountProviders = { google: boolean; email: boolean }
+export type AccountProviders = { google: boolean }
 export type AccountSession = { member: AccountMember | null; providers: AccountProviders }
-export type AccountRegistration = { displayName: string; email: string; password: string }
 
 /** Transport supplied by the page; Storybook supplies an in-memory fixture. */
 export type AccountClient = {
   session: () => Promise<AccountSession>
-  signIn: (email: string, password: string) => Promise<AccountSession>
-  register: (input: AccountRegistration) => Promise<void>
-  verify: (token: string) => Promise<void>
-  forgot: (email: string) => Promise<void>
-  reset: (token: string, password: string) => Promise<void>
   updateDisplayName: (displayName: string) => Promise<AccountSession>
   signOut: () => Promise<void>
   googleURL: (returnTo: string) => string
   /** The signed-in member's saved workbench store for a storage scope, or null. */
-  /** `current` is null when a Google-only member adds a first password. */
-  changePassword: (current: string | null, next: string) => Promise<AccountSession>
   signOutEverywhere: () => Promise<void>
   deleteAccount: (email: string) => Promise<void>
   readWorkbench: (scope: string) => Promise<unknown>
@@ -56,11 +46,10 @@ export const markSignedIn = () => writeHint(true)
 
 const unavailable = () => Promise.reject(new Error('Accounts are unavailable here.'))
 const noClient: AccountClient = {
-  session: async () => ({ member: null, providers: { google: false, email: false } }),
-  signIn: unavailable, register: unavailable, verify: unavailable, forgot: unavailable, reset: unavailable,
+  session: async () => ({ member: null, providers: { google: false } }),
   updateDisplayName: unavailable, signOut: async () => {}, googleURL: () => '#',
   readWorkbench: unavailable, writeWorkbench: unavailable,
-  changePassword: unavailable, signOutEverywhere: unavailable, deleteAccount: unavailable,
+  signOutEverywhere: unavailable, deleteAccount: unavailable,
 }
 
 const AccountContext = createContext<AccountState>({
@@ -90,7 +79,7 @@ export function AccountProvider({ client, initialSession, children }: { client: 
   }, [client, accept])
   const signOut = useCallback(async () => {
     await client.signOut()
-    accept({ member: null, providers: session?.providers ?? { google: false, email: false } })
+    accept({ member: null, providers: session?.providers ?? { google: false } })
   }, [client, accept, session])
 
   useEffect(() => {
