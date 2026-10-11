@@ -4,7 +4,7 @@ import { RecipeDetail } from '@eat-yeet/l7-recipes/recipes/recipe'
 import { activateRecipeWorkbench } from '@eat-yeet/l7-recipes/recipes/workbench-registry'
 import { pageBlockRegistry } from '@app/page-blocks'
 import { recipeWorkbenchRegistry } from '@app/recipe-workbenches'
-import { useMemo } from 'react'
+import { useMemo, useOptimistic, useTransition } from 'react'
 import { accountRequest } from './account-client'
 import { RecipeRating, type RatingClient } from '@eat-yeet/l7-recipes/recipes/recipe-rating'
 export function RecipeClient({
@@ -32,7 +32,8 @@ export function RecipeClient({
   }, [recipe.slug])
   // Browser Back updates the URL before a new server response arrives. Read the
   // current query so formulas restore immediately, including an empty query.
-  const raw = params ? params.get('config') ?? '' : serializedConfig
+  const [raw, showConfig] = useOptimistic(params ? params.get('config') ?? '' : serializedConfig)
+  const [, startTransition] = useTransition()
   const workbench = activateRecipeWorkbench(
     recipe,
     recipeWorkbenchRegistry,
@@ -48,12 +49,18 @@ export function RecipeClient({
       siteUrl={siteUrl}
       blockRegistry={pageBlockRegistry}
       workbench={workbench}
-      onWorkbenchApply={(next) =>
-        router.push(
-          `/recipes/${recipe.slug}?config=${encodeURIComponent(JSON.stringify(next))}`,
-          { scroll: false },
-        )
-      }
+      onWorkbenchApply={(next, options) => {
+        const config = JSON.stringify(next)
+        // Show the formula at once; the URL follows when the navigation settles.
+        startTransition(() => {
+          showConfig(config)
+          // A remembered formula loads in place; an explicit choice stays on the Back stack.
+          router[options?.replace ? 'replace' : 'push'](
+            `/recipes/${recipe.slug}?config=${encodeURIComponent(config)}`,
+            { scroll: false },
+          )
+        })
+      }}
       storageScope={new URL(siteUrl).hostname}
       rating={<RecipeRating key={recipe.slug} title={recipe.title} client={ratingClient} />}
     />

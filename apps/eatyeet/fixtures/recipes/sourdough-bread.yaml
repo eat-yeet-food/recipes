@@ -35,7 +35,7 @@ methodOptions:
 workbench:
   id: sourdough
   config:
-    defaultInputMode: weights
+    defaultInputMode: target
     doughIngredientSectionId: dough
     hiddenIngredientSectionIds:
       - starter-maintenance

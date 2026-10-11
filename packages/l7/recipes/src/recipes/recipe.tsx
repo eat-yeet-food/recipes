@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import { RecipeCard } from '@eat-yeet/l6-ui-catalog/cards'
 import type { PageBlockRegistry } from '@eat-yeet/l6-ui-content-blocks/page-blocks'
 import type { RecipeSummary } from '@eat-yeet/l1-recipe-model/recipes'
-import type { ActiveRecipeWorkbench } from './workbench-registry'
+import type { ActiveRecipeWorkbench, RecipeWorkbenchApplyOptions } from './workbench-registry'
 import type { RecipeContent as Recipe } from '@eat-yeet/l4-content-model/recipes'
 import { RecipeArticle } from './recipe-article'
 import type { RecipePageBlockContext } from './recipe-blocks'
@@ -52,7 +52,7 @@ export function RecipeDetail({
   siteUrl: string
   blockRegistry: PageBlockRegistry<RecipePageBlockContext>
   workbench?: ActiveRecipeWorkbench | null
-  onWorkbenchApply?: (state: unknown) => void
+  onWorkbenchApply?: (state: unknown, options?: RecipeWorkbenchApplyOptions) => void
   storageScope?: string
   rating?: ReactNode
 }) {

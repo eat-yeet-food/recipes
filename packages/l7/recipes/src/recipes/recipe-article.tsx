@@ -12,8 +12,8 @@ import type { PageBlockRegistry } from '@eat-yeet/l6-ui-content-blocks/page-bloc
 import type { RecipeContent } from '@eat-yeet/l4-content-model/recipes'
 import { RecipeAction } from './recipe-actions'
 import type { RecipePageBlockContext } from './recipe-blocks'
-import { RecipeWorkbenchHost } from './recipe-workbench'
-import type { ActiveRecipeWorkbench } from './workbench-registry'
+import { RecipeWorkbenchChoicesSource, RecipeWorkbenchHost } from './recipe-workbench'
+import type { ActiveRecipeWorkbench, RecipeWorkbenchApplyOptions } from './workbench-registry'
 
 type ScreenWakeLockSentinel = {
   released?: boolean
@@ -91,7 +91,7 @@ export function RecipeArticle({
   blockRegistry: PageBlockRegistry<RecipePageBlockContext>
   aside?: (props: RecipeArticleAsideProps) => ReactNode
   workbench?: ActiveRecipeWorkbench | null
-  onWorkbenchApply?: (state: unknown) => void
+  onWorkbenchApply?: (state: unknown, options?: RecipeWorkbenchApplyOptions) => void
   storageScope?: string
   rating?: ReactNode
 }) {
@@ -183,6 +183,9 @@ export function RecipeArticle({
     firstRecipeBlockIndex,
     workbenchSummary: workbench ? workbench.plugin.summary(page, workbench.config, workbench.state) : undefined,
     onOpenWorkbench: workbench ? openWorkbench : undefined,
+    workbenchChoices: workbench && onWorkbenchApply
+      ? (render) => <RecipeWorkbenchChoicesSource recipe={page} workbench={workbench} onApply={onWorkbenchApply} storageScope={storageScope}>{render}</RecipeWorkbenchChoicesSource>
+      : undefined,
   }
 
   return (

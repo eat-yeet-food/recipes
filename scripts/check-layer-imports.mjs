@@ -11,6 +11,7 @@ const APP_IMPORTS = {
   'packages/l8/web/src/lib/api.ts': new Set(['@app/articles', '@app/recipes']),
   'packages/l8/web/src/routes/recipes/$slug/index.tsx': new Set(['@app/page-blocks', '@app/recipe-workbenches']),
   'packages/l8/web/src/stories/dough-workbench.stories.tsx': new Set(['@app/recipe-workbenches']),
+  'packages/l8/web/src/stories/saved-formula-choice.stories.tsx': new Set(['@app/recipe-workbenches']),
 }
 const inside = (file, root) => {
   const rel = relative(root, file)

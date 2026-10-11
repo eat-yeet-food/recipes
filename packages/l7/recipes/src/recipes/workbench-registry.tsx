@@ -19,12 +19,38 @@ export interface RecipeWorkbenchSummary {
   details: string
 }
 
+export interface RecipeWorkbenchApplyOptions {
+  /** Replace the current history entry instead of adding one. */
+  replace?: boolean
+}
+
+export interface RecipeWorkbenchChoicesProps {
+  recipe: RecipeContent
+  config: unknown
+  state: unknown
+  onApply: (state: unknown, options?: RecipeWorkbenchApplyOptions) => void
+  hasSharedConfiguration: boolean
+  storageScope: string
+}
+
+/** A quick choice between whole configurations, shown in the adjustment summary. */
+export interface RecipeWorkbenchChoices {
+  label: string
+  value: string
+  options: readonly { value: string; label: string; disabled?: boolean }[]
+  onChange: (value: string) => void
+  /** Explains a choice that could not be remembered. */
+  notice?: string
+}
+
 export interface RecipeWorkbenchPlugin {
   id: string
   defaultState: (config: unknown) => unknown | null
   decodeState: (value: unknown, config: unknown, recipe: RecipeContent) => unknown | null
   resolveRecipe: (recipe: RecipeContent, config: unknown, state: unknown) => RecipeContent
   summary: (recipe: RecipeContent, config: unknown, state: unknown) => RecipeWorkbenchSummary | null
+  /** A hook returning the reader's own configurations for this recipe, or null when there are none. */
+  useChoices?: (props: RecipeWorkbenchChoicesProps) => RecipeWorkbenchChoices | null
   Drawer: ComponentType<RecipeWorkbenchDrawerProps>
 }
 

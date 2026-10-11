@@ -8,11 +8,13 @@ export const fixtureMember: AccountMember = {
  * In-memory account transport for Storybook. Signing in happens on Google,
  * so stories start signed in or signed out.
  */
-export function memoryAccountClient({ member = null, providers = { google: true }, delay = 0, fail = false }: {
+export function memoryAccountClient({ member = null, providers = { google: true }, delay = 0, fail = false, workbenches: saved = {} }: {
   member?: AccountMember | null; providers?: AccountProviders; delay?: number; fail?: boolean
+  /** Saved workbench stores the member starts with, by storage scope. */
+  workbenches?: Record<string, unknown>
 } = {}): AccountClient {
   let current = member
-  const workbenches = new Map<string, unknown>()
+  const workbenches = new Map<string, unknown>(Object.entries(structuredClone(saved)))
   const wait = async () => {
     if (delay) await new Promise((resolve) => setTimeout(resolve, delay))
     if (fail) throw new Error('Something went wrong. Please try again.')

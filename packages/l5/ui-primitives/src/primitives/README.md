@@ -13,5 +13,9 @@ ChoiceGroup derives nested radii from the shared outer radius and inset. Input,
 Select and Textarea share field geometry; visible labels and associated errors
 remain the caller's responsibility. Fields use flat ink fills with inset focus and no bottom edge. DialogContent's `sheet` variant removes every corner radius for viewport-attached sheets; floating dialogs retain surface rounding. Dialog and Checkbox retain Radix semantics.
 
+TextSelect is a native select presented as a borderless text action for a
+choice inside a line of label text. It inherits the surrounding type and
+truncates long labels; it is not a standalone form field.
+
 Do not override these with feature-wide descendant selectors or story-only form
 CSS. Add meaningful variants here and update their usage and state stories.

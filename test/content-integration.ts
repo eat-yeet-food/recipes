@@ -7,6 +7,9 @@ import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs'
 // This suite owns an isolated database; it never changes the development owner or sources.
 mkdirSync('.local', { recursive: true })
 process.env.LOCAL_STATE_DIR = mkdtempSync(resolve('.local', 'acceptance-'))
+// Google sign-in stays unconfigured here, whatever a developer's local .dev.vars enables.
+process.env.GOOGLE_CLIENT_ID = ''
+process.env.GOOGLE_CLIENT_SECRET = ''
 const { openLocalCMS } = await import('../scripts/cms-local')
 const { updateOwner } = await import('../scripts/local-runtime.mjs')
 const { sourceContent } = await import('../scripts/content-source.mjs')

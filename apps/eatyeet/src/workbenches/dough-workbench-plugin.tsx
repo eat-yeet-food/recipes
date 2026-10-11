@@ -3,8 +3,9 @@ import { lazy, Suspense } from 'react'
 import type { DoughFormula } from '@eat-yeet/l2-recipe-domain/formula'
 import { selectedRecipeMethod } from '@eat-yeet/l4-content-model/recipes'
 import { Dialog, DialogDescription, DialogTitle } from '@eat-yeet/l5-ui-primitives/primitives/dialog'
-import type { RecipeWorkbenchDrawerProps, RecipeWorkbenchPlugin } from '@eat-yeet/l7-recipes/recipes/workbench-registry'
+import type { RecipeWorkbenchChoicesProps, RecipeWorkbenchDrawerProps, RecipeWorkbenchPlugin } from '@eat-yeet/l7-recipes/recipes/workbench-registry'
 import { clone, completeFormula, isDoughConfig, decodeDoughState, resolveWorkbenchRecipe, selectionOverview } from './dough-workbench-model'
+import { useDoughFormulaChoices } from './dough-formula-choices'
 
 const DoughFormulaWorkbench = lazy(() => import('./dough-formula-workbench').then(({ DoughFormulaWorkbench }) => ({ default: DoughFormulaWorkbench })))
 
@@ -18,6 +19,7 @@ function DoughWorkbenchDrawer(props: RecipeWorkbenchDrawerProps, family: DoughFo
 }
 
 function createDoughWorkbenchPlugin(id: string, family: DoughFormula['family']): RecipeWorkbenchPlugin {
+  const useChoices = (props: RecipeWorkbenchChoicesProps) => useDoughFormulaChoices(props, family)
   return {
     id,
     defaultState: (config) => isDoughConfig(config) && config.defaultSelection.formula.family === family ? { ...clone(config.defaultSelection), formula: completeFormula(clone(config.defaultSelection.formula)) } : null,
@@ -34,6 +36,7 @@ function createDoughWorkbenchPlugin(id: string, family: DoughFormula['family']):
       const decoded = isDoughConfig(config) ? decodeDoughState(state, config, recipe) : null
       return decoded?.formula.family === family ? selectionOverview(decoded, selectedRecipeMethod(recipe, decoded.methodId)) : null
     },
+    useChoices,
     Drawer: (props) => DoughWorkbenchDrawer(props, family),
   }
 }

@@ -154,11 +154,11 @@ function TokenTable({ tokens }: { tokens: Token[] }) {
 }
 
 function FormStates() {
-  const [mode, setMode] = useState('weights')
+  const [mode, setMode] = useState('target')
   return <div data-storybook-form-row="">
     <label><span>Search</span><Input type="search" defaultValue="pizza" /></label>
     <label><span>Course</span><Select defaultValue="mains"><option value="mains">Mains</option><option value="desserts">Desserts</option></Select></label>
-    <ChoiceGroup label="Input mode" value={mode} onChange={setMode} options={[{ value: 'weights', label: 'Weights' }, { value: 'target', label: 'Target batch' }]} />
+    <ChoiceGroup label="Input mode" value={mode} onChange={setMode} options={[{ value: 'target', label: 'Percentages' }, { value: 'weights', label: 'Weights' }]} />
     <div data-storybook-chip-row=""><Button>Apply recipe</Button><Button disabled>Unavailable</Button></div>
   </div>
 }

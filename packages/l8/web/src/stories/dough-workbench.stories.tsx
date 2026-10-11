@@ -8,43 +8,9 @@ import { recipeWorkbenchRegistry } from '@app/recipe-workbenches'
 import { AccountProvider } from '@eat-yeet/l6-ui-shell/account/account'
 import { fixtureMember, memoryAccountClient } from '@eat-yeet/l6-ui-shell/account/account-fixture'
 
+import { recipe, state } from './dough-workbench-fixture'
+
 const plugin = recipeWorkbenchRegistry.get('sourdough')!
-
-const recipe = {
-  slug: 'storybook-sourdough',
-  title: 'Country Sourdough',
-  description: 'A configurable naturally leavened loaf.',
-  category: 'savory',
-  defaultMethod: 'dutch-oven',
-  methodOptions: [{ id: 'dutch-oven', label: 'Dutch Oven', description: '', prepMinutes: 60, cookMinutes: 40, totalMinutes: 1800, yieldAmount: 2, yieldUnit: 'loaves', blocks: [] }],
-  blocks: [],
-  courses: [], cuisines: [], methods: [], restrictions: [], occasions: [], ingredientTypes: [],
-  order: null, prepMinutes: 60, cookMinutes: 40, totalMinutes: 1800,
-  yieldAmount: 2, yieldUnit: 'loaves', image: '', imageHash: '', created: '', searchText: '',
-} as RecipeContent
-
-const state = {
-  version: 1,
-  methodId: 'dutch-oven',
-  batch: { count: 2, pieceWeightGrams: 907.5, pieceLabel: 'loaf' },
-  formula: {
-    family: 'sourdough', hydrationPercent: 77.04, saltPercent: 1.97,
-    oilPercent: 0, sugarPercent: 0, maltPercent: 0, yeastPercent: 0, levainPercent: 17.26,
-    flour: [
-      { id: 'bread', name: 'High-protein organic stone-milled bread flour', percent: 70 },
-      { id: 'whole-wheat', name: 'Whole wheat flour', percent: 20 },
-      { id: 'rye', name: 'Dark rye flour', percent: 10 },
-    ],
-    starter: {
-      hydrationPercent: 77,
-      flour: [
-        { id: 'bread', name: 'Bread flour', percent: 50 },
-        { id: 'whole-wheat', name: 'Whole wheat flour', percent: 25 },
-        { id: 'rye', name: 'Dark rye flour', percent: 25 },
-      ],
-    },
-  },
-} as const
 
 function WorkbenchPreview({ target = false, pizza = false }: { target?: boolean; pizza?: boolean }) {
   const scope = `storybook-${useId()}`
@@ -212,6 +178,12 @@ export const DeleteWithoutLoading: Story = { play: async ({ canvasElement }) => 
   await userEvent.click(panel.getByRole('button', { name: 'Save new' }))
   await userEvent.click(panel.getByRole('button', { name: 'New formula' }))
   await userEvent.click(panel.getByRole('button', { name: 'Delete Weekend batch' }))
+  await expect(panel.getByRole('button', { name: 'Keep' })).toHaveFocus()
+  await userEvent.click(panel.getByRole('button', { name: 'Keep' }))
+  await expect(panel.getAllByRole('option')).toHaveLength(1)
+  await expect(panel.getByRole('button', { name: 'Delete Weekend batch' })).toHaveFocus()
+  await userEvent.click(panel.getByRole('button', { name: 'Delete Weekend batch' }))
+  await userEvent.click(within(panel.getByRole('group', { name: 'Delete Weekend batch?' })).getByRole('button', { name: 'Delete formula' }))
   await expect(panel.queryByRole('option')).not.toBeInTheDocument()
   await expect(panel.getByRole('status')).toHaveTextContent('Deleted “Weekend batch”.')
   await expect(name).toHaveFocus()
@@ -263,11 +235,48 @@ export const SourdoughProcessAndSavedStarter: Story = { args: { target: true }, 
   await userEvent.type(screen.getByRole('textbox', { name: 'Formula preset name' }), 'Without lamination')
   await expect(screen.getByRole('button', { name: 'Save new' })).toBeEnabled()
   await userEvent.click(screen.getByRole('button', { name: 'Apply to recipe' }))
+  await expect(screen.getByRole('dialog', { name: 'Save this formula?' })).toBeInTheDocument()
+  await expect(screen.getByRole('status', { hidden: true })).toHaveTextContent('Recipe updated')
+  const savedName = screen.getByRole('textbox', { name: 'Formula name' })
+  await expect(savedName).toHaveFocus()
+  await expect(screen.getByRole('button', { name: 'Save formula' })).toBeDisabled()
+  await userEvent.type(savedName, ' hand   MIXED loaf ')
+  await expect(screen.getByRole('alert')).toHaveTextContent('A formula with this name already exists')
+  await expect(screen.getByRole('button', { name: 'Save formula' })).toBeDisabled()
+  await userEvent.clear(savedName)
+  await userEvent.type(savedName, 'Without lamination')
+  await userEvent.click(screen.getByRole('button', { name: 'Save formula' }))
   await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
   await userEvent.click(screen.getByRole('button', { name: 'Open workbench' }))
   await screen.findByRole('dialog')
   await expect(screen.getByRole('combobox', { name: 'Step 1 technique' })).toHaveValue('stretch-and-fold')
   await expect(screen.getByRole('combobox', { name: 'Step 2 technique' })).toHaveValue('coil-fold')
+} }
+
+export const SavePromptUpdatesLoadedFormula: Story = { args: { target: true }, play: async ({ canvasElement }) => {
+  const screen = within(canvasElement.ownerDocument.body)
+  await waitFor(() => { expect(screen.getByRole('dialog')).toHaveAttribute('data-workbench-drawer'); expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto') })
+  await userEvent.click(screen.getByRole('button', { name: /Saved formulas/ }))
+  await userEvent.type(screen.getByRole('textbox', { name: 'Formula preset name' }), 'Weekend batch')
+  await userEvent.click(screen.getByRole('button', { name: 'Save new' }))
+  await screen.findByRole('button', { name: 'Load Weekend batch' })
+  const hydration = screen.getByRole('textbox', { name: 'Hydration' })
+  await userEvent.clear(hydration)
+  await userEvent.type(hydration, '80')
+  await userEvent.click(screen.getByRole('button', { name: 'Apply to recipe' }))
+  const name = await screen.findByRole('textbox', { name: 'Formula name' })
+  await expect(name).toHaveValue('Weekend batch')
+  await expect(screen.getByRole('button', { name: 'Update formula' })).toBeEnabled()
+  await userEvent.type(name, ' 2')
+  await expect(screen.getByRole('button', { name: 'Save as new' })).toBeEnabled()
+  await userEvent.clear(name)
+  await userEvent.type(name, 'weekend batch')
+  await userEvent.click(screen.getByRole('button', { name: 'Update formula' }))
+  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+  await userEvent.click(screen.getByRole('button', { name: 'Open workbench' }))
+  await screen.findByRole('dialog')
+  await expect(screen.getByRole('button', { name: /Saved formulas/ })).toHaveTextContent('(1)')
+  await expect(screen.getByRole('textbox', { name: 'Hydration' })).toHaveValue('80')
 } }
 
 export const PluginProcessProjection: Story = { play: async () => {
@@ -333,6 +342,7 @@ export const PizzaSizeAndSugar: Story = { args: { pizza: true, target: true }, p
   await userEvent.click(screen.getByRole('button', { name: 'Weights' }))
   await expect(Number((screen.getByRole('textbox', { name: 'Sugar' }) as HTMLInputElement).value)).toBeGreaterThan(0)
   await userEvent.click(screen.getByRole('button', { name: 'Apply to recipe' }))
+  await userEvent.click(await screen.findByRole('button', { name: 'Not now' }))
   await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
   await userEvent.click(screen.getByRole('button', { name: 'Open workbench' }))
   await waitFor(() => { expect(screen.getByRole('dialog')).toHaveAttribute('data-workbench-drawer'); expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto') })

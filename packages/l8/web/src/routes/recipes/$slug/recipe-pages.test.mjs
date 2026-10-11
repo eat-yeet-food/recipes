@@ -120,6 +120,40 @@ await desktop.locator('[data-workbench-drawer]').waitFor()
 await desktop.getByLabel('Hydration').fill('71')
 await desktop.getByRole('button', { name: 'Cancel' }).click()
 check('cancel discards draft', (await desktop.locator('text=65% hydration').count()) > 0)
+// A saved formula is one choice away on the recipe page, and the choice follows the member.
+const pizzaSummary = desktop.locator('[data-recipe-adjustment]')
+const savedChoice = desktop.getByRole('combobox', { name: 'Saved formula' })
+check('saved formulas are offered beside the summary', await savedChoice.inputValue() === 'original' && await savedChoice.locator('option').allTextContents().then((labels) => labels.join('|') === 'Original|Outdoor favorite'))
+const summaryHeight = (await pizzaSummary.boundingBox()).height
+await desktop.getByRole('button', { name: 'Adjust Recipe' }).first().click()
+await desktop.locator('[data-workbench-drawer]').waitFor()
+await desktop.getByLabel('Hydration').fill('68')
+await desktop.getByRole('button', { name: 'Apply to recipe' }).click()
+const savePrompt = desktop.getByRole('dialog', { name: 'Save this formula?' })
+await savePrompt.waitFor()
+await pizzaSummary.getByText('68% hydration').waitFor({ timeout: 10000 }).catch(() => {})
+check('applying an unsaved formula updates the recipe before offering to save it', (await pizzaSummary.textContent()).includes('68% hydration'), await pizzaSummary.textContent())
+check('the save prompt focuses its name field', await desktop.getByLabel('Formula name').evaluate((input) => document.activeElement === input), await desktop.evaluate(() => document.activeElement?.outerHTML.slice(0, 200)))
+await desktop.getByLabel('Formula name').fill(' outdoor   FAVORITE ')
+check('save prompt rejects an existing name', (await savePrompt.getByRole('alert').textContent()).includes('already exists') && await desktop.getByRole('button', { name: 'Save formula' }).isDisabled())
+await desktop.getByLabel('Formula name').fill('Wetter pizza')
+await desktop.getByRole('button', { name: 'Save formula' }).click()
+await savePrompt.waitFor({ state: 'hidden', timeout: 10000 })
+const wetterValue = await savedChoice.inputValue()
+check('a formula saved from the prompt becomes the page choice', wetterValue.startsWith('saved:') && (await savedChoice.locator('option:checked').textContent()) === 'Wetter pizza')
+check('the saved formula choice adds no height to the summary', Math.abs((await pizzaSummary.boundingBox()).height - summaryHeight) < 1, `${summaryHeight} -> ${(await pizzaSummary.boundingBox()).height}`)
+await desktop.goto(`${BASE}/recipes/new-york-style-pizza`, { waitUntil: 'networkidle' })
+await desktop.getByText('68% hydration').first().waitFor({ timeout: 10000 }).catch(() => {})
+check('the last chosen formula loads on a plain recipe URL', (await pizzaSummary.textContent()).includes('68% hydration') && await savedChoice.inputValue() === wetterValue && desktop.url().includes('?config='), desktop.url())
+// The page updates at once; the choice reaches the account in the background.
+const choiceStored = desktop.waitForResponse((response) => response.url().includes('/api/public/account/workbench/') && response.request().method() === 'PUT', { timeout: 10000 }).catch(() => null)
+await savedChoice.selectOption('original')
+await desktop.getByText('65% hydration').first().waitFor({ timeout: 10000 }).catch(() => {})
+check('choosing Original restores the authored formula', (await pizzaSummary.textContent()).includes('65% hydration') && await savedChoice.inputValue() === 'original')
+check('the choice is stored in the account', (await choiceStored)?.ok())
+await desktop.goto(`${BASE}/recipes/new-york-style-pizza`, { waitUntil: 'networkidle' })
+await desktop.waitForTimeout(500)
+check('Original is remembered too', (await pizzaSummary.textContent()).includes('65% hydration') && await savedChoice.inputValue() === 'original' && !desktop.url().includes('?config='), desktop.url())
 const readingLayout = await desktop.evaluate(() => ['.yeet > header', '.yeet main', '.yeet main > article'].map((selector) => {
   const rect = document.querySelector(selector).getBoundingClientRect()
   return { selector, left: rect.left, width: rect.width }
@@ -157,14 +191,15 @@ check('instruction bindings agree with applied recipe rounding', sourdoughRecipe
 const adjustSourdough = sourdough.getByRole('button', { name: 'Adjust Recipe' }).first()
 await adjustSourdough.click()
 const sourdoughDialog = sourdough.getByRole('dialog', { name: 'Adjust recipe' })
-check('sourdough starts in ingredient weights', await sourdough.getByRole('button', { name: 'Weights' }).getAttribute('aria-pressed') === 'true')
+check('sourdough starts in baker\'s percentages', await sourdough.getByRole('button', { name: 'Percentages' }).getAttribute('aria-pressed') === 'true')
+await sourdough.getByRole('button', { name: 'Weights' }).click()
 check('sourdough defaults to 77 percent starter hydration', await sourdough.getByLabel('Starter hydration').inputValue() === '77')
 check('sourdough migration weights survive display rounding',
   Math.abs(Number(await sourdough.getByLabel('Bread flour grams').first().inputValue()) - 765) < 0.01 &&
   Math.abs(Number(await sourdough.getByLabel('Whole wheat flour grams').first().inputValue()) - 150) < 0.01 &&
   Math.abs(Number(await sourdough.getByLabel('Added water').inputValue()) - 705) < 0.01 &&
   Math.abs(Number(await sourdough.getByLabel('Ripe starter weight').inputValue()) - 175) < 0.01)
-await sourdough.getByRole('button', { name: 'Target batch' }).click()
+await sourdough.getByRole('button', { name: 'Percentages' }).click()
 check('target formula uses readable rounded percentages',
   Math.abs(Number(await sourdough.getByRole('textbox', { name: 'Hydration', exact: true }).inputValue()) - 77) < 0.01 &&
   Math.abs(Number(await sourdough.getByLabel('Fine sea salt', { exact: true }).inputValue()) - 2) < 0.01 &&

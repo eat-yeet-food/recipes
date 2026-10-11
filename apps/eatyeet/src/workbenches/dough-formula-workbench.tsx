@@ -1,5 +1,5 @@
 import { DoughWorkbenchSurface } from './dough-workbench-surface'
-import { clone, completeFormula, starterFrom, isDoughFormula, selectionSummary, dynamicDoughItems, formatWorkbenchGrams, formatBatchGrams, formatYeastGrams, yeastGramPrecision, pieceCountLabel, type InputMode, type DoughWorkbenchState, type DoughWorkbenchConfig } from './dough-workbench-model'
+import { clone, completeFormula, starterFrom, selectionSummary, dynamicDoughItems, formatWorkbenchGrams, formatBatchGrams, formatYeastGrams, yeastGramPrecision, pieceCountLabel, type InputMode, type DoughWorkbenchState, type DoughWorkbenchConfig } from './dough-workbench-model'
 import { pizzaBallWeight } from '@eat-yeet/l2-recipe-domain/pizza-sizing'
 import { DEFAULT_SOURDOUGH_PROCESS, type SourdoughProcess, type SourdoughFoldMethod } from '@eat-yeet/l2-recipe-domain/sourdough-process'
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
@@ -9,7 +9,7 @@ import { Select } from '@eat-yeet/l5-ui-primitives/primitives/select'
 import { ChoiceGroup } from '@eat-yeet/l5-ui-primitives/primitives/choice-group'
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react'
-import { useAccount } from '@eat-yeet/l6-ui-shell/account/account'
+import { formulasMatch, isAuthoredFormula, useWorkbenchStore, withRecipeChoice, type FormulaPreset, type WorkbenchStoreUpdate } from './dough-workbench-store'
 
 import {
   calculateFormula,
@@ -30,27 +30,6 @@ import {
   DialogTitle,
 } from '@eat-yeet/l5-ui-primitives/primitives/dialog'
 
-export interface FormulaPreset {
-  id: string
-  name: string
-  formula: DoughFormula
-}
-
-type WorkbenchStore = {
-  modes: Record<string, InputMode>
-  presets: FormulaPreset[]
-  starterProfiles: Array<{ id: string; name: string; profile: StarterProfile }>
-  defaults: Record<string, string>
-}
-
-const EMPTY_STORE: WorkbenchStore = { modes: {}, presets: [], starterProfiles: [], defaults: {} }
-const formulaKey = (formula: DoughFormula) => {
-  const complete = completeFormula(formula)
-  const process = complete.process
-  const comparable = { ...complete, ...(process ? { process: { ...process, foldMethod: undefined, folds: process.folds.map(({ atMinutes, method }) => ({ atMinutes, method: method ?? process.foldMethod })) } } : {}) }
-  return JSON.stringify(comparable, (_key, value) => value && typeof value === 'object' && !Array.isArray(value) ? Object.fromEntries(Object.entries(value).sort(([left], [right]) => left.localeCompare(right))) : value)
-}
-const formulasMatch = (left: DoughFormula, right: DoughFormula) => formulaKey(left) === formulaKey(right)
 const WORKBENCH_COPY = {
   pizza: { placeholder: 'e.g. Weekend pizza', saved: 'Save your dough formula here. Batch size and oven stay with this recipe.' },
   sourdough: { placeholder: 'e.g. Everyday sourdough', saved: 'Save your flour blend, starter, levain build, mixing method, and fold schedule together. Batch size stays with this recipe.' },
@@ -70,12 +49,6 @@ function presetSummary(formula: DoughFormula) {
   }
   if (formula.process) parts.push(formula.process.mixingMethod === 'hand' ? 'Hand mixed' : 'Spiral mixer', `${formula.process.folds.length} folding steps`)
   return parts.join(' · ')
-}
-
-function normalizeStore(value: any): WorkbenchStore {
-  return value && typeof value === 'object'
-    ? { ...EMPTY_STORE, ...value, modes: value.modes ?? {}, defaults: value.defaults ?? {}, presets: Array.isArray(value.presets) ? value.presets.filter((preset: FormulaPreset) => preset && typeof preset.id === 'string' && typeof preset.name === 'string' && isDoughFormula(preset.formula)) : [], starterProfiles: value.starterProfiles ?? [] }
-    : clone(EMPTY_STORE)
 }
 
 const NumericFields = createContext<{ report: NumberFieldValidation; resetKey: number } | null>(null)
@@ -106,7 +79,7 @@ function FlourEditor({ value, onChange, unit = '%' }: { value: FlourComponent[];
         <div key={part.id} className="grid grid-cols-[minmax(0,1fr)_100px_44px] items-start gap-2">
           <Input aria-label={`Flour ${index + 1} name`} className="px-3" value={part.name} onChange={(event) => onChange(value.map((item, itemIndex) => itemIndex === index ? { ...item, name: event.target.value } : item))} />
           <Field hideLabel label={`${part.name || `Flour ${index + 1}`} ${unit === '%' ? 'percentage' : 'grams'}`} suffix={unit} value={part.percent} onChange={(percent) => onChange(value.map((item, itemIndex) => itemIndex === index ? { ...item, percent } : item))} />
-          <Button variant="ghost" size="icon" type="button" disabled={value.length === 1} aria-label={`Remove ${part.name || 'flour'}`} onClick={() => onChange(value.filter((_, itemIndex) => itemIndex !== index))}><Trash2 className="mx-auto size-4" /></Button>
+          <Button variant="danger" size="icon" type="button" disabled={value.length === 1} aria-label={`Remove ${part.name || 'flour'}`} onClick={() => onChange(value.filter((_, itemIndex) => itemIndex !== index))}><Trash2 className="mx-auto size-4" /></Button>
         </div>
       ))}
       <Button variant="link" type="button" className="gap-1" onClick={() => onChange([...value, { id: `flour-${crypto.randomUUID()}`, name: '', percent: 0 }])}><Plus className="size-4" /> Add flour</Button>
@@ -115,7 +88,7 @@ function FlourEditor({ value, onChange, unit = '%' }: { value: FlourComponent[];
 }
 
 function Segmented({ value, onChange }: { value: InputMode; onChange: (value: InputMode) => void }) {
-  return <ChoiceGroup label="Calculator input mode" value={value} onChange={onChange} options={[{ value: 'weights', label: 'Weights' }, { value: 'target', label: 'Target batch' }]} />
+  return <ChoiceGroup label="Calculator input mode" value={value} onChange={onChange} options={[{ value: 'target', label: 'Percentages' }, { value: 'weights', label: 'Weights' }]} />
 }
 
 function WorkbenchPanel({ headingId, title, summary, children }: { headingId: string; title: string; summary?: ReactNode; children: ReactNode }) {
@@ -162,11 +135,11 @@ export function DoughFormulaWorkbench({
   }, [])
   const numericFields = useMemo(() => ({ report: reportFieldError, resetKey: fieldResetKey }), [reportFieldError, fieldResetKey])
   const [mode, setMode] = useState<InputMode>(config.defaultInputMode)
-  const [store, setStore] = useState<WorkbenchStore>(EMPTY_STORE)
+  const saved = useWorkbenchStore(storageScope)
+  const { store, persisting } = saved
+  const storeReady = saved.status === 'ready'
   const [storeError, setStoreError] = useState('')
-  const { member, client: account } = useAccount()
-  const memberId = member?.id ?? null
-  const [storeReady, setStoreReady] = useState(false)
+  const storeApplied = useRef(false)
   const [presetsOpen, setPresetsOpen] = useState(false)
   const [presetName, setPresetName] = useState('')
   const [chosenPresetId, setChosenPresetId] = useState('')
@@ -175,12 +148,19 @@ export function DoughFormulaWorkbench({
   const presetNameInput = useRef<HTMLInputElement>(null)
   const presetPicker = useRef<HTMLSelectElement>(null)
   const [selectedPresetId, setSelectedPresetId] = useState('')
+  // After an unsaved formula is applied, the sheet offers to save it before closing.
+  const [savePrompt, setSavePrompt] = useState<{ formula: DoughFormula; base: FormulaPreset | null } | null>(null)
+  const [saveName, setSaveName] = useState('')
+  const [saveAttempted, setSaveAttempted] = useState(false)
+  const saveNameInput = useRef<HTMLInputElement>(null)
+  const [confirmDeleteId, setConfirmDeleteId] = useState('')
+  const deleteAction = useRef<HTMLButtonElement>(null)
+  const keepAction = useRef<HTMLButtonElement>(null)
   const [buildOpen, setBuildOpen] = useState(false)
   const seedRatio = draft.formula.levainBuild?.flourPerSeed ?? 2
   const seed = draft.formula.levainBuild?.seed ?? starterFrom(draft.formula)
   const process = draft.formula.process
   const copy = WORKBENCH_COPY[draft.formula.family]
-  const storageKey = `${storageScope}:recipe-workbench:v1`
   const result = useMemo(() => calculateFormula(draft.formula, draft.batch), [draft])
   const weightInputs: ReverseFormulaInput = weightDraft ?? {
     family: draft.formula.family,
@@ -219,32 +199,48 @@ export function DoughFormulaWorkbench({
       ? `This formula is already saved as “${duplicateFormula.name}”. Load it to update it, or change the formula before saving a new one.`
       : ''
   const showPresetNameError = Boolean(presetNameError) && (presetAttempted || presetName.length > 0)
+  const saveBase = savePrompt?.base ?? null
+  const normalizedSaveName = cleanPresetName(saveName)
+  // Keeping the loaded formula's name updates it; any other name saves a separate formula.
+  const replacedPresetId = saveBase && presetNameKey(normalizedSaveName) === presetNameKey(saveBase.name) ? saveBase.id : ''
+  const saveNameError = !normalizedSaveName
+    ? 'Enter a name for this formula.'
+    : normalizedSaveName.length > 80
+      ? 'Use 80 characters or fewer.'
+      : compatiblePresets.some((preset) => preset.id !== replacedPresetId && presetNameKey(preset.name) === presetNameKey(normalizedSaveName))
+        ? 'A formula with this name already exists. Choose a different name.'
+        : ''
+  const saveDuplicate = savePrompt ? compatiblePresets.find((preset) => preset.id !== replacedPresetId && formulasMatch(preset.formula, savePrompt.formula)) : undefined
+  const showSaveNameError = Boolean(saveNameError) && (saveAttempted || saveName.length > 0)
   const presetNameDescription = showPresetNameError ? 'formula-preset-name-error' : !normalizedPresetName ? 'formula-preset-name-hint' : undefined
 
   // Saved formulas live in the member's account; the drawer only opens for members.
   useEffect(() => {
-    if (!memberId) return
-    let active = true
-    setStoreReady(false)
-    account.readWorkbench(storageKey).then((value) => {
-      if (!active) return
-      const saved = normalizeStore(value)
-      setStore(saved)
-      setStoreError('')
-      setStoreReady(true)
-      setMode(saved.modes[recipe.slug] ?? config.defaultInputMode)
-      if (!hasSharedConfiguration) {
-        const defaultId = saved.defaults[recipe.slug]
-        const preset = saved.presets.find((item) => item.id === defaultId && item.formula.family === selection.formula.family)
-        if (preset) onApply({ ...selection, formula: completeFormula(clone(preset.formula), config.defaultSelection.formula) })
-      }
-    }).catch(() => { if (active) setStoreError('Saved formulas could not be loaded. The calculator is using the authored recipe.') })
-    return () => { active = false }
-  }, [storageKey, recipe.slug, memberId])
+    if (saved.status === 'failed') setStoreError('Saved formulas could not be loaded. The calculator is using the authored recipe.')
+    if (saved.status !== 'ready' || storeApplied.current) return
+    storeApplied.current = true
+    setStoreError('')
+    setMode(store.modes[recipe.slug] ?? config.defaultInputMode)
+    if (!hasSharedConfiguration) {
+      const defaultId = store.defaults[recipe.slug]
+      const preset = store.presets.find((item) => item.id === defaultId && item.formula.family === selection.formula.family)
+      if (preset) onApply({ ...selection, formula: completeFormula(clone(preset.formula), config.defaultSelection.formula) })
+    }
+  }, [saved.status])
 
   useEffect(() => {
     if (!open) setPresetsOpen(false)
   }, [open])
+
+  useEffect(() => {
+    if (!savePrompt) return
+    saveNameInput.current?.focus()
+    saveNameInput.current?.select()
+  }, [savePrompt])
+
+  useEffect(() => {
+    if (confirmDeleteId) keepAction.current?.focus()
+  }, [confirmDeleteId])
 
   useEffect(() => {
     if (!open) return
@@ -253,19 +249,11 @@ export function DoughFormulaWorkbench({
     setFieldResetKey((current) => current + 1)
   }, [open, selection])
 
-  const [persisting, setPersisting] = useState(false)
-  const persist = async (next: WorkbenchStore) => {
-    if (!memberId || !storeReady) return false
-    setPersisting(true)
-    try {
-      await account.writeWorkbench(storageKey, next)
-      setStoreError('')
-      setStore(next)
-      return true
-    } catch {
-      setStoreError('Your formulas could not be saved. Please try again.')
-      return false
-    } finally { setPersisting(false) }
+  const persist = async (next: WorkbenchStoreUpdate) => {
+    if (!storeReady) return false
+    const stored = await saved.persist(next)
+    setStoreError(stored ? '' : 'Your formulas could not be saved. Please try again.')
+    return stored
   }
   const changeMode = (next: InputMode) => {
     setMode(next)
@@ -323,9 +311,40 @@ export function DoughFormulaWorkbench({
       setPresetAttempted(false)
     }
     setChosenPresetId('')
+    setConfirmDeleteId('')
     setPresetNotice(`Deleted “${preset.name}”.`)
     if (compatiblePresets.length > 1) presetPicker.current?.focus()
     else presetNameInput.current?.focus()
+  }
+  const applyDraft = () => {
+    if (errors.length) return
+    const applied = clone(draft)
+    onApply(applied)
+    if (!storeReady) { onOpenChange(false); return }
+    const authored = isAuthoredFormula(config, applied.formula)
+    const match = (activePresetId ? selectedPreset : undefined) ?? (authored ? undefined : compatiblePresets.find((preset) => formulasMatch(preset.formula, applied.formula)))
+    if (match || authored) {
+      // Applying a saved or authored formula is the member's choice for this recipe.
+      if (store.defaults[recipe.slug] !== match?.id) void saved.persist((current) => withRecipeChoice(current, recipe.slug, match?.id))
+      onOpenChange(false)
+      return
+    }
+    setSaveName(selectedPreset?.name ?? '')
+    setSaveAttempted(false)
+    setSavePrompt({ formula: applied.formula, base: selectedPreset ?? null })
+  }
+  const saveApplied = async () => {
+    setSaveAttempted(true)
+    if (!savePrompt || saveNameError || saveDuplicate) {
+      if (saveNameError) saveNameInput.current?.focus()
+      return
+    }
+    const item = { id: replacedPresetId || crypto.randomUUID(), name: normalizedSaveName, formula: clone(savePrompt.formula) }
+    const stored = await persist((current) => withRecipeChoice({
+      ...current,
+      presets: current.presets.some((preset) => preset.id === item.id) ? current.presets.map((preset) => preset.id === item.id ? item : preset) : [...current.presets, item],
+    }, recipe.slug, item.id))
+    if (stored) onOpenChange(false)
   }
   const updateProcess = (changes: Partial<SourdoughProcess>) => { if (process) updateFormula({ process: { ...process, ...changes } }) }
   const addFoldingStep = (afterIndex: number) => {
@@ -344,6 +363,28 @@ export function DoughFormulaWorkbench({
       <NumericFields.Provider value={numericFields}>
       <Dialog open={open} onOpenChange={(next) => { onOpenChange(next); if (!next) setDraft(clone(selection)) }}>
         <DoughWorkbenchSurface data-workbench-drawer="" aria-describedby={errors.length ? "workbench-description workbench-errors" : "workbench-description"}>
+          {savePrompt ? (
+          <form noValidate className="flex min-h-0 flex-1 flex-col" onSubmit={(event) => { event.preventDefault(); void saveApplied() }}>
+            <header className="shrink-0 px-6 py-5 pr-14 max-[640px]:px-[18px]">
+              <DialogTitle className="font-hero text-[30px] leading-tight font-normal">Save this formula?</DialogTitle>
+              <DialogDescription id="workbench-description" className="mt-2 text-sm text-[var(--color-ink)]">Your recipe is updated. Save this formula to choose it from the recipe page on any device.</DialogDescription>
+            </header>
+            <div className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto px-6 py-5 max-[640px]:px-[18px]">
+              <div className="grid gap-1.5">
+                <label htmlFor="applied-formula-name" className="text-xs font-bold">Formula name</label>
+                <Input ref={saveNameInput} id="applied-formula-name" required aria-invalid={showSaveNameError} aria-describedby={showSaveNameError ? 'applied-formula-name-error' : 'applied-formula-name-hint'} placeholder={copy.placeholder} value={saveName} onChange={(event) => setSaveName(event.target.value)} />
+                {showSaveNameError
+                  ? <p id="applied-formula-name-error" role="alert" className="rounded-field bg-danger-soft p-3 text-xs text-danger">{saveNameError}</p>
+                  : <p id="applied-formula-name-hint" className="text-xs">{saveBase ? `Keep this name to update “${saveBase.name}”, or enter a new name to save a separate formula.` : 'Enter a name to save this formula.'}</p>}
+              </div>
+              <p className="mt-4 text-sm leading-relaxed">{presetSummary(savePrompt.formula)}</p>
+              {(saveDuplicate || storeError) && <p role="alert" className="mt-4 break-words rounded-field bg-danger-soft p-3 text-xs text-danger">{saveDuplicate ? `This formula is already saved as “${saveDuplicate.name}”.` : storeError}</p>}
+            </div>
+            <footer className="shrink-0 bg-brand px-6 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] max-[640px]:px-[18px]">
+              <div className="flex items-center justify-end gap-4"><Button variant="link" type="button" onClick={() => onOpenChange(false)}>Not now</Button><Button variant="default" type="submit" disabled={Boolean(saveNameError || saveDuplicate) || persisting}>{replacedPresetId ? 'Update formula' : saveBase ? 'Save as new' : 'Save formula'}</Button></div>
+            </footer>
+          </form>
+          ) : (<>
           <header className="shrink-0 px-6 py-5 pr-14 max-[640px]:px-[18px]">
             <DialogTitle className="font-hero text-[30px] leading-tight font-normal">Adjust recipe</DialogTitle>
             <DialogDescription id="workbench-description" className="mt-2 text-sm text-[var(--color-ink)]">Build the batch you want, preview the weights, then apply it to the whole recipe.</DialogDescription>
@@ -379,10 +420,20 @@ export function DoughFormulaWorkbench({
                       setPresetNotice('Formula loaded. Apply to recipe when ready.')
                     }}>Load</Button>
                   </div>
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="min-w-0 text-xs leading-relaxed text-action-label">{presetSummary(chosenPreset.formula)}</p>
-                    <Button variant="quiet-on-ink" type="button" size="sm" aria-label={`Delete ${chosenPreset.name}`} disabled={persisting} onClick={() => void deletePreset(chosenPreset)}><Trash2 className="size-4" aria-hidden="true" />Delete</Button>
-                  </div>
+                  {confirmDeleteId === chosenPreset.id ? (
+                    <div role="group" aria-label={`Delete ${chosenPreset.name}?`} className="flex flex-wrap items-center justify-between gap-3">
+                      <p className="min-w-0 text-xs leading-relaxed text-action-label">Delete “{chosenPreset.name}”? This cannot be undone.</p>
+                      <div className="flex shrink-0 items-center gap-4">
+                        <Button ref={keepAction} variant="quiet-on-ink" type="button" size="sm" onClick={() => { setConfirmDeleteId(''); requestAnimationFrame(() => deleteAction.current?.focus()) }}>Keep</Button>
+                        <Button variant="danger" type="button" size="sm" disabled={persisting} onClick={() => void deletePreset(chosenPreset)}>Delete formula</Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="min-w-0 text-xs leading-relaxed text-action-label">{presetSummary(chosenPreset.formula)}</p>
+                      <Button ref={deleteAction} variant="danger" type="button" size="sm" aria-label={`Delete ${chosenPreset.name}`} onClick={() => setConfirmDeleteId(chosenPreset.id)}><Trash2 className="size-4" aria-hidden="true" />Delete</Button>
+                    </div>
+                  )}
                 </div>
               ) : <p className="text-sm text-action-label">No saved formulas yet.</p>}
 
@@ -503,7 +554,7 @@ export function DoughFormulaWorkbench({
                         </label>
                         <DurationField label={`Step ${index + 1} at`} value={fold.atMinutes} onChange={(atMinutes) => updateProcess({ folds: process.folds.map((item) => item.id === fold.id ? { ...item, atMinutes } : item) })} />
                       </div>
-                      <Button variant="ghost" size="icon" type="button" aria-label={`Remove step ${index + 1}`} onClick={() => updateProcess({ folds: process.folds.filter((item) => item.id !== fold.id) })}><Trash2 className="size-4" /></Button>
+                      <Button variant="danger" size="icon" type="button" aria-label={`Remove step ${index + 1}`} onClick={() => updateProcess({ folds: process.folds.filter((item) => item.id !== fold.id) })}><Trash2 className="size-4" /></Button>
                     </div>
                     {index < process.folds.length - 1 && <Button variant="link" type="button" className="justify-self-start" disabled={process.folds[index + 1].atMinutes - fold.atMinutes < 2} onClick={() => addFoldingStep(index)}>Insert step after step {index + 1}</Button>}
                   </div>)}
@@ -530,8 +581,9 @@ export function DoughFormulaWorkbench({
 
           </div>
           <footer className="shrink-0 bg-brand px-6 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] max-[640px]:px-[18px]">
-            <div className="flex items-center justify-end gap-4"><Button variant="link" type="button" onClick={() => onOpenChange(false)}>Cancel</Button><Button variant="default" type="button" disabled={errors.length > 0} onClick={() => { if (errors.length) return; onApply(clone(draft)); onOpenChange(false) }}>Apply to recipe</Button></div>
+            <div className="flex items-center justify-end gap-4"><Button variant="link" type="button" onClick={() => onOpenChange(false)}>Cancel</Button><Button variant="default" type="button" disabled={errors.length > 0} onClick={applyDraft}>Apply to recipe</Button></div>
           </footer>
+          </>)}
         </DoughWorkbenchSurface>
       </Dialog>
       </NumericFields.Provider>

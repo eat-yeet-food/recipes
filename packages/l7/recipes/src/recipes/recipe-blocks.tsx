@@ -3,8 +3,9 @@ import { formatYield, humanizeMinutes } from '@eat-yeet/l2-recipe-domain/format'
 import type { RecipeBlock, Section } from '@eat-yeet/l4-content-model/blocks'
 import type { RecipeContent } from '@eat-yeet/l4-content-model/recipes'
 import { createPageBlockRegistry, registerSharedPageBlocks, type PageBlockRegistry } from '@eat-yeet/l6-ui-content-blocks/page-blocks'
+import type { ReactNode } from 'react'
 import { RecipeAdjustmentSummary } from './recipe-workbench'
-import type { RecipeWorkbenchSummary } from './workbench-registry'
+import type { RecipeWorkbenchChoices, RecipeWorkbenchSummary } from './workbench-registry'
 import { RecipeFacts } from './recipe-facts'
 
 const Html = ({ as: Tag = 'div', html, ...rest }: { as?: any; html: string } & Record<string, unknown>) => (
@@ -16,6 +17,8 @@ export type RecipePageBlockContext = {
   siteUrl: string
   firstRecipeBlockIndex: number
   workbenchSummary?: RecipeWorkbenchSummary | null
+  /** Wraps the summary so a workbench plugin can offer the reader's own configurations. */
+  workbenchChoices?: (render: (choices: RecipeWorkbenchChoices | null) => ReactNode) => ReactNode
   onOpenWorkbench?: () => void
 }
 
@@ -97,9 +100,9 @@ function RecipeBlockView({
 
       {block.ingredients.length > 0 && (
         <section>
-          {context.workbenchSummary && context.onOpenWorkbench && (
-            <RecipeAdjustmentSummary summary={context.workbenchSummary} onOpen={context.onOpenWorkbench} />
-          )}
+          {context.workbenchSummary && context.onOpenWorkbench && (context.workbenchChoices ?? ((render) => render(null)))((choices) => (
+            <RecipeAdjustmentSummary summary={context.workbenchSummary!} onOpen={context.onOpenWorkbench!} choices={choices} />
+          ))}
           <h2 className="m-0 pt-[30px] pb-3 border-t border-[var(--color-border)] text-[34px] leading-none font-bold">
             Ingredients
           </h2>
