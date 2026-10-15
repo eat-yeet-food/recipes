@@ -35,6 +35,19 @@ const escapeHtml = (value: string) => value.replace(/&/g, '&amp;').replace(/</g,
 export const formatWorkbenchGrams = (value: number) => Number.isFinite(value) ? `${formatNumberFieldValue(value, Math.abs(value) >= 20 ? 0 : 1)}g` : '—'
 export const yeastGramPrecision = (value: number): NumberFieldPrecision => Math.abs(value) >= 20 ? 0 : 2
 export const formatYeastGrams = (value: number) => Number.isFinite(value) ? `${formatNumberFieldValue(value, yeastGramPrecision(value))}g` : '—'
+const eighthGlyphs: Record<number, string> = { 1: '⅛', 2: '¼', 3: '⅜', 4: '½', 5: '⅝', 6: '¾', 7: '⅞' }
+export const formatEighths = (amount: number) => {
+  const eighths = Math.round(amount * 8)
+  const whole = Math.floor(eighths / 8)
+  const remainder = eighths % 8
+  return remainder === 0 ? String(whole) : `${whole > 0 ? `${whole} ` : ''}${eighthGlyphs[remainder]}`
+}
+// Instant yeast weighs about 3.1g per teaspoon (a 7g packet is 2¼ tsp).
+const instantYeastGramsPerTsp = 3.1
+export const formatYeastTeaspoons = (grams: number) => {
+  const tsp = grams / instantYeastGramsPerTsp
+  return tsp < 0.0625 ? 'less than ⅛ tsp' : `${formatEighths(tsp)} tsp`
+}
 export const formatBatchGrams = (value: number) => Number.isFinite(value) ? `${formatNumberFieldValue(value, 0)}g` : '—'
 export const formatAppliedGrams = (value: number) => {
   if (!Number.isFinite(value)) return '—'
@@ -73,7 +86,9 @@ export function dynamicDoughItems(selection: DoughWorkbenchState, formatWeight =
   if (result.oilGrams > 0.005) items.push(`${formatWeight(result.oilGrams)} oil`)
   if (result.sugarGrams > 0.005) items.push(`${formatWeight(result.sugarGrams)} sugar`)
   if (result.maltGrams > 0.005) items.push(`${formatWeight(result.maltGrams)} malt powder`)
-  if (result.yeastGrams > 0.005) items.push(`${formatYeastGrams(result.yeastGrams)} ${selection.formula.family === 'pizza' ? 'SAF red instant yeast' : 'instant yeast'}`)
+  if (result.yeastGrams > 0.005) items.push(selection.formula.family === 'pizza'
+    ? `${formatYeastTeaspoons(result.yeastGrams)} (${formatYeastGrams(result.yeastGrams)}) SAF red instant yeast`
+    : `${formatYeastGrams(result.yeastGrams)} instant yeast`)
   items.push(`${formatWeight(result.saltGrams)} fine sea salt`)
   return { result, items }
 }
@@ -130,14 +145,7 @@ export function resolveWorkbenchRecipe(recipe: RecipeContent, selection: DoughWo
           if (!quantity) return item
           const display = (amount: number) => {
             if ((quantity.unit === 'tsp' || quantity.unit === 'tbsp') && amount > 0 && amount < 0.125) return `less than ⅛ ${quantity.unit}`
-            const eighths = Math.round(amount * 8)
-            if ((quantity.unit === 'tsp' || quantity.unit === 'tbsp') && Math.abs(amount * 8 - eighths) < 0.0001) {
-              const whole = Math.floor(eighths / 8)
-              const remainder = eighths % 8
-              const fractions: Record<number, string> = { 1: '⅛', 2: '¼', 3: '⅜', 4: '½', 5: '⅝', 6: '¾', 7: '⅞' }
-              const value = remainder === 0 ? String(whole) : `${whole > 0 ? `${whole} ` : ''}${fractions[remainder]}`
-              return `${value} ${quantity.unit}`
-            }
+            if ((quantity.unit === 'tsp' || quantity.unit === 'tbsp') && Math.abs(amount * 8 - Math.round(amount * 8)) < 0.0001) return `${formatEighths(amount)} ${quantity.unit}`
             return `${quantity.unit === 'g' && amount >= 20 ? Math.round(amount) : Number(amount.toFixed(1))} ${quantity.unit}`
           }
           return `${display(quantity.quantity * toppingScale)} ${item} (${display(quantity.quantity * toppingScale * selection.batch.count)} total)`
