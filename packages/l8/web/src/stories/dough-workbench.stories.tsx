@@ -181,7 +181,7 @@ export const DeleteWithoutLoading: Story = { play: async ({ canvasElement }) => 
   await expect(panel.getByRole('button', { name: 'Keep' })).toHaveFocus()
   await userEvent.click(panel.getByRole('button', { name: 'Keep' }))
   await expect(panel.getAllByRole('option')).toHaveLength(1)
-  await expect(panel.getByRole('button', { name: 'Delete Weekend batch' })).toHaveFocus()
+  await waitFor(() => expect(panel.getByRole('button', { name: 'Delete Weekend batch' })).toHaveFocus())
   await userEvent.click(panel.getByRole('button', { name: 'Delete Weekend batch' }))
   await userEvent.click(within(panel.getByRole('group', { name: 'Delete Weekend batch?' })).getByRole('button', { name: 'Delete formula' }))
   await expect(panel.queryByRole('option')).not.toBeInTheDocument()
@@ -253,7 +253,7 @@ export const SourdoughProcessAndSavedStarter: Story = { args: { target: true }, 
   await expect(screen.getByRole('combobox', { name: 'Step 2 technique' })).toHaveValue('coil-fold')
 } }
 
-export const SavePromptUpdatesLoadedFormula: Story = { args: { target: true }, play: async ({ canvasElement }) => {
+export const SaveAndSaveAsAfterApply: Story = { args: { target: true }, play: async ({ canvasElement }) => {
   const screen = within(canvasElement.ownerDocument.body)
   await waitFor(() => { expect(screen.getByRole('dialog')).toHaveAttribute('data-workbench-drawer'); expect(getComputedStyle(screen.getByRole('dialog')).pointerEvents).toBe('auto') })
   await userEvent.click(screen.getByRole('button', { name: /Saved formulas/ }))
@@ -264,19 +264,32 @@ export const SavePromptUpdatesLoadedFormula: Story = { args: { target: true }, p
   await userEvent.clear(hydration)
   await userEvent.type(hydration, '80')
   await userEvent.click(screen.getByRole('button', { name: 'Apply to recipe' }))
+  // Save replaces the formula being edited; Save as new asks for a name first.
+  await expect(await screen.findByRole('dialog', { name: 'Save your changes?' })).toHaveTextContent('replace “Weekend batch”')
+  await userEvent.click(screen.getByRole('button', { name: 'Save as new' }))
   const name = await screen.findByRole('textbox', { name: 'Formula name' })
-  await expect(name).toHaveValue('Weekend batch')
-  await expect(screen.getByRole('button', { name: 'Update formula' })).toBeEnabled()
-  await userEvent.type(name, ' 2')
-  await expect(screen.getByRole('button', { name: 'Save as new' })).toBeEnabled()
+  await expect(name).toHaveFocus()
+  await userEvent.type(name, 'weekend BATCH')
+  await expect(screen.getByRole('alert')).toHaveTextContent('A formula with this name already exists')
   await userEvent.clear(name)
-  await userEvent.type(name, 'weekend batch')
-  await userEvent.click(screen.getByRole('button', { name: 'Update formula' }))
+  await userEvent.type(name, 'Wetter weekend batch')
+  await userEvent.click(screen.getByRole('button', { name: 'Save formula' }))
   await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
   await userEvent.click(screen.getByRole('button', { name: 'Open workbench' }))
   await screen.findByRole('dialog')
-  await expect(screen.getByRole('button', { name: /Saved formulas/ })).toHaveTextContent('(1)')
+  await expect(screen.getByRole('button', { name: /Saved formulas/ })).toHaveTextContent('(2)')
   await expect(screen.getByRole('textbox', { name: 'Hydration' })).toHaveValue('80')
+  // The reopened recipe shows the new formula, so a further change saves over it.
+  await userEvent.clear(screen.getByRole('textbox', { name: 'Hydration' }))
+  await userEvent.type(screen.getByRole('textbox', { name: 'Hydration' }), '81')
+  await userEvent.click(screen.getByRole('button', { name: 'Apply to recipe' }))
+  await expect(await screen.findByRole('dialog', { name: 'Save your changes?' })).toHaveTextContent('replace “Wetter weekend batch”')
+  await userEvent.click(screen.getByRole('button', { name: 'Save' }))
+  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+  await userEvent.click(screen.getByRole('button', { name: 'Open workbench' }))
+  await screen.findByRole('dialog')
+  await expect(screen.getByRole('button', { name: /Saved formulas/ })).toHaveTextContent('(2)')
+  await expect(screen.getByRole('textbox', { name: 'Hydration' })).toHaveValue('81')
 } }
 
 export const PluginProcessProjection: Story = { play: async () => {

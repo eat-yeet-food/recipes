@@ -152,6 +152,7 @@ export function DoughFormulaWorkbench({
   const [savePrompt, setSavePrompt] = useState<{ formula: DoughFormula; base: FormulaPreset | null } | null>(null)
   const [saveName, setSaveName] = useState('')
   const [saveAttempted, setSaveAttempted] = useState(false)
+  const [saveAsNew, setSaveAsNew] = useState(false)
   const saveNameInput = useRef<HTMLInputElement>(null)
   const [confirmDeleteId, setConfirmDeleteId] = useState('')
   const deleteAction = useRef<HTMLButtonElement>(null)
@@ -201,9 +202,10 @@ export function DoughFormulaWorkbench({
   const showPresetNameError = Boolean(presetNameError) && (presetAttempted || presetName.length > 0)
   const saveBase = savePrompt?.base ?? null
   const normalizedSaveName = cleanPresetName(saveName)
-  // Keeping the loaded formula's name updates it; any other name saves a separate formula.
-  const replacedPresetId = saveBase && presetNameKey(normalizedSaveName) === presetNameKey(saveBase.name) ? saveBase.id : ''
-  const saveNameError = !normalizedSaveName
+  // Save overwrites the formula being edited; Save as names a separate one.
+  const namingSave = !saveBase || saveAsNew
+  const replacedPresetId = namingSave ? '' : saveBase.id
+  const saveNameError = !namingSave ? '' : !normalizedSaveName
     ? 'Enter a name for this formula.'
     : normalizedSaveName.length > 80
       ? 'Use 80 characters or fewer.'
@@ -221,10 +223,17 @@ export function DoughFormulaWorkbench({
     storeApplied.current = true
     setStoreError('')
     setMode(store.modes[recipe.slug] ?? config.defaultInputMode)
-    if (!hasSharedConfiguration) {
-      const defaultId = store.defaults[recipe.slug]
-      const preset = store.presets.find((item) => item.id === defaultId && item.formula.family === selection.formula.family)
-      if (preset) onApply({ ...selection, formula: completeFormula(clone(preset.formula), config.defaultSelection.formula) })
+    const candidates = store.presets.filter((item) => item.formula.family === selection.formula.family)
+    const remembered = candidates.find((item) => item.id === store.defaults[recipe.slug])
+    if (!hasSharedConfiguration && remembered) onApply({ ...selection, formula: completeFormula(clone(remembered.formula), config.defaultSelection.formula) })
+    // A recipe already showing a saved formula opens as an edit of that formula.
+    const editing = !hasSharedConfiguration || (remembered && formulasMatch(remembered.formula, selection.formula))
+      ? remembered
+      : isAuthoredFormula(config, selection.formula) ? undefined : candidates.find((item) => formulasMatch(item.formula, selection.formula))
+    if (editing) {
+      setSelectedPresetId(editing.id)
+      setChosenPresetId(editing.id)
+      setPresetName(editing.name)
     }
   }, [saved.status])
 
@@ -233,10 +242,8 @@ export function DoughFormulaWorkbench({
   }, [open])
 
   useEffect(() => {
-    if (!savePrompt) return
-    saveNameInput.current?.focus()
-    saveNameInput.current?.select()
-  }, [savePrompt])
+    if (savePrompt && namingSave) saveNameInput.current?.focus()
+  }, [savePrompt, namingSave])
 
   useEffect(() => {
     if (confirmDeleteId) keepAction.current?.focus()
@@ -329,8 +336,9 @@ export function DoughFormulaWorkbench({
       onOpenChange(false)
       return
     }
-    setSaveName(selectedPreset?.name ?? '')
+    setSaveName('')
     setSaveAttempted(false)
+    setSaveAsNew(false)
     setSavePrompt({ formula: applied.formula, base: selectedPreset ?? null })
   }
   const saveApplied = async () => {
@@ -339,7 +347,7 @@ export function DoughFormulaWorkbench({
       if (saveNameError) saveNameInput.current?.focus()
       return
     }
-    const item = { id: replacedPresetId || crypto.randomUUID(), name: normalizedSaveName, formula: clone(savePrompt.formula) }
+    const item = { id: replacedPresetId || crypto.randomUUID(), name: namingSave ? normalizedSaveName : saveBase.name, formula: clone(savePrompt.formula) }
     const stored = await persist((current) => withRecipeChoice({
       ...current,
       presets: current.presets.some((preset) => preset.id === item.id) ? current.presets.map((preset) => preset.id === item.id ? item : preset) : [...current.presets, item],
@@ -366,22 +374,26 @@ export function DoughFormulaWorkbench({
           {savePrompt ? (
           <form noValidate className="flex min-h-0 flex-1 flex-col" onSubmit={(event) => { event.preventDefault(); void saveApplied() }}>
             <header className="shrink-0 px-6 py-5 pr-14 max-[640px]:px-[18px]">
-              <DialogTitle className="font-hero text-[30px] leading-tight font-normal">Save this formula?</DialogTitle>
-              <DialogDescription id="workbench-description" className="mt-2 text-sm text-[var(--color-ink)]">Your recipe is updated. Save this formula to choose it from the recipe page on any device.</DialogDescription>
+              <DialogTitle className="font-hero text-[30px] leading-tight font-normal">{namingSave ? 'Save this formula?' : 'Save your changes?'}</DialogTitle>
+              <DialogDescription id="workbench-description" className="mt-2 text-sm text-[var(--color-ink)]">{namingSave ? 'Your recipe is updated. Save this formula to choose it from the recipe page on any device.' : `Your recipe is updated. Save to replace “${saveBase.name}” with these values, or save them as a new formula.`}</DialogDescription>
             </header>
             <div className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto px-6 py-5 max-[640px]:px-[18px]">
-              <div className="grid gap-1.5">
+              {namingSave && <div className="mb-4 grid gap-1.5">
                 <label htmlFor="applied-formula-name" className="text-xs font-bold">Formula name</label>
                 <Input ref={saveNameInput} id="applied-formula-name" required aria-invalid={showSaveNameError} aria-describedby={showSaveNameError ? 'applied-formula-name-error' : 'applied-formula-name-hint'} placeholder={copy.placeholder} value={saveName} onChange={(event) => setSaveName(event.target.value)} />
                 {showSaveNameError
                   ? <p id="applied-formula-name-error" role="alert" className="rounded-field bg-danger-soft p-3 text-xs text-danger">{saveNameError}</p>
-                  : <p id="applied-formula-name-hint" className="text-xs">{saveBase ? `Keep this name to update “${saveBase.name}”, or enter a new name to save a separate formula.` : 'Enter a name to save this formula.'}</p>}
-              </div>
-              <p className="mt-4 text-sm leading-relaxed">{presetSummary(savePrompt.formula)}</p>
+                  : <p id="applied-formula-name-hint" className="text-xs">Enter a name to save this formula.</p>}
+              </div>}
+              <p className="text-sm leading-relaxed">{presetSummary(savePrompt.formula)}</p>
               {(saveDuplicate || storeError) && <p role="alert" className="mt-4 break-words rounded-field bg-danger-soft p-3 text-xs text-danger">{saveDuplicate ? `This formula is already saved as “${saveDuplicate.name}”.` : storeError}</p>}
             </div>
             <footer className="shrink-0 bg-brand px-6 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] max-[640px]:px-[18px]">
-              <div className="flex items-center justify-end gap-4"><Button variant="link" type="button" onClick={() => onOpenChange(false)}>Not now</Button><Button variant="default" type="submit" disabled={Boolean(saveNameError || saveDuplicate) || persisting}>{replacedPresetId ? 'Update formula' : saveBase ? 'Save as new' : 'Save formula'}</Button></div>
+              <div className="flex flex-wrap items-center justify-end gap-4">
+                <Button variant="link" type="button" onClick={() => onOpenChange(false)}>Not now</Button>
+                {!namingSave && <Button variant="link" type="button" onClick={() => setSaveAsNew(true)}>Save as new</Button>}
+                <Button variant="default" type="submit" autoFocus={!namingSave} disabled={Boolean(saveNameError || saveDuplicate) || persisting}>{namingSave ? 'Save formula' : 'Save'}</Button>
+              </div>
             </footer>
           </form>
           ) : (<>
