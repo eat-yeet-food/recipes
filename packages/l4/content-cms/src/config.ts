@@ -14,6 +14,7 @@ import { seoShape } from '@eat-yeet/l4-content-model/field-shapes'
 import { r2Storage, type R2StorageOptions } from '@payloadcms/storage-r2'
 import { ratingRepliesCollection, ratingsCollection, retiredRatingCollections } from './ratings'
 import { memberSessionsCollection, membersCollection, memberWorkbenchesCollection } from './members'
+import { kitchenFormulasCollection, kitchenRevisionsCollection } from './kitchen'
 
 export const deny: Access = () => false
 export const isOwner = (user: any, email = process.env.OWNER_EMAIL) =>
@@ -190,6 +191,8 @@ export function createCMSConfig(
       membersCollection,
       memberSessionsCollection,
       memberWorkbenchesCollection,
+      kitchenFormulasCollection,
+      kitchenRevisionsCollection,
       ...retiredRatingCollections,
       ratingsCollection,
       ratingRepliesCollection,

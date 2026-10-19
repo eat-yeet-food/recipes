@@ -3,10 +3,10 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, userEvent, within } from 'storybook/test'
 import { NumberField, type NumberFieldPrecision } from './number-field'
 
-function Example({ integer = false, initialValue = 1, decimalPlaces = 1, max }: { max?: number; integer?: boolean; initialValue?: number; decimalPlaces?: NumberFieldPrecision }) {
+function Example({ integer = false, initialValue = 1, decimalPlaces = 1, max, surface = 'default' }: { max?: number; integer?: boolean; initialValue?: number; decimalPlaces?: NumberFieldPrecision; surface?: 'default' | 'underline' }) {
   const [value, setValue] = useState(initialValue)
-  return <div className="max-w-80 bg-brand p-5">
-    <NumberField label={integer ? 'Quantity' : 'Weight'} value={value} onValueChange={setValue} integer={integer} min={integer ? 1 : 0} max={max} suffix={integer ? undefined : 'g'} decimalPlaces={decimalPlaces} />
+  return <div className={`max-w-80 p-5 ${surface === 'underline' ? 'bg-white' : 'bg-brand'}`}>
+    <NumberField label={integer ? 'Quantity' : 'Weight'} value={value} onValueChange={setValue} integer={integer} min={integer ? 1 : 0} max={max} suffix={integer ? undefined : 'g'} decimalPlaces={decimalPlaces} surface={surface} />
     <p role="status">Accepted value: {value}</p>
   </div>
 }
@@ -16,6 +16,15 @@ export default meta
 type Story = StoryObj<typeof meta>
 export const Decimal: Story = {}
 export const Quantity: Story = { args: { integer: true } }
+/** Page forms on white, such as Test Kitchen, use the underline surface. */
+export const Underline: Story = { args: { surface: 'underline', initialValue: 68 }, play: async ({ canvasElement }) => {
+  const screen = within(canvasElement)
+  const input = screen.getByRole('textbox', { name: 'Weight' })
+  await userEvent.clear(input)
+  await userEvent.tab()
+  await expect(input).toHaveAttribute('aria-invalid', 'true')
+  await expect(screen.getByText('Enter a value.')).toBeVisible()
+} }
 export const ClearAndReplace: Story = { args: { integer: true }, play: async ({ canvasElement }) => {
   const screen = within(canvasElement)
   const input = screen.getByRole('textbox', { name: 'Quantity' })

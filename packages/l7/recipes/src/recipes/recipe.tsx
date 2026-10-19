@@ -3,7 +3,6 @@ import type { ReactNode } from 'react'
 import { RecipeCard } from '@eat-yeet/l6-ui-catalog/cards'
 import type { PageBlockRegistry } from '@eat-yeet/l6-ui-content-blocks/page-blocks'
 import type { RecipeSummary } from '@eat-yeet/l1-recipe-model/recipes'
-import type { ActiveRecipeWorkbench, RecipeWorkbenchApplyOptions } from './workbench-registry'
 import type { RecipeContent as Recipe } from '@eat-yeet/l4-content-model/recipes'
 import { RecipeArticle } from './recipe-article'
 import type { RecipePageBlockContext } from './recipe-blocks'
@@ -42,18 +41,14 @@ export function RecipeDetail({
   browseRecipes,
   siteUrl,
   blockRegistry,
-  workbench,
-  onWorkbenchApply,
-  storageScope,
+  beforeIngredients,
   rating,
 }: {
   recipe: Recipe
   browseRecipes: RecipeSummary[]
   siteUrl: string
   blockRegistry: PageBlockRegistry<RecipePageBlockContext>
-  workbench?: ActiveRecipeWorkbench | null
-  onWorkbenchApply?: (state: unknown, options?: RecipeWorkbenchApplyOptions) => void
-  storageScope?: string
+  beforeIngredients?: ReactNode
   rating?: ReactNode
 }) {
   return (
@@ -61,9 +56,7 @@ export function RecipeDetail({
       page={recipe}
       siteUrl={siteUrl}
       blockRegistry={blockRegistry}
-      workbench={workbench}
-      onWorkbenchApply={onWorkbenchApply}
-      storageScope={storageScope}
+      beforeIngredients={beforeIngredients}
       rating={rating}
       aside={({ page, focusedCooking }) => {
         const suggestions = getBrowseRecipeSuggestions(page, browseRecipes)

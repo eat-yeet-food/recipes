@@ -98,7 +98,7 @@ export function AccountSettingsPage() {
         </div>
       </Section>
 
-      <Section title="Delete account" description="Permanently deletes your account, ratings, reviews, replies and saved formulas, including replies other cooks left on your reviews. This cannot be undone.">
+      <Section title="Delete account" description="Permanently deletes your account, ratings, reviews, replies, and Test Kitchen formulas with their history, including replies other cooks left on your reviews. This cannot be undone.">
         <form noValidate className="grid gap-4" onSubmit={(event) => { event.preventDefault(); void deleteAction.run(async () => {
           await client.deleteAccount(confirmEmail.trim())
           accept({ member: null, providers: providers ?? { google: false } })

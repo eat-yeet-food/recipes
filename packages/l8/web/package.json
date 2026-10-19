@@ -19,6 +19,7 @@
     "@eat-yeet/l6-ui-shell": "workspace:*",
     "@eat-yeet/l7-home": "workspace:*",
     "@eat-yeet/l7-learn": "workspace:*",
+    "@eat-yeet/l7-kitchen": "workspace:*",
     "@eat-yeet/l7-recipes": "workspace:*",
     "@eat-yeet/l7-search": "workspace:*",
     "react": "19.2.8",

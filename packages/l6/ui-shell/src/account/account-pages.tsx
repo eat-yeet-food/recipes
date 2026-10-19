@@ -36,7 +36,7 @@ export function SignInPage({ returnTo: rawReturnTo, error }: { returnTo?: string
     <Button className="w-full" onClick={() => navigate({ to: returnTo, replace: true })}>Continue</Button>
   </AccountPanel>
 
-  return <AccountPanel title="Sign in" description="Rate and review recipes, adjust them with the recipe calculator, and keep your saved dough formulas on every device.">
+  return <AccountPanel title="Sign in" description="Rate and review recipes, and keep your Test Kitchen formulas and their history on every device.">
     <div className="grid gap-5">
       {error === 'google' ? <Alert>Google sign-in didn’t complete. Please try again.</Alert> : null}
       {failed || providers?.google === false ? <Alert>Sign-in is unavailable right now. Please try again later.</Alert> : null}

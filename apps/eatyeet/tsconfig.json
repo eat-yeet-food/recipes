@@ -32,6 +32,9 @@
     },
     {
       "path": "../../packages/l6/ui-shell/tsconfig.json"
+    },
+    {
+      "path": "../../packages/l7/kitchen/tsconfig.json"
     }
   ]
 }

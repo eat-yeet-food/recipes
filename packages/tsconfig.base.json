@@ -18,6 +18,7 @@
       "@eat-yeet/l6-ui-shell/*": ["../../../packages/l6/ui-shell/src/*"],
       "@eat-yeet/l7-home/*": ["../../../packages/l7/home/src/*"],
       "@eat-yeet/l7-learn/*": ["../../../packages/l7/learn/src/*"],
+      "@eat-yeet/l7-kitchen/*": ["../../../packages/l7/kitchen/src/*"],
       "@eat-yeet/l7-recipes/*": ["../../../packages/l7/recipes/src/*"],
       "@eat-yeet/l7-search/*": ["../../../packages/l7/search/src/*"],
       "@eat-yeet/l8-web/*": ["../../../packages/l8/web/src/*"]

@@ -23,14 +23,13 @@ try {
       try {
         await page.goto(`${server.url}iframe.html?id=${story.id}&viewMode=story`, { waitUntil:'load' })
         await page.waitForFunction(id => document.documentElement.dataset.storyReady === id, story.id, { timeout:20000 })
-        if (story.id.startsWith('recipes-dough-workbench--') && !story.id.endsWith('apply-and-close')) await page.locator('[data-workbench-drawer]').waitFor()
+        if (story.id === 'kitchen-pages--formula') await page.getByText(/^Saved ·/).waitFor()
+        if (story.id === 'kitchen-pages--library') await page.getByText('Restored Kids’ 10-inch.').waitFor()
+        if (story.id === 'kitchen-controls--history') await page.getByRole('status').filter({ hasText: 'Restored version 3' }).waitFor()
         await page.evaluate(()=>document.fonts.ready)
         if (story.id === 'search-palette--results') await page.getByRole('option', { name: /New York Style Pizza/ }).waitFor()
         if (story.id === 'search-palette--keyboard-selection') await page.locator('[data-palette-all][data-selected=true]').waitFor()
         if (story.id === 'search-palette--empty-results') await page.getByText(/No recipes found for/).waitFor()
-        if (story.id === 'recipes-dough-workbench--saved-formula') await page.getByRole('button', { name: 'Load Weekend batch' }).waitFor()
-        if (story.id === 'recipes-dough-workbench--incomplete-flour-blend') await page.getByRole('alert').waitFor()
-        if (story.id === 'recipes-dough-workbench--apply-and-close') await page.getByRole('status').filter({ hasText: 'Recipe updated' }).waitFor()
 
         const audit = await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']).analyze()
         if (story.id.startsWith('controls-button--') || story.id.startsWith('controls-choice-group--')) {
@@ -52,7 +51,7 @@ try {
             if (Math.abs(geometry.outer-geometry.inset-geometry.inner) > 0.1) errors.push('Nested selection radii are not concentric')
           }
         }
-        const sheet = page.locator('[data-workbench-drawer]')
+        const sheet = page.locator('[data-kitchen-history]')
         if (await sheet.count()) {
           const corners = await sheet.evaluate(el => {const s=getComputedStyle(el); return [s.borderTopLeftRadius,s.borderTopRightRadius,s.borderBottomLeftRadius,s.borderBottomRightRadius]})
           if (corners.some(radius => parseFloat(radius) !== 0)) errors.push('Viewport sheet must have square corners')

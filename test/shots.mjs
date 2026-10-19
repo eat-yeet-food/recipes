@@ -4,7 +4,6 @@
  * Usage: node test/shots.mjs [outDir]
  */
 import { chromium } from 'playwright'
-import { signIn } from './member-session.mjs'
 import { mkdirSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -23,10 +22,10 @@ export const SHOTS = [
   { name: 'learn', path: '/learn', full: true },
   { name: 'learn-article', path: '/learn/mixing-dough-and-gluten-development', full: false },
   { name: 'learn-mobile', path: '/learn/mixing-dough-and-gluten-development', full: false, viewport: { width: 390, height: 844 } },
-  { name: 'workbench', path: '/recipes/sourdough-bread', full: false, workbench: true },
-  { name: 'workbench-mobile', path: '/recipes/sourdough-bread', full: false, workbench: true, viewport: { width: 390, height: 844 } },
-  { name: 'workbench-summary', path: '/recipes/sourdough-bread', full: false, workbench: true, summary: true },
-  { name: 'workbench-summary-mobile', path: '/recipes/sourdough-bread', full: false, workbench: true, summary: true, viewport: { width: 390, height: 844 } },
+  { name: 'kitchen', path: '/kitchen', full: true },
+  { name: 'kitchen-calculator', path: '/kitchen/new-york-style-pizza', full: false },
+  { name: 'kitchen-calculator-mobile', path: '/kitchen/sourdough-bread', full: false, viewport: { width: 390, height: 844 } },
+  { name: 'kitchen-bake-mobile', path: '/kitchen/new-york-style-pizza/bake?count=4', full: false, viewport: { width: 390, height: 844 } },
   { name: 'home-fold', path: '/', full: false },
   { name: 'recipe', path: '/recipes/new-york-style-pizza', full: true },
   { name: 'search', path: '/search', full: false },
@@ -49,15 +48,12 @@ export async function capture(outDir) {
       viewport: shot.viewport ?? { width: 1440, height: 900 },
       deviceScaleFactor: 2,
     })
-    if (shot.workbench) await signIn(page.context(), server.url.replace(/\/$/, ''))
     page.on('pageerror', (e) => errors.push(`${shot.name}: ${e.message}`))
     page.on('console', (m) => {
       if (m.type() === 'error') errors.push(`${shot.name} console: ${m.text()}`)
     })
 
     await page.goto(server.url.replace(/\/$/, '') + shot.path, { waitUntil: 'networkidle' })
-    if (shot.workbench) await page.getByRole('button', { name: 'Adjust recipe', exact: true }).first().click()
-    if (shot.summary) await page.locator('[aria-labelledby=preview-heading]').scrollIntoViewIfNeeded()
     await page.evaluate(() => document.fonts.ready)
     if (shot.full) {
       // A full-page screenshot does not trigger native lazy loading below the

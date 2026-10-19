@@ -55,6 +55,8 @@ export function contentServices(payload: Payload) {
       recipes: (await list('recipes', request?.limit)).map(
         ({ blocks, learning, workbench, mediaReferences, ...r }) => ({
           ...r,
+          // Summaries name the calculator without its configuration.
+          ...(workbench ? { workbench: { id: workbench.id, config: {} } } : {}),
           methodOptions: r.methodOptions?.map(({ blocks, ...m }: any) => m),
         }),
       ),

@@ -50,6 +50,9 @@
       "path": "./packages/l7/learn/tsconfig.json"
     },
     {
+      "path": "./packages/l7/kitchen/tsconfig.json"
+    },
+    {
       "path": "./packages/l7/recipes/tsconfig.json"
     },
     {

@@ -8,13 +8,10 @@ export const fixtureMember: AccountMember = {
  * In-memory account transport for Storybook. Signing in happens on Google,
  * so stories start signed in or signed out.
  */
-export function memoryAccountClient({ member = null, providers = { google: true }, delay = 0, fail = false, workbenches: saved = {} }: {
+export function memoryAccountClient({ member = null, providers = { google: true }, delay = 0, fail = false }: {
   member?: AccountMember | null; providers?: AccountProviders; delay?: number; fail?: boolean
-  /** Saved workbench stores the member starts with, by storage scope. */
-  workbenches?: Record<string, unknown>
 } = {}): AccountClient {
   let current = member
-  const workbenches = new Map<string, unknown>(Object.entries(structuredClone(saved)))
   const wait = async () => {
     if (delay) await new Promise((resolve) => setTimeout(resolve, delay))
     if (fail) throw new Error('Something went wrong. Please try again.')
@@ -27,7 +24,5 @@ export function memoryAccountClient({ member = null, providers = { google: true 
     googleURL: () => '#google',
     signOutEverywhere: async () => { await wait(); current = null },
     deleteAccount: async (email) => { await wait(); if (email !== current?.email) throw new Error('Type your email address exactly to confirm.'); current = null },
-    readWorkbench: async (scope) => { await wait(); return structuredClone(workbenches.get(scope) ?? null) },
-    writeWorkbench: async (scope, store) => { await wait(); workbenches.set(scope, structuredClone(store)) },
   }
 }

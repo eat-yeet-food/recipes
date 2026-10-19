@@ -21,7 +21,7 @@ function Example({ narrow = false, disabled = false, custom = false }: { narrow?
   </div>
 }
 
-const meta = { title: 'Controls/Text select', component: Example, subcomponents: { TextSelect }, parameters: { layout: 'padded', docs: { description: { component: 'A native select presented as a borderless text action: the chosen label is underlined beside a chevron and inherits the surrounding type. Use it for a compact inline choice inside a label row, such as the saved formula in the recipe summary. Hover thickens the underline; keyboard focus adds one outward outline. Long labels truncate inside the available width rather than resizing their row. The accessible name comes from `label`; native menu and keyboard behavior are unchanged.' } } } } satisfies Meta<typeof Example>
+const meta = { title: 'Controls/Text select', component: Example, subcomponents: { TextSelect }, parameters: { layout: 'padded', docs: { description: { component: 'A native select presented as a borderless text action: the chosen label is underlined beside a chevron and inherits the surrounding type. Use it for a compact inline choice inside a label row, such as picking one version of a formula inside a label row. Not currently used by the app; kept as an owned primitive. Hover thickens the underline; keyboard focus adds one outward outline. Long labels truncate inside the available width rather than resizing their row. The accessible name comes from `label`; native menu and keyboard behavior are unchanged.' } } } } satisfies Meta<typeof Example>
 export default meta
 type Story = StoryObj<typeof meta>
 export const Default: Story = {}

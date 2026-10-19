@@ -1,19 +1,16 @@
 import { isPizzaSizing, pizzaAreaScale, pizzaBallWeight, type PizzaSizing } from '@eat-yeet/l2-recipe-domain/pizza-sizing'
-import { DEFAULT_SOURDOUGH_PROCESS, isSourdoughProcess } from '@eat-yeet/l2-recipe-domain/sourdough-process'
-import { calculateFormula, calculateLevainBuild, formatPercent, type DoughBatch, type DoughFormula, type FlourComponent, type StarterProfile } from '@eat-yeet/l2-recipe-domain/formula'
+import { DEFAULT_SOURDOUGH_PROCESS } from '@eat-yeet/l2-recipe-domain/sourdough-process'
+import { isDoughFormula, isDoughFormulaState, type DoughFormulaState } from '@eat-yeet/l2-recipe-domain/formula-state'
+import { calculateFormula, calculateLevainBuild, formatPercent, type DoughFormula, type StarterProfile } from '@eat-yeet/l2-recipe-domain/formula'
 import { formatNumberFieldValue, type NumberFieldPrecision } from '@eat-yeet/l5-ui-primitives/primitives/number-field-format'
-import type { RecipeContent, RecipeContentMethod } from '@eat-yeet/l4-content-model/recipes'
+import type { RecipeContent } from '@eat-yeet/l4-content-model/recipes'
 import { recipeWithSelectedMethod } from '@eat-yeet/l4-content-model/recipes'
+import { formatYeastGrams, formatYeastTeaspoons, formatEighths } from './dough-kitchen-model'
 import { resolveSourdoughSteps, type SourdoughProcessSections, type SpiralMixerProfile } from './sourdough-process'
 
 export type InputMode = 'weights' | 'target'
 
-export interface DoughWorkbenchState {
-  version: 1
-  batch: DoughBatch
-  formula: DoughFormula
-  methodId: string
-}
+export type DoughWorkbenchState = DoughFormulaState
 
 export interface DoughWorkbenchConfig {
   pizzaSizing?: PizzaSizing
@@ -34,21 +31,6 @@ export const pieceCountLabel = (count: number, label: 'loaf' | 'ball') => label 
 const escapeHtml = (value: string) => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
 export const formatWorkbenchGrams = (value: number) => Number.isFinite(value) ? `${formatNumberFieldValue(value, Math.abs(value) >= 20 ? 0 : 1)}g` : '—'
 export const yeastGramPrecision = (value: number): NumberFieldPrecision => Math.abs(value) >= 20 ? 0 : 2
-export const formatYeastGrams = (value: number) => Number.isFinite(value) ? `${formatNumberFieldValue(value, yeastGramPrecision(value))}g` : '—'
-const eighthGlyphs: Record<number, string> = { 1: '⅛', 2: '¼', 3: '⅜', 4: '½', 5: '⅝', 6: '¾', 7: '⅞' }
-export const formatEighths = (amount: number) => {
-  const eighths = Math.round(amount * 8)
-  const whole = Math.floor(eighths / 8)
-  const remainder = eighths % 8
-  return remainder === 0 ? String(whole) : `${whole > 0 ? `${whole} ` : ''}${eighthGlyphs[remainder]}`
-}
-// Instant yeast weighs about 3.1g per teaspoon (a 7g packet is 2¼ tsp).
-const instantYeastGramsPerTsp = 3.1
-export const formatYeastTeaspoons = (grams: number) => {
-  const tsp = grams / instantYeastGramsPerTsp
-  return tsp < 0.0625 ? 'less than ⅛ tsp' : `${formatEighths(tsp)} tsp`
-}
-export const formatBatchGrams = (value: number) => Number.isFinite(value) ? `${formatNumberFieldValue(value, 0)}g` : '—'
 export const formatAppliedGrams = (value: number) => {
   if (!Number.isFinite(value)) return '—'
   return `${value < 20 ? Number(value.toFixed(1)) : Math.round(value)}g`
@@ -58,27 +40,9 @@ export const completeFormula = (formula: DoughFormula, fallback?: DoughFormula):
   process: clone(formula.process ?? fallback?.process ?? DEFAULT_SOURDOUGH_PROCESS),
   levainBuild: clone(formula.levainBuild ?? { seed: starterFrom(formula), flourPerSeed: 2 }),
 } : formula
-export function selectionSummary(selection: DoughWorkbenchState, method?: RecipeContentMethod | null, formatWeight = formatBatchGrams) {
-  const { batch, formula } = selection
-  const pieces = `${batch.count} ${pieceCountLabel(batch.count, batch.pieceLabel)} × ${formatWeight(batch.pieceWeightGrams)}`
-  return [pieces, batch.diameterInches ? `${batch.diameterInches}-inch pizzas` : undefined, method?.label, `${formatPercent(formula.hydrationPercent)} hydration`, formula.process ? formula.process.mixingMethod === 'hand' ? 'Hand mixed' : 'Spiral mixer' : undefined].filter(Boolean).join(' · ')
-}
 
-export function selectionOverview(selection: DoughWorkbenchState, method?: RecipeContentMethod | null) {
-  const { batch, formula } = selection
-  const heading = formula.family === 'pizza' && batch.diameterInches
-    ? `${batch.count} × ${batch.diameterInches}-inch ${batch.count === 1 ? 'pizza' : 'pizzas'}`
-    : `${batch.count} ${pieceCountLabel(batch.count, batch.pieceLabel)}`
-  const details = [
-    `${formatAppliedGrams(batch.pieceWeightGrams)} each`,
-    method?.label,
-    `${formatPercent(formula.hydrationPercent)} hydration`,
-    formula.process ? formula.process.mixingMethod === 'hand' ? 'Hand mixed' : 'Spiral mixer' : undefined,
-  ].filter(Boolean).join(' · ')
-  return { heading, details }
-}
 
-export function dynamicDoughItems(selection: DoughWorkbenchState, formatWeight = formatWorkbenchGrams) {
+function dynamicDoughItems(selection: DoughWorkbenchState, formatWeight = formatWorkbenchGrams) {
   const result = calculateFormula(selection.formula, selection.batch)
   const items = result.freshFlour.filter((part) => part.grams > 0.005).map((part) => `${formatWeight(part.grams)} ${part.name}`)
   items.push(`${formatWeight(result.addedWaterGrams)} water`)
@@ -179,33 +143,7 @@ export function resolveWorkbenchRecipe(recipe: RecipeContent, selection: DoughWo
   }
 }
 
-function isFlourBlend(value: unknown): value is FlourComponent[] {
-  return Array.isArray(value) && value.every((part) => part && typeof part === 'object' && typeof part.id === 'string' && typeof part.name === 'string' && Number.isFinite(part.percent))
-}
-
-function isStarterProfile(value: unknown): value is StarterProfile {
-  return Boolean(value && typeof value === 'object' && Number.isFinite((value as StarterProfile).hydrationPercent) && isFlourBlend((value as StarterProfile).flour))
-}
-
-export function isDoughFormula(value: unknown): value is DoughFormula {
-  if (!value || typeof value !== 'object') return false
-  const formula = value as DoughFormula
-  const percentages = [formula.hydrationPercent, formula.saltPercent, formula.oilPercent, formula.sugarPercent, formula.maltPercent, formula.yeastPercent, formula.levainPercent]
-  return (
-    (formula.family === 'pizza' || formula.family === 'sourdough') &&
-    percentages.every(Number.isFinite) &&
-    isFlourBlend(formula.flour) &&
-    (formula.starter === undefined || isStarterProfile(formula.starter)) &&
-    (formula.process === undefined || (formula.family === 'sourdough' && isSourdoughProcess(formula.process))) &&
-    (formula.levainBuild === undefined || (formula.levainBuild !== null && typeof formula.levainBuild === 'object' && isStarterProfile(formula.levainBuild.seed) && Number.isFinite(formula.levainBuild.flourPerSeed) && formula.levainBuild.flourPerSeed > 0))
-  )
-}
-
-function isDoughState(value: unknown): value is DoughWorkbenchState {
-  if (!value || typeof value !== 'object') return false
-  const state = value as DoughWorkbenchState
-  return state.version === 1 && isDoughFormula(state.formula) && (state.batch?.diameterInches === undefined || (state.formula.family === 'pizza' && Number.isFinite(state.batch.diameterInches) && state.batch.diameterInches > 0)) && Boolean(state.batch) && Number.isInteger(state.batch.count) && state.batch.count > 0 && Number.isFinite(state.batch.pieceWeightGrams) && state.batch.pieceWeightGrams > 0 && (state.batch.pieceLabel === 'loaf' || state.batch.pieceLabel === 'ball') && typeof state.methodId === 'string'
-}
+const isDoughState = isDoughFormulaState
 
 export function isDoughConfig(value: unknown): value is DoughWorkbenchConfig {
   if (!value || typeof value !== 'object') return false

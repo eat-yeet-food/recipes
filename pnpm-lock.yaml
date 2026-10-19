@@ -66,6 +66,9 @@ importers:
       '@eat-yeet/l7-home':
         specifier: workspace:*
         version: link:packages/l7/home
+      '@eat-yeet/l7-kitchen':
+        specifier: workspace:*
+        version: link:packages/l7/kitchen
       '@eat-yeet/l7-learn':
         specifier: workspace:*
         version: link:packages/l7/learn
@@ -235,6 +238,9 @@ importers:
       '@eat-yeet/l6-ui-shell':
         specifier: workspace:*
         version: link:../../packages/l6/ui-shell
+      '@eat-yeet/l7-kitchen':
+        specifier: workspace:*
+        version: link:../../packages/l7/kitchen
       '@eat-yeet/l7-recipes':
         specifier: workspace:*
         version: link:../../packages/l7/recipes
@@ -319,6 +325,9 @@ importers:
 
   packages/l4/content-cms:
     dependencies:
+      '@eat-yeet/l2-recipe-domain':
+        specifier: workspace:*
+        version: link:../../l2/recipe-domain
       '@eat-yeet/l3-api-contract':
         specifier: workspace:*
         version: link:../../l3/api-contract
@@ -459,6 +468,40 @@ importers:
         specifier: ^1.33.0
         version: 1.33.0(react@19.2.8)
 
+  packages/l7/kitchen:
+    dependencies:
+      '@eat-yeet/l0-foundation':
+        specifier: workspace:*
+        version: link:../../l0/foundation
+      '@eat-yeet/l1-recipe-model':
+        specifier: workspace:*
+        version: link:../../l1/recipe-model
+      '@eat-yeet/l4-content-model':
+        specifier: workspace:*
+        version: link:../../l4/content-model
+      '@eat-yeet/l5-ui-primitives':
+        specifier: workspace:*
+        version: link:../../l5/ui-primitives
+      '@eat-yeet/l6-ui-content-blocks':
+        specifier: workspace:*
+        version: link:../../l6/ui-content-blocks
+      '@eat-yeet/l6-ui-shell':
+        specifier: workspace:*
+        version: link:../../l6/ui-shell
+      '@eat-yeet/l7-recipes':
+        specifier: workspace:*
+        version: link:../recipes
+      lucide-react:
+        specifier: ^1.33.0
+        version: 1.33.0(react@19.2.8)
+      react:
+        specifier: 19.2.8
+        version: 19.2.8
+    devDependencies:
+      '@storybook/react-vite':
+        specifier: ^10.5.8
+        version: 10.5.8(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(esbuild@0.25.12)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(rollup@4.62.4)(storybook@10.5.8(@types/react@19.2.18)(prettier@3.9.6)(react@19.2.8))(typescript@5.9.3)(vite@7.3.6(@types/node@22.20.1)(jiti@2.7.0)(lightningcss@1.33.0)(sass@1.77.4)(terser@5.16.9)(tsx@4.22.4)(yaml@2.9.0))
+
   packages/l7/learn:
     dependencies:
       '@eat-yeet/l0-foundation':
@@ -586,6 +629,9 @@ importers:
       '@eat-yeet/l7-home':
         specifier: workspace:*
         version: link:../../l7/home
+      '@eat-yeet/l7-kitchen':
+        specifier: workspace:*
+        version: link:../../l7/kitchen
       '@eat-yeet/l7-learn':
         specifier: workspace:*
         version: link:../../l7/learn

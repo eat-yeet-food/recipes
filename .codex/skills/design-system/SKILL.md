@@ -30,11 +30,11 @@ handbook’s context-specific variants. A mismatch in the article header does
 not justify changing the approved recipe-card actions. For borderless text
 actions, use the handbook’s shared unpadded, underlined treatment; do not borrow
 filled-button spacing or remove the visible clickable cue. Use a dedicated labeled
-switch for binary settings rather than a button-styled row. Saved-formula UI
-follows the **Saved formulas** contract and shares its panel with dough results;
-keep validation, persistence feedback, and corresponding stories together.
-Start that panel collapsed behind its compact saved-count disclosure so the
-calculator fields remain the primary use of workbench space.
+switch for binary settings rather than a button-styled row. Test Kitchen UI
+follows the **Test Kitchen** contract: recipes render as written, each formula
+has its own page, edits autosave with History, and Duplicate (named first) is
+the only way to branch. Do not reintroduce Save / Save as choices or a
+recipe-page calculator.
 For numeric controls, follow **Numeric editing**: keep editable text separate
 from accepted values, preserve blank/partial entries and focus, and block saves
 while invalid. Reuse NumberField rather than coercing or formatting raw input
@@ -44,8 +44,7 @@ and blurred displays, not typed buffers or calculation state; never use a
 rounded display as the value to validate. Follow the current cap: whole grams
 at 20g and above, at most one decimal below 20g and for percentages/ratios,
 except yeast permits two decimals for percentages and weights below 20g.
-Omit trailing zeros. Keep family-specific copy in the workbench's typed copy
-mapping. Starter and process settings belong to the saved formula, without a
+Omit trailing zeros. Keep family-specific copy in the app's dough editor. Starter and process settings belong to the saved formula, without a
 separate starter naming workflow. Sourdough process edits must update the
 domain model, plugin state/recipe projection, and production stories together.
 For recipe layout changes, follow **Recipe layout**: use the shared description

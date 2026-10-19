@@ -78,10 +78,23 @@ try {
   )
   const search = await (await fetch(origin + '/search?q=pizza')).text()
   assert(search.includes('noindex'))
+  // Test Kitchen renders public recipe data only, is never indexed, and old shared formula links open there.
+  for (const path of ['/kitchen', '/kitchen/new-york-style-pizza', '/kitchen/new-york-style-pizza/bake']) {
+    const response = await fetch(origin + path)
+    assert.equal(response.status, 200, path)
+    assert((await response.text()).includes('noindex'), path)
+  }
+  for (const path of ['/kitchen/not-real', '/kitchen/american-buttercream', '/kitchen/new-york-style-pizza/short'])
+    assert.equal((await fetch(origin + path)).status, 404, path)
+  const shared = await fetch(origin + '/recipes/new-york-style-pizza?config=%7B%7D', { redirect: 'manual' })
+  assert([307, 308].includes(shared.status))
+  assert.match(shared.headers.get('location'), /\/kitchen\/new-york-style-pizza\?config=%7B%7D$/)
+  assert((await (await fetch(origin + '/robots.txt')).text()).includes('Disallow: /kitchen'))
   const sitemap = await (await fetch(origin + '/sitemap.xml')).text()
   for (const item of [...recipes, ...articles])
     assert(sitemap.includes(item.slug))
   assert(!sitemap.includes('/search'))
+  assert(!sitemap.includes('/kitchen'))
   const media = await json('/api/media?limit=100')
   const file = media.docs[0].manifest.variants[0]
   const image = await fetch(origin + file.url)

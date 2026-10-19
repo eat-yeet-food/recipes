@@ -82,7 +82,7 @@ export function Nav({
   return (
     <nav
       data-site-nav=""
-      className={`fixed top-[var(--impersonation-h,0px)] left-0 z-[var(--z-nav)] w-full transition-nav ${navBg}`}
+      className={`fixed top-[var(--impersonation-h,0px)] left-0 z-[var(--z-nav)] w-full transition-nav print:hidden ${navBg}`}
     >
       <div
         data-site-nav-inner=""

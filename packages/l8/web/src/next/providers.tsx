@@ -50,11 +50,7 @@ export function SiteShell({
   )
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (
-        (e.metaKey || e.ctrlKey) &&
-        e.key === 'k' &&
-        document.body.dataset.workbenchOpen !== 'true'
-      ) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault()
         setOpen((v) => !v)
       }
@@ -80,7 +76,7 @@ export function SiteShell({
             wordmark={site.copy.wordmark}
             onOpenPalette={() => setOpen(true)}
           />
-          <main id="main-content" className="flex-1 pt-[var(--header-offset)]">
+          <main id="main-content" className="flex-1 pt-[var(--header-offset)] print:pt-0">
             {children}
           </main>
           <Footer

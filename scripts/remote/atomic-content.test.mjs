@@ -44,7 +44,7 @@ test('content changes commit together while concurrent reviews survive; failed b
 })
 
 test('atomic content cannot write authentication, members, reviews, schema or oversized batches', async () => {
-  const member = ['members', 'member_sessions', 'member_workbenches', 'recipe_reviews', 'recipe_review_replies']
+  const member = ['members', 'member_sessions', 'member_workbenches', 'kitchen_formulas', 'kitchen_revisions', 'recipe_reviews', 'recipe_review_replies']
   const sql = `CREATE TABLE owners(id INTEGER); CREATE TABLE recipe_ratings(id INTEGER); CREATE TABLE recipes(id INTEGER); ${member.map((table) => `CREATE TABLE ${table}(id INTEGER);`).join(' ')}`
   for (const query of ['INSERT INTO owners VALUES(1)', 'INSERT INTO recipe_ratings VALUES(1)', 'DROP TABLE recipes',
     ...member.flatMap((table) => [`INSERT INTO ${table} VALUES(1)`, `UPDATE ${table} SET id = 2`, `DELETE FROM ${table}`])]) {

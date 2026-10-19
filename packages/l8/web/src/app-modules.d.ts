@@ -24,7 +24,7 @@ declare module '@app/page-blocks' {
 }
 
 declare module '@app/recipe-workbenches' {
-  import type { RecipeWorkbenchRegistry } from '@eat-yeet/l7-recipes/recipes/workbench-registry'
+  import type { KitchenRegistry } from '@eat-yeet/l7-kitchen/kitchen/kitchen-plugin'
 
-  export const recipeWorkbenchRegistry: RecipeWorkbenchRegistry
+  export const recipeWorkbenchRegistry: KitchenRegistry
 }

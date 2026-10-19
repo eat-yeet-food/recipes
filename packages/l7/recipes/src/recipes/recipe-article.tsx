@@ -1,8 +1,6 @@
 'use client'
-import { useAccount } from '@eat-yeet/l6-ui-shell/account/account'
-import { useNavigate } from '@eat-yeet/l5-ui-primitives/primitives/navigation'
 import { ResponsiveImage } from '@eat-yeet/l5-ui-primitives/primitives/responsive-image'
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react'
 
 import { ChefHat, Printer, Share2 } from 'lucide-react'
 import { cn } from '@eat-yeet/l0-foundation/utils'
@@ -12,8 +10,6 @@ import type { PageBlockRegistry } from '@eat-yeet/l6-ui-content-blocks/page-bloc
 import type { RecipeContent } from '@eat-yeet/l4-content-model/recipes'
 import { RecipeAction } from './recipe-actions'
 import type { RecipePageBlockContext } from './recipe-blocks'
-import { RecipeWorkbenchChoicesSource, RecipeWorkbenchHost } from './recipe-workbench'
-import type { ActiveRecipeWorkbench, RecipeWorkbenchApplyOptions } from './workbench-registry'
 
 type ScreenWakeLockSentinel = {
   released?: boolean
@@ -31,37 +27,51 @@ type RecipeArticleAsideProps = {
   focusedCooking: boolean
 }
 
+/** Overrides for pages that present a recipe under another title, such as a Test Kitchen bake sheet. */
+export type RecipeArticleHeading = {
+  crumbs: { label: string; href?: string }[]
+  title: string
+  byline: ReactNode
+  /** Sharing a member's private bake sheet to Pinterest makes no sense. */
+  pin: boolean
+  /** Shown first in the page actions, e.g. Edit formula. */
+  actions?: ReactNode
+}
+
 export function RecipeArticleHeader({
   page,
+  heading,
   pinUrl,
   printPage,
   focusedCooking,
   toggleFocusedCooking,
 }: {
   page: Pick<RecipeContent, 'title' | 'description'>
+  heading?: RecipeArticleHeading
   pinUrl: URL
   printPage: () => void
   focusedCooking: boolean
   toggleFocusedCooking: () => void
 }) {
+  const crumbs = heading?.crumbs ?? [{ label: 'Home', href: '/' }, { label: 'Recipes', href: '/recipes' }, { label: page.title }]
   return (
     <div className="@container">
       <nav className="flex flex-wrap gap-1.5 mb-5 text-[var(--color-ink)] text-xs leading-[1.6] uppercase print:hidden" aria-label="Breadcrumb">
-        <a href="/">Home</a>
-        <span>&gt;</span>
-        <a href="/recipes">Recipes</a>
-        <span>&gt;</span>
-        <span>{page.title}</span>
+        {crumbs.map((crumb, index) => <Fragment key={`${crumb.label}-${index}`}>
+          {index > 0 && <span>&gt;</span>}
+          {crumb.href ? <a href={crumb.href}>{crumb.label}</a> : <span>{crumb.label}</span>}
+        </Fragment>)}
       </nav>
       <div>
-        <h1 className="m-0 min-w-0 max-w-[var(--layout-recipe-copy)] text-[34px] leading-[1.15] tracking-[1.2px] font-bold">{page.title}</h1>
-        <div className="mt-1.5 text-xs uppercase text-[var(--color-primary)]">By Patrick Hogan</div>
+        <h1 className="m-0 min-w-0 max-w-[var(--layout-recipe-copy)] text-[34px] leading-[1.15] tracking-[1.2px] font-bold">{heading?.title ?? page.title}</h1>
+        <div className="mt-1.5 text-xs uppercase text-[var(--color-primary)]">{heading?.byline ?? 'By Patrick Hogan'}</div>
       </div>
       <div className="mb-6 mt-4 flex flex-wrap gap-3 print:hidden" role="group" aria-label="Page actions">
-        <RecipeAction variant="hero" href={pinUrl.toString()} target="_blank" rel="noreferrer">
+        {heading?.actions}
+        {heading?.pin !== false && <RecipeAction variant="hero" href={pinUrl.toString()} target="_blank" rel="noreferrer">
           <Share2 className="size-3.5" />
           Pin Recipe
-        </RecipeAction>
+        </RecipeAction>}
         <RecipeAction variant="hero" onClick={printPage}>
           <Printer className="size-3.5" />
           Print Recipe
@@ -81,26 +91,21 @@ export function RecipeArticle({
   siteUrl,
   blockRegistry,
   aside,
-  workbench,
-  onWorkbenchApply,
-  storageScope = 'eat-yeet',
+  heading,
+  beforeIngredients,
   rating,
 }: {
   page: RecipeContent
   siteUrl: string
   blockRegistry: PageBlockRegistry<RecipePageBlockContext>
   aside?: (props: RecipeArticleAsideProps) => ReactNode
-  workbench?: ActiveRecipeWorkbench | null
-  onWorkbenchApply?: (state: unknown, options?: RecipeWorkbenchApplyOptions) => void
-  storageScope?: string
+  heading?: RecipeArticleHeading
+  /** Shown between the recipe facts and Ingredients, such as the Test Kitchen link. */
+  beforeIngredients?: ReactNode
   rating?: ReactNode
 }) {
   const [cookMode, setCookMode] = useState(false)
   const [focusedCooking, setFocusedCooking] = useState(false)
-  const [workbenchOpen, setWorkbenchOpen] = useState(false)
-  const account = useAccount()
-  const navigate = useNavigate()
-  const workbenchTriggerRef = useRef<HTMLElement | null>(null)
   const wakeLockRef = useRef<ScreenWakeLockSentinel | null>(null)
   const photo = imageUrl(page)
   const heroAlt = `${page.title} hero image`
@@ -117,19 +122,6 @@ export function RecipeArticle({
       setCookMode(!active)
       return !active
     })
-  }
-  const openWorkbench = () => {
-    // The calculator is a member feature; signed-out readers sign in, then return here.
-    if (!account.member) {
-      navigate({ to: '/account/sign-in', search: { returnTo: window.location.pathname + window.location.search } })
-      return
-    }
-    workbenchTriggerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
-    setWorkbenchOpen(true)
-  }
-  const changeWorkbenchOpen = (open: boolean) => {
-    setWorkbenchOpen(open)
-    if (!open) requestAnimationFrame(() => workbenchTriggerRef.current?.focus())
   }
 
   pinUrl.searchParams.set('url', pageUrl)
@@ -181,11 +173,7 @@ export function RecipeArticle({
     page,
     siteUrl,
     firstRecipeBlockIndex,
-    workbenchSummary: workbench ? workbench.plugin.summary(page, workbench.config, workbench.state) : undefined,
-    onOpenWorkbench: workbench ? openWorkbench : undefined,
-    workbenchChoices: workbench && onWorkbenchApply
-      ? (render) => <RecipeWorkbenchChoicesSource recipe={page} workbench={workbench} onApply={onWorkbenchApply} storageScope={storageScope}>{render}</RecipeWorkbenchChoicesSource>
-      : undefined,
+    beforeIngredients,
   }
 
   return (
@@ -203,6 +191,7 @@ export function RecipeArticle({
       header={(
         <RecipeArticleHeader
           page={page}
+          heading={heading}
           pinUrl={pinUrl}
           printPage={printPage}
           focusedCooking={focusedCooking}
@@ -223,16 +212,6 @@ export function RecipeArticle({
       aside={aside?.({ page, focusedCooking })}
     />
     {rating && <div className="mx-auto -mt-8 max-w-[960px] px-8 pb-12 max-[640px]:px-4 print:hidden">{rating}</div>}
-    {workbench && onWorkbenchApply && (
-      <RecipeWorkbenchHost
-        recipe={page}
-        workbench={workbench}
-        onApply={onWorkbenchApply}
-        storageScope={storageScope}
-        open={workbenchOpen}
-        onOpenChange={changeWorkbenchOpen}
-      />
-    )}
     </>
   )
 }

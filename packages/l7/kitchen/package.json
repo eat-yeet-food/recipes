@@ -1,0 +1,22 @@
+{
+  "name": "@eat-yeet/l7-kitchen",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./kitchen/*": "./src/kitchen/*.tsx"
+  },
+  "dependencies": {
+    "@eat-yeet/l0-foundation": "workspace:*",
+    "@eat-yeet/l1-recipe-model": "workspace:*",
+    "@eat-yeet/l4-content-model": "workspace:*",
+    "@eat-yeet/l5-ui-primitives": "workspace:*",
+    "@eat-yeet/l6-ui-content-blocks": "workspace:*",
+    "@eat-yeet/l6-ui-shell": "workspace:*",
+    "@eat-yeet/l7-recipes": "workspace:*",
+    "lucide-react": "^1.33.0",
+    "react": "19.2.8"
+  },
+  "devDependencies": {
+    "@storybook/react-vite": "^10.5.8"
+  }
+}

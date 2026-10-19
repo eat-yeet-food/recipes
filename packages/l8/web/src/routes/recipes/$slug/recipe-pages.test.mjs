@@ -3,8 +3,8 @@
  *
  * Static assertions only prove that files exist. This opens every canonical
  * recipe route and checks that the route renders the generic article shell,
- * registered recipe block, desktop-only browse sidebar, and mobile/cook-mode
- * behavior.
+ * registered recipe block, desktop-only browse sidebar, mobile/cook-mode
+ * behavior, and the Test Kitchen entry point that replaced Adjust recipe.
  */
 import { signIn } from '#web-test/member-session'
 import { chromium } from 'playwright'
@@ -28,7 +28,7 @@ const check = (name, ok, detail = '') => results.push({ name, ok: !!ok, detail: 
 
 async function newPage(viewport = { width: 1440, height: 1000 }) {
   const page = await browser.newPage({ viewport, deviceScaleFactor: viewport.width < 700 ? 2 : 1 })
-  // Adjust recipe is a member feature.
+  // Members see their Test Kitchen versions beside the recipe.
   await signIn(page.context(), BASE)
   page.on('pageerror', (e) => errors.push(e.message))
   page.on('console', (m) => m.type() === 'error' && errors.push(m.text()))
@@ -75,96 +75,23 @@ check(
   'variant selector is removed',
   await desktop.locator('[aria-label="Recipe variants"]').count() === 0,
 )
-check('pizza shows applied configuration', (await desktop.locator('[data-recipe-adjustment]').textContent()).includes('3 × 16-inch pizzas') && (await desktop.locator('[data-recipe-adjustment]').textContent()).includes('480g each'))
 check('pizza uses the authored mozzarella', (await desktop.locator('#recipe-card').textContent()).includes("Trader Joe's whole milk low moisture mozzarella"))
 check('pizza no longer requires frozen provolone', !(await desktop.locator('#recipe-card').textContent()).toLowerCase().includes('provolone'))
 check('pizza links the recommended mozzarella', await desktop.locator('#recipe-card a[href*="traderjoes.com/home/search"]').count() === 1)
 check('pizza recommends the selected mozzarella', (await desktop.locator('#recipe-card').textContent()).includes('is a particularly good choice for this pizza'))
 check('jump to recipe is removed', await desktop.getByRole('link', { name: 'Jump to Recipe' }).count() === 0)
-check('adjust recipe appears only beside the recipe', await desktop.getByRole('button', { name: 'Adjust Recipe' }).count() === 1)
+check('recipes have no Adjust recipe control', await desktop.getByRole('button', { name: /Adjust recipe/i }).count() === 0 && await desktop.locator('[data-recipe-adjustment]').count() === 0)
+await desktop.locator('[data-recipe-kitchen]').getByRole('link').first().waitFor()
+check('the calculator lives in Test Kitchen', await desktop.locator('[data-recipe-kitchen] a[href="/kitchen/new-york-style-pizza"]').count() === 1, await desktop.locator('[data-recipe-kitchen]').textContent())
 check('recipe controls appear once in the header', await desktop.getByRole('button', { name: 'Cooking view' }).count() === 1 && await desktop.getByRole('button', { name: 'Print Recipe' }).count() === 1 && await desktop.getByRole('link', { name: 'Pin Recipe' }).count() === 1 && await desktop.getByRole('switch', { name: 'Cook Mode' }).count() === 0)
 const authoredPizzaText = await desktop.locator('#recipe-card').textContent()
 check('pizza toppings show readable per-pizza and batch totals', authoredPizzaText.includes('6 oz pizza sauce (18 oz total)') && authoredPizzaText.includes('28 g pecorino romano (84 g total)') && authoredPizzaText.includes('⅛ tsp dried oregano (⅜ tsp total)'))
 check('outdoor mixing omits unused optional ingredients', authoredPizzaText.includes('Add the water, flour, fine sea salt, and SAF red instant yeast to the spiral mixer'))
-await desktop.getByRole('button', { name: 'Adjust Recipe' }).first().click()
-await desktop.locator('[data-workbench-drawer]').waitFor()
-check('workbench opens as a dialog', await desktop.getByRole('dialog', { name: 'Adjust recipe' }).isVisible())
-check('target inputs pin percent units', (await desktop.getByText('%', { exact: true }).count()) >= 3)
-const workbenchEdge = await desktop.getByRole('dialog', { name: 'Adjust recipe' }).evaluate((drawer) => ({ borderLeft: getComputedStyle(drawer).borderLeftWidth, hasPinkOffsetShadow: drawer.className.includes('shadow-[-18px') }))
-check('workbench has no decorative pink edge or hard left border', workbenchEdge.borderLeft === '0px' && !workbenchEdge.hasPinkOffsetShadow, JSON.stringify(workbenchEdge))
-check('saved formulas start collapsed', await desktop.getByRole('button', { name: /Saved formulas/ }).getAttribute('aria-expanded') === 'false')
-await desktop.getByRole('button', { name: /Saved formulas/ }).click()
-check('saved formula disclosure reveals the form', await desktop.getByRole('heading', { name: 'Saved formulas' }).isVisible())
-await desktop.getByLabel('Formula preset name').fill('Outdoor favorite')
-await desktop.getByRole('button', { name: 'Save new' }).click()
-// Saving writes to the member's account; wait for the server round trip.
-await desktop.getByRole('button', { name: 'Load Outdoor favorite' }).waitFor({ timeout: 10000 }).catch(() => {})
-check('saved formula has an explicit recall action', await desktop.getByRole('button', { name: 'Load Outdoor favorite' }).isVisible())
-check('saved formula reports when its exact values are loaded', await desktop.getByText('Loaded', { exact: true }).isVisible())
-await desktop.getByLabel('Oven method').selectOption('indoor-steel')
-await desktop.getByRole('button', { name: 'Use recommended formula for Indoor Steel' }).click()
-check('using a recommended formula clears the saved-formula identity', await desktop.getByText('Loaded', { exact: true }).count() === 0 && await desktop.getByText('Modified', { exact: true }).count() === 0)
-await desktop.getByRole('button', { name: 'Apply to recipe' }).click()
-await desktop.waitForURL('**/recipes/new-york-style-pizza?config=*')
-const indoorFacts = await desktop.evaluate(() => document.body.textContent ?? '')
-check('applied configuration updates URL', desktop.url().includes('?config='), desktop.url())
-check('indoor method applies calculated dough formula', indoorFacts.includes('861g Kirkland Organic All-Purpose Flour') && indoorFacts.includes('542g water') && indoorFacts.includes('17.2g oil') && indoorFacts.includes('63% hydration'))
-check('indoor mixing includes configured oil', indoorFacts.includes('Add the water, flour, oil, fine sea salt, and SAF red instant yeast to the spiral mixer'))
-check('indoor method shows baking steel equipment', indoorFacts.includes('16&quot; x 16&quot; baking steel') || indoorFacts.includes('16" x 16" baking steel'))
-await desktop.goBack()
-await desktop.waitForURL('**/recipes/new-york-style-pizza')
-const outdoorFacts = await desktop.evaluate(() => document.body.textContent ?? '')
-check('browser Back restores authored formula', outdoorFacts.includes('861g Kirkland Organic All-Purpose Flour') && outdoorFacts.includes('560g water') && outdoorFacts.includes('¾ tsp (2.15g) SAF red instant yeast') && outdoorFacts.includes('17.2g fine sea salt'), outdoorFacts.slice(outdoorFacts.indexOf('Ingredients'), outdoorFacts.indexOf('Instructions')))
-await desktop.getByRole('button', { name: 'Adjust Recipe' }).first().click()
-await desktop.locator('[data-workbench-drawer]').waitFor()
-await desktop.getByLabel('Hydration').fill('71')
-await desktop.getByRole('button', { name: 'Cancel' }).click()
-check('cancel discards draft', (await desktop.locator('text=65% hydration').count()) > 0)
-// A saved formula is one choice away on the recipe page, and the choice follows the member.
-const pizzaSummary = desktop.locator('[data-recipe-adjustment]')
-const savedChoice = desktop.getByRole('combobox', { name: 'Saved formula' })
-check('saved formulas are offered beside the summary', await savedChoice.inputValue() === 'original' && await savedChoice.locator('option').allTextContents().then((labels) => labels.join('|') === 'Original|Outdoor favorite'))
-const summaryHeight = (await pizzaSummary.boundingBox()).height
-await desktop.getByRole('button', { name: 'Adjust Recipe' }).first().click()
-await desktop.locator('[data-workbench-drawer]').waitFor()
-await desktop.getByLabel('Hydration').fill('68')
-await desktop.getByRole('button', { name: 'Apply to recipe' }).click()
-const savePrompt = desktop.getByRole('dialog', { name: 'Save this formula?' })
-await savePrompt.waitFor()
-await pizzaSummary.getByText('68% hydration').waitFor({ timeout: 10000 }).catch(() => {})
-check('applying an unsaved formula updates the recipe before offering to save it', (await pizzaSummary.textContent()).includes('68% hydration'), await pizzaSummary.textContent())
-check('the save prompt focuses its name field', await desktop.getByLabel('Formula name').evaluate((input) => document.activeElement === input), await desktop.evaluate(() => document.activeElement?.outerHTML.slice(0, 200)))
-await desktop.getByLabel('Formula name').fill(' outdoor   FAVORITE ')
-check('save prompt rejects an existing name', (await savePrompt.getByRole('alert').textContent()).includes('already exists') && await desktop.getByRole('button', { name: 'Save formula' }).isDisabled())
-await desktop.getByLabel('Formula name').fill('Wetter pizza')
-await desktop.getByRole('button', { name: 'Save formula' }).click()
-await savePrompt.waitFor({ state: 'hidden', timeout: 10000 })
-const wetterValue = await savedChoice.inputValue()
-check('a formula saved from the prompt becomes the page choice', wetterValue.startsWith('saved:') && (await savedChoice.locator('option:checked').textContent()) === 'Wetter pizza')
-check('the saved formula choice adds no height to the summary', Math.abs((await pizzaSummary.boundingBox()).height - summaryHeight) < 1, `${summaryHeight} -> ${(await pizzaSummary.boundingBox()).height}`)
+check('recipes always show the authored formula', authoredPizzaText.includes('861g Kirkland Organic All-Purpose Flour') && authoredPizzaText.includes('560g water') && authoredPizzaText.includes('¾ tsp (2.15g) SAF red instant yeast') && authoredPizzaText.includes('17.2g fine sea salt'))
+// Formulas shared before Test Kitchen open there as an unsaved copy.
+await desktop.goto(`${BASE}/recipes/new-york-style-pizza?config=${encodeURIComponent('{"version":1}')}`, { waitUntil: 'networkidle' })
+check('shared formula links open in Test Kitchen', new URL(desktop.url()).pathname === '/kitchen/new-york-style-pizza' && desktop.url().includes('config='), desktop.url())
 await desktop.goto(`${BASE}/recipes/new-york-style-pizza`, { waitUntil: 'networkidle' })
-await desktop.getByText('68% hydration').first().waitFor({ timeout: 10000 }).catch(() => {})
-check('the last chosen formula loads on a plain recipe URL', (await pizzaSummary.textContent()).includes('68% hydration') && await savedChoice.inputValue() === wetterValue && desktop.url().includes('?config='), desktop.url())
-// Adjusting a recipe that shows a saved formula offers to save over that formula.
-await desktop.getByRole('button', { name: 'Adjust Recipe' }).first().click()
-await desktop.locator('[data-workbench-drawer]').waitFor()
-await desktop.getByLabel('Hydration').fill('69')
-await desktop.getByRole('button', { name: 'Apply to recipe' }).click()
-const saveChanges = desktop.getByRole('dialog', { name: 'Save your changes?' })
-await saveChanges.waitFor()
-check('editing a saved formula offers Save and Save as new', (await saveChanges.textContent()).includes('replace “Wetter pizza”') && await desktop.getByRole('button', { name: 'Save as new' }).isVisible() && await desktop.getByLabel('Formula name').count() === 0)
-await desktop.getByRole('button', { name: 'Save', exact: true }).click()
-await saveChanges.waitFor({ state: 'hidden', timeout: 10000 })
-check('Save replaces the saved formula in place', (await pizzaSummary.textContent()).includes('69% hydration') && await savedChoice.inputValue() === wetterValue && await savedChoice.locator('option').count() === 3)
-// The page updates at once; the choice reaches the account in the background.
-const choiceStored = desktop.waitForResponse((response) => response.url().includes('/api/public/account/workbench/') && response.request().method() === 'PUT', { timeout: 10000 }).catch(() => null)
-await savedChoice.selectOption('original')
-await desktop.getByText('65% hydration').first().waitFor({ timeout: 10000 }).catch(() => {})
-check('choosing Original restores the authored formula', (await pizzaSummary.textContent()).includes('65% hydration') && await savedChoice.inputValue() === 'original')
-check('the choice is stored in the account', (await choiceStored)?.ok())
-await desktop.goto(`${BASE}/recipes/new-york-style-pizza`, { waitUntil: 'networkidle' })
-await desktop.waitForTimeout(500)
-check('Original is remembered too', (await pizzaSummary.textContent()).includes('65% hydration') && await savedChoice.inputValue() === 'original' && !desktop.url().includes('?config='), desktop.url())
 const readingLayout = await desktop.evaluate(() => ['.yeet > header', '.yeet main', '.yeet main > article'].map((selector) => {
   const rect = document.querySelector(selector).getBoundingClientRect()
   return { selector, left: rect.left, width: rect.width }
@@ -199,32 +126,7 @@ await sourdough.goto(`${BASE}/recipes/sourdough-bread`, { waitUntil: 'networkidl
 const sourdoughRecipeText = await sourdough.locator('#recipe-card').textContent()
 check('resolved sourdough removes fixed starter maintenance quantities', !sourdoughRecipeText.includes('6g starter') && !sourdoughRecipeText.includes('50g starter'))
 check('instruction bindings agree with applied recipe rounding', sourdoughRecipeText.includes('first portion of water (685g)') && sourdoughRecipeText.includes('remaining water (20g)'))
-const adjustSourdough = sourdough.getByRole('button', { name: 'Adjust Recipe' }).first()
-await adjustSourdough.click()
-const sourdoughDialog = sourdough.getByRole('dialog', { name: 'Adjust recipe' })
-check('sourdough starts in baker\'s percentages', await sourdough.getByRole('button', { name: 'Percentages' }).getAttribute('aria-pressed') === 'true')
-await sourdough.getByRole('button', { name: 'Weights' }).click()
-check('sourdough defaults to 77 percent starter hydration', await sourdough.getByLabel('Starter hydration').inputValue() === '77')
-check('sourdough migration weights survive display rounding',
-  Math.abs(Number(await sourdough.getByLabel('Bread flour grams').first().inputValue()) - 765) < 0.01 &&
-  Math.abs(Number(await sourdough.getByLabel('Whole wheat flour grams').first().inputValue()) - 150) < 0.01 &&
-  Math.abs(Number(await sourdough.getByLabel('Added water').inputValue()) - 705) < 0.01 &&
-  Math.abs(Number(await sourdough.getByLabel('Ripe starter weight').inputValue()) - 175) < 0.01)
-await sourdough.getByRole('button', { name: 'Percentages' }).click()
-check('target formula uses readable rounded percentages',
-  Math.abs(Number(await sourdough.getByRole('textbox', { name: 'Hydration', exact: true }).inputValue()) - 77) < 0.01 &&
-  Math.abs(Number(await sourdough.getByLabel('Fine sea salt', { exact: true }).inputValue()) - 2) < 0.01 &&
-  Math.abs(Number(await sourdough.getByLabel('Ripe levain').inputValue()) - 17.3) < 0.01)
-await sourdough.getByRole('button', { name: 'Add flour' }).first().click()
-await sourdough.getByLabel('Flour 3 name').fill('Rye')
-await sourdough.getByLabel('Rye percentage').fill('10')
-check('invalid flour blend disables apply', await sourdough.getByRole('button', { name: 'Apply to recipe' }).isDisabled())
-check('invalid flour blend explains its total', (await sourdoughDialog.getByRole('alert').textContent()).includes('must total 100%'))
-await sourdough.keyboard.press('Meta+k')
-check('search shortcut does not stack another modal', await sourdough.getByRole('dialog').count() === 1)
-await sourdough.keyboard.press('Escape')
-await sourdough.waitForTimeout(200)
-check('escape closes workbench and restores focus', await sourdoughDialog.isHidden() && await adjustSourdough.evaluate((button) => document.activeElement === button))
+check('sourdough recipe has no calculator sheet', await sourdough.getByRole('button', { name: /Adjust recipe/i }).count() === 0)
 await sourdough.close()
 
 const phone = await newPage({ width: 390, height: 900 })
@@ -233,30 +135,6 @@ check(
   'recipe browse sidebar hidden on phone',
   await phone.locator('[data-yeet-browse]').evaluate((el) => getComputedStyle(el).display === 'none'),
 )
-await phone.getByRole('button', { name: 'Adjust Recipe' }).first().click()
-await phone.locator('[data-workbench-drawer]').waitFor()
-await phone.waitForTimeout(150)
-const phoneDrawer = await phone.getByRole('dialog', { name: 'Adjust recipe' }).evaluate((dialog) => ({
-  width: dialog.getBoundingClientRect().width,
-  left: dialog.getBoundingClientRect().left,
-  viewport: window.innerWidth,
-  maxWidth: getComputedStyle(dialog).maxWidth,
-}))
-check('workbench fills phone viewport', Math.abs(phoneDrawer.width - phoneDrawer.viewport) < 2, JSON.stringify(phoneDrawer))
-const phoneScrollRegion = await phone.locator('[data-workbench-scroll-region]').evaluate((region) => ({
-  clientWidth: region.clientWidth,
-  scrollWidth: region.scrollWidth,
-  overflowX: getComputedStyle(region).overflowX,
-  touchAction: getComputedStyle(region).touchAction,
-}))
-check(
-  'workbench scroll region stays locked to vertical touch movement',
-  phoneScrollRegion.scrollWidth === phoneScrollRegion.clientWidth &&
-    phoneScrollRegion.overflowX === 'hidden' &&
-    phoneScrollRegion.touchAction === 'pan-y',
-  JSON.stringify(phoneScrollRegion),
-)
-await phone.getByRole('button', { name: 'Cancel' }).click()
 await phone.close()
 
 await browser.close()

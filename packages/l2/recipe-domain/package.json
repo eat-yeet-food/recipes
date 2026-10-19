@@ -7,7 +7,8 @@
     "./sourdough-process": "./src/sourdough-process.ts",
     "./formula": "./src/formula.ts",
     "./format": "./src/format.ts",
-    "./search": "./src/search.ts"
+    "./search": "./src/search.ts",
+    "./formula-state": "./src/formula-state.ts"
   },
   "dependencies": {
     "@eat-yeet/l1-recipe-model": "workspace:*"

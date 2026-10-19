@@ -22,8 +22,4 @@ export const accountClient: AccountClient = {
   googleURL: (returnTo) => `${ACCOUNT_API}/google?returnTo=${encodeURIComponent(returnTo)}`,
   signOutEverywhere: async () => { await accountRequest('/sessions', 'DELETE') },
   deleteAccount: async (email) => { await accountRequest('/delete', 'POST', { email }) },
-  readWorkbench: async (scope) => (await accountRequest<{ store: unknown }>(`/workbench/${encodeURIComponent(scope)}`, 'GET', undefined,
-    'Saved formulas could not be loaded from your account.')).store,
-  writeWorkbench: async (scope, store) => { await accountRequest(`/workbench/${encodeURIComponent(scope)}`, 'PUT', { store },
-    'Your formulas could not be saved to your account. Please try again.') },
 }

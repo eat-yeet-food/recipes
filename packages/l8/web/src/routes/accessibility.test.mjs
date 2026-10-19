@@ -35,6 +35,10 @@ const paths = [
   '/learn',
   '/account/sign-in',
   '/account/settings',
+  '/kitchen',
+  '/kitchen/new-york-style-pizza',
+  '/kitchen/sourdough-bread',
+  '/kitchen/new-york-style-pizza/bake',
   `/recipes/${INDEX[0].slug}`,
   ...(ARTICLE_INDEX[0] ? [`/learn/${ARTICLE_INDEX[0].slug}`] : []),
 ]
@@ -72,15 +76,31 @@ try {
     await page.getByRole('combobox').fill('no matching recipe')
     await audit(page, 'Search palette / empty', width)
     await page.keyboard.press('Escape')
-    if (INDEX.some(recipe => recipe.slug === 'sourdough-bread')) {
-      // Adjust recipe is a member feature; the rest of this pass stays anonymous.
+    if (INDEX.some(recipe => recipe.slug === 'new-york-style-pizza')) {
+      // Saved formulas are a member feature; the rest of this pass stays anonymous.
       await signIn(context, server.url.replace(/\/$/, ''))
-      await page.goto(new URL('/recipes/sourdough-bread', server.url).href, { waitUntil: 'networkidle' })
-      await page.getByRole('button', { name: 'Adjust recipe', exact: true }).first().click()
-      await audit(page, 'Dough workbench / open', width)
-      await page.locator('[aria-labelledby=preview-heading]').scrollIntoViewIfNeeded()
-      await audit(page, 'Dough workbench / summary', width)
+      await page.goto(new URL('/kitchen/new-york-style-pizza', server.url).href, { waitUntil: 'networkidle' })
+      await page.getByRole('button', { name: 'Save to Test Kitchen' }).first().click()
+      await page.getByRole('dialog', { name: 'Save to Test Kitchen' }).waitFor()
+      await audit(page, 'Test Kitchen / name dialog', width)
+      await page.getByRole('textbox', { name: 'Name' }).fill(`Accessibility ${width}`)
+      await page.getByRole('button', { name: 'Save formula' }).click()
+      await page.waitForURL(/\/kitchen\/new-york-style-pizza\/[A-Za-z0-9_-]{16}\/bake$/)
+      await page.locator('#recipe-card').waitFor()
+      await audit(page, 'Test Kitchen / bake sheet', width)
+      await page.getByRole('link', { name: 'Edit formula' }).click()
+      await page.waitForURL(/\/kitchen\/new-york-style-pizza\/[A-Za-z0-9_-]{16}$/)
+      await page.getByRole('heading', { level: 1, name: `Accessibility ${width}` }).waitFor()
+      await audit(page, 'Test Kitchen / formula', width)
+      await page.getByRole('button', { name: 'History' }).first().click()
+      await page.locator('[data-kitchen-history]').waitFor()
+      await audit(page, 'Test Kitchen / history', width)
       await page.keyboard.press('Escape')
+      await page.goto(new URL('/kitchen', server.url).href, { waitUntil: 'networkidle' })
+      await page.locator('[data-kitchen-formula]').first().waitFor()
+      await audit(page, 'Test Kitchen / library (member)', width)
+      await context.clearCookies()
+      await page.evaluate(() => localStorage.clear())
     }
   }
 } finally {

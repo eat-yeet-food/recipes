@@ -8,7 +8,7 @@ description: Use when adding or changing UI components, tests, stories, or proje
 Use the owners and layer graph in `CLAUDE.md`: primitives in `packages/l5`,
 shared shell/catalog/content patterns in `packages/l6`, feature composition in
 `packages/l7`, routes/bootstrap in `packages/l8/web`, app registries and
-app-specific workbenches in `apps/<app>`. Do not create root `src/` files.
+app-specific calculator plugins in `apps/<app>`. Do not create root `src/` files.
 
 Colocate tests and stories with the module that owns behavior. Root `test/` is
 for shared server, screenshot/baseline and production verification infrastructure.

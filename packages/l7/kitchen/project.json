@@ -1,0 +1,18 @@
+{
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "name": "l7-kitchen",
+  "projectType": "library",
+  "sourceRoot": "src",
+  "tags": ["layer:l7", "scope:kitchen", "type:feature"],
+  "metadata": {
+    "tsConfig": "tsconfig.json"
+  },
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -b packages/l7/kitchen/tsconfig.json --pretty false"
+      }
+    }
+  }
+}

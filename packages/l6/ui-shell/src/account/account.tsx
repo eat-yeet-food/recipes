@@ -16,11 +16,8 @@ export type AccountClient = {
   updateDisplayName: (displayName: string) => Promise<AccountSession>
   signOut: () => Promise<void>
   googleURL: (returnTo: string) => string
-  /** The signed-in member's saved workbench store for a storage scope, or null. */
   signOutEverywhere: () => Promise<void>
   deleteAccount: (email: string) => Promise<void>
-  readWorkbench: (scope: string) => Promise<unknown>
-  writeWorkbench: (scope: string, store: unknown) => Promise<void>
 }
 
 export type AccountStatus = 'unknown' | 'signed-out' | 'signed-in'
@@ -48,7 +45,6 @@ const unavailable = () => Promise.reject(new Error('Accounts are unavailable her
 const noClient: AccountClient = {
   session: async () => ({ member: null, providers: { google: false } }),
   updateDisplayName: unavailable, signOut: async () => {}, googleURL: () => '#',
-  readWorkbench: unavailable, writeWorkbench: unavailable,
   signOutEverywhere: unavailable, deleteAccount: unavailable,
 }
 

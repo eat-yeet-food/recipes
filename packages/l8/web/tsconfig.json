@@ -54,6 +54,9 @@
       "path": "../../l7/learn/tsconfig.json"
     },
     {
+      "path": "../../l7/kitchen/tsconfig.json"
+    },
+    {
       "path": "../../l7/recipes/tsconfig.json"
     },
     {

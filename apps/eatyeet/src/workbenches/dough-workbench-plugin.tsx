@@ -1,45 +1,47 @@
-import { DoughWorkbenchSurface } from './dough-workbench-surface'
-import { lazy, Suspense } from 'react'
 import type { DoughFormula } from '@eat-yeet/l2-recipe-domain/formula'
-import { selectedRecipeMethod } from '@eat-yeet/l4-content-model/recipes'
-import { Dialog, DialogDescription, DialogTitle } from '@eat-yeet/l5-ui-primitives/primitives/dialog'
-import type { RecipeWorkbenchChoicesProps, RecipeWorkbenchDrawerProps, RecipeWorkbenchPlugin } from '@eat-yeet/l7-recipes/recipes/workbench-registry'
-import { clone, completeFormula, isDoughConfig, decodeDoughState, resolveWorkbenchRecipe, selectionOverview } from './dough-workbench-model'
-import { useDoughFormulaChoices } from './dough-formula-choices'
+import { selectedRecipeMethod, type RecipeContent } from '@eat-yeet/l4-content-model/recipes'
+import type { KitchenPlugin } from '@eat-yeet/l7-kitchen/kitchen/kitchen-plugin'
+import { DoughFormulaEditor } from './dough-formula-editor'
+import { batchNoun, doughRows, formulaChanges, formulaFacts, withBatchCount } from './dough-kitchen-model'
+import { DoughResults } from './dough-results'
+import { clone, completeFormula, decodeDoughState, isDoughConfig, resolveWorkbenchRecipe, type DoughWorkbenchState } from './dough-workbench-model'
 
-const DoughFormulaWorkbench = lazy(() => import('./dough-formula-workbench').then(({ DoughFormulaWorkbench }) => ({ default: DoughFormulaWorkbench })))
+const methodLabel = (recipe: RecipeContent) => (id: string) => recipe.methodOptions.find((method) => method.id === id)?.label ?? id
 
-function DoughWorkbenchDrawer(props: RecipeWorkbenchDrawerProps, family: DoughFormula['family']) {
-  if (!props.open || !isDoughConfig(props.config)) return null
-  const state = decodeDoughState(props.state, props.config, props.recipe)
-  if (!state || state.formula.family !== family) return null
-  return <Suspense fallback={<Dialog open={props.open} onOpenChange={props.onOpenChange}><DoughWorkbenchSurface><header className="px-6 py-5 pr-14"><DialogTitle className="font-hero text-[30px] leading-tight font-normal">Adjust recipe</DialogTitle><DialogDescription className="mt-2 text-ink" role="status">Loading calculator…</DialogDescription></header></DoughWorkbenchSurface></Dialog>}>
-    <DoughFormulaWorkbench {...props} config={props.config} selection={state} onApply={(next) => props.onApply(next)} />
-  </Suspense>
-}
-
-function createDoughWorkbenchPlugin(id: string, family: DoughFormula['family']): RecipeWorkbenchPlugin {
-  const useChoices = (props: RecipeWorkbenchChoicesProps) => useDoughFormulaChoices(props, family)
+function createDoughWorkbenchPlugin(id: string, family: DoughFormula['family'], label: string): KitchenPlugin {
+  const decode = (value: unknown, config: unknown, recipe: RecipeContent) => {
+    const state = isDoughConfig(config) ? decodeDoughState(value, config, recipe) : null
+    return state?.formula.family === family ? state : null
+  }
+  // Test Kitchen only hands back states this plugin decoded or produced.
+  const dough = (state: unknown) => state as DoughWorkbenchState
   return {
     id,
+    label,
     defaultState: (config) => isDoughConfig(config) && config.defaultSelection.formula.family === family ? { ...clone(config.defaultSelection), formula: completeFormula(clone(config.defaultSelection.formula)) } : null,
-    decodeState: (value, config, recipe) => {
-      const state = isDoughConfig(config) ? decodeDoughState(value, config, recipe) : null
-      return state?.formula.family === family ? state : null
-    },
+    decodeState: decode,
     resolveRecipe: (recipe, config, state) => {
-      if (!isDoughConfig(config)) return recipe
-      const decoded = decodeDoughState(state, config, recipe)
-      return decoded?.formula.family === family ? resolveWorkbenchRecipe(recipe, decoded, config) : recipe
+      const decoded = decode(state, config, recipe)
+      return decoded && isDoughConfig(config) ? resolveWorkbenchRecipe(recipe, decoded, config) : recipe
     },
-    summary: (recipe, config, state) => {
-      const decoded = isDoughConfig(config) ? decodeDoughState(state, config, recipe) : null
-      return decoded?.formula.family === family ? selectionOverview(decoded, selectedRecipeMethod(recipe, decoded.methodId)) : null
+    facts: (recipe, _config, state) => {
+      const method = recipe.methodOptions.length > 1 ? selectedRecipeMethod(recipe, dough(state).methodId)?.label : undefined
+      return formulaFacts(dough(state), method)
     },
-    useChoices,
-    Drawer: (props) => DoughWorkbenchDrawer(props, family),
+    totals: (_recipe, _config, state) => {
+      const { total, totalDetail } = doughRows(dough(state))
+      return { total, detail: totalDetail }
+    },
+    changes: (recipe, _config, from, to) => formulaChanges(dough(from), dough(to), methodLabel(recipe)),
+    batchCount: (state) => dough(state).batch.count,
+    batchNoun: (state, count) => batchNoun(dough(state), count),
+    withBatchCount: (state, count) => withBatchCount(dough(state), count),
+    Editor: ({ recipe, config, state, onChange, onErrorsChange, resetKey }) => isDoughConfig(config)
+      ? <DoughFormulaEditor recipe={recipe} config={config} state={dough(state)} onChange={onChange} onErrorsChange={onErrorsChange} resetKey={resetKey} />
+      : null,
+    Results: ({ state }) => <DoughResults state={dough(state)} />,
   }
 }
 
-export const createSourdoughWorkbenchPlugin = () => createDoughWorkbenchPlugin('sourdough', 'sourdough')
-export const createPizzaWorkbenchPlugin = () => createDoughWorkbenchPlugin('pizza', 'pizza')
+export const createSourdoughWorkbenchPlugin = () => createDoughWorkbenchPlugin('sourdough', 'sourdough', 'Sourdough')
+export const createPizzaWorkbenchPlugin = () => createDoughWorkbenchPlugin('pizza', 'pizza', 'Pizza')

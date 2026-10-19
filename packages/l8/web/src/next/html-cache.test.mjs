@@ -69,7 +69,7 @@ test('identity, query, framework, conditional and reload requests never read or 
     { range: 'bytes=0-1' }, { 'if-none-match': 'etag' }, { 'cache-control': 'no-cache' }, { pragma: 'no-cache' },
     { accept: 'text/x-component' },
   ]) assert.equal((await f.get('/', { headers })).headers.get('x-eatyeet-html-cache'), 'BYPASS', JSON.stringify(headers))
-  for (const path of ['/?config=custom', '/?', '/recipes/pizza?config=x', '/search?q=pizza', '/recipes/', '/%72ecipes', '/unknown', '/__html-cache/public-html-v1'])
+  for (const path of ['/?config=custom', '/?', '/recipes/pizza?config=x', '/kitchen', '/kitchen/new-york-style-pizza', '/search?q=pizza', '/recipes/', '/%72ecipes', '/unknown', '/__html-cache/public-html-v1'])
     assert.equal((await f.get(path)).headers.get('x-eatyeet-html-cache'), 'BYPASS', path)
   assert.equal((await f.get('/', { method: 'HEAD' })).headers.get('x-eatyeet-html-cache'), 'BYPASS')
   assert.equal((await f.get('/', { method: 'POST' })).headers.get('x-eatyeet-html-cache'), 'BYPASS')

@@ -23,7 +23,8 @@ export const app = { ...{
     "/learn"
   ],
   "robotsDisallow": [
-    "/search"
+    "/search",
+    "/kitchen"
   ],
   "previewPaths": [
     "",

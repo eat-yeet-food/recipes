@@ -1,4 +1,5 @@
 import { useEffect, useId, useState } from 'react'
+import { cn } from '@eat-yeet/l0-foundation/utils'
 import { Input } from './input'
 import { formatNumberFieldValue, type NumberFieldPrecision } from './number-field-format'
 
@@ -23,7 +24,7 @@ function validateNumber(value: number, min: number, max: number, integer: boolea
 }
 
 /** Preserve editable text separately from the last accepted numeric value. */
-export function NumberField({ label, value, onValueChange, suffix, min = 0, max = Infinity, integer = false, positive = false, hideLabel = false, onValidationChange, resetKey = 0, decimalPlaces = 1 }: {
+export function NumberField({ label, value, onValueChange, suffix, min = 0, max = Infinity, integer = false, positive = false, hideLabel = false, onValidationChange, resetKey = 0, decimalPlaces = 1, surface = 'default' }: {
   label: string
   value: number
   onValueChange: (value: number) => void
@@ -36,6 +37,8 @@ export function NumberField({ label, value, onValueChange, suffix, min = 0, max 
   onValidationChange?: NumberFieldValidation
   resetKey?: number
   decimalPlaces?: NumberFieldPrecision
+  /** `underline` for page forms on white; the filled default for workbench and dialog panels. */
+  surface?: 'default' | 'underline'
 }) {
   const id = useId()
   const [edit, setEdit] = useState<{ text: string; revision: number } | null>(null)
@@ -45,6 +48,7 @@ export function NumberField({ label, value, onValueChange, suffix, min = 0, max 
   const text = editing ? editing.text : parsed.error && Number.isFinite(value) ? String(value) : formatNumberFieldValue(value, integer ? 0 : decimalPlaces)
   const error = parsed.error
   const showError = Boolean(error) && !focused
+  const underline = surface === 'underline'
 
   useEffect(() => {
     onValidationChange?.(id, error ? `${label}: ${error}` : null)
@@ -52,10 +56,11 @@ export function NumberField({ label, value, onValueChange, suffix, min = 0, max 
   useEffect(() => () => onValidationChange?.(id, null), [id, onValidationChange])
 
   return <div data-slot="number-field" className="grid min-w-0 content-start gap-1">
-    <label htmlFor={id} className={hideLabel ? 'sr-only' : 'text-xs font-bold text-ink'}>{label}</label>
+    <label htmlFor={id} className={hideLabel ? 'sr-only' : underline ? 'font-action text-sm font-bold text-ink' : 'text-xs font-bold text-ink'}>{label}</label>
     <div className="relative min-w-0">
       <Input id={id} type="text" inputMode={integer ? 'numeric' : 'decimal'} enterKeyHint="done" autoComplete="off" spellCheck={false}
-        className={suffix ? suffix.length > 4 ? 'pr-24' : 'px-3 pr-10' : undefined}
+        surface={surface}
+        className={suffix ? underline ? suffix.length > 4 ? 'pr-20' : 'pr-10' : suffix.length > 4 ? 'pr-24' : 'px-3 pr-10' : undefined}
         value={text} aria-invalid={showError}
         aria-describedby={[suffix ? `${id}-unit` : '', showError ? `${id}-error` : ''].filter(Boolean).join(' ') || undefined}
         onFocus={() => setFocused(true)}
@@ -68,7 +73,7 @@ export function NumberField({ label, value, onValueChange, suffix, min = 0, max 
         onBlur={() => { setFocused(false); if (!error) setEdit(null) }}
         onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); event.currentTarget.blur() } }}
       />
-      {suffix && <span id={`${id}-unit`} className={`pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs ${showError ? 'text-white' : 'text-action-label'}`}>{suffix}</span>}
+      {suffix && <span id={`${id}-unit`} className={cn('pointer-events-none absolute top-1/2 -translate-y-1/2', underline ? 'right-0 text-sm text-muted-foreground' : showError ? 'right-3 text-xs text-white' : 'right-3 text-xs text-action-label')}>{suffix}</span>}
     </div>
     {showError && <p id={`${id}-error`} className="text-xs text-danger">{error}</p>}
   </div>

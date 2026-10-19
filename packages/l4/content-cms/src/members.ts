@@ -1,5 +1,7 @@
 import { createHash, randomBytes } from 'node:crypto'
 import type { Access, CollectionConfig, Payload } from 'payload'
+import { memberRef } from './member-ref'
+import { deleteMemberKitchen } from './kitchen'
 
 // Members are public site accounts created only through Google sign-in. They
 // never reach Payload admin or REST: every collection sets `endpoints: false`,
@@ -11,7 +13,6 @@ export const memberPermitted: Access = ({ req }) => req.context.memberCapability
 const hidden = { hidden: true }
 
 export const SESSION_DAYS = 30
-export const WORKBENCH_BYTES = 64 * 1024
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 /**
@@ -52,6 +53,9 @@ export const memberSessionsCollection: CollectionConfig = {
   ],
 }
 
+// Retired with the recipe-page calculator: Test Kitchen formulas replaced the
+// saved-formula store. Declared so the schema stays additive; account deletion
+// still clears any rows written by the earlier release.
 export const memberWorkbenchesCollection: CollectionConfig = {
   slug: 'member-workbenches',
   admin: { hidden: true },
@@ -73,8 +77,7 @@ export type Member = {
 }
 
 const options = { overrideAccess: false, user: null, context: memberContext, depth: 0 } as const
-/** Public member IDs are strings; D1 relationships store numeric IDs. */
-export const memberRef = (id: string | number) => typeof id === 'number' ? id : /^\d{1,15}$/.test(id) ? Number(id) : id
+export { memberRef } from './member-ref'
 const hashToken = (token: string) => createHash('sha256').update(token).digest('hex')
 const normalizeEmail = (value: string) => value.trim().toLowerCase()
 export const cleanDisplayName = (value: string) => value.normalize('NFKC').trim().replace(/\s+/g, ' ')
@@ -163,45 +166,6 @@ export async function memberNames(payload: Payload, ids: Array<string | number>)
   return names
 }
 
-const workbenchKey = (memberId: string, scope: string) => `${memberId}:${scope}`
-export const validWorkbenchScope = (scope: string) => /^[a-z0-9.-]{1,120}:recipe-workbench:v1$/.test(scope)
-
-export async function readWorkbench(payload: Payload, memberId: string, scope: string) {
-  const doc = (await payload.find({ collection: 'member-workbenches', ...options, limit: 1,
-    where: { workbenchKey: { equals: workbenchKey(memberId, scope) } } })).docs[0] as any
-  return doc ? doc.store : null
-}
-
-/** The workbench store is the member's own opaque data; the client validates formulas on read. */
-export function validWorkbenchStore(value: unknown) {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) return false
-  const store = value as Record<string, unknown>
-  const record = (item: unknown) => item && typeof item === 'object' && !Array.isArray(item)
-  return Object.keys(store).every((key) => ['modes', 'presets', 'starterProfiles', 'defaults'].includes(key)) &&
-    Array.isArray(store.presets) && store.presets.length <= 200 &&
-    store.presets.every((preset: any) => record(preset) && typeof preset.id === 'string' && preset.id.length <= 100 &&
-      typeof preset.name === 'string' && preset.name.length <= 80 && record(preset.formula)) &&
-    (store.starterProfiles === undefined || (Array.isArray(store.starterProfiles) && store.starterProfiles.length <= 100)) &&
-    (store.modes === undefined || record(store.modes)) && (store.defaults === undefined || record(store.defaults))
-}
-
-export async function writeWorkbench(payload: Payload, memberId: string, scope: string, store: unknown) {
-  const key = workbenchKey(memberId, scope)
-  const existing = (await payload.find({ collection: 'member-workbenches', ...options, limit: 1,
-    where: { workbenchKey: { equals: key } } })).docs[0]
-  if (existing) await payload.update({ collection: 'member-workbenches', ...options, id: existing.id, data: { store: store as any } })
-  else {
-    try { await payload.create({ collection: 'member-workbenches', ...options, data: { workbenchKey: key, member: memberRef(memberId), scope, store: store as any } }) }
-    catch (error) {
-      // A concurrent first save from another tab created the row.
-      const raced = (await payload.find({ collection: 'member-workbenches', ...options, limit: 1, where: { workbenchKey: { equals: key } } })).docs[0]
-      if (!raced) throw error
-      await payload.update({ collection: 'member-workbenches', ...options, id: raced.id, data: { store: store as any } })
-    }
-  }
-  return store
-}
-
 /** Removes the member and everything they wrote or saved. Threads on their reviews go too. */
 export async function deleteMember(payload: Payload, memberId: string) {
   const id = memberRef(memberId)
@@ -211,6 +175,7 @@ export async function deleteMember(payload: Payload, memberId: string) {
     await payload.delete({ collection: 'recipe-review-replies', ...ratingOptions, where: { review: { in: reviews.docs.slice(index, index + 90).map((doc) => doc.id) } } })
   await payload.delete({ collection: 'recipe-review-replies', ...ratingOptions, where: { member: { equals: id } } })
   await payload.delete({ collection: 'recipe-reviews', ...ratingOptions, where: { member: { equals: id } } })
+  await deleteMemberKitchen(payload, memberId)
   await payload.delete({ collection: 'member-workbenches', ...options, where: { member: { equals: id } } })
   await payload.delete({ collection: 'member-sessions', ...options, where: { member: { equals: id } } })
   await payload.delete({ collection: 'members', ...options, id })

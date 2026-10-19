@@ -80,18 +80,8 @@ export async function verifyAccounts(payload: Payload, origin: string, slug: str
   assert.deepEqual([deleted.body.count, deleted.body.ownRating, deleted.body.reviews.length], [1, null, 0])
   assert.equal((await payload.find({ collection: 'recipe-review-replies', overrideAccess: true, where: { review: { equals: reviewId } } })).totalDocs, 0)
 
-  // Saved workbench formulas belong to one member.
-  const scope = '/workbench/127.0.0.1:recipe-workbench:v1'
-  const store = { modes: {}, presets: [{ id: 'p1', name: 'Weekend pizza', formula: { family: 'pizza' } }], starterProfiles: [], defaults: {} }
-  assert.equal((await call(scope)).status, 401)
-  assert.deepEqual((await json(await call(scope, 'GET', undefined, aliceCookie))).body, { store: null })
-  assert.equal((await call(scope, 'PUT', { store }, aliceCookie)).status, 200)
-  assert.equal((await call(scope, 'PUT', { store }, aliceCookie)).status, 200)
-  assert.deepEqual((await json(await call(scope, 'GET', undefined, aliceCookie))).body.store, store)
-  assert.equal((await json(await call(scope, 'GET', undefined, bobCookie))).body.store, null)
-  assert.equal((await call(scope, 'PUT', { store: { presets: 'nope' } }, aliceCookie)).status, 400)
-  assert.equal((await call(scope, 'PUT', { store: { ...store, presets: Array.from({ length: 201 }, (_, i) => ({ id: `p${i}`, name: 'n', formula: {} })) } }, aliceCookie)).status, 400)
-  assert.equal((await call('/workbench/../../evil', 'GET', undefined, aliceCookie)).status, 404)
+  // The retired saved-formula endpoint is gone.
+  assert.equal((await call('/workbench/127.0.0.1:recipe-workbench:v1', 'GET', undefined, aliceCookie)).status, 404)
 
   // Sign out and sign out everywhere.
   const phone = await session(alice.id)
@@ -104,12 +94,11 @@ export async function verifyAccounts(payload: Payload, origin: string, slug: str
   assert.equal((await json(await call('/session', 'GET', undefined, 'eatyeet-member=forged'))).body.member, null)
 
   // Account deletion requires the exact email and removes everything the member owns.
-  await call(scope, 'PUT', { store }, bobCookie)
   assert.equal((await call('/delete', 'POST', { email: 'someone@example.com' }, bobCookie)).status, 400)
   assert.equal((await call('/delete', 'POST', { email: 'bob@example.com' }, bobCookie, { Origin: 'https://other.example' })).status, 403)
   assert.equal((await call('/delete', 'POST', { email: 'bob@example.com' }, bobCookie)).status, 200)
   assert.equal(await raw('bob@example.com'), null)
-  for (const collection of ['recipe-reviews', 'recipe-review-replies', 'member-workbenches', 'member-sessions'] as const)
+  for (const collection of ['recipe-reviews', 'recipe-review-replies', 'member-workbenches', 'kitchen-formulas', 'kitchen-revisions', 'member-sessions'] as const)
     assert.equal((await payload.find({ collection, overrideAccess: true, where: { member: { equals: bob.id } } })).totalDocs, 0, collection)
   assert.equal((await json(await call(ratings))).body.count, 0)
 
@@ -121,7 +110,7 @@ export async function verifyAccounts(payload: Payload, origin: string, slug: str
 
   // Member records and their content are unreachable through Payload REST.
   const carolCookie = await session((await upsertGoogleMember(payload, { sub: 'g-carol', email: 'carol@example.com', emailVerified: true, name: 'Carol' }))!.id)
-  for (const collection of ['members', 'member-sessions', 'member-workbenches', 'recipe-reviews', 'recipe-review-replies', 'recipe-ratings', 'recipe-rating-replies']) {
+  for (const collection of ['members', 'member-sessions', 'member-workbenches', 'kitchen-formulas', 'kitchen-revisions', 'recipe-reviews', 'recipe-review-replies', 'recipe-ratings', 'recipe-rating-replies']) {
     for (const [method, path] of [['GET', ''], ['POST', ''], ['POST', '/login'], ['POST', '/forgot-password'], ['GET', '/me']]) {
       const response = await fetch(`${origin}/api/${collection}${path}`, { method, headers: { Origin: origin, 'Content-Type': 'application/json', Cookie: carolCookie },
         ...(method === 'POST' ? { body: JSON.stringify({ email: 'carol@example.com', password: 'x', recipe: recipeId, score: 5 }) } : {}) })
