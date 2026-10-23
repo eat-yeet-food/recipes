@@ -32,12 +32,19 @@ export function memoryKitchenClient({ formulas: seeds = [], delay = 0, fail = fa
   }
   const nameTaken = (name: string, except?: string) => [...store.values()].some((formula) => !formula.deletedAt && formula.id !== except && formula.name.toLowerCase() === cleanFormulaName(name).toLowerCase())
   const taken = () => new KitchenError('You already have a formula with this name. Choose a different name.', 409, 'name-taken')
+  const freeName = (base: string) => {
+    const root = cleanFormulaName(base)
+    for (let index = 1; ; index += 1) {
+      const name = index === 1 ? root : `${root.slice(0, 80 - String(index).length - 1).trimEnd()} ${index}`
+      if (!nameTaken(name)) return name
+    }
+  }
   const copy = <T,>(value: T) => structuredClone(value)
   const summary = ({ revisions: _revisions, notes: _notes, ...formula }: KitchenFormula) => formula
   const create = (recipeSlug: string, family: string, name: string, state: unknown, notes: string) => {
-    if (nameTaken(name)) throw taken()
+    const free = freeName(name)
     const formulaId = id()
-    const formula: KitchenFormula = { id: formulaId, name: cleanFormulaName(name), recipeSlug, family, state: copy(state), notes, revision: 1, updatedAt: now(), deletedAt: null, revisions: [revision(cleanFormulaName(name), state, notes)] }
+    const formula: KitchenFormula = { id: formulaId, name: free, recipeSlug, family, state: copy(state), notes, revision: 1, updatedAt: now(), deletedAt: null, revisions: [revision(free, state, notes)] }
     store.set(formulaId, formula)
     return copy(formula)
   }
@@ -86,7 +93,7 @@ export function memoryKitchenClient({ formulas: seeds = [], delay = 0, fail = fa
     undelete: async (formulaId) => {
       await wait()
       const formula = own(formulaId)
-      if (nameTaken(formula.name, formulaId)) formula.name = `${formula.name} (restored)`
+      formula.name = freeName(formula.name)
       formula.deletedAt = null
       return copy(formula)
     },

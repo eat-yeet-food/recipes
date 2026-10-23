@@ -134,6 +134,29 @@ async function nameTaken(payload: Payload, memberId: string, name: string, excep
   return Boolean(docs[0] && String((docs[0] as any).formulaId) !== exceptFormulaId)
 }
 
+/**
+ * The first free name from a base: "Friday pies", then "Friday pies 2", and
+ * so on. New formulas and copies never fail on a taken name.
+ */
+async function freeName(payload: Payload, memberId: string, base: string) {
+  const root = cleanFormulaName(base)
+  const candidate = (index: number) => {
+    if (index === 1) return root
+    const suffix = ` ${index}`
+    return `${root.slice(0, KITCHEN_LIMITS.nameLength - suffix.length).trimEnd()}${suffix}`
+  }
+  // A member has at most 200 formulas, so one of the first 201 names is free.
+  for (let start = 1; start <= KITCHEN_LIMITS.formulas + 1; start += 90) {
+    const names = Array.from({ length: 90 }, (_, offset) => candidate(start + offset))
+    const { docs } = await payload.find({ ...formulas, pagination: false, select: { nameKey: true },
+      where: { nameKey: { in: names.map((name) => nameKey(memberId, name)) } } })
+    const taken = new Set(docs.map((doc) => String((doc as any).nameKey)))
+    const free = names.find((name) => !taken.has(nameKey(memberId, name)))
+    if (free) return free
+  }
+  return null
+}
+
 const isUniqueViolation = (error: unknown) => /unique|constraint/i.test(String((error as any)?.message ?? error) + String((error as any)?.cause ?? ''))
 
 /** D1 bounds the parameters in one statement, so large deletes go 90 rows at a time. */
@@ -189,19 +212,21 @@ async function insertFormula(payload: Payload, memberId: string, data: { recipeS
   const member = memberRef(memberId)
   const { totalDocs } = await payload.count({ ...formulas, where: { member: { equals: member } } })
   if (totalDocs >= KITCHEN_LIMITS.formulas) return fail('limit')
-  const name = cleanFormulaName(data.name)
-  if (await nameTaken(payload, memberId, name)) return fail('name-taken')
   let created: any
-  try {
-    created = await payload.create({ ...formulas, data: {
-      formulaId: randomBytes(12).toString('base64url'), member, recipeSlug: data.recipeSlug, family: data.state.formula.family,
-      name, nameKey: nameKey(memberId, name), state: data.state as any, notes: data.notes, revision: 1,
-    } })
-  } catch (error) {
-    // A simultaneous save from another tab claimed the name first.
-    if (isUniqueViolation(error) && await nameTaken(payload, memberId, name)) return fail('name-taken')
-    throw error
+  // A simultaneous save from another tab may claim the free name first; pick again once.
+  for (let attempt = 0; !created; attempt += 1) {
+    const name = await freeName(payload, memberId, data.name)
+    if (!name) return fail('name-taken')
+    try {
+      created = await payload.create({ ...formulas, data: {
+        formulaId: randomBytes(12).toString('base64url'), member, recipeSlug: data.recipeSlug, family: data.state.formula.family,
+        name, nameKey: nameKey(memberId, name), state: data.state as any, notes: data.notes, revision: 1,
+      } })
+    } catch (error) {
+      if (attempt > 0 || !isUniqueViolation(error)) throw error
+    }
   }
+  const name = String(created.name)
   await payload.create({ ...revisions, data: { formula: created.id, member, name, state: data.state as any, notes: data.notes } })
   return { ok: await fullFormula(payload, created) }
 }
@@ -283,12 +308,9 @@ export async function undeleteKitchenFormula(payload: Payload, memberId: string,
   const doc = await ownFormula(payload, memberId, formulaId)
   if (!doc) return fail('not-found')
   if (!doc.deletedAt) return { ok: await fullFormula(payload, doc) }
-  let name = String(doc.name)
-  if (await nameTaken(payload, memberId, name)) {
-    const suffix = ' (restored)'
-    name = `${name.slice(0, KITCHEN_LIMITS.nameLength - suffix.length)}${suffix}`
-    if (await nameTaken(payload, memberId, name)) return fail('name-taken')
-  }
+  // Another formula may have taken the name meanwhile; restore under the next free one.
+  const name = await freeName(payload, memberId, String(doc.name))
+  if (!name) return fail('name-taken')
   const updated = await payload.update({ ...formulas, id: doc.id, data: { deletedAt: null, name, nameKey: nameKey(memberId, name) } as any })
   return { ok: await fullFormula(payload, updated) }
 }

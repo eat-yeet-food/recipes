@@ -3,11 +3,11 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
 import type { KitchenRevision } from './kitchen-client'
-import { ChangeStrip, CountStepper, HistorySheet, KitchenNotice, NameDialog, SaveStatus, type KitchenNoticeValue } from './kitchen-ui'
+import { ChangeStrip, CountStepper, FormulaTitle, HistorySheet, KitchenNotice, SaveStatus, type KitchenNoticeValue } from './kitchen-ui'
 
 const meta = {
   title: 'Kitchen/Controls',
-  parameters: { docs: { description: { component: 'Owned Test Kitchen controls. Formulas save automatically, so the Saved label, the changes strip, History with Restore, the Name dialog (Save, Duplicate, Rename) and Undo notices replace any Save / Save as choice.' } } },
+  parameters: { docs: { description: { component: 'Owned Test Kitchen controls. Formulas save automatically, so the Saved label, the changes strip, History with Restore, names renamed in place and Undo notices replace any Save / Save as choice.' } } },
 } satisfies Meta
 
 export default meta
@@ -39,35 +39,32 @@ export const ChangesFromTheRecipe: Story = {
   },
 }
 
-function NameDialogExample({ taken = 'Friday pies' }: { taken?: string }) {
-  const [open, setOpen] = useState(true)
-  const [saved, setSaved] = useState('')
+function FormulaTitleExample({ taken = 'Friday pies' }: { taken?: string }) {
+  const [name, setName] = useState('Friday pies copy')
   return <div className="p-6">
-    <Button onClick={() => setOpen(true)}>Duplicate</Button>
-    <p role="status">{saved && `Saved ${saved}`}</p>
-    <NameDialog open={open} onOpenChange={setOpen} title="Duplicate Friday pies" description="The copy opens next. Friday pies stays exactly as it is."
-      initialName="Friday pies copy" submitLabel="Create copy"
-      onSubmit={async (name) => name.toLowerCase() === taken.toLowerCase() ? 'You already have a formula with this name. Choose a different name.' : (setSaved(name), setOpen(false), null)} />
+    <FormulaTitle name={name} onRename={(next) => next.toLowerCase() === taken.toLowerCase() ? 'You already have a formula with this name. Choose a different name.' : (setName(next), null)} />
   </div>
 }
 
-export const NameDialogDuplicate: Story = {
-  render: () => <NameDialogExample />,
+export const RenameInPlace: Story = {
+  render: () => <FormulaTitleExample />,
   play: async ({ canvasElement }) => {
-    const screen = within(canvasElement.ownerDocument.body)
-    const field = await screen.findByRole('textbox', { name: 'Name' })
+    const screen = within(canvasElement)
+    await expect(screen.getByRole('heading', { level: 1, name: 'Friday pies copy' })).toBeVisible()
+    await userEvent.click(screen.getByRole('button', { name: 'Rename Friday pies copy' }))
+    const field = screen.getByRole('textbox', { name: 'Formula name' })
     await waitFor(() => expect(field).toHaveFocus())
     await userEvent.clear(field)
-    await userEvent.tab()
-    await expect(screen.getByRole('alert')).toHaveTextContent('Enter a name')
-    await expect(screen.getByRole('button', { name: 'Create copy' })).toBeDisabled()
-    await userEvent.type(field, 'FRIDAY pies')
-    await userEvent.click(screen.getByRole('button', { name: 'Create copy' }))
+    await userEvent.type(field, 'FRIDAY pies{Enter}')
     await expect(await screen.findByRole('alert')).toHaveTextContent('already have a formula')
-    await userEvent.clear(field)
-    await userEvent.type(field, 'Friday pies, 70%')
-    await userEvent.keyboard('{Enter}')
-    await expect(await screen.findByText('Saved Friday pies, 70%')).toBeVisible()
+    await expect(field).toHaveFocus()
+    await userEvent.keyboard('{Escape}')
+    await expect(screen.getByRole('heading', { level: 1, name: 'Friday pies copy' })).toBeVisible()
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Rename Friday pies copy' })).toHaveFocus())
+    await userEvent.click(screen.getByRole('heading', { level: 1 }))
+    await userEvent.clear(screen.getByRole('textbox', { name: 'Formula name' }))
+    await userEvent.type(screen.getByRole('textbox', { name: 'Formula name' }), 'Friday pies, 70%{Enter}')
+    await expect(await screen.findByRole('heading', { level: 1, name: 'Friday pies, 70%' })).toBeVisible()
   },
 }
 

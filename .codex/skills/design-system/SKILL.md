@@ -32,9 +32,9 @@ actions, use the handbook’s shared unpadded, underlined treatment; do not borr
 filled-button spacing or remove the visible clickable cue. Use a dedicated labeled
 switch for binary settings rather than a button-styled row. Test Kitchen UI
 follows the **Test Kitchen** contract: recipes render as written, each formula
-has its own page, edits autosave with History, and Duplicate (named first) is
-the only way to branch. Do not reintroduce Save / Save as choices or a
-recipe-page calculator.
+has its own page, edits autosave with History, names are edited in place on the
+page heading, and Duplicate is the only way to branch. Do not reintroduce Save /
+Save as choices, naming dialogs or a recipe-page calculator.
 For numeric controls, follow **Numeric editing**: keep editable text separate
 from accepted values, preserve blank/partial entries and focus, and block saves
 while invalid. Reuse NumberField rather than coercing or formatting raw input

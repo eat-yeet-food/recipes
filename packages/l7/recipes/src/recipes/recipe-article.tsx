@@ -27,10 +27,14 @@ type RecipeArticleAsideProps = {
   focusedCooking: boolean
 }
 
+export const recipeTitleClass = 'max-w-[var(--layout-recipe-copy)] text-[34px] leading-[1.15] tracking-[1.2px] font-bold'
+
 /** Overrides for pages that present a recipe under another title, such as a Test Kitchen bake sheet. */
 export type RecipeArticleHeading = {
   crumbs: { label: string; href?: string }[]
   title: string
+  /** Replaces the plain h1, e.g. a formula name that can be renamed in place; gets `recipeTitleClass`. */
+  titleElement?: ReactNode
   byline: ReactNode
   /** Sharing a member's private bake sheet to Pinterest makes no sense. */
   pin: boolean
@@ -63,7 +67,7 @@ export function RecipeArticleHeader({
         </Fragment>)}
       </nav>
       <div>
-        <h1 className="m-0 min-w-0 max-w-[var(--layout-recipe-copy)] text-[34px] leading-[1.15] tracking-[1.2px] font-bold">{heading?.title ?? page.title}</h1>
+        {heading?.titleElement ?? <h1 className={`m-0 min-w-0 ${recipeTitleClass}`}>{heading?.title ?? page.title}</h1>}
         <div className="mt-1.5 text-xs uppercase text-[var(--color-primary)]">{heading?.byline ?? 'By Patrick Hogan'}</div>
       </div>
       <div className="mb-6 mt-4 flex flex-wrap gap-3 print:hidden" role="group" aria-label="Page actions">

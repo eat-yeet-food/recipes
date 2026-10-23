@@ -1,12 +1,12 @@
 'use client'
 import { useCallback, useEffect, useRef, useState, type MouseEvent } from 'react'
-import { ArrowRight, Copy, History, Pencil, Trash2 } from 'lucide-react'
+import { ArrowRight, Copy, History, Trash2 } from 'lucide-react'
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
 import { useNavigate } from '@eat-yeet/l5-ui-primitives/primitives/navigation'
 import { useAccount } from '@eat-yeet/l6-ui-shell/account/account'
 import { kitchenErrorCode, kitchenErrorMessage, type KitchenClient, type KitchenFormula, type KitchenRevision } from './kitchen-client'
 import { decodeKitchenState, kitchenPath, type KitchenRecipe } from './kitchen-plugin'
-import { ChangeStrip, changeSummary, HistorySheet, KitchenHeader, KitchenNotice, NameDialog, SaveStatus, timeAgo, type KitchenNoticeValue, type SaveState } from './kitchen-ui'
+import { ChangeStrip, changeSummary, FormulaTitle, HistorySheet, KitchenHeader, KitchenNotice, SaveStatus, timeAgo, type KitchenNoticeValue, type SaveState } from './kitchen-ui'
 import { KitchenNotes, KitchenWorkspace } from './kitchen-workspace'
 import { KitchenGate, KitchenMessage } from './kitchen-gate'
 
@@ -159,9 +159,19 @@ function KitchenFormulaEditor({ kitchen, formulaId, client }: { kitchen: Kitchen
   const { formula, draft, save, errors } = editor
   const [historyOpen, setHistoryOpen] = useState(false)
   const [restoring, setRestoring] = useState<string | null>(null)
-  const [dialog, setDialog] = useState<'rename' | 'duplicate' | null>(null)
   const [notice, setNotice] = useState<KitchenNoticeValue | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [duplicating, setDuplicating] = useState(false)
+  // A new copy arrives with `?copied=1` and opens with its name selected.
+  const [copied, setCopied] = useState(false)
+  useEffect(() => {
+    const url = new URL(window.location.href)
+    if (!url.searchParams.has('copied')) return
+    url.searchParams.delete('copied')
+    window.history.replaceState(window.history.state, '', url)
+    setCopied(true)
+    setNotice({ message: 'Copy created. The original is unchanged.' })
+  }, [])
 
   if (editor.loadError) return <KitchenMessage title={editor.loadError.missing ? 'Formula not found' : 'Test Kitchen is unavailable'}
     action={editor.loadError.missing ? <Button asChild><a href="/kitchen">Back to Test Kitchen</a></Button> : <Button onClick={() => void editor.reload()}>Try again</Button>}>
@@ -183,25 +193,25 @@ function KitchenFormulaEditor({ kitchen, formulaId, client }: { kitchen: Kitchen
     } finally { setRestoring(null) }
   }
   const rename = async (name: string) => {
-    if (name === draft.name) { setDialog(null); return null }
     const failure = await editor.flush()
     if (failure) return failure
     try {
       editor.accept(await client.save(formulaId, { baseRevision: editor.baseRef.current, ...editor.draftRef.current!, name }), true)
-      setDialog(null)
-      setNotice({ message: `Renamed to ${name}.` })
       return null
     } catch (error) { return kitchenErrorMessage(error, 'The formula could not be renamed. Please try again.') }
   }
-  const duplicate = async (name: string) => {
-    const failure = await editor.flush()
-    if (failure) return failure
+  /** The copy takes the next free "<name> copy" name and opens ready to rename. */
+  const duplicate = async () => {
+    setDuplicating(true)
     try {
-      const copy = await client.duplicate(formulaId, name)
-      setDialog(null)
-      navigate({ to: kitchenPath(recipe.slug, copy.id) })
-      return null
-    } catch (error) { return kitchenErrorMessage(error, 'The copy could not be created. Please try again.') }
+      const failure = await editor.flush()
+      if (failure) throw new Error(failure)
+      const copy = await client.duplicate(formulaId, `${draft.name} copy`)
+      navigate({ to: kitchenPath(recipe.slug, copy.id), search: { copied: '1' } })
+    } catch (error) {
+      setDuplicating(false)
+      setNotice({ tone: 'error', message: kitchenErrorMessage(error, 'The copy could not be created. Please try again.') })
+    }
   }
   const remove = async () => {
     setDeleting(true)
@@ -232,15 +242,14 @@ function KitchenFormulaEditor({ kitchen, formulaId, client }: { kitchen: Kitchen
       header={<>
         <KitchenHeader
           crumbs={[{ label: 'Test Kitchen', href: '/kitchen' }, { label: draft.name, href: bakeHref }, { label: 'Edit' }]}
-          title={draft.name}
-          titleAction={<Button variant="ghost" size="icon" aria-label={`Rename ${draft.name}`} onClick={() => setDialog('rename')}><Pencil className="size-5" /></Button>}
+          title={<FormulaTitle key={formulaId} name={draft.name} onRename={rename} autoEdit={copied} />}
           meta={<>
             <span>From <a href={`/recipes/${recipe.slug}`} className="font-action font-bold underline decoration-1 underline-offset-4 hover:decoration-2">{recipe.title}</a></span>
             <SaveStatus state={save} />
           </>}
           actions={<>
             <Button variant="utility" size="sm" onClick={() => setHistoryOpen(true)}><History className="size-4" />History</Button>
-            <Button variant="utility" size="sm" onClick={() => setDialog('duplicate')}><Copy className="size-4" />Duplicate</Button>
+            <Button variant="utility" size="sm" disabled={duplicating} onClick={() => void duplicate()}><Copy className="size-4" />{duplicating ? 'Copying…' : 'Duplicate'}</Button>
             <Button asChild className="max-[640px]:hidden"><a href={bakeHref} onClick={openBakeSheet}>Bake sheet<ArrowRight className="size-4" /></a></Button>
           </>}
         />
@@ -267,10 +276,6 @@ function KitchenFormulaEditor({ kitchen, formulaId, client }: { kitchen: Kitchen
     <HistorySheet open={historyOpen} onOpenChange={setHistoryOpen} title={draft.name} revisions={revisions}
       complete={revisions.length < 100} restoring={restoring} onRestore={(revision) => void restore(revision)}
       describe={(revision, previous) => describeRevision(kitchen, revision, previous)} />
-    <NameDialog open={dialog === 'rename'} onOpenChange={(open) => setDialog(open ? 'rename' : null)} title="Rename formula"
-      description="The new name shows in your library and on the bake sheet." initialName={draft.name} submitLabel="Rename" onSubmit={rename} />
-    <NameDialog open={dialog === 'duplicate'} onOpenChange={(open) => setDialog(open ? 'duplicate' : null)} title={`Duplicate ${draft.name}`}
-      description={`The copy opens next. ${draft.name} stays exactly as it is.`} initialName={`${draft.name} copy`.slice(0, 80)} submitLabel="Create copy" onSubmit={duplicate} />
     <KitchenNotice notice={notice} onDismiss={() => setNotice(null)} raised />
   </>
 }

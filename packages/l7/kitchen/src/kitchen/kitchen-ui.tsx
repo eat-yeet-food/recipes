@@ -1,11 +1,10 @@
 'use client'
-import { Fragment, useEffect, useId, useState, type FormEvent, type ReactNode } from 'react'
-import { ChevronDown, ChevronUp, CloudCheck, CloudOff, History, Minus, Plus, Undo2, X } from 'lucide-react'
+import { Fragment, useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
+import { ChevronDown, ChevronUp, CloudCheck, CloudOff, History, Minus, Pencil, Plus, Undo2, X } from 'lucide-react'
 import { cn } from '@eat-yeet/l0-foundation/utils'
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@eat-yeet/l5-ui-primitives/primitives/dialog'
-import { Input } from '@eat-yeet/l5-ui-primitives/primitives/input'
-import { cleanFormulaName, formulaNameError, type KitchenRevision } from './kitchen-client'
+import { cleanFormulaName, type KitchenRevision } from './kitchen-client'
 import type { KitchenChange } from './kitchen-plugin'
 
 const eyebrow = 'font-action text-[11px] font-bold uppercase tracking-[0.14em]'
@@ -27,8 +26,10 @@ export function KitchenBand({ eyebrow: label, title, children, actions }: { eyeb
 
 export type KitchenCrumb = { label: string; href?: string }
 
-/** Formula and scratch pages: the formula's name is the page heading. */
-export function KitchenHeader({ crumbs, title, titleAction, meta, actions }: { crumbs: KitchenCrumb[]; title: string; titleAction?: ReactNode; meta: ReactNode; actions: ReactNode }) {
+export const kitchenTitleClass = 'font-display text-[44px] leading-[1.05] font-bold max-[640px]:text-[34px]'
+
+/** Formula and scratch pages: the formula's name is the page heading, usually a `FormulaTitle`. */
+export function KitchenHeader({ crumbs, title, meta, actions }: { crumbs: KitchenCrumb[]; title: ReactNode; meta: ReactNode; actions: ReactNode }) {
   return <header className="grid gap-4">
     <nav aria-label="Breadcrumb" className="flex flex-wrap gap-1.5 text-xs leading-[1.6] uppercase text-ink">
       {crumbs.map((crumb, index) => <Fragment key={`${crumb.label}-${index}`}>
@@ -38,10 +39,7 @@ export function KitchenHeader({ crumbs, title, titleAction, meta, actions }: { c
     </nav>
     <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
       <div className="grid min-w-0 gap-2">
-        <div className="flex min-w-0 items-center gap-1">
-          <h1 className="min-w-0 break-words font-display text-[44px] leading-[1.05] font-bold max-[640px]:text-[34px]">{title}</h1>
-          {titleAction}
-        </div>
+        {typeof title === 'string' ? <h1 className={cn('min-w-0 break-words', kitchenTitleClass)}>{title}</h1> : title}
         <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-[15px]">{meta}</div>
       </div>
       <div className="flex flex-wrap items-center gap-3 max-[640px]:w-full max-[640px]:[&>*]:flex-1">{actions}</div>
@@ -120,63 +118,72 @@ export function changeSummary(changes: KitchenChange[], limit = 2) {
 }
 
 /**
- * Names a new or existing formula. Used for Save, Duplicate and Rename, so a
- * formula always has a name before anything is written.
+ * A formula's name as its page heading, renamed in place: click the name or
+ * the pencil, type, then Enter or click away. Escape, or clearing the
+ * field, keeps the old name. A refused name stays in the field with the
+ * reason below it.
  */
-export function NameDialog({ open, onOpenChange, title, description, initialName, submitLabel, onSubmit }: {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  title: string
-  description: ReactNode
-  initialName: string
-  submitLabel: string
-  /** Resolves to an error message to show beside the field, or null on success. */
-  onSubmit: (name: string) => Promise<string | null>
+export function FormulaTitle({ name, onRename, className, autoEdit = false }: {
+  name: string
+  /** Resolves to an error message to show below the field, or null once renamed. */
+  onRename: (name: string) => Promise<string | null> | string | null
+  /** Heading typography; defaults to the Test Kitchen page title. */
+  className?: string
+  /** Opens with the name selected, e.g. for a new copy. */
+  autoEdit?: boolean
 }) {
   const id = useId()
-  const [name, setName] = useState(initialName)
-  const [touched, setTouched] = useState(false)
+  const [editing, setEditing] = useState(autoEdit)
+  const [value, setValue] = useState(name)
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+  const input = useRef<HTMLInputElement>(null)
+  const pencil = useRef<HTMLButtonElement>(null)
+  useEffect(() => { if (!editing) setValue(name) }, [name, editing])
   useEffect(() => {
-    if (!open) return
-    setName(initialName)
-    setTouched(false)
+    if (!editing) return
+    input.current?.focus()
+    input.current?.select()
+  }, [editing])
+  const close = (refocus: boolean) => {
+    setEditing(false)
     setError('')
-  }, [open, initialName])
-  const localError = formulaNameError(name)
-  const shownError = error || (touched ? localError : '')
-  const submit = async (event: FormEvent) => {
-    event.preventDefault()
-    setTouched(true)
-    if (localError || busy) return
-    setBusy(true)
-    const failure = await onSubmit(cleanFormulaName(name)).catch((reason: unknown) => reason instanceof Error ? reason.message : 'Something went wrong. Please try again.')
-    setBusy(false)
-    if (failure) setError(failure)
+    if (refocus) requestAnimationFrame(() => pencil.current?.focus())
   }
-  return <Dialog open={open} onOpenChange={(next) => { if (!busy) onOpenChange(next) }}>
-    <DialogContent className="gap-4 bg-brand p-6 text-ink sm:max-w-[460px]">
-      <DialogTitle className="pr-8 font-action text-2xl font-bold leading-tight">{title}</DialogTitle>
-      <DialogDescription className="text-[15px] leading-relaxed text-ink">{description}</DialogDescription>
-      <form className="grid gap-4" onSubmit={submit} noValidate>
-        <div className="grid gap-2">
-          <label htmlFor={`${id}-name`} className="font-action text-sm font-bold">Name</label>
-          <Input id={`${id}-name`} autoFocus autoComplete="off" maxLength={120} value={name} disabled={busy}
-            aria-invalid={Boolean(shownError)} aria-describedby={shownError ? `${id}-error` : `${id}-hint`}
-            onBlur={() => setTouched(true)}
-            onChange={(event) => { setName(event.target.value); setError('') }} />
-          {shownError
-            ? <p id={`${id}-error`} role="alert" className="rounded-field bg-danger-soft px-3 py-2 text-sm text-danger">{shownError}</p>
-            : <p id={`${id}-hint`} className="text-sm">Up to 80 characters. Each formula needs its own name.</p>}
-        </div>
-        <div className="flex flex-wrap items-center justify-end gap-6">
-          <Button variant="link" type="button" disabled={busy} onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button type="submit" disabled={busy || Boolean(localError)}>{busy ? 'Saving…' : submitLabel}</Button>
-        </div>
-      </form>
-    </DialogContent>
-  </Dialog>
+  const commit = async (refocus: boolean) => {
+    if (busy) return
+    const next = cleanFormulaName(value)
+    if (!next || next === name) { close(refocus); return }
+    setBusy(true)
+    const failure = await Promise.resolve(onRename(next)).catch((reason: unknown) => reason instanceof Error ? reason.message : 'The name could not be saved. Please try again.')
+    setBusy(false)
+    if (failure) { setError(failure); input.current?.focus() }
+    else close(refocus)
+  }
+  const keys = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') { event.preventDefault(); void commit(true) }
+    if (event.key === 'Escape') { event.preventDefault(); setValue(name); close(true) }
+  }
+  const heading = cn('min-w-0 break-words', className ?? kitchenTitleClass)
+  return <div className="grid min-w-0 gap-1.5" data-formula-title="">
+    <div className="flex min-w-0 items-center gap-1">
+      {editing
+        ? <h1 className={cn(heading, 'w-full')}>
+          <input ref={input} id={`${id}-name`} aria-label="Formula name" autoComplete="off" maxLength={80} value={value} readOnly={busy}
+            aria-invalid={Boolean(error)} aria-describedby={error ? `${id}-error` : `${id}-hint`}
+            onChange={(event) => { setValue(event.target.value); setError('') }}
+            onKeyDown={keys} onBlur={() => { if (!error) void commit(false) }}
+            className="w-full min-w-0 border-b-2 border-ink bg-transparent p-0 font-[inherit] text-inherit outline-none aria-invalid:border-danger" />
+        </h1>
+        : <>
+          <h1 className={cn(heading, 'cursor-text decoration-2 decoration-dotted underline-offset-[6px] hover:underline')} onClick={() => setEditing(true)}>{name}</h1>
+          <Button ref={pencil} variant="ghost" size="icon" className="print:hidden" aria-label={`Rename ${name}`} onClick={() => setEditing(true)}><Pencil className="size-5" /></Button>
+        </>}
+    </div>
+    {editing && (error
+      ? <p id={`${id}-error`} role="alert" className="text-sm text-danger">{error} Press Escape to keep “{name}”.</p>
+      : <p id={`${id}-hint`} className="text-[13px] text-muted-foreground">{busy ? 'Saving the name…' : 'Enter to save · Escape to cancel'}</p>)}
+  </div>
 }
 
 export type KitchenNoticeValue = { message: string; tone?: 'info' | 'error'; action?: { label: string; run: () => void } }

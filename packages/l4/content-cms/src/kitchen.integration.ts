@@ -50,7 +50,6 @@ export async function verifyKitchen(payload: Payload, origin: string, slug: stri
     [{ state: { ...state, formula: { ...state.formula, family: 'sourdough' } } }, 400],
     [{ recipeSlug: 'missing-recipe', name: 'Missing' }, 404],
     [{ recipeSlug: otherSlug, name: 'No calculator' }, 404],
-    [{ name: 'friday   PIES' }, 409],
   ] as const) assert.equal((await create(body)).status, status, JSON.stringify(body).slice(0, 80))
   assert.equal((await call('', 'POST', { recipeSlug: slug, name: 'Extra', state, notes: '', admin: true }, dana.cookie)).status, 400)
 
@@ -94,8 +93,12 @@ export async function verifyKitchen(payload: Payload, origin: string, slug: stri
   assert.equal((await payload.count({ collection: 'kitchen-revisions', overrideAccess: true, where: { formula: { equals: formulaDoc.id } } })).totalDocs, KITCHEN_LIMITS.revisions)
   assert.equal(saved.body.revisions[0].state.formula.hydrationPercent, 67)
 
-  // Duplicate needs its own name; rename collisions are refused.
-  assert.equal((await call(`/${friday.id}/duplicate`, 'POST', { name: 'Friday pies' }, dana.cookie)).status, 409)
+  // New copies take the next free name; rename collisions are refused.
+  const numbered = await json(await call(`/${friday.id}/duplicate`, 'POST', { name: 'friday PIES' }, dana.cookie))
+  assert.deepEqual([numbered.status, numbered.body.name], [201, 'friday PIES 2'])
+  assert.equal((await call(`/${numbered.body.id}`, 'DELETE', undefined, dana.cookie)).status, 200)
+  await payload.delete({ collection: 'kitchen-revisions', overrideAccess: true, where: { formula: { equals: (await payload.find({ collection: 'kitchen-formulas', overrideAccess: true, where: { formulaId: { equals: numbered.body.id } } })).docs[0].id } } })
+  await payload.delete({ collection: 'kitchen-formulas', overrideAccess: true, where: { formulaId: { equals: numbered.body.id } } })
   const copy = await json(await call(`/${friday.id}/duplicate`, 'POST', { name: 'Friday pies, 70%' }, dana.cookie))
   assert.deepEqual([copy.status, copy.body.revisions.length, copy.body.state.formula.hydrationPercent], [201, 1, 67])
   current = (await json(await call(`/${friday.id}`, 'GET', undefined, dana.cookie))).body
@@ -111,7 +114,7 @@ export async function verifyKitchen(payload: Payload, origin: string, slug: stri
   const reused = await json(await create({ name: 'Friday pies, 70%' }))
   assert.equal(reused.status, 201)
   const back = await json(await call(`/${copy.body.id}/undelete`, 'POST', undefined, dana.cookie))
-  assert.deepEqual([back.status, back.body.name, back.body.deletedAt], [200, 'Friday pies, 70% (restored)', null])
+  assert.deepEqual([back.status, back.body.name, back.body.deletedAt], [200, 'Friday pies, 70% 2', null])
 
   // Deletions older than 30 days are purged on the next list.
   await call(`/${reused.body.id}`, 'DELETE', undefined, dana.cookie)
