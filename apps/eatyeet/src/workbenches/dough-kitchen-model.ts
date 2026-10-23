@@ -1,4 +1,4 @@
-import { calculateFormula, calculateLevainBuild, formatPercent, type DoughFormula, type FlourComponent, type StarterProfile } from '@eat-yeet/l2-recipe-domain/formula'
+import { calculateDoughLevainBuild, calculateFormula, formatPercent, levainExtraPercent, type DoughFormula, type FlourComponent, type StarterProfile } from '@eat-yeet/l2-recipe-domain/formula'
 import type { DoughFormulaState } from '@eat-yeet/l2-recipe-domain/formula-state'
 import type { SourdoughProcess } from '@eat-yeet/l2-recipe-domain/sourdough-process'
 
@@ -47,6 +47,10 @@ export function formulaFacts(state: DoughFormulaState, methodLabel?: string) {
 }
 
 /** Ingredient weights for the dough panel, in recipe order. */
+/** Notes that the build makes more than the dough uses, e.g. " (use 175g; the rest stays in the jar)". */
+export const levainYield = (buildGrams: number, levainGrams: number, format: (grams: number) => string) =>
+  buildGrams - levainGrams >= 1 ? ` (use ${format(levainGrams)}; the rest stays in the jar)` : ''
+
 export function doughRows(state: DoughFormulaState): { total: string; totalDetail: string; rows: DoughRow[]; levainBuild: string | null } {
   const { formula, batch } = state
   const result = calculateFormula(formula, batch)
@@ -61,13 +65,13 @@ export function doughRows(state: DoughFormulaState): { total: string; totalDetai
     : { label: 'Instant yeast', amount: formatYeastGrams(result.yeastGrams) })
   rows.push({ label: 'Fine sea salt', amount: formatDoughGrams(result.saltGrams) })
   const build = formula.levainBuild && formula.starter && result.levainGrams > 0
-    ? calculateLevainBuild(result.levainGrams, formula.starter, formula.levainBuild.seed, formula.levainBuild.flourPerSeed) : null
+    ? calculateDoughLevainBuild(result.levainGrams, formula.starter, formula.levainBuild) : null
   return {
     total: formatDoughGrams(result.totalDoughGrams),
     totalDetail: `${batch.count} ${pieces(batch.count, batch.pieceLabel, formula.family)} × ${formatDoughGrams(batch.pieceWeightGrams)}`,
     rows,
     levainBuild: build && build.errors.length === 0
-      ? [`${formatDoughGrams(build.seedStarterGrams)} seed starter`, ...build.freshFlour.map((part) => `${formatDoughGrams(part.grams)} ${part.name}`), `${formatDoughGrams(build.addedWaterGrams)} water`].join(' + ')
+      ? [`${formatDoughGrams(build.seedStarterGrams)} seed starter`, ...build.freshFlour.map((part) => `${formatDoughGrams(part.grams)} ${part.name}`), `${formatDoughGrams(build.addedWaterGrams)} water`].join(' + ') + levainYield(build.buildGrams, result.levainGrams, formatDoughGrams)
       : null,
   }
 }
@@ -110,6 +114,7 @@ export function formulaChanges(from: DoughFormulaState, to: DoughFormulaState, m
     if (a.levainBuild && b.levainBuild) {
       add('Levain build', `1:${trimmed(a.levainBuild.flourPerSeed, 1)}`, `1:${trimmed(b.levainBuild.flourPerSeed, 1)}`)
       add('Seed starter', starterText(a.levainBuild.seed), starterText(b.levainBuild.seed))
+      add('Extra levain', formatPercent(levainExtraPercent(a.levainBuild)), formatPercent(levainExtraPercent(b.levainBuild)))
     }
   }
   if (a.process && b.process) {

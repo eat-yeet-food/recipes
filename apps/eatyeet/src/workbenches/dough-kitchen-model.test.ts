@@ -65,4 +65,17 @@ describe('Test Kitchen dough model', () => {
     ])
     assert.equal(formulaFacts(loaf), '2 loaves · 77% hydration · Spiral mixer')
   })
+
+  it('builds 30% extra levain and reports changes to it', () => {
+    const starter = { hydrationPercent: 77, flour: [{ id: 'bread', name: 'Bread flour', percent: 50 }, { id: 'whole-wheat', name: 'Whole wheat flour', percent: 50 }] }
+    const loaf: DoughFormulaState = {
+      version: 1, methodId: 'dutch-oven', batch: { count: 2, pieceWeightGrams: 907.5, pieceLabel: 'loaf' },
+      formula: { family: 'sourdough', hydrationPercent: 77.04, saltPercent: 1.97, oilPercent: 0, sugarPercent: 0, maltPercent: 0, yeastPercent: 0, levainPercent: 17.26,
+        flour: [{ id: 'bread', name: 'Bread flour', percent: 80.33 }, { id: 'whole-wheat', name: 'Whole wheat flour', percent: 19.67 }], starter, levainBuild: { seed: starter, flourPerSeed: 2 } },
+    }
+    assert.equal(doughRows(loaf).levainBuild, '50g seed starter + 50g Bread flour + 50g Whole wheat flour + 77g water (use 175g; the rest stays in the jar)')
+    const exact = { ...loaf, formula: { ...loaf.formula, levainBuild: { seed: starter, flourPerSeed: 2, extraPercent: 0 } } }
+    assert.equal(doughRows(exact).levainBuild, '39g seed starter + 39g Bread flour + 39g Whole wheat flour + 59g water')
+    assert.deepEqual(formulaChanges(loaf, exact, () => 'Dutch oven'), [{ label: 'Extra levain', from: '30%', to: '0%' }])
+  })
 })

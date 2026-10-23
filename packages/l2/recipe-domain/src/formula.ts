@@ -23,7 +23,15 @@ export interface DoughFormula {
   flour: FlourComponent[]
   starter?: StarterProfile
   process?: SourdoughProcess
-  levainBuild?: { seed: StarterProfile; flourPerSeed: number }
+  levainBuild?: LevainBuild
+}
+
+/** How to feed a seed starter into the levain this dough needs. */
+export interface LevainBuild {
+  seed: StarterProfile
+  flourPerSeed: number
+  /** How much more levain to build than the dough uses; some always stays in the jar. Absent means the default. */
+  extraPercent?: number
 }
 
 export interface DoughBatch {
@@ -215,6 +223,21 @@ export function calculateLevainBuild(
   const addedWater = totalFlour * ratio(target.hydrationPercent) - seedWater
   if (addedWater < -0.01) errors.push('The seed contributes more water than the levain hydration allows.')
   return { seedStarterGrams: seedStarter, freshFlour, addedWaterGrams: Math.max(0, addedWater), errors: [...new Set(errors)] }
+}
+
+/** Levain left on the jar and spatula; a build makes this much more than the dough uses. */
+export const DEFAULT_LEVAIN_EXTRA_PERCENT = 30
+export const MAX_LEVAIN_EXTRA_PERCENT = 100
+
+export const levainExtraPercent = (build: Pick<LevainBuild, 'extraPercent'>) => build.extraPercent ?? DEFAULT_LEVAIN_EXTRA_PERCENT
+
+/** The levain build for a dough's levain, including the extra that stays behind. */
+export function calculateDoughLevainBuild(levainGrams: number, starter: StarterProfile, build: LevainBuild): LevainBuildResult & { buildGrams: number } {
+  const extra = levainExtraPercent(build)
+  const validExtra = Number.isFinite(extra) && extra >= 0 && extra <= MAX_LEVAIN_EXTRA_PERCENT
+  const buildGrams = levainGrams * (1 + (validExtra ? extra : 0) / 100)
+  const result = calculateLevainBuild(buildGrams, starter, build.seed, build.flourPerSeed)
+  return { ...result, buildGrams, errors: validExtra ? result.errors : [...result.errors, `Extra levain must be between 0% and ${MAX_LEVAIN_EXTRA_PERCENT}%.`] }
 }
 
 export function formatGrams(value: number) {

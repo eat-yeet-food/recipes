@@ -3,7 +3,7 @@ import { createContext, useCallback, useContext, useEffect, useId, useMemo, useR
 import { Plus, Trash2 } from 'lucide-react'
 import { pizzaBallWeight } from '@eat-yeet/l2-recipe-domain/pizza-sizing'
 import type { SourdoughFoldMethod, SourdoughProcess } from '@eat-yeet/l2-recipe-domain/sourdough-process'
-import { calculateFormula, calculateLevainBuild, formatPercent, reverseFormula, type DoughBatch, type DoughFormula, type FlourComponent, type ReverseFormulaInput, type StarterProfile } from '@eat-yeet/l2-recipe-domain/formula'
+import { MAX_LEVAIN_EXTRA_PERCENT, calculateDoughLevainBuild, calculateFormula, formatPercent, levainExtraPercent, reverseFormula, type DoughBatch, type DoughFormula, type FlourComponent, type ReverseFormulaInput, type StarterProfile } from '@eat-yeet/l2-recipe-domain/formula'
 import { selectedRecipeMethod, type RecipeContent } from '@eat-yeet/l4-content-model/recipes'
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
 import { ChoiceGroup } from '@eat-yeet/l5-ui-primitives/primitives/choice-group'
@@ -12,6 +12,7 @@ import { NumberField, formatNumberFieldValue, type NumberFieldPrecision, type Nu
 import { Select } from '@eat-yeet/l5-ui-primitives/primitives/select'
 import { clone, formatWorkbenchGrams, pieceCountLabel, starterFrom, yeastGramPrecision, type DoughWorkbenchConfig, type DoughWorkbenchState, type InputMode } from './dough-workbench-model'
 import { formulasMatch } from './dough-formula-match'
+import { levainYield } from './dough-kitchen-model'
 
 const NumericFields = createContext<{ report: NumberFieldValidation; resetKey: number } | null>(null)
 
@@ -107,6 +108,7 @@ export function DoughFormulaEditor({ recipe, config, state, onChange, onErrorsCh
   const result = useMemo(() => calculateFormula(formula, batch), [formula, batch])
   const seedRatio = formula.levainBuild?.flourPerSeed ?? 2
   const seed = formula.levainBuild?.seed ?? starterFrom(formula)
+  const levainBuild = { seed, flourPerSeed: seedRatio, extraPercent: levainExtraPercent(formula.levainBuild ?? {}) }
   const process = formula.process
   const weightInputs: ReverseFormulaInput = weightDraft ?? {
     family: formula.family,
@@ -123,7 +125,7 @@ export function DoughFormulaEditor({ recipe, config, state, onChange, onErrorsCh
   const editableStarter = mode === 'weights' ? weightInputs.starter : formula.starter
   const reverseRows = weightInputs.freshFlour.map((part) => ({ ...part, percent: part.grams }))
   const reverseErrors = weightDraft ? reverseFormula(weightDraft).errors : []
-  const build = formula.starter && result.levainGrams > 0 ? calculateLevainBuild(result.levainGrams, formula.starter, seed, seedRatio) : null
+  const build = formula.starter && result.levainGrams > 0 ? calculateDoughLevainBuild(result.levainGrams, formula.starter, levainBuild) : null
   const errors = useMemo(() => [...new Set([...Object.values(fieldErrors), ...reverseErrors, ...result.errors, ...(build ? build.errors : [])])], [fieldErrors, reverseErrors.join('\n'), result.errors, build?.errors.join('\n')])
   const reported = useRef('')
   useEffect(() => {
@@ -176,7 +178,7 @@ export function DoughFormulaEditor({ recipe, config, state, onChange, onErrorsCh
     folds.splice(afterIndex + 1, 0, { id: `fold-${crypto.randomUUID()}`, atMinutes, method: previous?.method === 'lamination' ? 'coil-fold' : previous?.method ?? process.foldMethod })
     updateProcess({ folds, bulkMinutes: next ? process.bulkMinutes : Math.max(process.bulkMinutes, atMinutes + 30) })
   }
-  const updateSeed = (next: StarterProfile) => updateFormula({ levainBuild: { seed: next, flourPerSeed: seedRatio } })
+  const updateSeed = (next: StarterProfile) => updateFormula({ levainBuild: { ...levainBuild, seed: next } })
   const pieces = pieceCountLabel(2, batch.pieceLabel)
 
   return <NumericFields.Provider value={numericFields}>
@@ -239,12 +241,13 @@ export function DoughFormulaEditor({ recipe, config, state, onChange, onErrorsCh
         <Button variant="link" type="button" className="justify-self-start" aria-expanded={buildOpen} aria-controls={`${prefix}-build`} onClick={() => setBuildOpen((open) => !open)}>{buildOpen ? 'Hide levain build' : 'Build this levain'}</Button>
         <div id={`${prefix}-build`} hidden={!buildOpen || !build} className="grid gap-5 rounded-field bg-tint p-5">
           {build && <>
-            <div className="grid grid-cols-2 gap-x-6 gap-y-5">
-              <Field label="Fresh flour per 1 part seed" positive suffix="parts" value={seedRatio} onChange={(flourPerSeed) => updateFormula({ levainBuild: { seed, flourPerSeed } })} />
+            <div className="grid grid-cols-2 gap-x-6 gap-y-5 md:grid-cols-3">
+              <Field label="Fresh flour per 1 part seed" positive suffix="parts" value={seedRatio} onChange={(flourPerSeed) => updateFormula({ levainBuild: { ...levainBuild, flourPerSeed } })} />
+              <Field label="Extra to build" suffix="%" max={MAX_LEVAIN_EXTRA_PERCENT} value={levainBuild.extraPercent} onChange={(extraPercent) => updateFormula({ levainBuild: { ...levainBuild, extraPercent } })} />
               <Field label="Seed hydration" suffix="%" value={seed.hydrationPercent} onChange={(hydrationPercent) => updateSeed({ ...seed, hydrationPercent })} />
             </div>
             <FlourEditor label="Seed starter flour" prefix="Seed" value={seed.flour} onChange={(flour) => updateSeed({ ...seed, flour })} />
-            <p className="text-sm"><strong>1:{formatNumberFieldValue(seedRatio, 1)}</strong> seed to fresh flour: <strong>{formatWorkbenchGrams(build.seedStarterGrams)}</strong> seed starter + {build.freshFlour.map((part) => `${formatWorkbenchGrams(part.grams)} ${part.name}`).join(' + ')} + <strong>{formatWorkbenchGrams(build.addedWaterGrams)}</strong> water</p>
+            <p className="text-sm"><strong>1:{formatNumberFieldValue(seedRatio, 1)}</strong> seed to fresh flour: <strong>{formatWorkbenchGrams(build.seedStarterGrams)}</strong> seed starter + {build.freshFlour.map((part) => `${formatWorkbenchGrams(part.grams)} ${part.name}`).join(' + ')} + <strong>{formatWorkbenchGrams(build.addedWaterGrams)}</strong> water{levainYield(build.buildGrams, result.levainGrams, formatWorkbenchGrams)}</p>
           </>}
         </div>
       </Section>}

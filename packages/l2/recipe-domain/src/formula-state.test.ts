@@ -27,6 +27,14 @@ describe('dough formula state', () => {
     assert.equal(isDoughFormulaState({ ...pizza, methodId: 7 }), false)
   })
 
+  it('bounds the extra levain', () => {
+    const starter = { hydrationPercent: 77, flour: [{ id: 'all-purpose', name: 'All-purpose flour', percent: 100 }] }
+    const withExtra = (extraPercent: number) => ({ ...pizza, formula: { ...pizza.formula, family: 'sourdough' as const, yeastPercent: 0, levainPercent: 20, starter, levainBuild: { seed: starter, flourPerSeed: 2, extraPercent } }, batch: { count: 1, pieceWeightGrams: 900, pieceLabel: 'loaf' as const } })
+    assert.equal(isDoughFormulaState(withExtra(30)), true)
+    assert.equal(isDoughFormulaState(withExtra(-1)), false)
+    assert.equal(isDoughFormulaState(withExtra(101)), false)
+  })
+
   it('rejects a pizza diameter on sourdough and a process on pizza', () => {
     assert.equal(isDoughFormulaState({ ...pizza, formula: { ...pizza.formula, process: { mixingMethod: 'hand', foldMethod: 'coil-fold', autolyseMinutes: 0, saltDelayMinutes: 0, bulkMinutes: 60, folds: [] } } }), false)
   })

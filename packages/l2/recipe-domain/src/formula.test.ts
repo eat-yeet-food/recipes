@@ -2,7 +2,7 @@ import { pizzaAreaScale, pizzaBallWeight, isPizzaSizing } from './pizza-sizing.t
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 
-import { calculateFormula, calculateLevainBuild, reverseFormula, formatGrams, formatPercent, type DoughFormula } from './formula.ts'
+import { DEFAULT_LEVAIN_EXTRA_PERCENT, calculateDoughLevainBuild, calculateFormula, calculateLevainBuild, reverseFormula, formatGrams, formatPercent, type DoughFormula } from './formula.ts'
 
 const sourdough: DoughFormula = {
   family: 'sourdough',
@@ -77,6 +77,18 @@ describe('dough formula calculations', () => {
     assert.equal(result.errors.length, 0)
     assert.ok(Math.abs(result.seedStarterGrams + result.freshFlour.reduce((total, part) => total + part.grams, 0) + result.addedWaterGrams - 177) < 1e-8)
     assert.ok(Math.abs(result.freshFlour.reduce((total, part) => total + part.grams, 0) / result.seedStarterGrams - 2) < 1e-8)
+  })
+
+  it('builds extra levain so the dough still gets its full amount', () => {
+    const starter = { hydrationPercent: 77, flour: [{ id: 'bread', name: 'Bread flour', percent: 50 }, { id: 'whole-wheat', name: 'Whole wheat flour', percent: 50 }] }
+    const build = calculateDoughLevainBuild(175, starter, { seed: starter, flourPerSeed: 2 })
+    assert.equal(DEFAULT_LEVAIN_EXTRA_PERCENT, 30)
+    assert.equal(build.buildGrams, 227.5)
+    assert.equal(Math.round(build.seedStarterGrams), 50)
+    assert.deepEqual(build.freshFlour.map((part) => Math.round(part.grams)), [50, 50])
+    assert.equal(Math.round(build.addedWaterGrams), 77)
+    assert.equal(calculateDoughLevainBuild(175, starter, { seed: starter, flourPerSeed: 2, extraPercent: 0 }).buildGrams, 175)
+    assert.ok(calculateDoughLevainBuild(175, starter, { seed: starter, flourPerSeed: 2, extraPercent: 101 }).errors.some((error) => error.includes('Extra levain')))
   })
 
   it('keeps optional pizza ingredients in exact mass accounting', () => {

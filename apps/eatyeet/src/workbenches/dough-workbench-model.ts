@@ -1,11 +1,11 @@
 import { isPizzaSizing, pizzaAreaScale, pizzaBallWeight, type PizzaSizing } from '@eat-yeet/l2-recipe-domain/pizza-sizing'
 import { DEFAULT_SOURDOUGH_PROCESS } from '@eat-yeet/l2-recipe-domain/sourdough-process'
 import { isDoughFormula, isDoughFormulaState, type DoughFormulaState } from '@eat-yeet/l2-recipe-domain/formula-state'
-import { calculateFormula, calculateLevainBuild, formatPercent, type DoughFormula, type StarterProfile } from '@eat-yeet/l2-recipe-domain/formula'
+import { calculateDoughLevainBuild, calculateFormula, formatPercent, type DoughFormula, type StarterProfile } from '@eat-yeet/l2-recipe-domain/formula'
 import { formatNumberFieldValue, type NumberFieldPrecision } from '@eat-yeet/l5-ui-primitives/primitives/number-field-format'
 import type { RecipeContent } from '@eat-yeet/l4-content-model/recipes'
 import { recipeWithSelectedMethod } from '@eat-yeet/l4-content-model/recipes'
-import { formatYeastGrams, formatYeastTeaspoons, formatEighths } from './dough-kitchen-model'
+import { formatYeastGrams, formatYeastTeaspoons, formatEighths, levainYield } from './dough-kitchen-model'
 import { resolveSourdoughSteps, type SourdoughProcessSections, type SpiralMixerProfile } from './sourdough-process'
 
 export type InputMode = 'weights' | 'target'
@@ -89,8 +89,8 @@ export function resolveWorkbenchRecipe(recipe: RecipeContent, selection: DoughWo
   const process = selection.formula.process
   const seedBuild = selection.formula.levainBuild
   const levain = seedBuild && selection.formula.starter && result.levainGrams > 0
-    ? calculateLevainBuild(result.levainGrams, selection.formula.starter, seedBuild.seed, seedBuild.flourPerSeed) : null
-  const levainIngredients = levain ? [`${formatWorkbenchGrams(levain.seedStarterGrams)} seed starter`, ...levain.freshFlour.map((part) => `${formatWorkbenchGrams(part.grams)} ${part.name}`), `${formatWorkbenchGrams(levain.addedWaterGrams)} water`].map(escapeHtml).join(' + ') : undefined
+    ? calculateDoughLevainBuild(result.levainGrams, selection.formula.starter, seedBuild) : null
+  const levainIngredients = levain ? [`${formatWorkbenchGrams(levain.seedStarterGrams)} seed starter`, ...levain.freshFlour.map((part) => `${formatWorkbenchGrams(part.grams)} ${part.name}`), `${formatWorkbenchGrams(levain.addedWaterGrams)} water`].map(escapeHtml).join(' + ') + levainYield(levain.buildGrams, result.levainGrams, formatAppliedGrams) : undefined
   const toppingScale = selection.batch.diameterInches && config.pizzaSizing ? pizzaAreaScale(selection.batch.diameterInches, config.pizzaSizing) : 1
   const items = rawItems.map(escapeHtml)
   const blocks = selected.blocks.map((block) => {
@@ -173,7 +173,7 @@ export function decodeDoughState(value: unknown, config: DoughWorkbenchConfig, r
   const weights = calculateFormula(state.formula, state.batch)
   const formulaErrors = weights.errors
   const levainBuild = state.formula.levainBuild
-  const buildErrors = levainBuild && state.formula.starter && weights.levainGrams > 0 ? calculateLevainBuild(weights.levainGrams, state.formula.starter, levainBuild.seed, levainBuild.flourPerSeed).errors : []
+  const buildErrors = levainBuild && state.formula.starter && weights.levainGrams > 0 ? calculateDoughLevainBuild(weights.levainGrams, state.formula.starter, levainBuild).errors : []
   return formulaErrors.length === 0 && buildErrors.length === 0 ? state : null
 }
 
