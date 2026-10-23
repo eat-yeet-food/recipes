@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
+import { TodayBatch, useTodayCount } from './today-batch'
 import { Pencil } from 'lucide-react'
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
 import { RecipeAction } from '@eat-yeet/l7-recipes/recipes/recipe-actions'
@@ -10,7 +11,7 @@ import { kitchenErrorCode, kitchenErrorMessage, type KitchenClient, type Kitchen
 import { KitchenGate, KitchenMessage } from './kitchen-gate'
 import { decodeKitchenState, kitchenPath, type KitchenRecipe } from './kitchen-plugin'
 import { readScratch, readScratchName } from './kitchen-scratch'
-import { CountStepper, FormulaTitle, KitchenNotice, type KitchenNoticeValue } from './kitchen-ui'
+import { FormulaTitle, KitchenNotice, type KitchenNoticeValue } from './kitchen-ui'
 
 type BakeSheetProps = {
   kitchen: KitchenRecipe
@@ -18,19 +19,6 @@ type BakeSheetProps = {
   blockRegistry: PageBlockRegistry<RecipePageBlockContext>
   /** `?count=` from the URL: today's batch, which never edits the formula. */
   initialCount?: number
-}
-
-/** Today's batch lives in the URL so a reload or a printed page keeps it. */
-function useTodayCount(usual: number, initial?: number) {
-  const [count, setCount] = useState(initial && initial >= 1 && initial <= 99 ? initial : usual)
-  const change = (next: number) => {
-    setCount(next)
-    const url = new URL(window.location.href)
-    if (next === usual) url.searchParams.delete('count')
-    else url.searchParams.set('count', String(next))
-    window.history.replaceState(window.history.state, '', url)
-  }
-  return [count, change] as const
 }
 
 /** The recipe rewritten with a formula's numbers, ready to cook from or print. */
@@ -46,13 +34,8 @@ export function KitchenBakeSheet({ kitchen, state, name, heading, siteUrl, block
       siteUrl={siteUrl}
       blockRegistry={blockRegistry}
       heading={heading}
-      beforeIngredients={<div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-field bg-tint px-4 py-3">
-        <div className="grid">
-          <p className="font-action text-[15px] font-bold">Making {count} {noun} today</p>
-          <p className="text-[13px] leading-snug text-muted-foreground">{count === usual ? `The usual batch for ${name}.` : `Just this bake. ${name} keeps ${usual}.`}</p>
-        </div>
-        <div className="print:hidden"><CountStepper label={`How many ${plugin.batchNoun(state, 2)} today`} unit={plugin.batchNoun(state, 2)} value={count} onChange={setCount} /></div>
-      </div>}
+      beforeIngredients={<TodayBatch count={count} usual={usual} noun={noun} plural={plugin.batchNoun(state, 2)} onChange={setCount}
+        usualNote={`The usual batch for ${name}.`} changedNote={`Just this bake. ${name} keeps ${usual}.`} />}
     />
   </div>
 }

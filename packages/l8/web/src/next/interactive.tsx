@@ -2,6 +2,7 @@
 import { RecipeDetail } from '@eat-yeet/l7-recipes/recipes/recipe'
 import { authoredRecipe } from '@eat-yeet/l7-recipes/recipes/workbench-registry'
 import { RecipeKitchenLink } from '@eat-yeet/l7-kitchen/kitchen/recipe-kitchen-link'
+import { TodayBatch, useTodayCount } from '@eat-yeet/l7-kitchen/kitchen/today-batch'
 import { pageBlockRegistry } from '@app/page-blocks'
 import { recipeWorkbenchRegistry } from '@app/recipe-workbenches'
 import { useMemo } from 'react'
@@ -28,14 +29,25 @@ export function RecipeClient({
     }
   }, [recipe.slug])
   // Recipes render as written; the calculator's authored default fills in dough weights and bound steps.
-  const page = useMemo(() => authoredRecipe(recipe, recipeWorkbenchRegistry), [recipe])
+  // The only change a reader makes here is how many pieces to make today (`?count=`).
+  const plugin = recipe.workbench ? recipeWorkbenchRegistry.get(recipe.workbench.id) : undefined
+  const authored = useMemo(() => plugin ? plugin.defaultState(recipe.workbench.config) : null, [plugin, recipe])
+  const usual = plugin && authored !== null ? plugin.batchCount(authored) : 1
+  const [count, setCount] = useTodayCount(usual)
+  const page = useMemo(() => plugin && authored !== null
+    ? plugin.resolveRecipe(recipe, recipe.workbench.config, plugin.withBatchCount(authored, count))
+    : authoredRecipe(recipe, recipeWorkbenchRegistry), [plugin, authored, recipe, count])
   return (
     <RecipeDetail
       recipe={page}
       browseRecipes={recipes}
       siteUrl={siteUrl}
       blockRegistry={pageBlockRegistry}
-      beforeIngredients={recipe.workbench && recipeWorkbenchRegistry.get(recipe.workbench.id) ? <RecipeKitchenLink recipeSlug={recipe.slug} client={kitchenClient} /> : undefined}
+      beforeIngredients={plugin && authored !== null ? <>
+        <TodayBatch count={count} usual={usual} noun={plugin.batchNoun(authored, count)} plural={plugin.batchNoun(authored, 2)} onChange={setCount}
+          usualNote="The batch as written." changedNote={`Just this bake. The recipe makes ${usual}.`} />
+        <RecipeKitchenLink recipeSlug={recipe.slug} client={kitchenClient} />
+      </> : undefined}
       rating={<RecipeRating key={recipe.slug} title={recipe.title} client={ratingClient} />}
     />
   )
