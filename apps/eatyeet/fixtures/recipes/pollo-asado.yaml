@@ -31,13 +31,9 @@ blocks:
       - title: ''
         items:
           - id: ingredients-1-item-1
-            text: '6 [chipotle peppers in adobo sauce](https://www.amazon.com/s?k=chipotles+in+adobo+sauce), from the can'
-          - id: ingredients-1-item-2
-            text: '2 tbsp adobo sauce, from the can'
-          - id: ingredients-1-item-3
-            text: 'Juice of 1 mandarin orange, freshly squeezed'
-          - id: ingredients-1-item-4
-            text: '4 garlic cloves, peeled and trimmed'
+            text: '1 can (7 oz) [chipotle peppers in adobo sauce](https://www.amazon.com/s?k=chipotles+in+adobo+sauce), peppers and sauce'
+          - id: ingredients-1-item-8
+            text: 1 tbsp white wine vinegar
           - id: ingredients-1-item-5
             text: 60g rice bran oil (or any neutral oil)
           - id: ingredients-1-item-6
@@ -50,8 +46,8 @@ blocks:
         items:
           - id: steps-1-item-1
             text: >-
-              Blend the marinade: Add the chipotle peppers, adobo sauce, mandarin juice, garlic, rice bran oil, and salt
-              to a blender. Blend until smooth, about 30 seconds, scraping down as needed. The sauce should be thick,
+              Blend the marinade: Add the whole can of chipotles in adobo, white wine vinegar, rice bran oil, and salt to
+              a blender. Blend until smooth, about 30 seconds, scraping down as needed. The sauce should be thick,
               smoky, and glossy.
           - id: steps-1-item-2
             text: >-
@@ -69,9 +65,5 @@ blocks:
               Rest, dust, and serve: Let the thighs rest 5 minutes, then dust with flaky or kosher salt while still hot
               so it sticks to the char. Slice and serve with rice, charred tortillas, slaw, or pickled onions.
         id: steps-1
-    notes:
-      - Save the leftover chipotle peppers in adobo in a small container in the fridge or freeze in tablespoon portions.
-    tips:
-      - >-
-        Save the extra adobo sauce from the can and spoon a little over the chicken after slicing if you want more smoke
-        and heat.
+    notes: []
+    tips: []
