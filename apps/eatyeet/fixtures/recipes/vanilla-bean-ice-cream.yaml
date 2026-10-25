@@ -1,0 +1,98 @@
+sourceId: 'recipes:vanilla-bean-ice-cream'
+status: published
+slug: vanilla-bean-ice-cream
+title: Vanilla Bean Ice Cream
+order: 16
+description: 'Dense, ultra-creamy ice cream packed with real vanilla bean.'
+category: sweet
+prepMinutes: 30
+cookMinutes: 15
+totalMinutes: 600
+yieldAmount: 1
+yieldUnit: quart
+image: vanilla-bean-ice-cream.jpg
+courses:
+  - desserts
+cuisines:
+  - north_american
+methods:
+  - stovetop
+restrictions:
+  - gluten_free
+  - vegetarian
+occasions:
+  - entertaining
+  - everyday
+ingredientTypes:
+  - milk
+  - eggs
+created: '2026-10-25'
+blocks:
+  - type: recipe
+    equipment:
+      - title: ''
+        items:
+          - id: equipment-1-item-1
+            text: Cuisinart ice cream maker (bowl frozen solid)
+          - id: equipment-1-item-2
+            text: Instant-read thermometer
+          - id: equipment-1-item-3
+            text: Saucepan
+          - id: equipment-1-item-4
+            text: Shallow freezer container, pre-chilled
+        id: equipment-1
+    ingredients:
+      - title: ''
+        items:
+          - id: ingredients-1-item-1
+            text: 476g (2 cups) cold heavy whipping cream
+          - id: ingredients-1-item-2
+            text: 305g (1¼ cups) skim milk
+          - id: ingredients-1-item-3
+            text: 170g (¾ cup + 2 tbsp) cane sugar
+          - id: ingredients-1-item-4
+            text: 2 large egg yolks
+          - id: ingredients-1-item-5
+            text: 3 Madagascar vanilla beans
+          - id: ingredients-1-item-6
+            text: 2 tsp pure Madagascar vanilla extract
+        id: ingredients-1
+    steps:
+      - title: ''
+        items:
+          - id: steps-1-item-1
+            text: >-
+              **Infuse the vanilla:** Split all 3 vanilla beans lengthwise and scrape out the seeds. Combine the skim milk,
+              vanilla seeds, vanilla pods, and about half the sugar in a saucepan. Heat until steaming. Remove from heat,
+              cover, and steep 30–45 minutes.
+          - id: steps-1-item-2
+            text: >-
+              **Temper the yolks:** Whisk the egg yolks with the remaining sugar. Reheat the vanilla milk until hot. Slowly
+              whisk ½–1 cup of the hot milk into the yolks, then pour the tempered yolks back into the saucepan.
+          - id: steps-1-item-3
+            text: >-
+              **Cook to 175°F:** Cook over medium-low heat, stirring constantly, until the base reaches 175°F (79–80°C).
+              Remove from heat immediately. Do not boil or keep cooking once it reaches temperature.
+          - id: steps-1-item-4
+            text: >-
+              **Add the cold cream:** Remove the vanilla pods. Pour the hot custard directly into the cold heavy cream and
+              stir in the vanilla extract. Set the bowl in an ice-water bath and stir occasionally until thoroughly cold.
+              Keep all the vanilla seeds in the base.
+          - id: steps-1-item-5
+            text: '**Age:** Cover and refrigerate 4–24 hours, until thoroughly chilled (ideally 35–38°F).'
+          - id: steps-1-item-6
+            text: >-
+              **Churn:** Using a completely frozen bowl and very cold base, churn until it reaches a thick, dense soft-serve
+              consistency, generally 20–25 minutes. Go by texture rather than the clock.
+          - id: steps-1-item-7
+            text: >-
+              **Harden:** Immediately transfer to the pre-chilled container. Press parchment against the surface, cover, and
+              freeze in the coldest part of the freezer for 4–6 hours. Let sit about 5 minutes before scooping.
+        id: steps-1
+    notes:
+      - 'Just cream, milk, sugar, yolks, and vanilla.'
+      - '170g sugar makes a deliberately sweet, scoop-shop-style ice cream.'
+      - 'Two yolks add just enough richness while keeping the color pale and the vanilla front and center.'
+      - 'Cream plus skim milk gives a high-fat, low-water base for a dense, smooth scoop.'
+    tips:
+      - 'Pulling the base at 175°F sets the proteins gently for a silky, clean-tasting custard.'

@@ -12,7 +12,7 @@ try {
   }
   const { recipes } = await json('/api/public/recipes'),
     { articles } = await json('/api/public/articles')
-  assert.equal(recipes.length, 15)
+  assert.equal(recipes.length, 16)
   assert.equal(articles.length, 5)
   for (const path of [
     '/',

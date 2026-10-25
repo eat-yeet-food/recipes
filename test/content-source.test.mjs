@@ -7,7 +7,7 @@ import {sourceContent} from '../scripts/content-source.mjs'
 test('complete source validation catches duplicate identities and broken publication references before writes',()=>{
  const root=mkdtempSync(join(tmpdir(),'eatyeet-sources-'))
  cpSync('apps/eatyeet/fixtures',join(root,'fixtures'),{recursive:true});cpSync('apps/eatyeet/site.yaml',join(root,'site.yaml'));mkdirSync(join(root,'public'));symlinkSync(resolve('apps/eatyeet/public/images'),join(root,'public/images'),'dir')
- const valid=sourceContent({root});assert.equal(valid.records.filter(r=>r.collection==='recipes').length,15);assert.equal(valid.records[0].collection,'articles')
+ const valid=sourceContent({root});assert.equal(valid.records.filter(r=>r.collection==='recipes').length,16);assert.equal(valid.records[0].collection,'articles')
  const recipe=join(root,'fixtures/recipes/new-york-style-pizza.yaml'),duplicate=join(root,'fixtures/recipes/duplicate.yaml')
  cpSync(recipe,duplicate);assert.throws(()=>sourceContent({root}),/Duplicate sourceId/);unlinkSync(duplicate)
  const article=join(root,'fixtures/articles/mixing-dough-and-gluten-development.yaml'),original=readFileSync(article,'utf8')
