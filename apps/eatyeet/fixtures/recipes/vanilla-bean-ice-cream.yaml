@@ -5,9 +5,9 @@ title: Vanilla Bean Ice Cream
 order: 16
 description: 'Dense, ultra-creamy ice cream packed with real vanilla bean.'
 category: sweet
-prepMinutes: 30
+prepMinutes: 15
 cookMinutes: 15
-totalMinutes: 600
+totalMinutes: 555
 yieldAmount: 1
 yieldUnit: quart
 image: vanilla-bean-ice-cream.jpg
@@ -52,32 +52,27 @@ blocks:
             text: 200g (1 cup) cane sugar
           - id: ingredients-1-item-4
             text: 2 large egg yolks
-          - id: ingredients-1-item-5
-            text: 3 Madagascar vanilla beans
-          - id: ingredients-1-item-6
-            text: 2 tsp pure Madagascar vanilla extract
+          - id: ingredients-1-item-7
+            text: 1 tbsp vanilla bean paste
         id: ingredients-1
     steps:
       - title: ''
         items:
           - id: steps-1-item-1
             text: >-
-              **Infuse the vanilla:** Split all 3 vanilla beans lengthwise and scrape out the seeds. Combine the skim milk,
-              vanilla seeds, vanilla pods, and about half the sugar in a saucepan. Heat until steaming. Remove from heat,
-              cover, and steep 30–45 minutes.
+              **Warm the milk:** Combine the skim milk and about half the sugar in a saucepan. Heat until steaming.
           - id: steps-1-item-2
             text: >-
-              **Temper the yolks:** Whisk the egg yolks with the remaining sugar. Reheat the vanilla milk until hot. Slowly
-              whisk ½–1 cup of the hot milk into the yolks, then pour the tempered yolks back into the saucepan.
+              **Temper the yolks:** Whisk the egg yolks with the remaining sugar. Slowly whisk ½–1 cup of the hot milk
+              into the yolks, then pour the tempered yolks back into the saucepan.
           - id: steps-1-item-3
             text: >-
               **Cook to 175°F:** Cook over medium-low heat, stirring constantly, until the base reaches 175°F (79–80°C).
               Remove from heat immediately. Do not boil or keep cooking once it reaches temperature.
           - id: steps-1-item-4
             text: >-
-              **Add the cold cream:** Remove the vanilla pods. Pour the hot custard directly into the cold heavy cream and
-              stir in the vanilla extract. Set the bowl in an ice-water bath and stir occasionally until thoroughly cold.
-              Keep all the vanilla seeds in the base.
+              **Add the cold cream:** Pour the hot custard directly into the cold heavy cream and stir in the vanilla
+              bean paste. Set the bowl in an ice-water bath and stir occasionally until thoroughly cold.
           - id: steps-1-item-5
             text: '**Age:** Cover and refrigerate 4–24 hours, until thoroughly chilled (ideally 35–38°F).'
           - id: steps-1-item-6
