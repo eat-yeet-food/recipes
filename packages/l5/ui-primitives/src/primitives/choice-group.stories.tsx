@@ -11,6 +11,6 @@ export default meta
 type Story = StoryObj<typeof meta>
 export const Weights: Story = {}
 export const LongLabels: Story = { args: { long: true } }
-/** Beside 44px page fields, such as the Test Kitchen editor. */
+/** Beside 44px page fields, such as the Notebook editor. */
 export const Compact: Story = { args: { size: 'compact' } }
 export const KeyboardSelection: Story = { play: async ({ canvasElement }) => { const canvas = within(canvasElement); const target = canvas.getByRole('button', { name: 'Percentages' }); target.focus(); await userEvent.keyboard(' '); await expect(target).toHaveAttribute('aria-pressed', 'true'); await expect(canvas.getByRole('status')).toHaveTextContent('Baker’s percentages') } }

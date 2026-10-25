@@ -24,10 +24,10 @@ export function RecipeKitchenLink({ recipeSlug, client }: { recipeSlug: string; 
     <span aria-hidden="true" className="grid size-10 shrink-0 place-items-center rounded-full bg-brand"><FlaskConical className="size-5" /></span>
     <p className="min-w-0 text-[15px] leading-relaxed">
       {mine.length
-        ? <>Your versions in Test Kitchen: {mine.slice(0, 3).map((formula, index) => <Fragment key={formula.id}>
+        ? <>Your versions in Notebook: {mine.slice(0, 3).map((formula, index) => <Fragment key={formula.id}>
             {index > 0 && ', '}<a className={textLink} href={kitchenPath(recipeSlug, formula.id, true)}>{formula.name}</a>
-          </Fragment>)}{mine.length > 3 && <>, <a className={textLink} href="/kitchen">{mine.length - 3} more</a></>} · <a className={textLink} href={kitchenPath(recipeSlug)}>Start another</a></>
-        : <>Change the batch, hydration or anything else: <a className={textLink} href={kitchenPath(recipeSlug)}>make this dough your own in Test Kitchen</a>.</>}
+          </Fragment>)}{mine.length > 3 && <>, <a className={textLink} href="/notebook">{mine.length - 3} more</a></>} · <a className={textLink} href={kitchenPath(recipeSlug)}>Start another</a></>
+        : <>Change the batch, hydration or anything else: <a className={textLink} href={kitchenPath(recipeSlug)}>make this dough your own in your Notebook</a>.</>}
     </p>
   </div>
 }

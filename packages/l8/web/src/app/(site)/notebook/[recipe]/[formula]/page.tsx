@@ -5,7 +5,7 @@ import { kitchenMetadata, kitchenRecipeContent, validFormulaId } from '../../sha
 type RouteProps = { params: Promise<{ recipe: string; formula: string }> }
 
 // The formula's name is private and loads after hydration, so the title names the section.
-export const generateMetadata = kitchenMetadata('Your formula · Test Kitchen')
+export const generateMetadata = kitchenMetadata('Your formula · Notebook')
 
 export default async function Page({ params }: RouteProps) {
   const { recipe: slug, formula } = await params

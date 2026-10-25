@@ -10,7 +10,7 @@ import { kitchenRecipe, type KitchenRecipe } from '@eat-yeet/l7-kitchen/kitchen/
 import { KitchenScratchPage } from '@eat-yeet/l7-kitchen/kitchen/kitchen-scratch'
 import { kitchenClient } from './kitchen-client'
 
-// Test Kitchen pages render public recipe data on the server; everything a
+// Notebook pages render public recipe data on the server; everything a
 // member owns loads here, after hydration, through the account API.
 const useKitchen = (recipe: RecipeContent) => useMemo(() => kitchenRecipe(recipe, recipeWorkbenchRegistry), [recipe])
 

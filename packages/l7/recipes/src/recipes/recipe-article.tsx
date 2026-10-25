@@ -29,7 +29,7 @@ type RecipeArticleAsideProps = {
 
 export const recipeTitleClass = 'max-w-[var(--layout-recipe-copy)] text-[34px] leading-[1.15] tracking-[1.2px] font-bold'
 
-/** Overrides for pages that present a recipe under another title, such as a Test Kitchen bake sheet. */
+/** Overrides for pages that present a recipe under another title, such as a Notebook bake sheet. */
 export type RecipeArticleHeading = {
   crumbs: { label: string; href?: string }[]
   title: string
@@ -104,7 +104,7 @@ export function RecipeArticle({
   blockRegistry: PageBlockRegistry<RecipePageBlockContext>
   aside?: (props: RecipeArticleAsideProps) => ReactNode
   heading?: RecipeArticleHeading
-  /** Shown between the recipe facts and Ingredients, such as the Test Kitchen link. */
+  /** Shown between the recipe facts and Ingredients, such as the Notebook link. */
   beforeIngredients?: ReactNode
   rating?: ReactNode
 }) {

@@ -16,7 +16,7 @@ export default meta
 type Story = StoryObj<typeof meta>
 export const Decimal: Story = {}
 export const Quantity: Story = { args: { integer: true } }
-/** Page forms on white, such as Test Kitchen, use the underline surface. */
+/** Page forms on white, such as Notebook, use the underline surface. */
 export const Underline: Story = { args: { surface: 'underline', initialValue: 68 }, play: async ({ canvasElement }) => {
   const screen = within(canvasElement)
   const input = screen.getByRole('textbox', { name: 'Weight' })

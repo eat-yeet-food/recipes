@@ -39,6 +39,13 @@ const payloadConfig = withPayload({
     )
     return config
   },
+  // Notebook was called Test Kitchen and lived at /kitchen; keep old links working.
+  async redirects() {
+    return [
+      { source: '/kitchen', destination: '/notebook', permanent: true },
+      { source: '/kitchen/:path*', destination: '/notebook/:path*', permanent: true },
+    ]
+  },
   async headers() {
     return [
       {

@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { publicDocument, siteData } from '../../../next/cms'
 
-// Test Kitchen pages hold a member's private formulas (loaded after hydration)
+// Notebook pages hold a member's private formulas (loaded after hydration)
 // or an unsaved calculator; neither is worth indexing.
 export const kitchenMetadata = (title: string) => async (): Promise<Metadata> =>
   ({ title: `${title} | ${(await siteData()).siteName}`, robots: { index: false, follow: false } })

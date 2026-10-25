@@ -171,8 +171,8 @@ navigation:
     desktop: false
   - label: Learn
     href: /learn
-  - label: Test Kitchen
-    href: /kitchen
+  - label: Notebook
+    href: /notebook
   - label: Privacy
     href: /privacy
     desktop: false

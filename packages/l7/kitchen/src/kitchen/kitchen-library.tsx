@@ -99,7 +99,7 @@ export function KitchenLibraryPage({ recipes, client, deletedId }: { recipes: Ki
     void load().then((next) => {
       const deleted = deletedId ? next?.deleted.find((formula) => formula.id === deletedId) : undefined
       if (!deleted) return
-      window.history.replaceState(window.history.state, '', '/kitchen')
+      window.history.replaceState(window.history.state, '', '/notebook')
       setNotice({ message: `Deleted ${deleted.name}. It stays in Recently deleted for 30 days.`, action: { label: 'Undo', run: () => { void restore(deleted) } } })
     })
   }, [status, load, deletedId, restore])
@@ -122,7 +122,7 @@ export function KitchenLibraryPage({ recipes, client, deletedId }: { recipes: Ki
   return <>
     <KitchenBand
       eyebrow={signedIn && count !== undefined ? `Your formulas · ${count}` : 'Your own versions'}
-      title="Test Kitchen"
+      title="Notebook"
       actions={signedIn ? <Button asChild><a href={`#${startId}`}><Plus className="size-4" />New formula</a></Button> : undefined}
     >
       <p>Your own versions of the dough recipes. Recipes stay as written; everything you change lives here{signedIn ? ' and saves as you go.' : '.'}</p>

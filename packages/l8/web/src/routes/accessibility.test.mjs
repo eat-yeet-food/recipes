@@ -35,10 +35,10 @@ const paths = [
   '/learn',
   '/account/sign-in',
   '/account/settings',
-  '/kitchen',
-  '/kitchen/new-york-style-pizza',
-  '/kitchen/sourdough-bread',
-  '/kitchen/new-york-style-pizza/bake',
+  '/notebook',
+  '/notebook/new-york-style-pizza',
+  '/notebook/sourdough-bread',
+  '/notebook/new-york-style-pizza/bake',
   `/recipes/${INDEX[0].slug}`,
   ...(ARTICLE_INDEX[0] ? [`/learn/${ARTICLE_INDEX[0].slug}`] : []),
 ]
@@ -79,28 +79,28 @@ try {
     if (INDEX.some(recipe => recipe.slug === 'new-york-style-pizza')) {
       // Saved formulas are a member feature; the rest of this pass stays anonymous.
       await signIn(context, server.url.replace(/\/$/, ''))
-      await page.goto(new URL('/kitchen/new-york-style-pizza', server.url).href, { waitUntil: 'networkidle' })
+      await page.goto(new URL('/notebook/new-york-style-pizza', server.url).href, { waitUntil: 'networkidle' })
       await page.getByRole('button', { name: /^Rename / }).click()
       await page.getByRole('textbox', { name: 'Formula name' }).fill(`Accessibility ${width}`)
-      await audit(page, 'Test Kitchen / renaming', width)
+      await audit(page, 'Notebook / renaming', width)
       await page.keyboard.press('Enter')
       await page.getByRole('textbox', { name: 'Formula name' }).waitFor({ state: 'detached' })
       await page.getByRole('heading', { level: 1, name: `Accessibility ${width}` }).waitFor()
-      await page.getByRole('button', { name: 'Save to Test Kitchen' }).first().click()
-      await page.waitForURL(/\/kitchen\/new-york-style-pizza\/[A-Za-z0-9_-]{16}\/bake(\?saved=1)?$/)
+      await page.getByRole('button', { name: 'Save to Notebook' }).first().click()
+      await page.waitForURL(/\/notebook\/new-york-style-pizza\/[A-Za-z0-9_-]{16}\/bake(\?saved=1)?$/)
       await page.locator('#recipe-card').waitFor()
-      await audit(page, 'Test Kitchen / bake sheet', width)
+      await audit(page, 'Notebook / bake sheet', width)
       await page.getByRole('link', { name: 'Edit formula' }).click()
-      await page.waitForURL(/\/kitchen\/new-york-style-pizza\/[A-Za-z0-9_-]{16}$/)
+      await page.waitForURL(/\/notebook\/new-york-style-pizza\/[A-Za-z0-9_-]{16}$/)
       await page.getByRole('heading', { level: 1, name: `Accessibility ${width}` }).waitFor()
-      await audit(page, 'Test Kitchen / formula', width)
+      await audit(page, 'Notebook / formula', width)
       await page.getByRole('button', { name: 'History' }).first().click()
       await page.locator('[data-kitchen-history]').waitFor()
-      await audit(page, 'Test Kitchen / history', width)
+      await audit(page, 'Notebook / history', width)
       await page.keyboard.press('Escape')
-      await page.goto(new URL('/kitchen', server.url).href, { waitUntil: 'networkidle' })
+      await page.goto(new URL('/notebook', server.url).href, { waitUntil: 'networkidle' })
       await page.locator('[data-kitchen-formula]').first().waitFor()
-      await audit(page, 'Test Kitchen / library (member)', width)
+      await audit(page, 'Notebook / library (member)', width)
       await context.clearCookies()
       await page.evaluate(() => localStorage.clear())
     }

@@ -13,7 +13,7 @@ function createDoughWorkbenchPlugin(id: string, family: DoughFormula['family'], 
     const state = isDoughConfig(config) ? decodeDoughState(value, config, recipe) : null
     return state?.formula.family === family ? state : null
   }
-  // Test Kitchen only hands back states this plugin decoded or produced.
+  // Notebook only hands back states this plugin decoded or produced.
   const dough = (state: unknown) => state as DoughWorkbenchState
   return {
     id,

@@ -4,7 +4,7 @@ import { createSession, upsertGoogleMember } from './members'
 import { KITCHEN_LIMITS } from './kitchen'
 
 /**
- * Exercises the Test Kitchen API against the running app: ownership,
+ * Exercises the Notebook API against the running app: ownership,
  * validation, autosave conflicts, history, restore, duplicate and soft
  * delete. `slug` names a published recipe with a pizza calculator.
  */

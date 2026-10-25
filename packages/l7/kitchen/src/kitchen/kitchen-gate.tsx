@@ -20,10 +20,10 @@ export function KitchenMessage({ title, children, action, busy = false }: { titl
 /** Saved formulas belong to a member; signed-out visitors sign in and come back here. */
 export function KitchenGate({ what, children }: { what: string; children: ReactNode }) {
   const { status } = useAccount()
-  if (status === 'unknown') return <KitchenMessage title="Opening Test Kitchen…" busy>Checking your account.</KitchenMessage>
+  if (status === 'unknown') return <KitchenMessage title="Opening Notebook…" busy>Checking your account.</KitchenMessage>
   if (status === 'signed-out') return <KitchenMessage title="Sign in to open this formula"
     action={<SignInLink className={buttonVariants()}>Sign in with Google</SignInLink>}>
-    Test Kitchen formulas are saved to your account. Sign in to see {what}; you’ll come straight back here.
+    Notebook formulas are saved to your account. Sign in to see {what}; you’ll come straight back here.
   </KitchenMessage>
   return <>{children}</>
 }

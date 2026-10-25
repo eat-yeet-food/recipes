@@ -53,7 +53,7 @@ export function KitchenScratchBakePage(props: BakeSheetProps) {
   if (state === null) return <KitchenMessage title="Opening the bake sheet…" busy>Loading your numbers from this browser.</KitchenMessage>
   const title = name ?? kitchen.recipe.title
   return <KitchenBakeSheet {...props} state={state} name="This formula" heading={{
-    crumbs: [{ label: 'Test Kitchen', href: '/kitchen' }, { label: title }],
+    crumbs: [{ label: 'Notebook', href: '/notebook' }, { label: title }],
     title,
     byline: 'Bake sheet · unsaved formula from this browser',
     pin: false,
@@ -76,7 +76,7 @@ function FormulaBakeSheet({ formulaId, client, ...props }: BakeSheetProps & { fo
     if (!url.searchParams.has('saved')) return
     url.searchParams.delete('saved')
     window.history.replaceState(window.history.state, '', url)
-    setNotice({ message: 'Saved to Test Kitchen. Click the name to rename it.' })
+    setNotice({ message: 'Saved to Notebook. Click the name to rename it.' })
   }, [])
   useEffect(() => {
     let active = true
@@ -85,8 +85,8 @@ function FormulaBakeSheet({ formulaId, client, ...props }: BakeSheetProps & { fo
     })
     return () => { active = false }
   }, [client, formulaId])
-  if (failure) return <KitchenMessage title={failure.missing ? 'Formula not found' : 'Test Kitchen is unavailable'}
-    action={<Button asChild><a href="/kitchen">Back to Test Kitchen</a></Button>}>{failure.message}</KitchenMessage>
+  if (failure) return <KitchenMessage title={failure.missing ? 'Formula not found' : 'Notebook is unavailable'}
+    action={<Button asChild><a href="/notebook">Back to Notebook</a></Button>}>{failure.message}</KitchenMessage>
   if (!formula) return <KitchenMessage title="Opening the bake sheet…" busy>Loading your formula.</KitchenMessage>
   const state = decodeKitchenState(kitchen, formula.state) ?? kitchen.defaultState
   const rename = async (name: string) => {
@@ -96,7 +96,7 @@ function FormulaBakeSheet({ formulaId, client, ...props }: BakeSheetProps & { fo
     } catch (error) { return kitchenErrorMessage(error, 'The formula could not be renamed. Please try again.') }
   }
   return <><KitchenBakeSheet {...props} state={state} name={formula.name} heading={{
-    crumbs: [{ label: 'Test Kitchen', href: '/kitchen' }, { label: formula.name }],
+    crumbs: [{ label: 'Notebook', href: '/notebook' }, { label: formula.name }],
     title: formula.name,
     titleElement: <FormulaTitle name={formula.name} onRename={rename} className={recipeTitleClass} />,
     byline: byline(kitchen),

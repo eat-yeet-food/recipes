@@ -68,14 +68,14 @@ function Page({ view, signedIn = true }: { view: 'library' | 'scratch' | 'formul
     {(view === 'scratch' || view === 'sourdough') && <KitchenScratchPage kitchen={kitchen} client={client} />}
     {view === 'formula' && firstId && <KitchenFormulaPage kitchen={kitchen} formulaId={firstId} client={client} />}
     {view === 'bake' && <KitchenBakeSheet kitchen={kitchen} state={friday} name="Friday pies" siteUrl="https://eatyeet.com" blockRegistry={pageBlockRegistry}
-      heading={{ crumbs: [{ label: 'Test Kitchen', href: '/kitchen' }, { label: 'Friday pies' }, { label: 'Bake sheet' }], title: 'Friday pies', byline: 'Bake sheet · New York Style Pizza', pin: false }} />}
+      heading={{ crumbs: [{ label: 'Notebook', href: '/notebook' }, { label: 'Friday pies' }, { label: 'Bake sheet' }], title: 'Friday pies', byline: 'Bake sheet · New York Style Pizza', pin: false }} />}
   </Account>
 }
 
 const meta = {
   title: 'Kitchen/Pages',
   component: Page,
-  parameters: { layout: 'fullscreen', docs: { description: { component: 'Test Kitchen pages composed with the app’s dough calculator and in-memory account and kitchen transports. Recipes stay as written; each formula has its own page, saves automatically and keeps History.' } } },
+  parameters: { layout: 'fullscreen', docs: { description: { component: 'Notebook pages composed with the app’s dough calculator and in-memory account and kitchen transports. Recipes stay as written; each formula has its own page, saves automatically and keeps History.' } } },
 } satisfies Meta<typeof Page>
 
 export default meta
@@ -113,7 +113,7 @@ export const SourdoughCalculator: Story = {
     await userEvent.clear(share)
     await userEvent.type(share, '60')
     await expect(await screen.findByText(/must total 100%/)).toBeVisible()
-    await expect(screen.getAllByRole('button', { name: 'Save to Test Kitchen' })[0]).toBeDisabled()
+    await expect(screen.getAllByRole('button', { name: 'Save to Notebook' })[0]).toBeDisabled()
   },
 }
 export const Formula: Story = {

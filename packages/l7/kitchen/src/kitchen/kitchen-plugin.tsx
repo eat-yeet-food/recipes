@@ -19,8 +19,8 @@ export type KitchenEditorProps = {
 export type KitchenResultsProps = { recipe: RecipeContent; config: unknown; state: unknown }
 
 /**
- * A recipe calculator that Test Kitchen can edit. The app supplies the
- * editor and results for its own dough families; Test Kitchen owns pages,
+ * A recipe calculator that Notebook can edit. The app supplies the
+ * editor and results for its own dough families; Notebook owns pages,
  * saving and history.
  */
 export interface KitchenPlugin extends RecipeWorkbenchPlugin {
@@ -38,7 +38,7 @@ export interface KitchenPlugin extends RecipeWorkbenchPlugin {
 
 export type KitchenRegistry = RecipeWorkbenchRegistry<KitchenPlugin>
 
-/** A published recipe with a Test Kitchen calculator, ready to edit. */
+/** A published recipe with a Notebook calculator, ready to edit. */
 export type KitchenRecipe = {
   recipe: RecipeContent
   plugin: KitchenPlugin
@@ -58,4 +58,4 @@ export function kitchenRecipe(recipe: RecipeContent, registry: KitchenRegistry):
 export const decodeKitchenState = (kitchen: KitchenRecipe, value: unknown) => kitchen.plugin.decodeState(value, kitchen.config, kitchen.recipe)
 
 export const kitchenPath = (slug: string, formulaId?: string, bake = false) =>
-  `/kitchen/${slug}${formulaId ? `/${formulaId}` : ''}${bake ? '/bake' : ''}`
+  `/notebook/${slug}${formulaId ? `/${formulaId}` : ''}${bake ? '/bake' : ''}`

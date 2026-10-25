@@ -5,7 +5,7 @@ import { first, kitchenMetadata, kitchenRecipeContent, todayCount, validFormulaI
 
 type RouteProps = { params: Promise<{ recipe: string; formula: string }>; searchParams: KitchenSearch }
 
-export const generateMetadata = kitchenMetadata('Bake sheet · Test Kitchen')
+export const generateMetadata = kitchenMetadata('Bake sheet · Notebook')
 
 export default async function Page({ params, searchParams }: RouteProps) {
   const [{ recipe: slug, formula }, query, site] = await Promise.all([params, searchParams, siteData()])

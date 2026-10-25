@@ -17,7 +17,7 @@ export default function Page() {
         <ul>
           <li>From Google, when you sign in: your Google account identifier, email address and name. We don’t receive your Google password or contacts.</li>
           <li>The public name you choose.</li>
-          <li>What you create: ratings, reviews, replies, and Test Kitchen formulas with their change history.</li>
+          <li>What you create: ratings, reviews, replies, and Notebook formulas with their change history.</li>
           <li>Security records: when your sign-in sessions were created or ended.</li>
         </ul>
         <p><strong>In your browser:</strong> one essential sign-in cookie, used only by our account service, and local storage that remembers whether you’ve signed in. These are needed for the features you use, so we don’t ask for cookie consent.</p>
@@ -25,7 +25,7 @@ export default function Page() {
       { heading: 'How we use it', body: <ul>
         <li>To run your account: signing you in and keeping your account secure.</li>
         <li>To show your public name next to your ratings, reviews and replies. Your email is never shown publicly.</li>
-        <li>To keep your Test Kitchen formulas and their history so they’re available on your devices.</li>
+        <li>To keep your Notebook formulas and their history so they’re available on your devices.</li>
         <li>To prevent abuse, such as limiting repeated sign-in attempts.</li>
       </ul> },
       { heading: 'What we never do', body: <p>We don’t sell or rent your personal information, share it for advertising, or send you email.</p> },
@@ -37,7 +37,7 @@ export default function Page() {
         </ul>
         <p>We may disclose information if required by law or to protect the safety of our users or the site.</p>
       </> },
-      { heading: 'How long we keep it', body: <p>We keep your account data until you delete your account. Sign-in sessions expire after 30 days. When you delete your account, we delete your profile, ratings, reviews, replies and Test Kitchen formulas right away; copies may remain in encrypted backups for up to 30 days before they’re overwritten.</p> },
+      { heading: 'How long we keep it', body: <p>We keep your account data until you delete your account. Sign-in sessions expire after 30 days. When you delete your account, we delete your profile, ratings, reviews, replies and Notebook formulas right away; copies may remain in encrypted backups for up to 30 days before they’re overwritten.</p> },
       { heading: 'Your choices and rights', body: <>
         <ul>
           <li>Change your public name or sign out everywhere in <a href="/account/settings">Account settings</a>.</li>

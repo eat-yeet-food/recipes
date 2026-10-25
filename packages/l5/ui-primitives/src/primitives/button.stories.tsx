@@ -5,7 +5,7 @@ import { Trash2 } from 'lucide-react'
 
 const meta = {
   title: 'Controls/Button', component: Button,
-  args: { children: 'Save to Test Kitchen' },
+  args: { children: 'Save to Notebook' },
   parameters: { layout: 'padded', docs: { description: { component: 'Filled and outlined actions retain their padding and plain labels. Borderless text actions (link, ghost, quiet-on-ink) are flush, underlined, and have no padding or hover fill; their minimum target is 24px with outward keyboard focus. Icon sizes retain dedicated targets. Use asChild for navigation links. Outline remains a compatibility alias for secondary; utility owns the thin border.' } } },
   argTypes: { variant: { control: 'select', options: ['default', 'secondary', 'ghost', 'utility', 'on-ink', 'quiet-on-ink', 'danger', 'link'] }, size: { control: 'select', options: ['default', 'sm', 'lg', 'icon'] } },
 } satisfies Meta<typeof Button>

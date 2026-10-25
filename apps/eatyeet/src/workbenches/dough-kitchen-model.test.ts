@@ -19,7 +19,7 @@ const friday: DoughFormulaState = {
 }
 const methods = (id: string) => ({ 'outdoor-oven': 'Outdoor Oven', 'indoor-steel': 'Indoor Steel' })[id] ?? id
 
-describe('Test Kitchen dough model', () => {
+describe('Notebook dough model', () => {
   it('matches the recipe page weights for the authored pizza', () => {
     const { total, rows } = doughRows(recipe)
     assert.equal(total, '1,440g')

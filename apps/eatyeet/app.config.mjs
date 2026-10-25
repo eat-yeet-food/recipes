@@ -24,6 +24,7 @@ export const app = { ...{
   ],
   "robotsDisallow": [
     "/search",
+    "/notebook",
     "/kitchen"
   ],
   "previewPaths": [

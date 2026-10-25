@@ -31,14 +31,14 @@ type Handler = (payload: Payload, member: Member) => Promise<Response>
  * member, and a generic failure that never leaks internals.
  */
 export async function kitchenRequest(request: NextRequest, handler: Handler, { write = true } = {}) {
-  if (write && !sameOrigin(request)) return failure('Please use Test Kitchen on this site.', 403)
+  if (write && !sameOrigin(request)) return failure('Please use Notebook on this site.', 403)
   const member = await currentMember(request)
-  if (!member) return failure('Sign in to use your Test Kitchen formulas.', 401)
+  if (!member) return failure('Sign in to use your Notebook formulas.', 401)
   try {
     return await handler(await cms(), member)
   } catch (error) {
-    console.error('Test Kitchen request failed', error)
-    return failure('Test Kitchen is unavailable. Your edits are still on this page; please try again.', 503)
+    console.error('Notebook request failed', error)
+    return failure('Notebook is unavailable. Your edits are still on this page; please try again.', 503)
   }
 }
 

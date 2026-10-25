@@ -5,7 +5,7 @@ import { ACCOUNT_API } from './account-client'
 const KITCHEN_API = `${ACCOUNT_API}/kitchen/formulas`
 
 /** Same-origin JSON request; failures keep the server's message and code. */
-async function kitchenRequest<T>(path: string, method = 'GET', body?: unknown, fallback = 'Test Kitchen is unavailable. Please try again.'): Promise<T> {
+async function kitchenRequest<T>(path: string, method = 'GET', body?: unknown, fallback = 'Notebook is unavailable. Please try again.'): Promise<T> {
   let response: Response
   try {
     response = await fetch(`${KITCHEN_API}${path}`, {

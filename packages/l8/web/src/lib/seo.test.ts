@@ -5,7 +5,7 @@ import { buildSeoMeta } from './seo.ts'
 
 const TEST_APP_CONFIG = {
   id: 'test',
-  siteName: 'Test Kitchen',
+  siteName: 'Notebook',
   siteUrl: 'https://example.test',
   defaultOgImage: '/images/default.jpg',
   copy: {

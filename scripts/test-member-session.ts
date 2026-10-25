@@ -9,7 +9,7 @@ try {
   const member = await upsertGoogleMember(cms.payload, { sub: 'local-browser-test', email: 'browser-test@local.example', emailVerified: true, name: 'Test Cook' })
   if (!member) throw new Error('Test member could not be created')
   await cms.payload.update({ collection: 'members', id: Number(member.id), overrideAccess: true, data: { displayNameConfirmed: true } })
-  // Each browser run starts without Test Kitchen formulas.
+  // Each browser run starts without Notebook formulas.
   const owned = { overrideAccess: true, where: { member: { equals: Number(member.id) } } } as const
   await cms.payload.delete({ collection: 'kitchen-revisions', ...owned })
   await cms.payload.delete({ collection: 'kitchen-formulas', ...owned })

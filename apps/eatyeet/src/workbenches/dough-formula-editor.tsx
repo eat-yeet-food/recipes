@@ -76,7 +76,7 @@ function useInputMode(config: DoughWorkbenchConfig, family: DoughFormula['family
 
 /**
  * Every value a dough formula owns, as an ordinary form on the page. The
- * editor is controlled: Test Kitchen owns the state, saving and history.
+ * editor is controlled: Notebook owns the state, saving and history.
  */
 export function DoughFormulaEditor({ recipe, config, state, onChange, onErrorsChange, resetKey }: {
   recipe: RecipeContent

@@ -4,7 +4,7 @@ import type { RecipeContent } from '@eat-yeet/l4-content-model/recipes'
  * A recipe calculator registered by the app. Recipe pages use only its
  * projection: the authored default state written into the recipe (dough
  * weights, bound step text, process steps). Interactive editing lives in
- * Test Kitchen, which extends this contract.
+ * Notebook, which extends this contract.
  */
 export interface RecipeWorkbenchPlugin {
   id: string

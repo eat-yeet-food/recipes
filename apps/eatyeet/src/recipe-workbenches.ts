@@ -8,7 +8,7 @@ import {
 /**
  * The app owns the set of executable calculators. Recipe content only names a
  * registered calculator and supplies opaque authored configuration for it.
- * Recipe pages use their projection; Test Kitchen edits them.
+ * Recipe pages use their projection; Notebook edits them.
  */
 export const recipeWorkbenchRegistry = createRecipeWorkbenchRegistry<KitchenPlugin>()
   .register(createSourdoughWorkbenchPlugin())

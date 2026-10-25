@@ -127,7 +127,7 @@ export function FormulaTitle({ name, onRename, className, autoEdit = false }: {
   name: string
   /** Resolves to an error message to show below the field, or null once renamed. */
   onRename: (name: string) => Promise<string | null> | string | null
-  /** Heading typography; defaults to the Test Kitchen page title. */
+  /** Heading typography; defaults to the Notebook page title. */
   className?: string
   /** Opens with the name selected, e.g. for a new copy. */
   autoEdit?: boolean

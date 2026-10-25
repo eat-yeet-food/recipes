@@ -7,7 +7,7 @@ import { ChangeStrip, CountStepper, FormulaTitle, HistorySheet, KitchenNotice, S
 
 const meta = {
   title: 'Kitchen/Controls',
-  parameters: { docs: { description: { component: 'Owned Test Kitchen controls. Formulas save automatically, so the Saved label, the changes strip, History with Restore, names renamed in place and Undo notices replace any Save / Save as choice.' } } },
+  parameters: { docs: { description: { component: 'Owned Notebook controls. Formulas save automatically, so the Saved label, the changes strip, History with Restore, names renamed in place and Undo notices replace any Save / Save as choice.' } } },
 } satisfies Meta
 
 export default meta

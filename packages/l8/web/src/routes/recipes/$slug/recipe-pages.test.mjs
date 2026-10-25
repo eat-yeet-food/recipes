@@ -4,7 +4,7 @@
  * Static assertions only prove that files exist. This opens every canonical
  * recipe route and checks that the route renders the generic article shell,
  * registered recipe block, desktop-only browse sidebar, mobile/cook-mode
- * behavior, and the Test Kitchen entry point that replaced Adjust recipe.
+ * behavior, and the Notebook entry point that replaced Adjust recipe.
  */
 import { signIn } from '#web-test/member-session'
 import { chromium } from 'playwright'
@@ -28,7 +28,7 @@ const check = (name, ok, detail = '') => results.push({ name, ok: !!ok, detail: 
 
 async function newPage(viewport = { width: 1440, height: 1000 }) {
   const page = await browser.newPage({ viewport, deviceScaleFactor: viewport.width < 700 ? 2 : 1 })
-  // Members see their Test Kitchen versions beside the recipe.
+  // Members see their Notebook versions beside the recipe.
   await signIn(page.context(), BASE)
   page.on('pageerror', (e) => errors.push(e.message))
   page.on('console', (m) => m.type() === 'error' && errors.push(m.text()))
@@ -82,7 +82,7 @@ check('pizza recommends the selected mozzarella', (await desktop.locator('#recip
 check('jump to recipe is removed', await desktop.getByRole('link', { name: 'Jump to Recipe' }).count() === 0)
 check('recipes have no Adjust recipe control', await desktop.getByRole('button', { name: /Adjust recipe/i }).count() === 0 && await desktop.locator('[data-recipe-adjustment]').count() === 0)
 await desktop.locator('[data-recipe-kitchen]').getByRole('link').first().waitFor()
-check('the calculator lives in Test Kitchen', await desktop.locator('[data-recipe-kitchen] a[href="/kitchen/new-york-style-pizza"]').count() === 1, await desktop.locator('[data-recipe-kitchen]').textContent())
+check('the calculator lives in your Notebook', await desktop.locator('[data-recipe-kitchen] a[href="/notebook/new-york-style-pizza"]').count() === 1, await desktop.locator('[data-recipe-kitchen]').textContent())
 check('recipe controls appear once in the header', await desktop.getByRole('button', { name: 'Cooking view' }).count() === 1 && await desktop.getByRole('button', { name: 'Print Recipe' }).count() === 1 && await desktop.getByRole('link', { name: 'Pin Recipe' }).count() === 1 && await desktop.getByRole('switch', { name: 'Cook Mode' }).count() === 0)
 const authoredPizzaText = await desktop.locator('#recipe-card').textContent()
 check('pizza toppings show readable per-pizza and batch totals', authoredPizzaText.includes('6 oz pizza sauce (18 oz total)') && authoredPizzaText.includes('28 g pecorino romano (84 g total)') && authoredPizzaText.includes('⅛ tsp dried oregano (⅜ tsp total)'))
@@ -96,9 +96,9 @@ await desktop.getByText('Making 4 pizzas today').waitFor()
 check('today\'s count survives a reload', (await desktop.locator('#recipe-card').textContent()).includes('(24 oz total)'))
 await desktop.getByRole('button', { name: 'Fewer pizzas' }).click()
 check('returning to the written count clears the URL', !desktop.url().includes('count=') && (await desktop.locator('#recipe-card').textContent()).includes('861g Kirkland'), desktop.url())
-// Formulas shared before Test Kitchen open there as an unsaved copy.
+// Formulas shared before Notebook open there as an unsaved copy.
 await desktop.goto(`${BASE}/recipes/new-york-style-pizza?config=${encodeURIComponent('{"version":1}')}`, { waitUntil: 'networkidle' })
-check('shared formula links open in Test Kitchen', new URL(desktop.url()).pathname === '/kitchen/new-york-style-pizza' && desktop.url().includes('config='), desktop.url())
+check('shared formula links open in your Notebook', new URL(desktop.url()).pathname === '/notebook/new-york-style-pizza' && desktop.url().includes('config='), desktop.url())
 await desktop.goto(`${BASE}/recipes/new-york-style-pizza`, { waitUntil: 'networkidle' })
 const readingLayout = await desktop.evaluate(() => ['.yeet > header', '.yeet main', '.yeet main > article'].map((selector) => {
   const rect = document.querySelector(selector).getBoundingClientRect()

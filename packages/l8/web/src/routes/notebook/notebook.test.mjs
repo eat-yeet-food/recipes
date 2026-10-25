@@ -1,5 +1,5 @@
 /**
- * Test Kitchen in a real browser: the signed-out calculator, saving through
+ * Notebook in a real browser: the signed-out calculator, saving through
  * sign-in, autosave and History, duplicate, delete with undo, bake sheets and
  * phone layouts. Runs against the production build with a local test member.
  */
@@ -34,11 +34,11 @@ try {
   const visitor = await browser.newContext({ viewport: { width: 1280, height: 900 } })
   const sessionReads = []
   visitor.on('request', (request) => request.url().includes('/api/public/account/') && sessionReads.push(request.url()))
-  let page = await open(visitor, '/kitchen')
-  check('library introduces Test Kitchen to visitors', await page.getByRole('heading', { level: 1, name: 'Test Kitchen' }).isVisible() && await page.locator('[data-kitchen-start]').count() === 2)
-  check('nav links to Test Kitchen', await page.locator('nav a[href="/kitchen"]').first().isVisible())
+  let page = await open(visitor, '/notebook')
+  check('library introduces Notebook to visitors', await page.getByRole('heading', { level: 1, name: 'Notebook' }).isVisible() && await page.locator('[data-kitchen-start]').count() === 2)
+  check('nav links to Notebook', await page.locator('nav a[href="/notebook"]').first().isVisible())
   await page.locator('[data-kitchen-start="new-york-style-pizza"]').click()
-  await page.waitForURL('**/kitchen/new-york-style-pizza')
+  await page.waitForURL('**/notebook/new-york-style-pizza')
   await page.waitForLoadState('networkidle')
   check('scratch starts from the recipe as written', (await dough(page).textContent()).includes('861g') && (await page.getByRole('region', { name: 'Changed from the recipe' }).textContent()).includes('matches the recipe'))
   await page.getByRole('textbox', { name: 'Hydration' }).fill('68')
@@ -47,14 +47,14 @@ try {
   await page.reload({ waitUntil: 'networkidle' })
   check('unsaved work survives a reload in this browser', await page.getByRole('textbox', { name: 'Hydration' }).inputValue() === '68')
   check('anonymous visitors make no account requests', sessionReads.length === 0, sessionReads.join(', '))
-  await page.goto(`${BASE}/kitchen/new-york-style-pizza/bake?count=5`, { waitUntil: 'networkidle' })
+  await page.goto(`${BASE}/notebook/new-york-style-pizza/bake?count=5`, { waitUntil: 'networkidle' })
   const scratchBake = await page.locator('#recipe-card').textContent()
   check('scratch bake sheet uses the browser formula and today\'s count', scratchBake.includes('Making 5 pizzas today') && scratchBake.includes('Divide and shape dough into 5 balls'), scratchBake.slice(0, 400))
-  await page.goto(`${BASE}/kitchen/new-york-style-pizza`, { waitUntil: 'networkidle' })
+  await page.goto(`${BASE}/notebook/new-york-style-pizza`, { waitUntil: 'networkidle' })
   await page.getByRole('button', { name: 'Sign in to save' }).first().click()
   await page.waitForURL('**/account/sign-in**')
-  check('saving signs in and returns to the formula', new URL(page.url()).searchParams.get('returnTo') === '/kitchen/new-york-style-pizza?save=1', page.url())
-  await page.goto(`${BASE}/kitchen/sourdough-bread`, { waitUntil: 'networkidle' })
+  check('saving signs in and returns to the formula', new URL(page.url()).searchParams.get('returnTo') === '/notebook/new-york-style-pizza?save=1', page.url())
+  await page.goto(`${BASE}/notebook/sourdough-bread`, { waitUntil: 'networkidle' })
   await page.getByRole('button', { name: 'Add flour' }).first().click()
   await page.getByLabel('Flour 3 name').fill('Rye')
   await page.getByLabel('Rye percentage').fill('10')
@@ -65,7 +65,7 @@ try {
   // Signed in: the typed name and the browser formula save on return from sign-in, with no extra step.
   const member = await browser.newContext({ viewport: { width: 1280, height: 900 } })
   await signIn(member, BASE)
-  page = await open(member, '/kitchen/new-york-style-pizza')
+  page = await open(member, '/notebook/new-york-style-pizza')
   await page.getByRole('textbox', { name: 'Hydration' }).fill('68')
   await page.getByRole('heading', { level: 1 }).click()
   await page.getByRole('textbox', { name: 'Formula name' }).fill('  Friday   pies ')
@@ -77,14 +77,14 @@ try {
   await page.getByRole('textbox', { name: 'Formula name' }).waitFor({ state: 'detached' })
   await page.getByRole('heading', { level: 1, name: 'Friday pies' }).waitFor()
   check('the unsaved name stays in this browser', await page.evaluate(() => localStorage.getItem('eatyeet:kitchen:new-york-style-pizza:name')) === 'Friday pies')
-  await page.goto(`${BASE}/kitchen/new-york-style-pizza?save=1`, { waitUntil: 'networkidle' })
-  await page.waitForURL(/\/kitchen\/new-york-style-pizza\/[A-Za-z0-9_-]{16}\/bake$/)
+  await page.goto(`${BASE}/notebook/new-york-style-pizza?save=1`, { waitUntil: 'networkidle' })
+  await page.waitForURL(/\/notebook\/new-york-style-pizza\/[A-Za-z0-9_-]{16}\/bake$/)
   check('returning from sign-in saves without a dialog', await page.getByRole('dialog').count() === 0)
-  await page.getByRole('status').filter({ hasText: 'Saved to Test Kitchen' }).waitFor()
+  await page.getByRole('status').filter({ hasText: 'Saved to Notebook' }).waitFor()
   await page.getByRole('heading', { level: 1, name: 'Friday pies' }).waitFor()
   check('saving opens the formula\'s bake sheet under its name', (await page.locator('#recipe-card').textContent()).includes('846g Kirkland Organic All-Purpose Flour'))
   await page.getByRole('link', { name: 'Edit formula' }).click()
-  await page.waitForURL(/\/kitchen\/new-york-style-pizza\/[A-Za-z0-9_-]{16}$/)
+  await page.waitForURL(/\/notebook\/new-york-style-pizza\/[A-Za-z0-9_-]{16}$/)
   const formulaUrl = page.url()
   await page.getByRole('heading', { level: 1, name: 'Friday pies' }).waitFor()
   check('Edit formula opens the editor', await page.getByRole('textbox', { name: 'Hydration' }).inputValue() === '68')
@@ -146,7 +146,7 @@ try {
 
   // Duplicate opens the copy at once under the next free name, ready to rename; names stay unique.
   await page.getByRole('button', { name: 'Duplicate' }).click()
-  await page.waitForURL((url) => url.href !== formulaUrl && /\/kitchen\/new-york-style-pizza\/[A-Za-z0-9_-]{16}$/.test(url.pathname))
+  await page.waitForURL((url) => url.href !== formulaUrl && /\/notebook\/new-york-style-pizza\/[A-Za-z0-9_-]{16}$/.test(url.pathname))
   const copyName = page.getByRole('textbox', { name: 'Formula name' })
   await copyName.waitFor()
   check('the copy opens with its name selected', await copyName.inputValue() === 'Friday pies copy' && await copyName.evaluate((input) => document.activeElement === input && input.selectionStart === 0 && input.selectionEnd === input.value.length))
@@ -162,7 +162,7 @@ try {
 
   // Delete moves to Recently deleted with Undo.
   await page.getByRole('button', { name: 'Delete formula' }).click()
-  await page.waitForURL('**/kitchen?deleted=*')
+  await page.waitForURL('**/notebook?deleted=*')
   await page.getByRole('status').filter({ hasText: 'Deleted Friday pies, wetter' }).waitFor()
   check('deleting returns to the library with Undo', await page.locator('[data-kitchen-formula]').count() === 1)
   await page.getByRole('button', { name: 'Undo' }).click()
@@ -172,7 +172,7 @@ try {
   check('library cards open bake sheets', (await page.locator('[data-kitchen-formula]').first().getAttribute('href')).endsWith('/bake'))
 
   await page.goto(`${BASE}/recipes/new-york-style-pizza`, { waitUntil: 'networkidle' })
-  await page.locator('[data-recipe-kitchen] a[href^="/kitchen/new-york-style-pizza/"]').first().waitFor()
+  await page.locator('[data-recipe-kitchen] a[href^="/notebook/new-york-style-pizza/"]').first().waitFor()
   check('the recipe links to the member\'s versions', (await page.locator('[data-recipe-kitchen]').textContent()).includes('Friday pies'))
   await member.close()
 
@@ -188,7 +188,7 @@ try {
     check(`dough total is docked at ${width}px`, await dock.isVisible() && (await dock.textContent()).includes('1,440g'))
     await dock.getByRole('button', { name: /Your dough/ }).click()
     check(`docked dough expands at ${width}px`, await dock.locator('[data-dough-results]').isVisible())
-    page = await open(phone, '/kitchen/sourdough-bread')
+    page = await open(phone, '/notebook/sourdough-bread')
     check(`sourdough calculator fits ${width}px`, await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth))
     await phone.close()
   }

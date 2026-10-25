@@ -173,8 +173,8 @@ function KitchenFormulaEditor({ kitchen, formulaId, client }: { kitchen: Kitchen
     setNotice({ message: 'Copy created. The original is unchanged.' })
   }, [])
 
-  if (editor.loadError) return <KitchenMessage title={editor.loadError.missing ? 'Formula not found' : 'Test Kitchen is unavailable'}
-    action={editor.loadError.missing ? <Button asChild><a href="/kitchen">Back to Test Kitchen</a></Button> : <Button onClick={() => void editor.reload()}>Try again</Button>}>
+  if (editor.loadError) return <KitchenMessage title={editor.loadError.missing ? 'Formula not found' : 'Notebook is unavailable'}
+    action={editor.loadError.missing ? <Button asChild><a href="/notebook">Back to Notebook</a></Button> : <Button onClick={() => void editor.reload()}>Try again</Button>}>
     {editor.loadError.missing ? 'It may have been deleted, or it belongs to another account.' : editor.loadError.message}
   </KitchenMessage>
   if (!formula || !draft) return <KitchenMessage title="Loading your formula…" busy>Your formula and its history are on their way.</KitchenMessage>
@@ -218,7 +218,7 @@ function KitchenFormulaEditor({ kitchen, formulaId, client }: { kitchen: Kitchen
     try {
       await editor.flush()
       await client.remove(formulaId)
-      navigate({ to: '/kitchen', search: { deleted: formulaId } })
+      navigate({ to: '/notebook', search: { deleted: formulaId } })
     } catch (error) {
       setDeleting(false)
       setNotice({ tone: 'error', message: kitchenErrorMessage(error, 'The formula could not be deleted. Please try again.') })
@@ -241,7 +241,7 @@ function KitchenFormulaEditor({ kitchen, formulaId, client }: { kitchen: Kitchen
       onErrorsChange={editor.reportErrors}
       header={<>
         <KitchenHeader
-          crumbs={[{ label: 'Test Kitchen', href: '/kitchen' }, { label: draft.name, href: bakeHref }, { label: 'Edit' }]}
+          crumbs={[{ label: 'Notebook', href: '/notebook' }, { label: draft.name, href: bakeHref }, { label: 'Edit' }]}
           title={<FormulaTitle key={formulaId} name={draft.name} onRename={rename} autoEdit={copied} />}
           meta={<>
             <span>From <a href={`/recipes/${recipe.slug}`} className="font-action font-bold underline decoration-1 underline-offset-4 hover:decoration-2">{recipe.title}</a></span>

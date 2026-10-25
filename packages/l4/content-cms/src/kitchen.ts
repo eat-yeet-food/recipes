@@ -4,7 +4,7 @@ import { formulaStateErrors, isDoughFormulaState, type DoughFormulaState } from 
 import { memberRef } from './member-ref'
 import { contentServices } from './service'
 
-// Test Kitchen formulas belong to one member and are never public. Like the
+// Notebook formulas belong to one member and are never public. Like the
 // other member collections they have no REST/admin surface; only this
 // service's unforgeable capability reaches them.
 const kitchenCapability = Symbol.for('eat-yeet.kitchen-service')

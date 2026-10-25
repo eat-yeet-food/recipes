@@ -106,7 +106,7 @@ export function KitchenScratchPage({ kitchen, client, sharedConfig, saveOnArriva
     writeScratchName(recipe.slug, kept)
     return null
   }
-  const saveLabel = saving ? 'Saving…' : member ? 'Save to Test Kitchen' : 'Sign in to save'
+  const saveLabel = saving ? 'Saving…' : member ? 'Save to Notebook' : 'Sign in to save'
   const bakeHref = kitchenPath(recipe.slug, undefined, true)
 
   return <>
@@ -119,7 +119,7 @@ export function KitchenScratchPage({ kitchen, client, sharedConfig, saveOnArriva
       onErrorsChange={setErrors}
       header={<>
         <KitchenHeader
-          crumbs={[{ label: 'Test Kitchen', href: '/kitchen' }, { label: recipe.title }]}
+          crumbs={[{ label: 'Notebook', href: '/notebook' }, { label: recipe.title }]}
           title={<FormulaTitle name={name ?? recipe.title} onRename={rename} />}
           meta={<>
             <span>Unsaved formula from <a href={`/recipes/${recipe.slug}`} className="font-action font-bold underline decoration-1 underline-offset-4 hover:decoration-2">the recipe</a></span>

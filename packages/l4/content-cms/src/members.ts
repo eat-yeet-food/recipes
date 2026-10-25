@@ -53,7 +53,7 @@ export const memberSessionsCollection: CollectionConfig = {
   ],
 }
 
-// Retired with the recipe-page calculator: Test Kitchen formulas replaced the
+// Retired with the recipe-page calculator: Notebook formulas replaced the
 // saved-formula store. Declared so the schema stays additive; account deletion
 // still clears any rows written by the earlier release.
 export const memberWorkbenchesCollection: CollectionConfig = {

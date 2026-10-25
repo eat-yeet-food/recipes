@@ -3,7 +3,7 @@ import { KitchenError, cleanFormulaName, type KitchenClient, type KitchenFormula
 type Seed = { name: string; recipeSlug: string; family: string; state: unknown; notes?: string; history?: { state: unknown; minutesAgo: number }[]; deleted?: boolean }
 
 /**
- * In-memory Test Kitchen transport for Storybook, following the server's
+ * In-memory Notebook transport for Storybook, following the server's
  * rules: unique names, revision conflicts, restore as a new version and soft
  * delete.
  */
@@ -23,7 +23,7 @@ export function memoryKitchenClient({ formulas: seeds = [], delay = 0, fail = fa
   }
   const wait = async () => {
     if (delay) await new Promise((resolve) => setTimeout(resolve, delay))
-    if (fail) throw new KitchenError('Test Kitchen is unavailable. Please try again.', 503)
+    if (fail) throw new KitchenError('Notebook is unavailable. Please try again.', 503)
   }
   const own = (formulaId: string) => {
     const formula = store.get(formulaId)

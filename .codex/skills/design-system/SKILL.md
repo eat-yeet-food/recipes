@@ -30,8 +30,8 @@ handbook’s context-specific variants. A mismatch in the article header does
 not justify changing the approved recipe-card actions. For borderless text
 actions, use the handbook’s shared unpadded, underlined treatment; do not borrow
 filled-button spacing or remove the visible clickable cue. Use a dedicated labeled
-switch for binary settings rather than a button-styled row. Test Kitchen UI
-follows the **Test Kitchen** contract: recipes render as written, each formula
+switch for binary settings rather than a button-styled row. Notebook UI
+follows the **Notebook** contract: recipes render as written, each formula
 has its own page, edits autosave with History, names are edited in place on the
 page heading, and Duplicate is the only way to branch. Do not reintroduce Save /
 Save as choices, naming dialogs or a recipe-page calculator.
