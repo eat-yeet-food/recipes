@@ -208,7 +208,7 @@ methodOptions:
                   shredded [Trader Joe's whole milk low moisture
                   mozzarella](https://www.traderjoes.com/home/search?q=whole%20milk%20low%20moisture%20mozzarella&section=products)
               - id: pecorino
-                text: pecorino romano
+                text: optional pecorino romano
               - id: pizza-toppings-item-4
                 text: >-
                   [Olive
@@ -221,7 +221,7 @@ methodOptions:
                   flour](https://www.wholefoodsmarket.com/product/365-by-whole-foods-market-all-purpose-flour-80-oz-b074jd6hhh)
                   for dusting
               - id: oregano
-                text: dried oregano
+                text: optional dried oregano
         steps:
           - title: Dough
             items:
@@ -259,7 +259,7 @@ methodOptions:
                   freeze / refrigerate for a bit, but always bring to room temperature immediately before use to avoid
                   gummy pizza.
               - id: steps-2-item-2
-                text: 'Cheese: Grate the mozzarella and finely grate the romano.'
+                text: 'Cheese: Grate the mozzarella and, if using, finely grate the romano.'
               - id: steps-2-item-3
                 text: 'Bench flour: Mix 50/50 semolina + all purpose flour in a small bowl and set aside.'
             id: steps-2
@@ -284,9 +284,9 @@ methodOptions:
                   Apply sauce to the pizza in a circular motion with a large spoon all the way to the raised portion
                   that will become your crust.
               - id: steps-3-item-8
-                text: Pinch dried oregano in your fingers to oxidize and spread over the top of the sauce.
+                text: (Optional) Pinch dried oregano in your fingers to oxidize and spread over the top of the sauce.
               - id: steps-3-item-9
-                text: 'Spread Romano cheese evenly over the entire pizza, covering as much of the sauce as possible.'
+                text: '(Optional) Spread Romano cheese evenly over the entire pizza, covering as much of the sauce as possible.'
               - id: steps-3-item-10
                 text: Scatter the shredded mozzarella evenly over the top.
             id: steps-3
@@ -413,7 +413,7 @@ blocks:
               shredded [Trader Joe's whole milk low moisture
               mozzarella](https://www.traderjoes.com/home/search?q=whole%20milk%20low%20moisture%20mozzarella&section=products)
           - id: pecorino
-            text: pecorino romano
+            text: optional pecorino romano
           - id: pizza-toppings-item-4
             text: >-
               [Olive
@@ -426,7 +426,7 @@ blocks:
               flour](https://www.wholefoodsmarket.com/product/365-by-whole-foods-market-all-purpose-flour-80-oz-b074jd6hhh)
               for dusting
           - id: oregano
-            text: dried oregano
+            text: optional dried oregano
     steps:
       - title: Dough
         items:
@@ -460,7 +460,7 @@ blocks:
               easy-to-spread consistency. Place sauce in a small bowl and cover with saran wrap. It's ok to freeze /
               refrigerate for a bit, but always bring to room temperature immediately before use to avoid gummy pizza.
           - id: steps-2-item-2
-            text: 'Cheese: Grate the mozzarella and finely grate the romano.'
+            text: 'Cheese: Grate the mozzarella and, if using, finely grate the romano.'
           - id: steps-2-item-3
             text: 'Bench flour: Mix 50/50 semolina + all purpose flour in a small bowl and set aside.'
         id: steps-2
@@ -483,9 +483,9 @@ blocks:
               Apply sauce to the pizza in a circular motion with a large spoon all the way to the raised portion that
               will become your crust.
           - id: steps-3-item-8
-            text: Pinch dried oregano in your fingers to oxidize and spread over the top of the sauce.
+            text: (Optional) Pinch dried oregano in your fingers to oxidize and spread over the top of the sauce.
           - id: steps-3-item-9
-            text: 'Spread Romano cheese evenly over the entire pizza, covering as much of the sauce as possible.'
+            text: '(Optional) Spread Romano cheese evenly over the entire pizza, covering as much of the sauce as possible.'
           - id: steps-3-item-10
             text: Scatter the shredded mozzarella evenly over the top.
         id: steps-3
