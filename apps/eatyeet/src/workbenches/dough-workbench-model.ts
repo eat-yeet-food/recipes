@@ -101,9 +101,11 @@ export function resolveWorkbenchRecipe(recipe: RecipeContent, selection: DoughWo
     const otherIngredients = block.ingredients.filter((section) => !replacedSectionIds.has(section.id))
     const ingredients = [{ id: doughSectionId, title: doughTitle, items, itemIds: result.freshFlour.filter((part) => part.grams > 0.005).map((part) => `flour-${part.id}`).concat(['water'], result.levainGrams > 0 ? ['levain'] : [], result.oilGrams > 0.005 ? ['oil'] : [], result.sugarGrams > 0.005 ? ['sugar'] : [], result.maltGrams > 0.005 ? ['malt'] : [], result.yeastGrams > 0.005 ? ['yeast'] : [], ['salt']) }, ...otherIngredients.map((section) => {
       const label = config.perPieceIngredientLabel ?? selection.batch.pieceLabel
+      // A single piece needs no per-piece/total split.
+      const single = selection.batch.count === 1
       return {
         ...section,
-        title: section.id === 'pizza-toppings' ? `Pizza toppings (per ${label}; ${selection.batch.count} total)` : section.title,
+        title: section.id === 'pizza-toppings' && !single ? `Pizza toppings (per ${label}; ${selection.batch.count} total)` : section.title,
         items: section.items.map((item, index) => {
           const quantity = config.perPieceIngredientQuantities?.[section.itemIds[index]]
           if (!quantity) return item
@@ -112,6 +114,7 @@ export function resolveWorkbenchRecipe(recipe: RecipeContent, selection: DoughWo
             if ((quantity.unit === 'tsp' || quantity.unit === 'tbsp') && Math.abs(amount * 8 - Math.round(amount * 8)) < 0.0001) return `${formatEighths(amount)} ${quantity.unit}`
             return `${quantity.unit === 'g' && amount >= 20 ? Math.round(amount) : Number(amount.toFixed(1))} ${quantity.unit}`
           }
+          if (single) return `${display(quantity.quantity * toppingScale)} ${item}`
           return `${display(quantity.quantity * toppingScale)} ${item} (${display(quantity.quantity * toppingScale * selection.batch.count)} total)`
         }),
       }
@@ -122,7 +125,7 @@ export function resolveWorkbenchRecipe(recipe: RecipeContent, selection: DoughWo
       items: section.items.map((item) => renderFormulaBindings(item, selection, config, result)),
     }))
     const formulaNote = selection.formula.family === 'pizza'
-      ? `This dough is ${formatPercent(selection.formula.hydrationPercent)} hydration and makes ${selection.batch.count} × ${formatAppliedGrams(selection.batch.pieceWeightGrams)} balls (${formatAppliedGrams(result.totalDoughGrams)} total).`
+      ? `This dough is ${formatPercent(selection.formula.hydrationPercent)} hydration and makes ${selection.batch.count === 1 ? `one ${formatAppliedGrams(selection.batch.pieceWeightGrams)} ball` : `${selection.batch.count} × ${formatAppliedGrams(selection.batch.pieceWeightGrams)} balls (${formatAppliedGrams(result.totalDoughGrams)} total)`}.`.replace(/^(.*makes) 1 × (\S+) balls \(.*\)\.$/, '$1 one $2 ball.')
       : `This dough is ${formatPercent(selection.formula.hydrationPercent)} hydration with ${formatPercent(result.prefermentedFlourPercent)} prefermented flour and makes ${selection.batch.count} × ${formatAppliedGrams(selection.batch.pieceWeightGrams)} ${pieceCountLabel(selection.batch.count, 'loaf')}.`
     const notes = [formulaNote, ...block.notes.filter((note) => !/formula uses|dough formula|lands around/i.test(note))]
     const equipment = process?.mixingMethod === 'hand' ? block.equipment.map((section) => {

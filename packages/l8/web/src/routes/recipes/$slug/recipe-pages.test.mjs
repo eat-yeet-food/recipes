@@ -85,6 +85,8 @@ await desktop.locator('[data-recipe-kitchen]').getByRole('link').first().waitFor
 check('the calculator lives in your Notebook', await desktop.locator('[data-recipe-kitchen] a[href="/notebook/new-york-style-pizza"]').count() === 1, await desktop.locator('[data-recipe-kitchen]').textContent())
 check('recipe controls appear once in the header', await desktop.getByRole('button', { name: 'Cooking view' }).count() === 1 && await desktop.getByRole('button', { name: 'Print Recipe' }).count() === 1 && await desktop.getByRole('link', { name: 'Pin Recipe' }).count() === 1 && await desktop.getByRole('switch', { name: 'Cook Mode' }).count() === 0)
 check('recipes start with one pizza today', (await desktop.locator('[data-today-batch]').textContent()).includes('Making 1 pizza today') && !desktop.url().includes('count='))
+const onePizzaText = await desktop.locator('#recipe-card').textContent()
+check('one pizza lists toppings without batch totals', onePizzaText.includes('6 oz pizza sauce') && !onePizzaText.includes(' total)') && onePizzaText.includes('makes one '), onePizzaText.slice(0, 600))
 await desktop.getByRole('button', { name: 'More pizzas' }).click()
 await desktop.getByRole('button', { name: 'More pizzas' }).click()
 const authoredPizzaText = await desktop.locator('#recipe-card').textContent()
