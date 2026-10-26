@@ -125,7 +125,7 @@ try {
   await page.getByRole('heading', { level: 1, name: 'Friday pies' }).waitFor()
   await page.getByRole('button', { name: 'More pizzas' }).click()
   bake = await page.locator('#recipe-card').textContent()
-  check('today\'s batch scales the bake sheet only', bake.includes('Making 4 pizzas today') && bake.includes('Friday pies keeps 3') && page.url().endsWith('/bake?count=4'), bake.slice(0, 300))
+  check('today\'s batch scales the bake sheet only', bake.includes('Making 4 pizzas today') && bake.includes('The usual batch for Friday pies is 3.') && page.url().endsWith('/bake?count=4'), bake.slice(0, 300))
   await page.goto(formulaUrl, { waitUntil: 'networkidle' })
   await page.getByRole('heading', { level: 1, name: 'Friday pies' }).waitFor()
   check('the formula keeps its usual batch', await page.getByRole('textbox', { name: 'Pizzas' }).inputValue() === '3')

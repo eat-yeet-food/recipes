@@ -29,11 +29,10 @@ export function RecipeClient({
     }
   }, [recipe.slug])
   // Recipes render as written; the calculator's authored default fills in dough weights and bound steps.
-  // The only change a reader makes here is how many pieces to make today (`?count=`).
+  // The only change a reader makes here is how many pieces to make today (`?count=`), starting at 1.
   const plugin = recipe.workbench ? recipeWorkbenchRegistry.get(recipe.workbench.id) : undefined
   const authored = useMemo(() => plugin ? plugin.defaultState(recipe.workbench.config) : null, [plugin, recipe])
-  const usual = plugin && authored !== null ? plugin.batchCount(authored) : 1
-  const [count, setCount] = useTodayCount(usual)
+  const [count, setCount] = useTodayCount(1)
   const page = useMemo(() => plugin && authored !== null
     ? plugin.resolveRecipe(recipe, recipe.workbench.config, plugin.withBatchCount(authored, count))
     : authoredRecipe(recipe, recipeWorkbenchRegistry), [plugin, authored, recipe, count])
@@ -44,8 +43,7 @@ export function RecipeClient({
       siteUrl={siteUrl}
       blockRegistry={pageBlockRegistry}
       beforeIngredients={plugin && authored !== null ? <>
-        <TodayBatch count={count} usual={usual} noun={plugin.batchNoun(authored, count)} plural={plugin.batchNoun(authored, 2)} onChange={setCount}
-          usualNote="The batch as written." changedNote={`Just this bake. The recipe makes ${usual}.`} />
+        <TodayBatch count={count} noun={plugin.batchNoun(authored, count)} plural={plugin.batchNoun(authored, 2)} onChange={setCount} />
         <RecipeKitchenLink recipeSlug={recipe.slug} client={kitchenClient} />
       </> : undefined}
       rating={<RecipeRating key={recipe.slug} title={recipe.title} client={ratingClient} />}

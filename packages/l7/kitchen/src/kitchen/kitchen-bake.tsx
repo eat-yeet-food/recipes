@@ -34,8 +34,8 @@ export function KitchenBakeSheet({ kitchen, state, name, heading, siteUrl, block
       siteUrl={siteUrl}
       blockRegistry={blockRegistry}
       heading={heading}
-      beforeIngredients={<TodayBatch count={count} usual={usual} noun={noun} plural={plugin.batchNoun(state, 2)} onChange={setCount}
-        usualNote={`The usual batch for ${name}.`} changedNote={`Just this bake. ${name} keeps ${usual}.`} />}
+      beforeIngredients={<TodayBatch count={count} noun={noun} plural={plugin.batchNoun(state, 2)} onChange={setCount}
+        note={`The usual batch for ${name} is ${usual}.`} />}
     />
   </div>
 }
