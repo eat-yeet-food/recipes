@@ -250,7 +250,7 @@ function KitchenFormulaEditor({ kitchen, formulaId, client }: { kitchen: Kitchen
           actions={<>
             <Button variant="utility" size="sm" onClick={() => setHistoryOpen(true)}><History className="size-4" />History</Button>
             <Button variant="utility" size="sm" disabled={duplicating} onClick={() => void duplicate()}><Copy className="size-4" />{duplicating ? 'Copying…' : 'Duplicate'}</Button>
-            <Button asChild className="max-[640px]:hidden"><a href={bakeHref} onClick={openBakeSheet}>Bake sheet<ArrowRight className="size-4" /></a></Button>
+            <Button asChild className="max-[640px]:hidden"><a href={bakeHref} onClick={openBakeSheet}>Apply<ArrowRight className="size-4" /></a></Button>
           </>}
         />
         {editor.mismatch && <p role="status" className="mt-4 rounded-field bg-tint p-4 text-sm">This formula no longer matches the recipe’s options, so it opens with the recipe’s values. Your earlier versions are still in History.</p>}
@@ -271,7 +271,7 @@ function KitchenFormulaEditor({ kitchen, formulaId, client }: { kitchen: Kitchen
           <span className="whitespace-nowrap text-muted-foreground">{timeAgo(revision.updatedAt)}</span>
         </li>)}</ul>
       </section>}
-      dockAction={<Button asChild variant="on-ink" size="sm"><a href={bakeHref} onClick={openBakeSheet}>Bake sheet</a></Button>}
+      dockAction={<Button asChild variant="on-ink" size="sm"><a href={bakeHref} onClick={openBakeSheet}>Apply</a></Button>}
     />
     <HistorySheet open={historyOpen} onOpenChange={setHistoryOpen} title={draft.name} revisions={revisions}
       complete={revisions.length < 100} restoring={restoring} onRestore={(revision) => void restore(revision)}

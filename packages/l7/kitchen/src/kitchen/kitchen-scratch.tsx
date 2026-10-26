@@ -126,7 +126,7 @@ export function KitchenScratchPage({ kitchen, client, sharedConfig, saveOnArriva
             <SaveStatus state={errors.length ? { kind: 'invalid' } : { kind: 'local' }} />
           </>}
           actions={<>
-            <Button asChild variant="utility" size="sm" className="max-[640px]:hidden"><a href={bakeHref}>Bake sheet</a></Button>
+            <Button asChild variant="utility" size="sm" className="max-[640px]:hidden"><a href={bakeHref}>Apply</a></Button>
             <Button disabled={errors.length > 0 || saving} onClick={save}><Save className="size-4" />{saveLabel}</Button>
           </>}
         />

@@ -183,9 +183,8 @@ export function DoughFormulaEditor({ recipe, config, state, onChange, onErrorsCh
 
   return <NumericFields.Provider value={numericFields}>
     <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-10" data-dough-editor={formula.family}>
-      <Section title="Usual batch" description="What this formula normally makes. A bake sheet can make more or fewer without changing it.">
+      <Section title="Size" description="Choose how many to make on the bake sheet.">
         <div className="grid grid-cols-2 gap-x-6 gap-y-5 md:grid-cols-4">
-          <Field label={pizza ? 'Pizzas' : pieces.charAt(0).toUpperCase() + pieces.slice(1)} value={batch.count} min={1} step="1" onChange={(count) => updateBatch({ count })} />
           {pizza && config.pizzaSizing && <div className="grid min-w-0 content-start gap-1">
             <label htmlFor={`${prefix}-size`} className="font-action text-sm font-bold">Pizza size</label>
             <Select surface="underline" id={`${prefix}-size`} value={batch.diameterInches ?? ''} onChange={(event) => {
@@ -199,7 +198,6 @@ export function DoughFormulaEditor({ recipe, config, state, onChange, onErrorsCh
             </Select>
           </div>}
           <Field label={pizza ? 'Ball weight' : `${batch.pieceLabel === 'loaf' ? 'Loaf' : 'Ball'} weight`} suffix="g" positive decimalPlaces={0} value={batch.pieceWeightGrams} onChange={(pieceWeightGrams) => updateBatch({ pieceWeightGrams })} />
-          <Field label="Total dough" suffix="g" positive decimalPlaces={0} value={batch.count * batch.pieceWeightGrams} onChange={(total) => updateBatch({ pieceWeightGrams: total / batch.count })} />
         </div>
       </Section>
 

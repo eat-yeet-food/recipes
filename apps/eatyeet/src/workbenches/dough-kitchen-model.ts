@@ -68,7 +68,7 @@ export function doughRows(state: DoughFormulaState): { total: string; totalDetai
     ? calculateDoughLevainBuild(result.levainGrams, formula.starter, formula.levainBuild) : null
   return {
     total: formatDoughGrams(result.totalDoughGrams),
-    totalDetail: `${batch.count} ${pieces(batch.count, batch.pieceLabel, formula.family)} × ${formatDoughGrams(batch.pieceWeightGrams)}`,
+    totalDetail: batch.count === 1 ? `1 ${pieces(1, batch.pieceLabel, formula.family)}` : `${batch.count} ${pieces(batch.count, batch.pieceLabel, formula.family)} × ${formatDoughGrams(batch.pieceWeightGrams)}`,
     rows,
     levainBuild: build && build.errors.length === 0
       ? [`${formatDoughGrams(build.seedStarterGrams)} seed starter`, ...build.freshFlour.map((part) => `${formatDoughGrams(part.grams)} ${part.name}`), `${formatDoughGrams(build.addedWaterGrams)} water`].join(' + ') + levainYield(build.buildGrams, result.levainGrams, formatDoughGrams)
