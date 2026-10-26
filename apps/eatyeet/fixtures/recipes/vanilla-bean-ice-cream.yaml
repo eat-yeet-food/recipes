@@ -49,7 +49,7 @@ blocks:
           - id: ingredients-1-item-2
             text: 305g (1¼ cups) skim milk
           - id: ingredients-1-item-3
-            text: 185g (¾ cup + 3 tbsp) cane sugar
+            text: 185g cane sugar
           - id: ingredients-1-item-4
             text: 2 large egg yolks
           - id: ingredients-1-item-7
