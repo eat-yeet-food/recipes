@@ -45,9 +45,9 @@ blocks:
       - title: ''
         items:
           - id: ingredients-1-item-1
-            text: 476g (2 cups) cold heavy whipping cream
+            text: 476g cold heavy whipping cream
           - id: ingredients-1-item-2
-            text: 305g (1¼ cups) skim milk
+            text: 305g skim milk
           - id: ingredients-1-item-3
             text: 185g cane sugar
           - id: ingredients-1-item-4
