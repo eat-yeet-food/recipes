@@ -39,19 +39,19 @@ blocks:
           - id: equipment-1-item-3
             text: Saucepan
           - id: equipment-1-item-4
-            text: Shallow freezer container, pre-chilled
+            text: Covered freezer container
         id: equipment-1
     ingredients:
       - title: ''
         items:
           - id: ingredients-1-item-1
-            text: 476g cold heavy whipping cream
+            text: 476g heavy whipping cream
           - id: ingredients-1-item-2
             text: 305g skim milk
           - id: ingredients-1-item-3
-            text: 185g cane sugar
+            text: 170g granulated sugar
           - id: ingredients-1-item-4
-            text: 2 large egg yolks
+            text: 32g egg yolk
           - id: ingredients-1-item-7
             text: 1 tbsp vanilla bean paste
         id: ingredients-1
@@ -60,34 +60,24 @@ blocks:
         items:
           - id: steps-1-item-1
             text: >-
-              **Warm the milk:** Combine the skim milk and about half the sugar in a saucepan. Heat until steaming.
-          - id: steps-1-item-2
-            text: >-
-              **Temper the yolks:** Whisk the egg yolks with the remaining sugar. Slowly whisk ½–1 cup of the hot milk
-              into the yolks, then pour the tempered yolks back into the saucepan.
+              **Combine:** Combine the cream, skim milk, sugar, and egg yolk in a saucepan. Whisk thoroughly.
           - id: steps-1-item-3
             text: >-
-              **Cook to 175°F:** Cook over medium-low heat, stirring constantly, until the base reaches 175°F (79–80°C).
-              Remove from heat immediately. Do not boil or keep cooking once it reaches temperature.
+              **Cook to 168°F:** Heat gently, stirring constantly. Remove from heat at 168°F (76°C). Do not boil or
+              reduce.
           - id: steps-1-item-4
-            text: >-
-              **Add the cold cream:** Pour the hot custard directly into the cold heavy cream and stir in the vanilla
-              bean paste. Set the bowl in an ice-water bath and stir occasionally until thoroughly cold.
+            text: '**Add the vanilla:** Stir in the vanilla bean paste immediately after removing from the heat.'
           - id: steps-1-item-5
-            text: '**Age:** Cover and refrigerate 4–24 hours, until thoroughly chilled (ideally 35–38°F).'
+            text: '**Chill:** Cool quickly in an ice-water bath. Cover and refrigerate 4–24 hours.'
           - id: steps-1-item-6
-            text: >-
-              **Churn:** Using a completely frozen bowl and very cold base, churn until it reaches a thick, dense soft-serve
-              consistency, generally 20–25 minutes. Go by texture rather than the clock.
+            text: '**Churn:** Churn in a completely frozen Cuisinart bowl until thick, dense soft serve.'
           - id: steps-1-item-7
-            text: >-
-              **Harden:** Immediately transfer to the pre-chilled container. Press parchment against the surface, cover, and
-              freeze in the coldest part of the freezer for 4–6 hours. Let sit about 5 minutes before scooping.
+            text: '**Freeze:** Transfer to a covered container and freeze 4–6 hours or overnight.'
         id: steps-1
     notes:
       - 'Just cream, milk, sugar, yolks, and vanilla.'
-      - '185g sugar makes a deliberately sweet, scoop-shop-style ice cream that scoops softly.'
-      - 'Two yolks add just enough richness while keeping the color pale and the vanilla front and center.'
+      - '170g sugar makes a sweet, scoop-shop-style ice cream that scoops softly.'
+      - '32g of yolk (about two large) adds just enough richness while keeping the color pale and the vanilla front and center.'
       - 'Cream plus skim milk gives a high-fat, low-water base for a dense, smooth scoop.'
     tips:
-      - 'Pulling the base at 175°F sets the proteins gently for a silky, clean-tasting custard.'
+      - 'Pulling the base at 168°F sets the proteins gently for a silky, clean-tasting custard.'
