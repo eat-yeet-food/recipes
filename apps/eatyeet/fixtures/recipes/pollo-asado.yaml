@@ -31,7 +31,7 @@ blocks:
       - title: ''
         items:
           - id: ingredients-1-item-1
-            text: '1 can (7 oz) [chipotle peppers in adobo sauce](https://www.amazon.com/s?k=chipotles+in+adobo+sauce), peppers and sauce'
+            text: '200g [chipotles in adobo](/recipes/chipotles-in-adobo) (half a batch), peppers and sauce'
           - id: ingredients-1-item-8
             text: 1 tbsp white wine vinegar
           - id: ingredients-1-item-5
@@ -46,7 +46,7 @@ blocks:
         items:
           - id: steps-1-item-1
             text: >-
-              Blend the marinade: Add the whole can of chipotles in adobo, white wine vinegar, rice bran oil, and salt to
+              Blend the marinade: Add the chipotles in adobo, white wine vinegar, rice bran oil, and salt to
               a blender. Blend until smooth, about 30 seconds, scraping down as needed. The sauce should be thick,
               smoky, and glossy.
           - id: steps-1-item-2

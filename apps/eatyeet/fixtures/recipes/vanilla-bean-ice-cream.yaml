@@ -54,13 +54,15 @@ blocks:
             text: 32g egg yolk
           - id: ingredients-1-item-7
             text: 1 tbsp vanilla bean paste
+          - id: ingredients-1-item-8
+            text: 2 vanilla beans, split and scraped
         id: ingredients-1
     steps:
       - title: ''
         items:
           - id: steps-1-item-1
             text: >-
-              **Combine:** Combine the cream, skim milk, sugar, and egg yolk in a saucepan. Whisk thoroughly.
+              **Combine:** Combine the cream, skim milk, sugar, egg yolk, and the scraped vanilla seeds in a saucepan. Whisk thoroughly.
           - id: steps-1-item-3
             text: >-
               **Cook to 168°F:** Heat gently, stirring constantly. Remove from heat at 168°F (76°C). Do not boil or

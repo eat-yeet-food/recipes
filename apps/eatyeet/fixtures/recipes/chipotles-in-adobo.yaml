@@ -1,0 +1,78 @@
+sourceId: 'recipes:chipotles-in-adobo'
+status: published
+slug: chipotles-in-adobo
+title: Chipotles in Adobo
+order: 17
+description: 'Smoky, tangy homemade chipotles in adobo with no added sugar.'
+category: savory
+prepMinutes: 45
+cookMinutes: 35
+totalMinutes: 80
+yieldAmount: 400
+yieldUnit: g
+courses:
+  - condiments_and_sauces
+cuisines:
+  - central_american
+methods:
+  - stovetop
+restrictions:
+  - gluten_free
+  - vegetarian
+occasions:
+  - everyday
+ingredientTypes: []
+created: '2026-10-31'
+blocks:
+  - type: recipe
+    equipment:
+      - title: ''
+        items:
+          - id: equipment-1-item-1
+            text: Small saucepan with lid
+          - id: equipment-1-item-2
+            text: Blender
+        id: equipment-1
+    ingredients:
+      - title: ''
+        items:
+          - id: ingredients-1-item-1
+            text: 56g dried chipotle peppers (about 16–20 small peppers)
+          - id: ingredients-1-item-2
+            text: Boiling water, for soaking
+          - id: ingredients-1-item-3
+            text: 6 tbsp fresh water
+          - id: ingredients-1-item-4
+            text: ¼ cup finely minced onion
+          - id: ingredients-1-item-5
+            text: 45g white vinegar
+          - id: ingredients-1-item-6
+            text: 4 tsp tomato paste
+          - id: ingredients-1-item-7
+            text: 1 tsp kosher salt
+          - id: ingredients-1-item-8
+            text: 1 tsp neutral oil
+        id: ingredients-1
+    steps:
+      - title: ''
+        items:
+          - id: steps-1-item-1
+            text: '**Soak:** Cover the chipotles with boiling water and soak 30–45 minutes.'
+          - id: steps-1-item-2
+            text: '**Drain:** Drain, discard the soaking water, and remove the stems.'
+          - id: steps-1-item-3
+            text: '**Soften the onion:** Sauté the onion in the oil for 3–4 minutes, until soft.'
+          - id: steps-1-item-4
+            text: '**Combine:** Add the chipotles, fresh water, vinegar, tomato paste, and salt.'
+          - id: steps-1-item-5
+            text: >-
+              **Simmer:** Cover and gently simmer 20–30 minutes, adding a tablespoon of water if needed.
+          - id: steps-1-item-6
+            text: '**Blend:** Blend 2 chipotles with a few spoonfuls of sauce, then stir back into the pot.'
+          - id: steps-1-item-7
+            text: '**Reduce:** Simmer uncovered briefly until thick and saucy.'
+        id: steps-1
+    notes:
+      - 'Makes about 400g, equal to two 7 oz cans. Actual yield may vary.'
+    tips:
+      - 'Refrigerate promptly; freeze portions for longer storage.'
