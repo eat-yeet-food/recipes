@@ -10,6 +10,7 @@ cookMinutes: 35
 totalMinutes: 80
 yieldAmount: 400
 yieldUnit: g
+image: chipotles-in-adobo.jpg
 courses:
   - condiments_and_sauces
 cuisines:
