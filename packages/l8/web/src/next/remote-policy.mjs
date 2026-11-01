@@ -15,6 +15,13 @@ export function protectedPath(path) {
     ((path === '/api' || path.startsWith('/api/')) && !(path === '/api/public' || path.startsWith('/api/public/')))
 }
 export async function verifyAccess(token, env, fetcher = fetch, now = Date.now()) {
+  return await accessIdentity(token, env, fetcher, now) === 'owner'
+}
+/**
+ * Returns 'owner' for the owner's Access identity, 'service' for the staging
+ * deploy service token (public pages only, never owner capabilities), else false.
+ */
+export async function accessIdentity(token, env, fetcher = fetch, now = Date.now()) {
   try {
     if (!token || token.length > 16384 || !/^[a-z0-9-]+\.cloudflareaccess\.com$/.test(env.ACCESS_TEAM_DOMAIN)) return false
     const parts = token.split('.')
@@ -26,8 +33,11 @@ export async function verifyAccess(token, env, fetcher = fetch, now = Date.now()
     if (header.alg !== 'RS256' || typeof header.kid !== 'string' || claims.iss !== issuer ||
       !Number.isFinite(claims.exp) || claims.exp <= now / 1000 ||
       (claims.nbf != null && (!Number.isFinite(claims.nbf) || claims.nbf > now / 1000)) ||
-      claims.email?.toLowerCase() !== env.OWNER_EMAIL?.toLowerCase() ||
       !audiences.some((aud) => (Array.isArray(claims.aud) ? claims.aud : [claims.aud]).includes(aud))) return false
+    const owner = typeof claims.email === 'string' && claims.email.toLowerCase() === env.OWNER_EMAIL?.toLowerCase()
+    const service = env.DEPLOY_ENV === 'staging' && claims.email == null && /^[a-f0-9]{32}\.access$/.test(env.ACCESS_SERVICE_CLIENT_ID ?? '') &&
+      claims.common_name === env.ACCESS_SERVICE_CLIENT_ID
+    if (!owner && !service) return false
     let cached = jwksCache.get(issuer)
     if (!cached || cached.expires < now) {
       const response = await fetcher(`${issuer}/cdn-cgi/access/certs`, { signal: AbortSignal.timeout(5000) })
@@ -38,7 +48,8 @@ export async function verifyAccess(token, env, fetcher = fetch, now = Date.now()
     const jwk = cached.keys?.find((key) => key.kid === header.kid && key.kty === 'RSA')
     if (!jwk) return false
     const key = await crypto.subtle.importKey('jwk', jwk, { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['verify'])
-    return await crypto.subtle.verify('RSASSA-PKCS1-v1_5', key, decode(parts[2]), encoder.encode(parts.slice(0, 2).join('.')))
+    if (!await crypto.subtle.verify('RSASSA-PKCS1-v1_5', key, decode(parts[2]), encoder.encode(parts.slice(0, 2).join('.')))) return false
+    return owner ? 'owner' : 'service'
   } catch { return false }
 }
 export async function verifyReleaseProbe(token, secret, state, origin, now = Date.now()) {
@@ -81,8 +92,10 @@ export async function remoteRequest(request, env, next) {
   if (mediaHost && !path.startsWith('/media/')) return privateResponse(404, 'Not found')
   const accessToken = request.headers.get('Cf-Access-Jwt-Assertion')
   const needsAccess = env.DEPLOY_ENV === 'staging' || protectedPath(path)
-  const access = accessToken ? await verifyAccess(accessToken, env) : false
-  if (needsAccess && !access) return privateResponse(403, 'Owner Access authentication required')
+  const identity = accessToken ? await accessIdentity(accessToken, env) : false
+  const access = identity === 'owner'
+  // The deploy service token may read public staging pages, never owner paths.
+  if (needsAccess && !access && !(identity === 'service' && !protectedPath(path))) return privateResponse(403, 'Owner Access authentication required')
   // Build files contain no content/session data. Keep serving them during a
   // content release without a cross-region operations-bucket read per file.
   // Host and staging Access checks above still apply to every network request.

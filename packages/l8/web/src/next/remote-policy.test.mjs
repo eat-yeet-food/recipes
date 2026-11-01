@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { generateKeyPairSync, sign, createHmac } from 'node:crypto'
-import { remoteRequest, normalizedPath, protectedPath, verifyAccess, verifyReleaseProbe } from './remote-policy.mjs'
+import { remoteRequest, normalizedPath, protectedPath, verifyAccess, accessIdentity, verifyReleaseProbe } from './remote-policy.mjs'
 import { ProjectionCache } from './projection-cache.mjs'
 
 const { publicKey, privateKey } = generateKeyPairSync('rsa', { modulusLength: 2048 })
@@ -133,4 +133,23 @@ test('maintenance blocks images and pages while build files remain available', a
   }
   const response = await remoteRequest(new Request(env.SITE_URL + '/_next/static/chunks/01234567.js'), runtime, () => new Response('script'))
   assert.equal(await response.text(), 'script')
+})
+
+test('the staging deploy service token reads public staging pages but never owner paths or production', async () => {
+  const clientId = '0123456789abcdef0123456789abcdef.access'
+  const staging = { ...env, DEPLOY_ENV: 'staging', SITE_URL: 'https://staging.eatyeet.com', ACCESS_SERVICE_CLIENT_ID: clientId }
+  const service = jwt({ email: undefined, common_name: clientId })
+  assert.equal(await accessIdentity(service, staging, certs), 'service')
+  assert.equal(await verifyAccess(service, staging, certs), false)
+  assert.equal(await accessIdentity(service, { ...staging, DEPLOY_ENV: 'production' }, certs), false)
+  assert.equal(await accessIdentity(jwt({ email: undefined, common_name: 'other.access' }), staging, certs), false)
+  assert.equal(await accessIdentity(service, { ...staging, ACCESS_SERVICE_CLIENT_ID: '' }, certs), false)
+  assert.equal(await accessIdentity(jwt({ common_name: clientId, email: 'someone@example.test' }), staging, certs), false)
+  const seen = []
+  const next = async (request) => { seen.push(request.headers.get('x-eatyeet-access')); return new Response('ok') }
+  const headers = { 'Cf-Access-Jwt-Assertion': service }
+  assert.equal((await remoteRequest(new Request(staging.SITE_URL + '/recipes/a', { headers }), staging, next)).status, 200)
+  assert.deepEqual(seen, [null])
+  for (const path of ['/admin', '/api/owners', '/preview/recipes/a'])
+    assert.equal((await remoteRequest(new Request(staging.SITE_URL + path, { headers }), staging, next)).status, 403)
 })

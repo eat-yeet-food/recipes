@@ -1,6 +1,6 @@
 import { ObjectStore } from './storage.mjs'
 import { ReleaseLock } from './lock.mjs'
-import { ownerAccessSession } from './access-session.mjs'
+import { deployAccessSession } from './access-session.mjs'
 import { probeToken } from './release.mjs'
 import { cleanRevision, migrationManifest, digest, command } from './process.mjs'
 
@@ -41,7 +41,7 @@ export async function verifyRelease(context, releaseId) {
   const initial = (await operations.read('control.json'))?.value
   assertVerificationState(record, initial, outputs, (context.migrations ?? migrationManifest)())
   // Authentication is read-only and happens before taking a new writer lock.
-  const session = config.environment === 'staging' ? await (context.accessSession ?? ownerAccessSession)(config.origin) : undefined
+  const session = config.environment === 'staging' ? await (context.accessSession ?? deployAccessSession)(config.origin) : undefined
   const lock = new ReleaseLock(stateStore, config.environment)
   await lock.acquire(releaseId)
   const abort = new AbortController()

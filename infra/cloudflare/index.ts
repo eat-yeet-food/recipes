@@ -74,13 +74,21 @@ if (environment === 'bootstrap') {
     requires: [{ cloudflareAccountMember: { accountId } }, { loginMethod: { id: settings.cloudflareIdpId } }],
     mfaConfig: { mfaDisabled: false, allowedAuthenticators: ['totp', 'security_key', 'biometrics'], sessionDuration: '2h' },
   }, imported('owner'))
+  // Staging deploys verify through a non-expiring Access service token instead of
+  // an interactive owner login. The Worker admits it to public pages only.
+  // Access admits any valid service token here; the Worker pins the exact client ID.
+  const deployToken = environment === 'staging' && settings.accessServiceClientId
+  if (deployToken && !/^[a-f0-9]{32}\.access$/.test(settings.accessServiceClientId)) throw new Error('Invalid accessServiceClientId')
+  const servicePolicy = deployToken ? new cloudflare.ZeroTrustAccessPolicy('deploy-service', { accountId, name: `${prefix}-deploy-service`,
+    decision: 'non_identity', includes: [{ anyValidServiceToken: {} }],
+  }, protectedOptions) : undefined
   const host = new URL(settings.origin).hostname
   const paths = environment === 'staging' ? [''] : ['/admin', '/api', '/preview']
   const accessApps = paths.map((path, i) => new cloudflare.ZeroTrustAccessApplication(`owner-access-${i}`, {
     accountId, name: `${prefix}${path || '-staging'}`, domain: host + path, type: 'self_hosted',
     allowedIdps: [settings.cloudflareIdpId], sessionDuration: '2h', autoRedirectToIdentity: true,
     appLauncherVisible: false, allowAuthenticateViaWarp: false,
-    policies: [{ id: policy.id, precedence: 1 }],
+    policies: [{ id: policy.id, precedence: 1 }, ...(servicePolicy ? [{ id: servicePolicy.id, precedence: 2 }] : [])],
     mfaConfig: { mfaDisabled: false, allowedAuthenticators: ['totp', 'security_key', 'biometrics'], sessionDuration: '2h' },
   }, imported(`owner-access-${i}`)))
   if (environment === 'production') new cloudflare.ZeroTrustAccessApplication('public-api', {
@@ -95,6 +103,7 @@ if (environment === 'bootstrap') {
   const accountSecretNames = ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET']
   const variables = { DEPLOY_ENV: environment, SITE_URL: settings.origin, MEDIA_ORIGIN: settings.mediaOrigin,
     OWNER_EMAIL: settings.ownerEmail, ACCESS_TEAM_DOMAIN: settings.accessTeamDomain,
+    ...(deployToken ? { ACCESS_SERVICE_CLIENT_ID: settings.accessServiceClientId } : {}),
     RELEASE_ID: release?.id ?? 'uninitialized', INDEXABLE: settings.cutover && environment === 'production' ? '1' : '0' }
   const worker = new cloudflare.WorkersScript('application', {
     accountId, scriptName: prefix, content: content.toString(), contentType: 'application/javascript+module', mainModule: 'worker.js',

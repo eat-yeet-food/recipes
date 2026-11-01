@@ -7,7 +7,7 @@ import { infrastructure, saveOutputs } from './pulumi.mjs'
 import { archiveAssets, restoreAssets } from './assets.mjs'
 import { command, cleanRevision, migrationManifest, assertCompatible, digest } from './process.mjs'
 import { recoveryBookmark } from './backups.mjs'
-import { ownerAccessSession } from './access-session.mjs'
+import { deployAccessSession } from './access-session.mjs'
 import { deploymentManifest } from '../../infra/cloudflare/assets.cjs'
 import { assertCodeOnly } from './code-only.mjs'
 import { concurrent } from './concurrency.mjs'
@@ -74,7 +74,7 @@ export async function runRelease(context, { resume, rollback, codeOnly = false }
   if (rollback && (!rollbackRecord || rollbackRecord.status !== 'complete' || JSON.stringify(rollbackRecord.migrations) !== JSON.stringify(previous?.migrations))) throw new Error('Application rollback requires a completed release with the currently applied migration set')
   // Complete interactive staging authentication before build work or the remote
   // writer lock; reuse the session during the final online health check.
-  const accessSession = config.environment === 'staging' ? await (context.accessSession ?? ownerAccessSession)(config.origin) : undefined
+  const accessSession = config.environment === 'staging' ? await (context.accessSession ?? deployAccessSession)(config.origin) : undefined
   const buildStarted = Date.now()
   const { bundleFile, assetsDirectory } = await (context.build ?? buildArtifacts)({ directory, outputs, childEnv, abort, child, rollback, command: run, revision })
   const buildMs = Date.now() - buildStarted

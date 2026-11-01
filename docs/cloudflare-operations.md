@@ -32,6 +32,8 @@ Cloudflare supports [versioned and gradual deployments](https://developers.cloud
 
 After a restart, use normal Chrome for Access. If a login stalls, stop only the identified read-only login and retry `.local/remote/bin/cloudflared access login --quiet https://staging.eatyeet.com`; `--quiet` suppresses JWT output. Do not reenroll credentials or change Access policies for a routine deploy.
 
+Staging deploys use a non-expiring Access service token when one is enrolled (`pnpm remote:credentials access-token --env staging`; the secret lives only in the staging Keychain entry, the client ID in `infra/cloudflare/staging.json`). The staging Access app admits any valid service token; the Worker pins the exact client ID, admits it to public staging pages only and never grants owner capabilities. Without an enrolled token, deploys fall back to the browser login. Staging acceptance still uses the owner login. Rotate by deleting the dashboard token, clearing `ACCESS_CLIENT_*` from Keychain and re-enrolling.
+
 ## Verified account and resource map
 
 Inventory checked 2026-09-13. Names are descriptive; compare actual IDs against inventory before adopting or changing resources.

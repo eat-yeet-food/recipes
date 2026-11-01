@@ -6,5 +6,6 @@
   "accessTeamDomain": "icy-fog-1d6c.cloudflareaccess.com",
   "cloudflareIdpId": "3d5badd9-1c03-4f76-9622-73ca031d9610",
   "cutover": false,
-  "imports": {}
+  "imports": {},
+  "accessServiceClientId": "b641b68477db4d20f0f509cee456dfd6.access"
 }

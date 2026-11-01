@@ -1,12 +1,12 @@
 import { command, cleanRevision } from './remote/process.mjs'
 import { deploymentCredentials } from './remote/operator.mjs'
-import { ownerAccessSession } from './remote/access-session.mjs'
+import { deployAccessSession } from './remote/access-session.mjs'
 import { pathToFileURL } from 'node:url'
 
 export async function deploy(args, context = {}) {
   args = args.flatMap((argument) => argument.startsWith('--env=') ? ['--env', argument.slice(6)] : [argument])
   const run = context.command ?? command, credentials = context.credentials ?? deploymentCredentials
-  const authenticate = context.authenticate ?? ownerAccessSession, revision = context.revision ?? cleanRevision
+  const authenticate = context.authenticate ?? deployAccessSession, revision = context.revision ?? cleanRevision
   const environment = args.indexOf('--env')
   if (environment >= 0 && args[environment + 1] === 'both') {
     if (args.includes('--resume') || args.includes('--rollback')) throw new Error('Resume and rollback target one explicit environment')

@@ -26,7 +26,8 @@ export async function hiddenInput(label) {
       process.stdout.write('\n')
     }
     const read = (chunk) => {
-      for (const char of chunk.toString()) {
+      // Strip bracketed-paste markers (ESC[200~ / ESC[201~) so pasted secrets survive.
+      for (const char of chunk.toString().replace(/\u001b\[20[01]~/g, '')) {
         if (char === '\u0003') { done(); reject(new Error('Cancelled')); return }
         if (char === '\r' || char === '\n') { done(); resolve(value); return }
         if (char === '\u007f') value = value.slice(0, -1)
@@ -103,4 +104,29 @@ export async function credentialsCommand(environment, action, path, { deriveR2 =
     keychain('set', environment, credentials)
     console.log(`Account providers for ${environment}: ${accountCredentialNames.filter((name) => credentials[name]).join(', ') || 'none'}. Run pnpm remote:setup to export a new recovery kit before deploying.`)
   } else throw new Error('Use credentials enroll, account, export <file>, or import <file>')
+}
+
+// One-time: create a non-expiring Access service token for staging release
+// verification and keep its secret only in the staging Keychain entry. Pulumi
+// receives just the token and client IDs (staging.json) to attach a
+// non_identity policy; the Worker admits it to public staging pages only.
+export async function enrollDeployServiceToken(environment, { read = keychain, prompt = hiddenInput, configPath = resolve('infra/cloudflare/staging.json') } = {}) {
+  if (environment !== 'staging') throw new Error('The deploy service token is staging-only; production deploys need no Access login')
+  const { deploymentCredentials } = await import('./operator.mjs')
+  const stored = read('get', 'staging')
+  if (stored.ACCESS_CLIENT_ID) throw new Error('A staging deploy service token is already enrolled')
+  const config = JSON.parse(readFileSync(configPath, 'utf8'))
+  deploymentCredentials('staging')
+  // The operator token lacks "Access: Service Tokens: Edit"; create the token in
+  // the dashboard (Zero Trust > Access controls > Service credentials) and paste it.
+  // Dashboard copy buttons include the header name ("CF-Access-Client-Id: …").
+  const value = (input) => input.replace(/^\s*CF-Access-Client-(?:Id|Secret)\s*:\s*/i, '').trim()
+  const token = { client_id: value(await prompt('Client ID')), client_secret: value(await prompt('Client Secret')) }
+  if (!/^[a-f0-9]{32}\.access$/.test(token.client_id)) throw new Error(`Client ID should look like <32 hex>.access (got ${token.client_id.length} characters)`)
+  if (!/^\S{20,512}$/.test(token.client_secret)) throw new Error(`Client Secret looks incomplete (${token.client_secret.length} characters)`)
+  // Same entry, same RECOVERY_EXPORTED_AT: the token is replaceable, so it does
+  // not invalidate the operator recovery kit pairing.
+  read('set', 'staging', { ...stored, ACCESS_CLIENT_ID: token.client_id, ACCESS_CLIENT_SECRET: token.client_secret })
+  writeFileSync(configPath, JSON.stringify({ ...config, accessServiceClientId: token.client_id }, null, 2) + '\n')
+  console.log('Staging deploy service token enrolled. Deploy staging once to attach it.')
 }
