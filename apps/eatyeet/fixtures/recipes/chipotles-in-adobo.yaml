@@ -2,7 +2,7 @@ sourceId: 'recipes:chipotles-in-adobo'
 status: published
 slug: chipotles-in-adobo
 title: Chipotles in Adobo
-order: 17
+order: 2
 description: 'Smoky, tangy homemade chipotles in adobo with no added sugar.'
 category: savory
 prepMinutes: 45
@@ -31,8 +31,6 @@ blocks:
         items:
           - id: equipment-1-item-1
             text: Small saucepan with lid
-          - id: equipment-1-item-2
-            text: Blender
         id: equipment-1
     ingredients:
       - title: ''
@@ -68,8 +66,6 @@ blocks:
           - id: steps-1-item-5
             text: >-
               **Simmer:** Cover and gently simmer 20–30 minutes, adding a tablespoon of water if needed.
-          - id: steps-1-item-6
-            text: '**Blend:** Blend 2 chipotles with a few spoonfuls of sauce, then stir back into the pot.'
           - id: steps-1-item-7
             text: '**Reduce:** Simmer uncovered briefly until thick and saucy.'
         id: steps-1

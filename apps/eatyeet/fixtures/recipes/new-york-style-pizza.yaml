@@ -2,7 +2,7 @@ sourceId: 'recipes:new-york-style-pizza'
 status: published
 slug: new-york-style-pizza
 title: New York Style Pizza
-order: 3
+order: 4
 description: 'A crisp, foldable New York-style pizza with a chewy crust, bright tomato sauce, and bubbling cheese.'
 category: savory
 prepMinutes: 4590

@@ -2,7 +2,7 @@ sourceId: 'recipes:vanilla-bean-ice-cream'
 status: published
 slug: vanilla-bean-ice-cream
 title: Vanilla Bean Ice Cream
-order: 16
+order: 13
 description: 'Dense, ultra-creamy ice cream packed with real vanilla bean.'
 category: sweet
 prepMinutes: 15
@@ -62,7 +62,9 @@ blocks:
         items:
           - id: steps-1-item-1
             text: >-
-              **Combine:** Combine the cream, skim milk, sugar, egg yolk, and the scraped vanilla seeds in a saucepan. Whisk thoroughly.
+              **Combine:** In a saucepan, whisk the egg yolk with 30g of the skim milk until smooth, then whisk in
+              another 50g of skim milk. This keeps the yolk from clumping. Add the cream, the remaining skim milk, the
+              sugar, and the scraped vanilla seeds, and whisk thoroughly.
           - id: steps-1-item-3
             text: >-
               **Cook to 168°F:** Heat gently, stirring constantly. Remove from heat at 168°F (76°C). Do not boil or

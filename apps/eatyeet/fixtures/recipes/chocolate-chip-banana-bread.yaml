@@ -2,7 +2,7 @@ sourceId: 'recipes:chocolate-chip-banana-bread'
 status: published
 slug: chocolate-chip-banana-bread
 title: Chocolate Chip Banana Bread
-order: 8
+order: 9
 description: 'Moist, tender banana bread with a gooey center and generous pockets of dark chocolate.'
 category: sweet
 prepMinutes: 15
@@ -42,9 +42,9 @@ blocks:
           - id: ingredients-1-item-3
             text: 200g brown sugar
           - id: ingredients-1-item-4
-            text: '120g sour cream, at room temperature'
+            text: 120g sour cream
           - id: ingredients-1-item-5
-            text: '1 large egg, at room temperature'
+            text: 1 large egg
           - id: ingredients-1-item-6
             text: 60g canola oil
           - id: ingredients-1-item-7
@@ -72,16 +72,24 @@ blocks:
           - id: steps-1-item-2
             text: >-
               Brown the butter: Melt the butter in a small saucepan over medium heat, stirring often, until the milk
-              solids turn golden and it smells nutty — about 5 minutes. Pour into a large bowl and let cool while you
-              prep the remaining ingredients.
+              solids turn golden and it smells nutty — about 5 minutes. Pour into a small bowl and let cool below 140°F
+              while you mix the rest. The other ingredients can go in straight from the fridge.
           - id: steps-1-item-3
             text: >-
               Whisk the dry ingredients: In a medium bowl, whisk together the cake flour, baking soda, baking powder,
-              fine sea salt, and cinnamon.
+              and fine sea salt.
           - id: steps-1-item-4
             text: >-
-              Build the wet mixture: To the cooled brown butter, add the mashed bananas, brown sugar, sour cream, egg,
-              canola oil, milk, and vanilla. Whisk until smooth and fully combined.
+              Start the wet mixture: In a large bowl, whisk the sour cream, egg, canola oil, milk, and vanilla until
+              smooth. Whisk in the brown sugar.
+          - id: steps-1-item-10
+            text: >-
+              Add the butter and bananas: Once the brown butter is below 140°F, whisk it in. Then mix in the mashed
+              bananas until fully combined.
+          - id: steps-1-item-11
+            text: >-
+              Check the temperature: If the batter is below 70°F, microwave it in 10-second bursts, stirring and
+              checking with an IR thermometer each time, until it reaches 70°F.
           - id: steps-1-item-5
             text: >-
               Combine: Add the dry ingredients to the wet ingredients and fold gently with a spatula until just
