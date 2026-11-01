@@ -55,7 +55,7 @@ blocks:
           - id: ingredients-1-item-7
             text: 1 tbsp vanilla bean paste
           - id: ingredients-1-item-8
-            text: 2 vanilla beans, split and scraped
+            text: 3 vanilla beans, split and scraped
         id: ingredients-1
     steps:
       - title: ''
