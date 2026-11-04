@@ -242,7 +242,7 @@ blocks:
         id: steps-5
     notes:
       - The autolyse process allows flour to fully hydrate and develops gluten naturally
-      - Bulk fermentation timing can vary based on temperature and starter activity
+      - Bulk times assume 75°F. Below 75°F bulk takes longer and above it shorter; the Notebook estimates the difference for your temperature
       - Cold retarding in the refrigerator develops flavor and makes shaping easier
       - Proper scoring allows controlled expansion during baking
       - High initial heat creates steam for crust development

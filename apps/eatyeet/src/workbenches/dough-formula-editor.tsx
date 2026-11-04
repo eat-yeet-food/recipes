@@ -2,7 +2,7 @@
 import { createContext, useCallback, useContext, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Plus, Trash2 } from 'lucide-react'
 import { pizzaBallWeight } from '@eat-yeet/l2-recipe-domain/pizza-sizing'
-import { BULK_TEMPERATURE_RANGE_F, bannetonPieceWeight, estimateBulkMinutes, targetRisePercent, type SourdoughFoldMethod, type SourdoughProcess } from '@eat-yeet/l2-recipe-domain/sourdough-process'
+import { BULK_TEMPERATURE_RANGE_F, SMALLER_LOAF_BELOW_F, bannetonPieceWeight, estimateBulkMinutes, targetRisePercent, type SourdoughFoldMethod, type SourdoughProcess } from '@eat-yeet/l2-recipe-domain/sourdough-process'
 import { MAX_LEVAIN_EXTRA_PERCENT, calculateDoughLevainBuild, calculateFormula, formatPercent, levainExtraPercent, reverseFormula, type DoughBatch, type DoughFormula, type FlourComponent, type ReverseFormulaInput, type StarterProfile } from '@eat-yeet/l2-recipe-domain/formula'
 import { selectedRecipeMethod, type RecipeContent } from '@eat-yeet/l4-content-model/recipes'
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
@@ -65,12 +65,16 @@ function BulkPlanner({ config, formula, batch, temperatureF, onUseBulk, onUseWei
   const reference = referenceTemperature != null && authored.process ? { bulkTemperatureF: referenceTemperature, bulkMinutes: authored.process.bulkMinutes, levainPercent: authored.levainPercent } : undefined
   const minutes = estimateBulkMinutes(temperatureF, formula.levainPercent, reference)
   const rise = targetRisePercent(temperatureF)
-  const loaf = batch.pieceLabel === 'loaf' && referenceTemperature != null
+  const loaf = batch.pieceLabel === 'loaf' && referenceTemperature != null && referenceTemperature - temperatureF >= SMALLER_LOAF_BELOW_F
   const weight = loaf ? bannetonPieceWeight(config.defaultSelection.batch.pieceWeightGrams, referenceTemperature, temperatureF) : null
+  const difference = reference && minutes !== null ? minutes - reference.bulkMinutes : 0
+  const comparison = !reference || minutes === null ? ''
+    : difference === 0 ? `, the same as the recipe at ${reference.bulkTemperatureF}°F`
+    : `, ${formatDuration(Math.abs(difference))} ${difference > 0 ? 'longer' : 'shorter'} than the recipe’s ${formatDuration(reference.bulkMinutes)} at ${reference.bulkTemperatureF}°F`
   const lastFold = process.folds.at(-1)?.atMinutes ?? process.saltDelayMinutes
   return <div className="grid gap-3 rounded-field bg-tint p-5" data-bulk-planner>
     <p className="text-sm leading-relaxed">
-      {minutes !== null && <>At {temperatureF}°F, plan about <strong>{formatDuration(minutes)}</strong> of bulk{reference ? ', scaled from this recipe’s tested bake' : ''}. </>}
+      {minutes !== null && <>At {temperatureF}°F, plan about <strong>{formatDuration(minutes)}</strong> of bulk{comparison}. </>}
       End bulk at about <strong>{rise}% rise</strong> in volume. Warmer dough keeps fermenting while it chills, so it should finish with less rise.
     </p>
     {minutes !== null && minutes !== process.bulkMinutes && <Button variant="link" type="button" className="justify-self-start" onClick={() => onUseBulk(minutes)}>End bulk at {formatDuration(minutes)}</Button>}

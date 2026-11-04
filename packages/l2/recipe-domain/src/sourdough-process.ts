@@ -111,12 +111,16 @@ export function estimateBulkMinutes(temperatureF: number, levainPercent: number,
   return Math.max(5, Math.round(base.minutes * Math.sqrt(base.levain / levainPercent) / 5) * 5)
 }
 
+/** How much cooler than the reference a bulk must be before a smaller loaf is worth suggesting. */
+export const SMALLER_LOAF_BELOW_F = 3
+
 /**
  * Cooler bulks end at a higher rise and fill the same banneton with less dough.
- * Scales a reference piece weight gently (70°F ≈ 94% of a 75°F loaf).
+ * Scales a reference piece weight gently (70°F ≈ 94% of a 75°F loaf). Only a
+ * significantly cooler bulk shrinks the loaf; warmer bulks never enlarge it.
  */
 export function bannetonPieceWeight(referenceGrams: number, referenceTemperatureF: number, temperatureF: number): number {
-  if (targetRisePercent(referenceTemperatureF) === targetRisePercent(temperatureF)) return referenceGrams
+  if (referenceTemperatureF - temperatureF < SMALLER_LOAF_BELOW_F) return referenceGrams
   const ratio = (1 + targetRisePercent(referenceTemperatureF) / 100) / (1 + targetRisePercent(temperatureF) / 100)
   return Math.round(referenceGrams * ratio ** 0.42 / 5) * 5
 }

@@ -57,5 +57,8 @@ describe('sourdough process', () => {
   it('suggests a smaller loaf for a cooler bulk', () => {
     assert.equal(bannetonPieceWeight(907.5, 75, 75), 907.5)
     assert.equal(bannetonPieceWeight(907.5, 75, 70), 850)
+    assert.equal(bannetonPieceWeight(907.5, 75, 73), 907.5)
+    assert.equal(bannetonPieceWeight(907.5, 75, 80), 907.5)
+    assert.ok(bannetonPieceWeight(907.5, 75, 72) < 907.5)
   })
 })
