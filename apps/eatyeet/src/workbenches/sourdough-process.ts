@@ -1,4 +1,4 @@
-import { sourdoughTimeline, type SourdoughProcess } from '@eat-yeet/l2-recipe-domain/sourdough-process'
+import { sourdoughTimeline, targetRisePercent, type SourdoughProcess } from '@eat-yeet/l2-recipe-domain/sourdough-process'
 import type { Section } from '@eat-yeet/l4-content-model/recipes'
 
 export interface SourdoughProcessSections {
@@ -18,7 +18,7 @@ export interface SpiralMixerProfile {
   finishMinutes: number
 }
 
-function formatDuration(minutes: number): string {
+export function formatDuration(minutes: number): string {
   if (minutes < 60) return `${minutes}m`
   const hours = Math.floor(minutes / 60)
   const remainder = minutes % 60
@@ -38,6 +38,7 @@ export function resolveSourdoughSteps(sections: Section[], bindings: SourdoughPr
   const saltMix = hand ? 'Pinch and fold by hand until incorporated and the dough starts to gain strength.' : mixer
     ? `Mix at ${mixer.saltRpm} RPM for ${mixer.saltMinutes} min while the fine sea salt incorporates, then increase to ${mixer.finishRpm} RPM for about ${mixer.finishMinutes} min.`
     : 'Mix to incorporate, then continue until the dough gains moderate strength.'
+  const temperature = process.bulkTemperatureF
   return sections.map((section) => {
     if (section.id === bindings.levain && levainIngredients) return {
       ...section, items: [`Mix ${levainIngredients}.`, ...section.items.slice(1)],
@@ -52,14 +53,14 @@ export function resolveSourdoughSteps(sections: Section[], bindings: SourdoughPr
       items: timeline.map((event, index) => {
         const stamp = `<strong>[${formatDuration(event.atMinutes)} elapsed]</strong>`
         const next = timeline[index + 1]
-        const rest = next ? ` Cover until the next step at ${formatDuration(next.atMinutes)} elapsed.` : ''
+        const rest = next ? ` Cover${temperature ? ` at ${temperature}°F` : ''} until the next step at ${formatDuration(next.atMinutes)} elapsed.` : ''
         if (event.kind === 'mix') return `${stamp} Mix in the ripe levain ${levainMix}.${rest}`
         if (event.kind === 'salt') return `${stamp} Add fine sea salt and the remaining water ({{remainingWaterGrams}}). ${saltMix}${rest}`
         if (event.kind === 'fold') {
           if (event.method === 'lamination') return `${stamp} Laminate the dough: gently stretch it into a thin sheet on a damp work surface without tearing, then fold it back over itself and return it to the bulk container.${rest}`
           return `${stamp} Perform one set of ${event.method === 'coil-fold' ? 'coil folds' : 'stretch and folds'}, working gently around the dough.${rest}`
         }
-        return `${stamp} Check the dough for the recipe’s target rise (approximately doubled), aeration, and strength. This is your planned end of bulk fermentation; extend or shorten the rest according to the dough, then continue to shaping.`
+        return `${stamp} Check the dough for ${temperature ? `about ${targetRisePercent(temperature)}% rise in volume (the target for ${temperature}°F dough)` : 'the recipe’s target rise (approximately doubled)'}, aeration, and strength. This is your planned end of bulk fermentation; extend or shorten the rest according to the dough, then continue to shaping.`
       }),
     }
   })

@@ -7,7 +7,7 @@ description: 'Crackling, deeply browned loaves with an open crumb, gentle tang, 
 category: savory
 prepMinutes: 60
 cookMinutes: 39
-totalMinutes: 1869
+totalMinutes: 1899
 yieldAmount: 2
 yieldUnit: loaves
 image: sourdough-bread.jpg
@@ -29,7 +29,7 @@ methodOptions:
     description: 'Crackling, deeply browned loaves with an open crumb, gentle tang, and satisfying chew.'
     prepMinutes: 60
     cookMinutes: 39
-    totalMinutes: 1869
+    totalMinutes: 1899
     yieldAmount: 2
     yieldUnit: loaves
 workbench:
@@ -70,7 +70,8 @@ workbench:
           foldMethod: coil-fold
           autolyseMinutes: 180
           saltDelayMinutes: 30
-          bulkMinutes: 290
+          bulkMinutes: 320
+          bulkTemperatureF: 75
           folds:
             - id: fold-1
               atMinutes: 60
@@ -201,28 +202,28 @@ blocks:
           - id: bulk-fermentation-item-1
             text: >-
               **[0m elapsed]** Mix in levain in the Ooni Halo Pro at 165 RPM until evenly incorporated + cover and rest
-              at 70°F for 20m.
+              at 75°F for 20m.
           - id: add-salt-and-water
             text: >-
               **[30m elapsed]** Mix in fine sea salt + remainder of water ({{remainingWaterGrams}}) at 90 RPM for 1m.
-              Increase to 165 RPM and mix for about 4m. Cover and rest at 70°F for 25m. Internal dough temp should be
-              about 72°F.
+              Increase to 165 RPM and mix for about 4m. Cover and rest at 75°F for 25m. Internal dough temp should be
+              about 72°F; it will warm to 75°F over the first hour.
           - id: bulk-fermentation-item-3
-            text: '**[1h elapsed]** Stretch and fold + cover and rest at 70°F for 25m'
+            text: '**[1h elapsed]** Stretch and fold + cover and rest at 75°F for 25m'
           - id: bulk-fermentation-item-4
-            text: '**[1:30h elapsed]** Stretch and fold + cover and rest at 70°F for 25m'
+            text: '**[1:30h elapsed]** Stretch and fold + cover and rest at 75°F for 25m'
           - id: bulk-fermentation-item-5
-            text: '**[2:00h elapsed]** Coil fold + cover and rest at 70°F for 2:50h.'
+            text: '**[2:00h elapsed]** Coil fold + cover and rest at 75°F for 3:20h.'
           - id: bulk-fermentation-item-6
-            text: '**[4:50h elapsed]** End of bulk when risen approximately 100% in volume'
+            text: '**[5:20h elapsed]** End of bulk when risen about 50% in volume'
       - title: Shape
         items:
           - id: divide-dough
             text: >-
-              Divide into {{pieceCount}} {{pieceLabelPlural}} ({{pieceWeightGrams}} each), preshape, and rest at 70°F
+              Divide into {{pieceCount}} {{pieceLabelPlural}} ({{pieceWeightGrams}} each), preshape, and rest at 75°F
               for 30m.
           - id: steps-4-item-2
-            text: Shape and place in banneton. Rest at 70°F for 10m.
+            text: Shape and place in banneton. Rest at 75°F for 10m.
           - id: steps-4-item-3
             text: 'Stitch, cover and place in 37°F refrigerator for 12-18h'
         id: steps-4

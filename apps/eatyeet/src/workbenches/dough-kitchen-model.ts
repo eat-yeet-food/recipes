@@ -87,6 +87,7 @@ const foldNames = { 'stretch-and-fold': 'stretch and fold', 'coil-fold': 'coil f
 const schedule = (process: SourdoughProcess) => process.folds.length
   ? process.folds.map((fold) => `${foldNames[fold.method ?? process.foldMethod]} at ${duration(fold.atMinutes)}`).join(', ')
   : 'No folds'
+const temperature = (value?: number) => value == null ? 'Not set' : `${value}°F`
 const starterText = (starter?: StarterProfile) => starter ? `${formatPercent(starter.hydrationPercent)} hydration, ${blend(starter.flour)}` : 'None'
 
 /**
@@ -122,6 +123,7 @@ export function formulaChanges(from: DoughFormulaState, to: DoughFormulaState, m
     add('Autolyse', duration(a.process.autolyseMinutes), duration(b.process.autolyseMinutes))
     add('Salt added at', duration(a.process.saltDelayMinutes), duration(b.process.saltDelayMinutes))
     add('Bulk', duration(a.process.bulkMinutes), duration(b.process.bulkMinutes))
+    add('Bulk temperature', temperature(a.process.bulkTemperatureF), temperature(b.process.bulkTemperatureF))
     add('Folds', schedule(a.process), schedule(b.process))
   }
   return changes

@@ -43,6 +43,7 @@ const formula = object({
     autolyseMinutes: number,
     saltDelayMinutes: number,
     bulkMinutes: number,
+    bulkTemperatureF: number,
     folds: array(object({ id: text, atMinutes: number, method: text })),
   }),
 })

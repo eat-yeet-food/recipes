@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
-import { DEFAULT_SOURDOUGH_PROCESS, isSourdoughProcess, sourdoughProcessErrors, sourdoughTimeline } from './sourdough-process.ts'
+import { DEFAULT_SOURDOUGH_PROCESS, bannetonPieceWeight, estimateBulkMinutes, isSourdoughProcess, targetRisePercent, sourdoughProcessErrors, sourdoughTimeline } from './sourdough-process.ts'
 
 describe('sourdough process', () => {
   it('preserves the authored timeline and fold identities', () => {
@@ -35,5 +35,27 @@ describe('sourdough process', () => {
     assert.equal(isSourdoughProcess({ ...DEFAULT_SOURDOUGH_PROCESS, folds: [null] }), false)
     assert.equal(isSourdoughProcess({ ...DEFAULT_SOURDOUGH_PROCESS, bulkMinutes: 20.5 }), false)
     assert.ok(sourdoughProcessErrors({ ...DEFAULT_SOURDOUGH_PROCESS, bulkMinutes: 0 }).length)
+  })
+  it('validates an optional bulk temperature', () => {
+    assert.deepEqual(sourdoughProcessErrors({ ...DEFAULT_SOURDOUGH_PROCESS, bulkTemperatureF: 75 }), [])
+    assert.ok(sourdoughProcessErrors({ ...DEFAULT_SOURDOUGH_PROCESS, bulkTemperatureF: 110 }).length)
+    assert.equal(isSourdoughProcess({ ...DEFAULT_SOURDOUGH_PROCESS, bulkTemperatureF: 'warm' }), false)
+  })
+  it('scales bulk time from the guidelines and a reference bake', () => {
+    assert.equal(estimateBulkMinutes(75, 20), 420)
+    assert.equal(estimateBulkMinutes(70, 20), 720)
+    const reference = { bulkTemperatureF: 75, bulkMinutes: 290, levainPercent: 17.26 }
+    assert.equal(estimateBulkMinutes(75, 17.26, reference), 290)
+    assert.equal(estimateBulkMinutes(70, 17.26, reference), 495)
+    assert.ok(estimateBulkMinutes(85, 17.26, reference)! < estimateBulkMinutes(80, 17.26, reference)!)
+    assert.ok(estimateBulkMinutes(75, 30, reference)! < 290)
+    assert.equal(estimateBulkMinutes(75, 0, reference), null)
+  })
+  it('targets a lower rise as dough gets warmer', () => {
+    assert.deepEqual([60, 65, 70, 72, 75, 80, 88].map(targetRisePercent), [100, 100, 75, 65, 50, 30, 30])
+  })
+  it('suggests a smaller loaf for a cooler bulk', () => {
+    assert.equal(bannetonPieceWeight(907.5, 75, 75), 907.5)
+    assert.equal(bannetonPieceWeight(907.5, 75, 70), 850)
   })
 })

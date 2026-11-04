@@ -2,7 +2,7 @@
 import { createContext, useCallback, useContext, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Plus, Trash2 } from 'lucide-react'
 import { pizzaBallWeight } from '@eat-yeet/l2-recipe-domain/pizza-sizing'
-import type { SourdoughFoldMethod, SourdoughProcess } from '@eat-yeet/l2-recipe-domain/sourdough-process'
+import { BULK_TEMPERATURE_RANGE_F, bannetonPieceWeight, estimateBulkMinutes, targetRisePercent, type SourdoughFoldMethod, type SourdoughProcess } from '@eat-yeet/l2-recipe-domain/sourdough-process'
 import { MAX_LEVAIN_EXTRA_PERCENT, calculateDoughLevainBuild, calculateFormula, formatPercent, levainExtraPercent, reverseFormula, type DoughBatch, type DoughFormula, type FlourComponent, type ReverseFormulaInput, type StarterProfile } from '@eat-yeet/l2-recipe-domain/formula'
 import { selectedRecipeMethod, type RecipeContent } from '@eat-yeet/l4-content-model/recipes'
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
@@ -13,6 +13,7 @@ import { Select } from '@eat-yeet/l5-ui-primitives/primitives/select'
 import { clone, formatWorkbenchGrams, pieceCountLabel, starterFrom, yeastGramPrecision, type DoughWorkbenchConfig, type DoughWorkbenchState, type InputMode } from './dough-workbench-model'
 import { formulasMatch } from './dough-formula-match'
 import { levainYield } from './dough-kitchen-model'
+import { formatDuration } from './sourdough-process'
 
 const NumericFields = createContext<{ report: NumberFieldValidation; resetKey: number } | null>(null)
 
@@ -47,6 +48,38 @@ function FlourEditor({ label, prefix = '', value, onChange, unit = '%' }: { labe
       <Button variant="danger" size="icon" type="button" disabled={value.length === 1} aria-label={`Remove ${prefix ? `${prefix.toLowerCase()} ` : ''}${part.name || 'flour'}`} onClick={() => onChange(value.filter((_, itemIndex) => itemIndex !== index))}><Trash2 className="mx-auto size-4" /></Button>
     </div>)}
     <Button variant="link" type="button" className="justify-self-start gap-1" onClick={() => onChange([...value, { id: `flour-${crypto.randomUUID()}`, name: '', percent: 0 }])}><Plus className="size-4" />Add {prefix ? `${prefix.toLowerCase()} ` : ''}flour</Button>
+  </div>
+}
+
+const GUIDELINES_URL = 'https://thesourdoughjourney.com/the-mystery-of-percentage-rise-in-bulk-fermentation/'
+
+/**
+ * Plans bulk fermentation for a chosen temperature: an estimated duration,
+ * the end-of-bulk rise to look for and, for loaves, a basket-filling weight.
+ * Suggestions apply only when the reader chooses them.
+ */
+function BulkPlanner({ config, formula, batch, temperatureF, onUseBulk, onUseWeight }: { config: DoughWorkbenchConfig; formula: DoughFormula; batch: DoughBatch; temperatureF: number; onUseBulk: (minutes: number) => void; onUseWeight: (grams: number) => void }) {
+  const process = formula.process!
+  const authored = config.defaultSelection.formula
+  const referenceTemperature = authored.process?.bulkTemperatureF
+  const reference = referenceTemperature != null && authored.process ? { bulkTemperatureF: referenceTemperature, bulkMinutes: authored.process.bulkMinutes, levainPercent: authored.levainPercent } : undefined
+  const minutes = estimateBulkMinutes(temperatureF, formula.levainPercent, reference)
+  const rise = targetRisePercent(temperatureF)
+  const loaf = batch.pieceLabel === 'loaf' && referenceTemperature != null
+  const weight = loaf ? bannetonPieceWeight(config.defaultSelection.batch.pieceWeightGrams, referenceTemperature, temperatureF) : null
+  const lastFold = process.folds.at(-1)?.atMinutes ?? process.saltDelayMinutes
+  return <div className="grid gap-3 rounded-field bg-tint p-5" data-bulk-planner>
+    <p className="text-sm leading-relaxed">
+      {minutes !== null && <>At {temperatureF}°F, plan about <strong>{formatDuration(minutes)}</strong> of bulk{reference ? ', scaled from this recipe’s tested bake' : ''}. </>}
+      End bulk at about <strong>{rise}% rise</strong> in volume. Warmer dough keeps fermenting while it chills, so it should finish with less rise.
+    </p>
+    {minutes !== null && minutes !== process.bulkMinutes && <Button variant="link" type="button" className="justify-self-start" onClick={() => onUseBulk(minutes)}>End bulk at {formatDuration(minutes)}</Button>}
+    {minutes !== null && minutes <= lastFold && <p className="text-sm text-muted-foreground">Move folding steps earlier so they finish before the end of bulk.</p>}
+    {weight !== null && <>
+      <p className="text-sm leading-relaxed">Cooler bulks rise more. About <strong>{formatWorkbenchGrams(weight)}</strong> per loaf fills the same banneton.</p>
+      {Math.abs(weight - batch.pieceWeightGrams) >= 1 && <Button variant="link" type="button" className="justify-self-start" onClick={() => onUseWeight(weight)}>Use {formatWorkbenchGrams(weight)} loaves</Button>}
+    </>}
+    <p className="text-xs text-muted-foreground">Based on <Button variant="link" className="inline" asChild><a href={GUIDELINES_URL} target="_blank" rel="noreferrer">The Sourdough Journey’s bulk fermentation guidelines</a></Button>. Times are estimates; follow the rise.</p>
   </div>
 }
 
@@ -178,6 +211,7 @@ export function DoughFormulaEditor({ recipe, config, state, onChange, onErrorsCh
     folds.splice(afterIndex + 1, 0, { id: `fold-${crypto.randomUUID()}`, atMinutes, method: previous?.method === 'lamination' ? 'coil-fold' : previous?.method ?? process.foldMethod })
     updateProcess({ folds, bulkMinutes: next ? process.bulkMinutes : Math.max(process.bulkMinutes, atMinutes + 30) })
   }
+  const bulkTemperature = process?.bulkTemperatureF ?? config.defaultSelection.formula.process?.bulkTemperatureF ?? 75
   const updateSeed = (next: StarterProfile) => updateFormula({ levainBuild: { ...levainBuild, seed: next } })
   const pieces = pieceCountLabel(2, batch.pieceLabel)
 
@@ -264,6 +298,10 @@ export function DoughFormulaEditor({ recipe, config, state, onChange, onErrorsCh
           <DurationField label="Add fine sea salt at" value={process.saltDelayMinutes} onChange={(saltDelayMinutes) => updateProcess({ saltDelayMinutes })} />
           <DurationField label="Planned end of bulk" value={process.bulkMinutes} onChange={(bulkMinutes) => updateProcess({ bulkMinutes })} />
         </div>
+        <div className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-3">
+          <Field label="Bulk temperature" suffix="°F" step="1" decimalPlaces={0} min={BULK_TEMPERATURE_RANGE_F[0]} max={BULK_TEMPERATURE_RANGE_F[1]} value={bulkTemperature} onChange={(bulkTemperatureF) => updateProcess({ bulkTemperatureF })} />
+        </div>
+        <BulkPlanner config={config} formula={formula} batch={batch} temperatureF={bulkTemperature} onUseBulk={(bulkMinutes) => { updateProcess({ bulkMinutes }); setLocalReset((key) => key + 1) }} onUseWeight={(pieceWeightGrams) => { updateBatch({ pieceWeightGrams }); setLocalReset((key) => key + 1) }} />
         <div className="grid gap-4">
           <p className="text-sm text-muted-foreground">Choose a technique for each step. Mix stretch and folds, coil folds and lamination in the order you use them.</p>
           {process.folds.map((fold, index) => <div key={fold.id} className="grid gap-2">
