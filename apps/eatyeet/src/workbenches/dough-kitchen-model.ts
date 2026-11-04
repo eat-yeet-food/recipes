@@ -122,7 +122,8 @@ export function formulaChanges(from: DoughFormulaState, to: DoughFormulaState, m
     add('Mixing', a.process.mixingMethod === 'hand' ? 'By hand' : 'Spiral mixer', b.process.mixingMethod === 'hand' ? 'By hand' : 'Spiral mixer')
     add('Autolyse', duration(a.process.autolyseMinutes), duration(b.process.autolyseMinutes))
     add('Salt added at', duration(a.process.saltDelayMinutes), duration(b.process.saltDelayMinutes))
-    add('Bulk', duration(a.process.bulkMinutes), duration(b.process.bulkMinutes))
+    add('Divide at', duration(a.process.bulkMinutes), duration(b.process.bulkMinutes))
+    add('Preshape and shaping', duration(a.process.benchMinutes ?? 0), duration(b.process.benchMinutes ?? 0))
     add('Bulk temperature', temperature(a.process.bulkTemperatureF), temperature(b.process.bulkTemperatureF))
     add('Folds', schedule(a.process), schedule(b.process))
   }

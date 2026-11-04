@@ -1,5 +1,5 @@
 import { isPizzaSizing, pizzaAreaScale, pizzaBallWeight, type PizzaSizing } from '@eat-yeet/l2-recipe-domain/pizza-sizing'
-import { DEFAULT_SOURDOUGH_PROCESS } from '@eat-yeet/l2-recipe-domain/sourdough-process'
+import { DEFAULT_SOURDOUGH_PROCESS, levainToFridgeMinutes } from '@eat-yeet/l2-recipe-domain/sourdough-process'
 import { isDoughFormula, isDoughFormulaState, type DoughFormulaState } from '@eat-yeet/l2-recipe-domain/formula-state'
 import { calculateDoughLevainBuild, calculateFormula, formatPercent, type DoughFormula, type StarterProfile } from '@eat-yeet/l2-recipe-domain/formula'
 import { formatNumberFieldValue, type NumberFieldPrecision } from '@eat-yeet/l5-ui-primitives/primitives/number-field-format'
@@ -138,7 +138,7 @@ export function resolveWorkbenchRecipe(recipe: RecipeContent, selection: DoughWo
     ...selected,
     blocks,
     ...(process && config.processSections ? {
-      totalMinutes: selected.totalMinutes === null ? null : Math.max(0, selected.totalMinutes + process.autolyseMinutes + process.bulkMinutes - (config.defaultSelection.formula.process ?? DEFAULT_SOURDOUGH_PROCESS).autolyseMinutes - (config.defaultSelection.formula.process ?? DEFAULT_SOURDOUGH_PROCESS).bulkMinutes),
+      totalMinutes: selected.totalMinutes === null ? null : Math.max(0, selected.totalMinutes + process.autolyseMinutes + levainToFridgeMinutes(process) - (config.defaultSelection.formula.process ?? DEFAULT_SOURDOUGH_PROCESS).autolyseMinutes - levainToFridgeMinutes(config.defaultSelection.formula.process ?? DEFAULT_SOURDOUGH_PROCESS)),
       learning: selected.learning?.mixing ? { ...selected.learning, mixing: { ...selected.learning.mixing, defaultMethod: process.mixingMethod } } : selected.learning,
     } : {}),
     yieldAmount: selection.batch.count,

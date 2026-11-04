@@ -7,6 +7,7 @@ import * as migration_20260922_111220_recipe_rating_identities_and_replies from 
 import * as migration_20260927_122353_member_accounts from './20260927_122353_member_accounts';
 import * as migration_20261019_114245_kitchen_formulas from './20261019_114245_kitchen_formulas';
 import * as migration_20261104_005309_sourdough_bulk_temperature from './20261104_005309_sourdough_bulk_temperature';
+import * as migration_20261104_202227_sourdough_bench_minutes from './20261104_202227_sourdough_bench_minutes';
 
 export const migrations = [
   {
@@ -52,6 +53,11 @@ export const migrations = [
   {
     up: migration_20261104_005309_sourdough_bulk_temperature.up,
     down: migration_20261104_005309_sourdough_bulk_temperature.down,
-    name: '20261104_005309_sourdough_bulk_temperature'
+    name: '20261104_005309_sourdough_bulk_temperature',
+  },
+  {
+    up: migration_20261104_202227_sourdough_bench_minutes.up,
+    down: migration_20261104_202227_sourdough_bench_minutes.down,
+    name: '20261104_202227_sourdough_bench_minutes'
   },
 ];

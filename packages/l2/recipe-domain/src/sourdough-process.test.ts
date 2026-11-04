@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
-import { DEFAULT_SOURDOUGH_PROCESS, bannetonPieceWeight, estimateBulkMinutes, isSourdoughProcess, targetRisePercent, sourdoughProcessErrors, sourdoughTimeline } from './sourdough-process.ts'
+import { DEFAULT_SOURDOUGH_PROCESS, bannetonPieceWeight, estimateBulkMinutes, isSourdoughProcess, levainToFridgeMinutes, targetRisePercent, sourdoughProcessErrors, sourdoughTimeline } from './sourdough-process.ts'
 
 describe('sourdough process', () => {
   it('preserves the authored timeline and fold identities', () => {
@@ -35,6 +35,12 @@ describe('sourdough process', () => {
     assert.equal(isSourdoughProcess({ ...DEFAULT_SOURDOUGH_PROCESS, folds: [null] }), false)
     assert.equal(isSourdoughProcess({ ...DEFAULT_SOURDOUGH_PROCESS, bulkMinutes: 20.5 }), false)
     assert.ok(sourdoughProcessErrors({ ...DEFAULT_SOURDOUGH_PROCESS, bulkMinutes: 0 }).length)
+  })
+  it('counts bulk from levain until the dough goes into the refrigerator', () => {
+    assert.equal(levainToFridgeMinutes({ ...DEFAULT_SOURDOUGH_PROCESS, bulkMinutes: 320, benchMinutes: 40 }), 360)
+    assert.equal(levainToFridgeMinutes(DEFAULT_SOURDOUGH_PROCESS), 290)
+    assert.ok(sourdoughProcessErrors({ ...DEFAULT_SOURDOUGH_PROCESS, benchMinutes: -5 }).length)
+    assert.equal(isSourdoughProcess({ ...DEFAULT_SOURDOUGH_PROCESS, benchMinutes: 2.5 }), false)
   })
   it('validates an optional bulk temperature', () => {
     assert.deepEqual(sourdoughProcessErrors({ ...DEFAULT_SOURDOUGH_PROCESS, bulkTemperatureF: 75 }), [])

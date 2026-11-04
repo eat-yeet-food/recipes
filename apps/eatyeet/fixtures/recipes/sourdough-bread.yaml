@@ -69,18 +69,29 @@ workbench:
           mixingMethod: spiral
           foldMethod: coil-fold
           autolyseMinutes: 180
-          saltDelayMinutes: 30
+          saltDelayMinutes: 10
           bulkMinutes: 320
           bulkTemperatureF: 75
+          benchMinutes: 40
           folds:
             - id: fold-1
-              atMinutes: 60
+              atMinutes: 30
               method: stretch-and-fold
             - id: fold-2
-              atMinutes: 90
+              atMinutes: 45
               method: stretch-and-fold
             - id: fold-3
+              atMinutes: 60
+              method: stretch-and-fold
+            - id: fold-4
+              atMinutes: 90
+              method: coil-fold
+            - id: fold-5
               atMinutes: 120
+              method: coil-fold
+            - id: fold-6
+              atMinutes: 150
+              method: coil-fold
         hydrationPercent: 77.04
         saltPercent: 1.97
         oilPercent: 0
@@ -202,20 +213,26 @@ blocks:
           - id: bulk-fermentation-item-1
             text: >-
               **[0m elapsed]** Mix in levain in the Ooni Halo Pro at 165 RPM until evenly incorporated + cover and rest
-              at 75°F for 20m.
+              at 75°F for 10m (fermentolyse).
           - id: add-salt-and-water
             text: >-
-              **[30m elapsed]** Mix in fine sea salt + remainder of water ({{remainingWaterGrams}}) at 90 RPM for 1m.
-              Increase to 165 RPM and mix for about 4m. Cover and rest at 75°F for 25m. Internal dough temp should be
-              about 72°F; it will warm to 75°F over the first hour.
+              **[10m elapsed]** Mix in fine sea salt + remainder of water ({{remainingWaterGrams}}) at 90 RPM for 1m.
+              Increase to 165 RPM and mix for about 4m. Cover and rest at 75°F for about 15m. Internal dough temp
+              should be about 72°F; it will warm to 75°F over the first hour.
           - id: bulk-fermentation-item-3
-            text: '**[1h elapsed]** Stretch and fold + cover and rest at 75°F for 25m'
+            text: '**[30m elapsed]** Stretch and fold + cover and rest at 75°F for 15m'
           - id: bulk-fermentation-item-4
-            text: '**[1:30h elapsed]** Stretch and fold + cover and rest at 75°F for 25m'
+            text: '**[45m elapsed]** Stretch and fold + cover and rest at 75°F for 15m'
+          - id: bulk-fermentation-item-7
+            text: '**[1h elapsed]** Stretch and fold + cover and rest at 75°F for 30m'
           - id: bulk-fermentation-item-5
-            text: '**[2:00h elapsed]** Coil fold + cover and rest at 75°F for 3:20h.'
+            text: '**[1:30h elapsed]** Coil fold + cover and rest at 75°F for 30m'
+          - id: bulk-fermentation-item-8
+            text: '**[2h elapsed]** Coil fold + cover and rest at 75°F for 30m'
+          - id: bulk-fermentation-item-9
+            text: '**[2:30h elapsed]** Coil fold + cover and rest at 75°F for 2:50h'
           - id: bulk-fermentation-item-6
-            text: '**[5:20h elapsed]** End of bulk when risen about 50% in volume'
+            text: '**[5:20h elapsed]** Divide and shape. Bulk continues through the preshape and shaping rests until the loaves go into the refrigerator at 6h elapsed; aim for about 50% rise by then.'
       - title: Shape
         items:
           - id: divide-dough
@@ -242,7 +259,7 @@ blocks:
         id: steps-5
     notes:
       - The autolyse process allows flour to fully hydrate and develops gluten naturally
-      - Bulk times assume 75°F. Below 75°F bulk takes longer and above it shorter; the Notebook estimates the difference for your temperature
+      - Bulk fermentation runs from mixing in the levain until the loaves go into the refrigerator, 6h at 75°F (5:20h in the container, then 40m of preshape and shaping rests). Below 75°F it takes longer and above it shorter; the Notebook estimates the difference for your temperature
       - Cold retarding in the refrigerator develops flavor and makes shaping easier
       - Proper scoring allows controlled expansion during baking
       - High initial heat creates steam for crust development

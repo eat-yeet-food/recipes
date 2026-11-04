@@ -39,6 +39,7 @@ export function resolveSourdoughSteps(sections: Section[], bindings: SourdoughPr
     ? `Mix at ${mixer.saltRpm} RPM for ${mixer.saltMinutes} min while the fine sea salt incorporates, then increase to ${mixer.finishRpm} RPM for about ${mixer.finishMinutes} min.`
     : 'Mix to incorporate, then continue until the dough gains moderate strength.'
   const temperature = process.bulkTemperatureF
+  const bench = process.benchMinutes ?? 0
   return sections.map((section) => {
     if (section.id === bindings.levain && levainIngredients) return {
       ...section, items: [`Mix ${levainIngredients}.`, ...section.items.slice(1)],
@@ -60,7 +61,7 @@ export function resolveSourdoughSteps(sections: Section[], bindings: SourdoughPr
           if (event.method === 'lamination') return `${stamp} Laminate the dough: gently stretch it into a thin sheet on a damp work surface without tearing, then fold it back over itself and return it to the bulk container.${rest}`
           return `${stamp} Perform one set of ${event.method === 'coil-fold' ? 'coil folds' : 'stretch and folds'}, working gently around the dough.${rest}`
         }
-        return `${stamp} Check the dough for ${temperature ? `about ${targetRisePercent(temperature)}% rise in volume (the target for ${temperature}°F dough)` : 'the recipe’s target rise (approximately doubled)'}, aeration, and strength. This is your planned end of bulk fermentation; extend or shorten the rest according to the dough, then continue to shaping.`
+        return `${stamp} Divide and shape. Bulk fermentation continues through ${bench ? `${formatDuration(bench)} of preshape and shaping rests` : 'shaping'} until the loaves go into the refrigerator at ${formatDuration(process.bulkMinutes + bench)} elapsed. Aim for ${temperature ? `about ${targetRisePercent(temperature)}% rise in volume by then (the target for ${temperature}°F dough)` : 'the recipe’s target rise by then'}, with good aeration and strength; divide earlier or later according to the dough.`
       }),
     }
   })

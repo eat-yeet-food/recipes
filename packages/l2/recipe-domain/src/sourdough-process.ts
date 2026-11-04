@@ -9,6 +9,8 @@ export interface SourdoughProcess {
   bulkMinutes: number
   /** Where the dough sits during bulk fermentation; absent in formulas saved before temperature planning. */
   bulkTemperatureF?: number
+  /** Preshape and shaping rests after dividing, until the dough goes into the refrigerator. Absent means none planned. */
+  benchMinutes?: number
   folds: Array<{ id: string; atMinutes: number; method?: SourdoughFoldMethod }>
 }
 
@@ -25,6 +27,7 @@ export function isSourdoughProcess(value: unknown): value is SourdoughProcess {
   return (process.mixingMethod === 'hand' || process.mixingMethod === 'spiral') &&
     (process.foldMethod === 'stretch-and-fold' || process.foldMethod === 'coil-fold') &&
     (process.bulkTemperatureF == null || Number.isFinite(process.bulkTemperatureF)) &&
+    (process.benchMinutes == null || Number.isSafeInteger(process.benchMinutes)) &&
     [process.autolyseMinutes, process.saltDelayMinutes, process.bulkMinutes].every(Number.isSafeInteger) &&
     Array.isArray(process.folds) && process.folds.every((fold) => fold && typeof fold.id === 'string' && Number.isSafeInteger(fold.atMinutes) &&
       (fold.method === undefined || fold.method === 'stretch-and-fold' || fold.method === 'coil-fold' || fold.method === 'lamination'))
@@ -35,12 +38,13 @@ export function sourdoughProcessErrors(process: SourdoughProcess): string[] {
   const errors: string[] = []
   if (process.autolyseMinutes < 0 || process.saltDelayMinutes < 0 || process.bulkMinutes <= 0) errors.push('Rest times must be zero or greater; bulk fermentation must be positive.')
   if (process.bulkTemperatureF != null && (process.bulkTemperatureF < BULK_TEMPERATURE_RANGE_F[0] || process.bulkTemperatureF > BULK_TEMPERATURE_RANGE_F[1])) errors.push(`Plan bulk fermentation between ${BULK_TEMPERATURE_RANGE_F[0]}°F and ${BULK_TEMPERATURE_RANGE_F[1]}°F.`)
-  if (process.saltDelayMinutes >= process.bulkMinutes) errors.push('Add fine sea salt before the end of bulk fermentation.')
+  if (process.benchMinutes != null && process.benchMinutes < 0) errors.push('Preshape and shaping rests must be zero or greater.')
+  if (process.saltDelayMinutes >= process.bulkMinutes) errors.push('Add fine sea salt before dividing the dough.')
   if (new Set(process.folds.map((fold) => fold.id)).size !== process.folds.length) errors.push('Each folding step needs a unique identity.')
   let previous = process.saltDelayMinutes
   for (const fold of process.folds) {
     if (fold.atMinutes <= previous || fold.atMinutes >= process.bulkMinutes) {
-      errors.push('Schedule folding steps in increasing order after adding fine sea salt and before bulk fermentation ends.')
+      errors.push('Schedule folding steps in increasing order after adding fine sea salt and before dividing the dough.')
       break
     }
     previous = fold.atMinutes
@@ -95,6 +99,9 @@ export function targetRisePercent(temperatureF: number): number {
   const { a, b, t } = segment(temperatureF)
   return Math.round((a.risePercent + (b.risePercent - a.risePercent) * t) / 5) * 5
 }
+
+/** Whole bulk fermentation: levain until the shaped dough goes into the refrigerator. */
+export const levainToFridgeMinutes = (process: SourdoughProcess) => process.bulkMinutes + (process.benchMinutes ?? 0)
 
 export interface BulkReference { bulkTemperatureF: number; bulkMinutes: number; levainPercent: number }
 
