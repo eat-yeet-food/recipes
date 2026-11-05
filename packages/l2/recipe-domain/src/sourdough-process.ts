@@ -11,6 +11,8 @@ export interface SourdoughProcess {
   bulkTemperatureF?: number
   /** Preshape and shaping rests after dividing, until the dough goes into the refrigerator. Absent means none planned. */
   benchMinutes?: number
+  /** Of the bench time, the rest after dividing and preshaping, before final shaping. Absent means not split. */
+  preshapeMinutes?: number
   folds: Array<{ id: string; atMinutes: number; method?: SourdoughFoldMethod }>
 }
 
@@ -28,6 +30,7 @@ export function isSourdoughProcess(value: unknown): value is SourdoughProcess {
     (process.foldMethod === 'stretch-and-fold' || process.foldMethod === 'coil-fold') &&
     (process.bulkTemperatureF == null || Number.isFinite(process.bulkTemperatureF)) &&
     (process.benchMinutes == null || Number.isSafeInteger(process.benchMinutes)) &&
+    (process.preshapeMinutes == null || Number.isSafeInteger(process.preshapeMinutes)) &&
     [process.autolyseMinutes, process.saltDelayMinutes, process.bulkMinutes].every(Number.isSafeInteger) &&
     Array.isArray(process.folds) && process.folds.every((fold) => fold && typeof fold.id === 'string' && Number.isSafeInteger(fold.atMinutes) &&
       (fold.method === undefined || fold.method === 'stretch-and-fold' || fold.method === 'coil-fold' || fold.method === 'lamination'))
@@ -39,6 +42,7 @@ export function sourdoughProcessErrors(process: SourdoughProcess): string[] {
   if (process.autolyseMinutes < 0 || process.saltDelayMinutes < 0 || process.bulkMinutes <= 0) errors.push('Rest times must be zero or greater; bulk fermentation must be positive.')
   if (process.bulkTemperatureF != null && (process.bulkTemperatureF < BULK_TEMPERATURE_RANGE_F[0] || process.bulkTemperatureF > BULK_TEMPERATURE_RANGE_F[1])) errors.push(`Plan bulk fermentation between ${BULK_TEMPERATURE_RANGE_F[0]}°F and ${BULK_TEMPERATURE_RANGE_F[1]}°F.`)
   if (process.benchMinutes != null && process.benchMinutes < 0) errors.push('Preshape and shaping rests must be zero or greater.')
+  if (process.preshapeMinutes != null && (process.preshapeMinutes < 0 || process.preshapeMinutes > (process.benchMinutes ?? 0))) errors.push('The preshape rest must fit within the preshape and shaping time.')
   if (process.saltDelayMinutes >= process.bulkMinutes) errors.push('Add fine sea salt before dividing the dough.')
   if (new Set(process.folds.map((fold) => fold.id)).size !== process.folds.length) errors.push('Each folding step needs a unique identity.')
   let previous = process.saltDelayMinutes
@@ -130,4 +134,60 @@ export function bannetonPieceWeight(referenceGrams: number, referenceTemperature
   if (referenceTemperatureF - temperatureF < SMALLER_LOAF_BELOW_F) return referenceGrams
   const ratio = (1 + targetRisePercent(referenceTemperatureF) / 100) / (1 + targetRisePercent(temperatureF) / 100)
   return Math.round(referenceGrams * ratio ** 0.42 / 5) * 5
+}
+
+/** Consecutive folds with one technique and even spacing, the editor's unit of folding. */
+export interface FoldGroup { method: SourdoughFoldMethod; count: number; everyMinutes: number; ids: string[] }
+export interface FoldPlan { startMinutes: number; groups: FoldGroup[] }
+
+const DEFAULT_FOLD_INTERVAL = 30
+
+/**
+ * Reads stored folds as groups without moving any fold. The first fold sits
+ * `startMinutes` after salt; each later fold follows the previous one by its
+ * group's interval, so irregular schedules become several small groups.
+ */
+export function foldGroups(process: SourdoughProcess): FoldPlan {
+  const folds = process.folds
+  if (!folds.length) return { startMinutes: DEFAULT_FOLD_INTERVAL, groups: [] }
+  const groups: Array<Omit<FoldGroup, 'everyMinutes'> & { everyMinutes: number | null }> = []
+  folds.forEach((fold, index) => {
+    const method = fold.method ?? process.foldMethod
+    const current = groups.at(-1)
+    if (index === 0 || !current) { groups.push({ method, count: 1, everyMinutes: null, ids: [fold.id] }); return }
+    const gap = fold.atMinutes - folds[index - 1].atMinutes
+    if (current.method === method && (current.everyMinutes === null || current.everyMinutes === gap)) {
+      current.everyMinutes = gap
+      current.count++
+      current.ids.push(fold.id)
+    } else groups.push({ method, count: 1, everyMinutes: gap, ids: [fold.id] })
+  })
+  return {
+    startMinutes: folds[0].atMinutes - process.saltDelayMinutes,
+    groups: groups.map((group, index) => ({ ...group, everyMinutes: group.everyMinutes ?? groups[index + 1]?.everyMinutes ?? DEFAULT_FOLD_INTERVAL })),
+  }
+}
+
+/** Expands groups into stored folds, keeping each group's existing fold identities. */
+export function foldsFromGroups(saltDelayMinutes: number, plan: FoldPlan, newId: () => string): SourdoughProcess['folds'] {
+  const folds: SourdoughProcess['folds'] = []
+  let at = saltDelayMinutes + plan.startMinutes
+  plan.groups.forEach((group, groupIndex) => {
+    for (let index = 0; index < group.count; index++) {
+      if (groupIndex > 0 || index > 0) at += group.everyMinutes
+      folds.push({ id: group.ids[index] ?? newId(), atMinutes: at, method: group.method })
+    }
+  })
+  return folds
+}
+
+/** Reads `90`, `1:30`, `1:30h`, `1h30`, `1h 30m`, `2h` or `45m` as whole minutes. */
+export function parseDuration(text: string): number | null {
+  const value = text.trim().toLowerCase().replace(/\s+/g, '').replace(/(min|mins|minutes?)$/, 'm').replace(/(hr|hrs|hours?)/, 'h')
+  let match: RegExpMatchArray | null
+  if (/^\d+$/.test(value)) return Number(value)
+  if ((match = value.match(/^(\d+):([0-5]\d)h?$/))) return Number(match[1]) * 60 + Number(match[2])
+  if ((match = value.match(/^(\d+)h(?:([0-5]?\d)m?)?$/))) return Number(match[1]) * 60 + Number(match[2] ?? 0)
+  if ((match = value.match(/^(\d+)m$/))) return Number(match[1])
+  return null
 }

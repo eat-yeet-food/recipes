@@ -120,11 +120,13 @@ export function formulaChanges(from: DoughFormulaState, to: DoughFormulaState, m
   }
   if (a.process && b.process) {
     add('Mixing', a.process.mixingMethod === 'hand' ? 'By hand' : 'Spiral mixer', b.process.mixingMethod === 'hand' ? 'By hand' : 'Spiral mixer')
-    add('Autolyse', duration(a.process.autolyseMinutes), duration(b.process.autolyseMinutes))
-    add('Salt added at', duration(a.process.saltDelayMinutes), duration(b.process.saltDelayMinutes))
-    add('Divide at', duration(a.process.bulkMinutes), duration(b.process.bulkMinutes))
-    add('Preshape and shaping', duration(a.process.benchMinutes ?? 0), duration(b.process.benchMinutes ?? 0))
-    add('Bulk temperature', temperature(a.process.bulkTemperatureF), temperature(b.process.bulkTemperatureF))
+    const rest = (minutes: number) => minutes > 0 ? duration(minutes) : 'Off'
+    add('Autolyse', rest(a.process.autolyseMinutes), rest(b.process.autolyseMinutes))
+    add('Fermentolyse', rest(a.process.saltDelayMinutes), rest(b.process.saltDelayMinutes))
+    add('Into the refrigerator at', duration(a.process.bulkMinutes + (a.process.benchMinutes ?? 0)), duration(b.process.bulkMinutes + (b.process.benchMinutes ?? 0)))
+    add('Preshape rest', duration(a.process.preshapeMinutes ?? 0), duration(b.process.preshapeMinutes ?? 0))
+    add('Shaping rest', duration((a.process.benchMinutes ?? 0) - (a.process.preshapeMinutes ?? 0)), duration((b.process.benchMinutes ?? 0) - (b.process.preshapeMinutes ?? 0)))
+    add('Dough temperature', temperature(a.process.bulkTemperatureF), temperature(b.process.bulkTemperatureF))
     add('Folds', schedule(a.process), schedule(b.process))
   }
   return changes

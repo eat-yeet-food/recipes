@@ -72,6 +72,7 @@ function renderFormulaBindings(value: string, selection: DoughWorkbenchState, co
   const bindings: Record<string, string> = {
     initialWaterGrams: formatAppliedGrams(initialWaterGrams),
     remainingWaterGrams: formatAppliedGrams(remainingWaterGrams),
+    addedWaterGrams: formatAppliedGrams(result.addedWaterGrams),
     pizzaDiameter: selection.batch.diameterInches ? `${selection.batch.diameterInches} inches` : 'your preferred size',
     pieceCount: String(selection.batch.count),
     pieceLabelPlural: plural,
@@ -157,7 +158,7 @@ export function isDoughConfig(value: unknown): value is DoughWorkbenchConfig {
     (config.defaultInputMode === 'weights' || config.defaultInputMode === 'target') &&
     isDoughState(config.defaultSelection) &&
     (mixer === undefined || Boolean(mixer && typeof mixer.name === 'string' && [mixer.initialRpm, mixer.targetTemperatureF, mixer.saltRpm, mixer.saltMinutes, mixer.finishRpm, mixer.finishMinutes].every((number) => Number.isFinite(number) && number > 0) && Array.isArray(mixer.initialMinutes) && mixer.initialMinutes.length === 2 && mixer.initialMinutes.every((number) => Number.isFinite(number) && number > 0) && mixer.initialMinutes[0] <= mixer.initialMinutes[1])) &&
-    (config.processSections === undefined || Boolean(config.processSections && ['autolyse', 'bulk', 'levain'].every((key) => typeof config.processSections?.[key as keyof SourdoughProcessSections] === 'string'))) &&
+    (config.processSections === undefined || Boolean(config.processSections && ['autolyse', 'bulk', 'levain'].every((key) => typeof config.processSections?.[key as keyof SourdoughProcessSections] === 'string') && (config.processSections.shape == null || typeof config.processSections.shape === 'string'))) &&
     Boolean(config.recommendedFormulas && typeof config.recommendedFormulas === 'object' && Object.values(config.recommendedFormulas).every(isDoughFormula))
   )
 }

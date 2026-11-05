@@ -14,6 +14,20 @@ export interface Section {
   title: string
   items: string[]
   itemIds: string[]
+  /** Render-time projection only, never stored: elapsed time for each step of a timed process. */
+  itemTimes?: SectionItemTime[]
+  /** What itemTimes count from, e.g. `Time since mixing in the levain`. */
+  timeOrigin?: string
+}
+
+export interface SectionItemTime {
+  /** Display label, e.g. `10m` or `1:30h`. */
+  label: string
+  minutes: number
+  /** Steps that change the dough's state get a filled marker. */
+  emphasis?: boolean
+  /** Muted line under the step, e.g. how long to rest. */
+  rest?: string
 }
 
 export interface MarkdownBlock {

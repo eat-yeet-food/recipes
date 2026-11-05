@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
-import { DEFAULT_SOURDOUGH_PROCESS, bannetonPieceWeight, estimateBulkMinutes, isSourdoughProcess, levainToFridgeMinutes, targetRisePercent, sourdoughProcessErrors, sourdoughTimeline } from './sourdough-process.ts'
+import { DEFAULT_SOURDOUGH_PROCESS, foldGroups, foldsFromGroups, parseDuration, bannetonPieceWeight, estimateBulkMinutes, isSourdoughProcess, levainToFridgeMinutes, targetRisePercent, sourdoughProcessErrors, sourdoughTimeline } from './sourdough-process.ts'
 
 describe('sourdough process', () => {
   it('preserves the authored timeline and fold identities', () => {
@@ -66,5 +66,40 @@ describe('sourdough process', () => {
     assert.equal(bannetonPieceWeight(907.5, 75, 73), 907.5)
     assert.equal(bannetonPieceWeight(907.5, 75, 80), 907.5)
     assert.ok(bannetonPieceWeight(907.5, 75, 72) < 907.5)
+  })
+})
+
+describe('fold groups', () => {
+  const authored = { ...DEFAULT_SOURDOUGH_PROCESS, saltDelayMinutes: 10, bulkMinutes: 320, folds: [
+    { id: 'fold-1', atMinutes: 30, method: 'stretch-and-fold' as const },
+    { id: 'fold-2', atMinutes: 45, method: 'stretch-and-fold' as const },
+    { id: 'fold-3', atMinutes: 60, method: 'stretch-and-fold' as const },
+    { id: 'fold-4', atMinutes: 90, method: 'coil-fold' as const },
+    { id: 'fold-5', atMinutes: 120, method: 'coil-fold' as const },
+    { id: 'fold-6', atMinutes: 150, method: 'coil-fold' as const },
+  ] }
+  it('reads the authored schedule as two groups and writes it back unchanged', () => {
+    const plan = foldGroups(authored)
+    assert.equal(plan.startMinutes, 20)
+    assert.deepEqual(plan.groups.map(({ method, count, everyMinutes }) => [method, count, everyMinutes]), [['stretch-and-fold', 3, 15], ['coil-fold', 3, 30]])
+    assert.deepEqual(foldsFromGroups(10, plan, () => 'new'), authored.folds)
+  })
+  it('keeps irregular and legacy schedules exactly', () => {
+    for (const process of [DEFAULT_SOURDOUGH_PROCESS, { ...authored, folds: [{ id: 'a', atMinutes: 40 }, { id: 'b', atMinutes: 55, method: 'lamination' as const }, { id: 'c', atMinutes: 100 }, { id: 'd', atMinutes: 110 }] }]) {
+      const expected = process.folds.map((fold) => ({ ...fold, method: fold.method ?? process.foldMethod }))
+      assert.deepEqual(foldsFromGroups(process.saltDelayMinutes, foldGroups(process), () => 'new'), expected)
+    }
+  })
+  it('moves folds with salt and mints identities only for added sets', () => {
+    const plan = foldGroups(authored)
+    plan.groups[1].count = 4
+    const folds = foldsFromGroups(0, plan, () => 'fold-new')
+    assert.deepEqual(folds.map((fold) => fold.atMinutes), [20, 35, 50, 80, 110, 140, 170])
+    assert.equal(folds.at(-1)!.id, 'fold-new')
+    assert.deepEqual(foldGroups({ ...authored, folds: [] }), { startMinutes: 30, groups: [] })
+  })
+  it('parses durations', () => {
+    for (const [text, minutes] of [['90', 90], ['1:30', 90], ['1:30h', 90], ['1h30', 90], ['1h 30m', 90], ['2h', 120], ['45m', 45], ['45 min', 45], ['0', 0]] as const) assert.equal(parseDuration(text), minutes, text)
+    for (const text of ['', '1:75', 'soon', '1.5h', '-5']) assert.equal(parseDuration(text), null, text)
   })
 })

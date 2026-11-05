@@ -45,6 +45,7 @@ const formula = object({
     bulkMinutes: number,
     bulkTemperatureF: number,
     benchMinutes: number,
+    preshapeMinutes: number,
     folds: array(object({ id: text, atMinutes: number, method: text })),
   }),
 })
@@ -72,7 +73,7 @@ export const workbenchShape = object({
       finishRpm: number,
       finishMinutes: number,
     }),
-    processSections: object({ autolyse: text, bulk: text, levain: text }),
+    processSections: object({ autolyse: text, bulk: text, levain: text, shape: text }),
     defaultSelection: object({
       version: number,
       methodId: text,

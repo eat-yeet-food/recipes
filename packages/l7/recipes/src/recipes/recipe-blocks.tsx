@@ -3,7 +3,7 @@ import { formatYield, humanizeMinutes } from '@eat-yeet/l2-recipe-domain/format'
 import type { RecipeBlock, Section } from '@eat-yeet/l4-content-model/blocks'
 import type { RecipeContent } from '@eat-yeet/l4-content-model/recipes'
 import { createPageBlockRegistry, registerSharedPageBlocks, type PageBlockRegistry } from '@eat-yeet/l6-ui-content-blocks/page-blocks'
-import type { ReactNode } from 'react'
+import { useId, type ReactNode } from 'react'
 import { RecipeFacts } from './recipe-facts'
 
 const Html = ({ as: Tag = 'div', html, ...rest }: { as?: any; html: string } & Record<string, unknown>) => (
@@ -29,6 +29,37 @@ function MetaList({ page }: { page: RecipeContent }) {
   return <RecipeFacts items={items} />
 }
 
+/**
+ * Steps of a timed process on a time rail: a marker column replaces the list
+ * number, filled where the dough changes state, with rests in muted text.
+ */
+function TimedList({ section }: { section: Section }) {
+  const times = section.itemTimes!
+  const originId = useId()
+  return (<>
+    {section.timeOrigin && <p id={originId} className="-mt-1 mb-3.5 text-[13px] text-muted-foreground">{section.timeOrigin}</p>}
+    <ol data-timed-steps="" aria-describedby={section.timeOrigin ? originId : undefined} className="m-0 grid list-none gap-[18px] p-0">
+      {section.items.map((item, index) => {
+        const time = times[index]
+        return (
+          <li key={section.itemIds[index] ?? index} className="relative grid grid-cols-[64px_minmax(0,1fr)] gap-3 text-base leading-[1.72] [&:not(:last-child)]:before:absolute [&:not(:last-child)]:before:top-4 [&:not(:last-child)]:before:-bottom-[34px] [&:not(:last-child)]:before:left-[31px] [&:not(:last-child)]:before:w-0.5 [&:not(:last-child)]:before:bg-border print:before:bg-ink">
+            <time
+              dateTime={`PT${time.minutes}M`}
+              className={`relative z-[1] mt-0.5 self-start justify-self-center min-w-14 rounded-control px-2 py-0.5 text-center font-action text-sm leading-[1.6] font-bold tabular-nums ${time.emphasis ? 'bg-ink text-action-label' : 'bg-white text-ink shadow-[inset_0_0_0_1px_var(--color-ink)]'}`}
+            >
+              {time.label}
+            </time>
+            <div className="min-w-0">
+              <Html as="span" html={item} />
+              {time.rest && <span className="block text-sm text-muted-foreground">{time.rest}</span>}
+            </div>
+          </li>
+        )
+      })}
+    </ol>
+  </>)
+}
+
 export function RecipeList({ sections, ordered = false }: { sections: Section[]; ordered?: boolean }) {
   if (sections.length === 0) return null
   const List = ordered ? 'ol' : 'ul'
@@ -41,7 +72,7 @@ export function RecipeList({ sections, ordered = false }: { sections: Section[];
           {section.title && (
             <h3 className="mt-[22px] mb-2.5 text-[13px] font-bold uppercase text-[var(--color-primary)]">{section.title}</h3>
           )}
-          <List className={listClass}>
+          {ordered && section.itemTimes?.length === section.items.length ? <TimedList section={section} /> : <List className={listClass}>
             {section.items.map((item, itemIndex) => (
               <li
                 key={section.itemIds[itemIndex] ?? itemIndex}
@@ -50,7 +81,7 @@ export function RecipeList({ sections, ordered = false }: { sections: Section[];
                 <Html as="span" html={item} />
               </li>
             ))}
-          </List>
+          </List>}
         </section>
       ))}
     </div>

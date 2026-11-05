@@ -2,11 +2,13 @@
 import { useId } from 'react'
 import type { DoughWorkbenchState } from './dough-workbench-model'
 import { doughRows } from './dough-kitchen-model'
+import { sourdoughSchedule } from './sourdough-process'
 
 /** The ink result panel: yellow total, ingredient labels left and tabular weights right. */
 export function DoughResults({ state }: { state: DoughWorkbenchState }) {
   const id = useId()
   const { total, totalDetail, rows, levainBuild } = doughRows(state)
+  const schedule = state.formula.process ? sourdoughSchedule(state.formula.process) : null
   return <section aria-labelledby={id} data-dough-results="" className="grid gap-4 rounded-field bg-ink p-5 text-action-label">
     <h2 id={id} className="font-action text-2xl leading-tight font-bold text-brand">Your dough</h2>
     <p className="grid gap-2">
@@ -19,6 +21,15 @@ export function DoughResults({ state }: { state: DoughWorkbenchState }) {
         <dd className="m-0 whitespace-nowrap text-right font-action font-bold tabular-nums">{row.detail && <span className="mr-1.5 font-body text-[13px] font-normal">{row.detail}</span>}{row.amount}</dd>
       </div>)}
     </dl>
+    {schedule && <div className="grid gap-1" data-dough-schedule="">
+      <h3 id={`${id}-schedule`} className="pt-2 font-action text-[13px] font-bold uppercase">Schedule</h3>
+      <ol aria-labelledby={`${id}-schedule`} className="m-0 grid list-none p-0">
+        {schedule.map((row) => <li key={row.id} className={row.problem ? 'my-1 grid grid-cols-[52px_minmax(0,1fr)] gap-3 rounded-[6px] bg-danger-soft p-2 text-sm leading-snug text-ink' : 'grid grid-cols-[52px_minmax(0,1fr)] gap-3 border-t border-border-on-ink py-2 text-sm leading-snug'}>
+          <span className={`font-action font-bold tabular-nums ${row.problem ? 'text-danger' : 'text-brand'}`}>{row.time}</span>
+          <span>{row.label}{row.problem && <>. {row.problem}</>}</span>
+        </li>)}
+      </ol>
+    </div>}
     {levainBuild && <p className="border-t border-border-on-ink pt-3 text-[13px] leading-relaxed">Levain build: {levainBuild}</p>}
   </section>
 }

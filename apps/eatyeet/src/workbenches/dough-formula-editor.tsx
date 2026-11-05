@@ -2,7 +2,7 @@
 import { createContext, useCallback, useContext, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Plus, Trash2 } from 'lucide-react'
 import { pizzaBallWeight } from '@eat-yeet/l2-recipe-domain/pizza-sizing'
-import { BULK_TEMPERATURE_RANGE_F, SMALLER_LOAF_BELOW_F, bannetonPieceWeight, estimateBulkMinutes, levainToFridgeMinutes, targetRisePercent, type SourdoughFoldMethod, type SourdoughProcess } from '@eat-yeet/l2-recipe-domain/sourdough-process'
+import { BULK_TEMPERATURE_RANGE_F, SMALLER_LOAF_BELOW_F, bannetonPieceWeight, estimateBulkMinutes, foldGroups, foldsFromGroups, levainToFridgeMinutes, parseDuration, targetRisePercent, type FoldGroup, type FoldPlan, type SourdoughFoldMethod, type SourdoughProcess } from '@eat-yeet/l2-recipe-domain/sourdough-process'
 import { MAX_LEVAIN_EXTRA_PERCENT, calculateDoughLevainBuild, calculateFormula, formatPercent, levainExtraPercent, reverseFormula, type DoughBatch, type DoughFormula, type FlourComponent, type ReverseFormulaInput, type StarterProfile } from '@eat-yeet/l2-recipe-domain/formula'
 import { selectedRecipeMethod, type RecipeContent } from '@eat-yeet/l4-content-model/recipes'
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
@@ -10,6 +10,7 @@ import { ChoiceGroup } from '@eat-yeet/l5-ui-primitives/primitives/choice-group'
 import { Input } from '@eat-yeet/l5-ui-primitives/primitives/input'
 import { NumberField, formatNumberFieldValue, type NumberFieldPrecision, type NumberFieldValidation } from '@eat-yeet/l5-ui-primitives/primitives/number-field'
 import { Select } from '@eat-yeet/l5-ui-primitives/primitives/select'
+import { Switch } from '@eat-yeet/l5-ui-primitives/primitives/switch'
 import { clone, formatWorkbenchGrams, pieceCountLabel, starterFrom, yeastGramPrecision, type DoughWorkbenchConfig, type DoughWorkbenchState, type InputMode } from './dough-workbench-model'
 import { formulasMatch } from './dough-formula-match'
 import { levainYield } from './dough-kitchen-model'
@@ -23,17 +24,38 @@ function Field({ label, value, onChange, suffix, step, min = 0, max, positive = 
   return <NumberField surface="underline" decimalPlaces={precision} label={label} value={value} onValueChange={onChange} suffix={suffix} min={min} max={max} integer={step === '1'} positive={positive} hideLabel={hideLabel} onValidationChange={fields?.report} resetKey={fields?.resetKey} />
 }
 
-/** Edit whole-minute durations without requiring mental conversion from hours. */
-function DurationField({ label, value, onChange }: { label: string; value: number; onChange: (minutes: number) => void }) {
-  const hours = Math.floor(value / 60)
-  const minutes = value % 60
-  return <fieldset className="grid min-w-0 gap-1">
-    <legend className="mb-1 font-action text-sm font-bold">{label}</legend>
-    <div className="grid grid-cols-2 gap-4">
-      <Field hideLabel label={`${label} hours`} suffix="hr" step="1" value={hours} onChange={(next) => onChange(next * 60 + minutes)} />
-      <Field hideLabel label={`${label} minutes`} suffix="min" step="1" max={59} value={minutes} onChange={(next) => onChange(hours * 60 + next)} />
-    </div>
-  </fieldset>
+const DURATION_HINT = 'Use minutes (45) or hours:minutes (1:30).'
+
+/** One text field for a whole-minute duration: accepts 90, 1:30, 1h30 or 45m and shows 1:30h after editing. */
+function DurationField({ label, value, onChange, min = 0, hideLabel = false, describedBy }: { label: string; value: number; onChange: (minutes: number) => void; min?: number; hideLabel?: boolean; describedBy?: string }) {
+  const fields = useContext(NumericFields)
+  const id = useId()
+  const resetKey = fields?.resetKey ?? 0
+  const report = fields?.report
+  const [edit, setEdit] = useState<{ text: string; revision: number } | null>(null)
+  const [focused, setFocused] = useState(false)
+  const editing = edit?.revision === resetKey ? edit : null
+  const parsed = editing ? parseDuration(editing.text) : value
+  const error = parsed === null ? DURATION_HINT : parsed < min ? `Enter ${formatDuration(min)} or more.` : null
+  const showError = Boolean(error) && !focused
+  useEffect(() => { report?.(id, error ? `${label}: ${error}` : null) }, [error, id, label, report])
+  useEffect(() => () => report?.(id, null), [id, report])
+  return <div className="grid min-w-0 content-start gap-1">
+    <label htmlFor={id} className={hideLabel ? 'sr-only' : 'font-action text-sm font-bold text-ink'}>{label}</label>
+    <Input surface="underline" id={id} type="text" inputMode="text" enterKeyHint="done" autoComplete="off" spellCheck={false}
+      value={editing ? editing.text : formatDuration(value)} aria-invalid={showError}
+      aria-describedby={[describedBy, showError ? `${id}-error` : ''].filter(Boolean).join(' ') || undefined}
+      onFocus={() => setFocused(true)}
+      onChange={(event) => {
+        const text = event.target.value
+        setEdit({ text, revision: resetKey })
+        const minutes = parseDuration(text)
+        if (minutes !== null && minutes >= min) onChange(minutes)
+      }}
+      onBlur={() => { setFocused(false); if (!error) setEdit(null) }}
+      onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); event.currentTarget.blur() } }} />
+    {showError && <p id={`${id}-error`} className="text-xs text-danger">{error}</p>}
+  </div>
 }
 
 /** One row per flour. Accessible names carry the blend (`prefix`) so starter rows never share a name with dough rows. */
@@ -54,40 +76,58 @@ function FlourEditor({ label, prefix = '', value, onChange, unit = '%' }: { labe
 const GUIDELINES_URL = 'https://thesourdoughjourney.com/the-mystery-of-percentage-rise-in-bulk-fermentation/'
 
 /**
- * Plans bulk fermentation for a chosen temperature: an estimated duration,
- * the end-of-bulk rise to look for and, for loaves, a basket-filling weight.
+ * One line under the bulk row: the estimated bulk and target rise for the
+ * dough temperature and, for cooler loaves, a basket-filling weight.
  * Suggestions apply only when the reader chooses them.
  */
-function BulkPlanner({ config, formula, batch, temperatureF, onUseBulk, onUseWeight }: { config: DoughWorkbenchConfig; formula: DoughFormula; batch: DoughBatch; temperatureF: number; onUseBulk: (minutes: number) => void; onUseWeight: (grams: number) => void }) {
+function BulkHint({ id, config, formula, batch, temperatureF, onUseBulk, onUseWeight }: { id: string; config: DoughWorkbenchConfig; formula: DoughFormula; batch: DoughBatch; temperatureF: number; onUseBulk: (minutes: number) => void; onUseWeight: (grams: number) => void }) {
   const process = formula.process!
   const authored = config.defaultSelection.formula
   const referenceTemperature = authored.process?.bulkTemperatureF
   const bench = process.benchMinutes ?? 0
   const reference = referenceTemperature != null && authored.process ? { bulkTemperatureF: referenceTemperature, bulkMinutes: levainToFridgeMinutes(authored.process), levainPercent: authored.levainPercent } : undefined
   const total = estimateBulkMinutes(temperatureF, formula.levainPercent, reference)
-  const containerEnd = total === null ? null : total - bench
-  const rise = targetRisePercent(temperatureF)
+  const planned = levainToFridgeMinutes(process)
   const loaf = batch.pieceLabel === 'loaf' && referenceTemperature != null && referenceTemperature - temperatureF >= SMALLER_LOAF_BELOW_F
   const weight = loaf ? bannetonPieceWeight(config.defaultSelection.batch.pieceWeightGrams, referenceTemperature, temperatureF) : null
-  const difference = reference && total !== null ? total - reference.bulkMinutes : 0
-  const comparison = !reference || total === null ? ''
-    : difference === 0 ? `, the same as the recipe at ${reference.bulkTemperatureF}°F`
-    : `, ${formatDuration(Math.abs(difference))} ${difference > 0 ? 'longer' : 'shorter'} than the recipe’s ${formatDuration(reference.bulkMinutes)} at ${reference.bulkTemperatureF}°F`
   const lastFold = process.folds.at(-1)?.atMinutes ?? process.saltDelayMinutes
-  return <div className="grid gap-3 rounded-field bg-tint p-5" data-bulk-planner>
-    <p className="text-sm leading-relaxed">
-      {total !== null && containerEnd !== null && <>At {temperatureF}°F, plan about <strong>{formatDuration(total)}</strong> of bulk from mixing in the levain until the loaves go into the refrigerator{comparison}. {bench > 0 ? <>That is {formatDuration(Math.max(containerEnd, 0))} in the container, then {formatDuration(bench)} of preshape and shaping rests. </> : null}</>}
-      Aim for about <strong>{rise}% rise</strong> in volume by the time the loaves go into the refrigerator. Warmer dough keeps fermenting while it chills, so it should finish with less rise.
-    </p>
-    {containerEnd !== null && containerEnd > lastFold && containerEnd !== process.bulkMinutes && <Button variant="link" type="button" className="justify-self-start" onClick={() => onUseBulk(containerEnd)}>Divide at {formatDuration(containerEnd)}</Button>}
-    {containerEnd !== null && containerEnd <= lastFold && <p className="text-sm text-muted-foreground">Move folding steps earlier or shorten the preshape and shaping rests so the folds finish before dividing.</p>}
-    {weight !== null && <>
-      <p className="text-sm leading-relaxed">Cooler bulks rise more. About <strong>{formatWorkbenchGrams(weight)}</strong> per loaf fills the same banneton.</p>
-      {Math.abs(weight - batch.pieceWeightGrams) >= 1 && <Button variant="link" type="button" className="justify-self-start" onClick={() => onUseWeight(weight)}>Use {formatWorkbenchGrams(weight)} loaves</Button>}
-    </>}
-    <p className="text-xs text-muted-foreground">Based on <Button variant="link" className="inline" asChild><a href={GUIDELINES_URL} target="_blank" rel="noreferrer">The Sourdough Journey’s bulk fermentation guidelines</a></Button>. Times are estimates; follow the rise.</p>
+  const fits = total !== null && total - bench > lastFold
+  const useWeight = weight !== null && Math.abs(weight - batch.pieceWeightGrams) >= 1
+  return <div id={id} aria-live="polite" className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[13px] leading-normal text-muted-foreground" data-bulk-hint>
+    <span>At {temperatureF}°F: {total !== null && <>about <strong className="font-action text-ink">{formatDuration(total)}</strong> and </>}<strong className="font-action text-ink">{targetRisePercent(temperatureF)}% rise</strong>.{weight !== null && <> Smaller loaves fill the same banneton: <strong className="font-action text-ink">{formatWorkbenchGrams(weight)}</strong>.</>}{total === planned && !useWeight && ' Matches your plan.'}{total !== null && total !== planned && !fits && ' Move folds earlier to use this estimate.'}</span>
+    {total !== null && total !== planned && fits && <Button variant="link" type="button" className="text-[13px]" onClick={() => onUseBulk(total)}>Use {formatDuration(total)}</Button>}
+    {useWeight && <Button variant="link" type="button" className="text-[13px]" onClick={() => onUseWeight(weight!)}>Use {formatWorkbenchGrams(weight!)} loaves</Button>}
   </div>
 }
+
+/** A labeled group of fields inside a section, titled like a recipe subsection. */
+function Group({ title, children }: { title: string; children: ReactNode }) {
+  const id = useId()
+  return <div role="group" aria-labelledby={id} className="grid min-w-0 gap-4 border-t border-border pt-5">
+    <h3 id={id} className="font-action text-[13px] font-bold uppercase">{title}</h3>
+    {children}
+  </div>
+}
+
+/** An optional rest: a labeled switch, a hint, and its length while on. */
+function RestToggle({ label, hint, value, onToggle, onChange }: { label: string; hint: string; value: number; onToggle: (on: boolean) => void; onChange: (minutes: number) => void }) {
+  const id = useId()
+  const on = value > 0
+  return <div className="grid grid-cols-[minmax(0,1fr)_140px] items-center gap-x-6 gap-y-1 max-[520px]:grid-cols-1">
+    <div className="grid gap-1">
+      <div className="inline-flex items-center gap-3">
+        <Switch id={id} checked={on} onCheckedChange={onToggle} aria-describedby={`${id}-hint`} />
+        <label htmlFor={id} className="font-action text-base font-bold">{label}</label>
+      </div>
+      <p id={`${id}-hint`} className="pl-14 text-[13px] leading-normal text-muted-foreground">{hint}</p>
+    </div>
+    <div className={on ? 'max-[520px]:pl-14' : 'invisible max-[520px]:hidden'}>
+      {on && <DurationField hideLabel label={`${label} length`} min={1} value={value} onChange={onChange} />}
+    </div>
+  </div>
+}
+
+const FOLD_LABELS: Record<SourdoughFoldMethod, string> = { 'stretch-and-fold': 'stretch and folds', 'coil-fold': 'coil folds', lamination: 'laminations' }
 
 function Section({ title, children, aside, description }: { title: string; children: ReactNode; aside?: ReactNode; description?: ReactNode }) {
   const id = useId()
@@ -207,16 +247,29 @@ export function DoughFormulaEditor({ recipe, config, state, onChange, onErrorsCh
     onChange({ ...state, formula: { ...formula, ...reversed.formula }, batch: { ...batch, diameterInches: undefined, pieceWeightGrams: reversed.totalDoughGrams / batch.count } })
   }
   const updateProcess = (changes: Partial<SourdoughProcess>) => { if (process) updateFormula({ process: { ...process, ...changes } }) }
-  const addFoldingStep = (afterIndex: number) => {
+  const plan: FoldPlan | null = useMemo(() => process ? foldGroups(process) : null, [process])
+  const newFoldId = () => `fold-${crypto.randomUUID()}`
+  const updatePlan = (next: FoldPlan) => { if (process) updateProcess({ folds: foldsFromGroups(process.saltDelayMinutes, next, newFoldId) }) }
+  const updateGroup = (index: number, changes: Partial<FoldGroup>) => { if (plan) updatePlan({ ...plan, groups: plan.groups.map((group, groupIndex) => groupIndex === index ? { ...group, ...changes } : group) }) }
+  const setSaltDelay = (saltDelayMinutes: number) => { if (process && plan) updateProcess({ saltDelayMinutes, folds: foldsFromGroups(saltDelayMinutes, plan, newFoldId) }) }
+  const authoredProcess = config.defaultSelection.formula.process
+  const remembered = useRef<{ autolyseMinutes?: number; saltDelayMinutes?: number }>({})
+  const toggleRest = (key: 'autolyseMinutes' | 'saltDelayMinutes', on: boolean) => {
     if (!process) return
-    const previous = process.folds[afterIndex]
-    const next = process.folds[afterIndex + 1]
-    const start = previous?.atMinutes ?? process.saltDelayMinutes
-    const atMinutes = next ? Math.floor((start + next.atMinutes) / 2) : start + 30
-    const folds = [...process.folds]
-    folds.splice(afterIndex + 1, 0, { id: `fold-${crypto.randomUUID()}`, atMinutes, method: previous?.method === 'lamination' ? 'coil-fold' : previous?.method ?? process.foldMethod })
-    updateProcess({ folds, bulkMinutes: next ? process.bulkMinutes : Math.max(process.bulkMinutes, atMinutes + 30) })
+    if (!on) remembered.current[key] = process[key]
+    const restored = remembered.current[key] || authoredProcess?.[key] || (key === 'autolyseMinutes' ? 30 : 15)
+    if (key === 'saltDelayMinutes') setSaltDelay(on ? restored : 0)
+    else updateProcess({ autolyseMinutes: on ? restored : 0 })
+    setLocalReset((count) => count + 1)
   }
+  const preshapeRest = Math.min(process?.preshapeMinutes ?? 0, process?.benchMinutes ?? 0)
+  const shapingRest = (process?.benchMinutes ?? 0) - preshapeRest
+  const [focusGroup, setFocusGroup] = useState<number | 'add' | null>(null)
+  useEffect(() => {
+    if (focusGroup === null) return
+    document.getElementById(focusGroup === 'add' ? `${prefix}-add-folds` : `${prefix}-group-${focusGroup}`)?.focus()
+    setFocusGroup(null)
+  }, [focusGroup, prefix])
   const bulkTemperature = process?.bulkTemperatureF ?? config.defaultSelection.formula.process?.bulkTemperatureF ?? 75
   const updateSeed = (next: StarterProfile) => updateFormula({ levainBuild: { ...levainBuild, seed: next } })
   const pieces = pieceCountLabel(2, batch.pieceLabel)
@@ -297,41 +350,52 @@ export function DoughFormulaEditor({ recipe, config, state, onChange, onErrorsCh
         {recommended && !formulasMatch(recommended, formula) && <Button variant="link" type="button" className="justify-self-start" onClick={() => { setLocalReset((key) => key + 1); updateFormula(clone(recommended)) }}>Use the recommended formula for {method?.label ?? 'this method'}</Button>}
       </Section>}
 
-      {process && <Section title="Mixing and fermentation" description="Times start when you mix in the levain. Follow the dough’s rise as well as the clock.">
+      {process && plan && <Section title="Mixing and fermentation" description="Times count from mixing in the levain. Follow the dough’s rise as well as the clock.">
         <ChoiceGroup size="compact" label="Mixing method" className="w-[340px] max-w-full" value={process.mixingMethod} onChange={(mixingMethod) => updateProcess({ mixingMethod })} options={[{ value: 'hand', label: 'By hand' }, { value: 'spiral', label: 'Spiral mixer' }]} />
-        <div className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2 lg:grid-cols-4">
-          <DurationField label="Autolyse before bulk" value={process.autolyseMinutes} onChange={(autolyseMinutes) => updateProcess({ autolyseMinutes })} />
-          <DurationField label="Add fine sea salt at" value={process.saltDelayMinutes} onChange={(saltDelayMinutes) => updateProcess({ saltDelayMinutes })} />
-          <DurationField label="Divide at" value={process.bulkMinutes} onChange={(bulkMinutes) => updateProcess({ bulkMinutes })} />
-          <DurationField label="Preshape and shaping rests" value={process.benchMinutes ?? 0} onChange={(benchMinutes) => updateProcess({ benchMinutes })} />
-        </div>
-        <p className="text-sm text-muted-foreground">Bulk fermentation runs from mixing in the levain until the loaves go into the refrigerator: <strong>{formatDuration(levainToFridgeMinutes(process))}</strong> with this schedule.</p>
-        <div className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-3">
-          <Field label="Bulk temperature" suffix="°F" step="1" decimalPlaces={0} min={BULK_TEMPERATURE_RANGE_F[0]} max={BULK_TEMPERATURE_RANGE_F[1]} value={bulkTemperature} onChange={(bulkTemperatureF) => updateProcess({ bulkTemperatureF })} />
-        </div>
-        <BulkPlanner config={config} formula={formula} batch={batch} temperatureF={bulkTemperature} onUseBulk={(bulkMinutes) => { updateProcess({ bulkMinutes }); setLocalReset((key) => key + 1) }} onUseWeight={(pieceWeightGrams) => { updateBatch({ pieceWeightGrams }); setLocalReset((key) => key + 1) }} />
-        <div className="grid gap-4">
-          <p className="text-sm text-muted-foreground">Choose a technique for each step. Mix stretch and folds, coil folds and lamination in the order you use them.</p>
-          {process.folds.map((fold, index) => <div key={fold.id} className="grid gap-2">
-            <div className="grid grid-cols-[minmax(0,1fr)_44px] items-end gap-4">
-              <div className="grid grid-cols-2 gap-x-6 gap-y-3 max-[640px]:grid-cols-1">
-                <div className="grid min-w-0 gap-1">
-                  <label htmlFor={`${prefix}-${fold.id}`} className="font-action text-sm font-bold">Step {index + 1} technique</label>
-                  <Select surface="underline" id={`${prefix}-${fold.id}`} value={fold.method ?? process.foldMethod} onChange={(event) => updateProcess({ folds: process.folds.map((item) => item.id === fold.id ? { ...item, method: event.target.value as SourdoughFoldMethod } : item) })}>
+        <Group title="Before bulk">
+          <RestToggle label="Autolyse" hint="Rest flour and water before adding the levain." value={process.autolyseMinutes} onToggle={(on) => toggleRest('autolyseMinutes', on)} onChange={(autolyseMinutes) => updateProcess({ autolyseMinutes })} />
+          <RestToggle label="Fermentolyse" hint="Rest with the levain before adding salt and the remaining water." value={process.saltDelayMinutes} onToggle={(on) => toggleRest('saltDelayMinutes', on)} onChange={setSaltDelay} />
+        </Group>
+        <Group title="Folds">
+          {plan.groups.length > 0 && <div aria-hidden="true" className="-mb-2 grid grid-cols-[minmax(0,1fr)_84px_112px_44px] gap-4 font-action text-sm font-bold max-[520px]:hidden"><span>Technique</span><span>Sets</span><span>Every</span><span /></div>}
+          {plan.groups.map((group, index) => {
+            const start = plan.groups.slice(0, index).reduce((count, item) => count + item.count, 0)
+            const times = process.folds.slice(start, start + group.count).map((fold) => formatDuration(fold.atMinutes))
+            return <div key={group.ids[0] ?? index} className="grid gap-2">
+              <div className="grid grid-cols-[minmax(0,1fr)_84px_112px_44px] items-end gap-4 max-[520px]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_44px]">
+                <div className="grid min-w-0 gap-1 max-[520px]:col-span-3">
+                  <label htmlFor={`${prefix}-group-${index}`} className="sr-only">Group {index + 1} technique</label>
+                  <Select surface="underline" id={`${prefix}-group-${index}`} value={group.method} onChange={(event) => updateGroup(index, { method: event.target.value as SourdoughFoldMethod })}>
                     <option value="stretch-and-fold">Stretch and fold</option>
                     <option value="coil-fold">Coil fold</option>
                     <option value="lamination">Lamination</option>
                   </Select>
                 </div>
-                <DurationField label={`Step ${index + 1} at`} value={fold.atMinutes} onChange={(atMinutes) => updateProcess({ folds: process.folds.map((item) => item.id === fold.id ? { ...item, atMinutes } : item) })} />
+                <Field hideLabel label={`Group ${index + 1} sets`} suffix="×" step="1" min={1} max={20} decimalPlaces={0} value={group.count} onChange={(count) => updateGroup(index, { count })} />
+                <DurationField hideLabel label={`Group ${index + 1} every`} min={1} value={group.everyMinutes} onChange={(everyMinutes) => updateGroup(index, { everyMinutes })} />
+                <Button variant="danger" size="icon" type="button" aria-label={`Remove group ${index + 1}: ${FOLD_LABELS[group.method]}`} onClick={() => { updatePlan({ ...plan, groups: plan.groups.filter((_, groupIndex) => groupIndex !== index) }); setFocusGroup(index < plan.groups.length - 1 ? index : 'add') }}><Trash2 className="size-4" /></Button>
               </div>
-              <Button variant="danger" size="icon" type="button" aria-label={`Remove step ${index + 1}`} onClick={() => updateProcess({ folds: process.folds.filter((item) => item.id !== fold.id) })}><Trash2 className="size-4" /></Button>
+              <p className="text-[13px] tabular-nums text-muted-foreground">At {times.join(', ')}</p>
             </div>
-            {index < process.folds.length - 1 && <Button variant="link" type="button" className="justify-self-start" disabled={process.folds[index + 1].atMinutes - fold.atMinutes < 2} onClick={() => addFoldingStep(index)}>Insert step after step {index + 1}</Button>}
-          </div>)}
-          {process.folds.length === 0 && <p className="text-sm">No folding steps scheduled.</p>}
-          <Button variant="link" type="button" className="justify-self-start gap-1" onClick={() => addFoldingStep(process.folds.length - 1)}><Plus className="size-4" />Add step</Button>
-        </div>
+          })}
+          {plan.groups.length === 0 && <p className="text-sm">No folds scheduled.</p>}
+          <Button id={`${prefix}-add-folds`} variant="link" type="button" className="justify-self-start gap-1" onClick={() => {
+            const last = plan.groups.at(-1)
+            updatePlan({ ...plan, groups: [...plan.groups, { method: last?.method === 'stretch-and-fold' ? 'coil-fold' : last?.method ?? process.foldMethod, count: 1, everyMinutes: last?.everyMinutes ?? 30, ids: [] }] })
+            setFocusGroup(plan.groups.length)
+          }}><Plus className="size-4" />Add folds</Button>
+          {plan.groups.length > 0 && <div className="max-w-[240px]"><DurationField label="First fold after salt" min={1} value={plan.startMinutes} onChange={(startMinutes) => updatePlan({ ...plan, startMinutes })} /></div>}
+        </Group>
+        <Group title="Bulk and shaping">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-5 md:grid-cols-4">
+            <Field label="Dough temperature" suffix="°F" step="1" decimalPlaces={0} min={BULK_TEMPERATURE_RANGE_F[0]} max={BULK_TEMPERATURE_RANGE_F[1]} value={bulkTemperature} onChange={(bulkTemperatureF) => updateProcess({ bulkTemperatureF })} />
+            <DurationField label="Into the refrigerator at" min={(process.benchMinutes ?? 0) + 1} describedBy={`${prefix}-bulk-hint`} value={levainToFridgeMinutes(process)} onChange={(minutes) => updateProcess({ bulkMinutes: minutes - (process.benchMinutes ?? 0) })} />
+            <DurationField label="Preshape rest" value={preshapeRest} onChange={(preshapeMinutes) => updateProcess({ preshapeMinutes, benchMinutes: preshapeMinutes + shapingRest, bulkMinutes: levainToFridgeMinutes(process) - preshapeMinutes - shapingRest })} />
+            <DurationField label="Shaping rest" value={shapingRest} onChange={(rest) => updateProcess({ preshapeMinutes: preshapeRest, benchMinutes: preshapeRest + rest, bulkMinutes: levainToFridgeMinutes(process) - preshapeRest - rest })} />
+          </div>
+          <BulkHint id={`${prefix}-bulk-hint`} config={config} formula={formula} batch={batch} temperatureF={bulkTemperature} onUseBulk={(minutes) => { updateProcess({ bulkMinutes: minutes - (process.benchMinutes ?? 0) }); setLocalReset((key) => key + 1) }} onUseWeight={(pieceWeightGrams) => { updateBatch({ pieceWeightGrams }); setLocalReset((key) => key + 1) }} />
+        </Group>
+        <p className="text-[13px] text-muted-foreground">Estimates follow <Button variant="link" className="inline text-[13px]" asChild><a href={GUIDELINES_URL} target="_blank" rel="noreferrer">The Sourdough Journey’s bulk fermentation guidelines</a></Button>. Times are estimates; follow the rise.</p>
       </Section>}
       {!pizza && <p className="text-sm text-muted-foreground">{formatPercent(result.prefermentedFlourPercent)} of the flour is prefermented in the levain.</p>}
     </div>

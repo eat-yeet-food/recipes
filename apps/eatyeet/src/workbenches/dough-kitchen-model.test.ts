@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 import type { DoughFormulaState } from '@eat-yeet/l2-recipe-domain/formula-state'
 import { batchNoun, doughRows, formulaChanges, formulaFacts, withBatchCount } from './dough-kitchen-model.ts'
+import { resolveSourdoughSteps, sourdoughSchedule } from './sourdough-process.ts'
 
 const recipe: DoughFormulaState = {
   version: 1,
@@ -77,5 +78,45 @@ describe('Notebook dough model', () => {
     const exact = { ...loaf, formula: { ...loaf.formula, levainBuild: { seed: starter, flourPerSeed: 2, extraPercent: 0 } } }
     assert.equal(doughRows(exact).levainBuild, '39g seed starter + 39g Bread flour + 39g Whole wheat flour + 59g water')
     assert.deepEqual(formulaChanges(loaf, exact, () => 'Dutch oven'), [{ label: 'Extra levain', from: '30%', to: '0%' }])
+  })
+})
+
+describe('sourdough steps', () => {
+  const sections = [
+    { id: 'autolyse', title: 'Autolyse (3h before bulk)', items: ['x'], itemIds: ['x'] },
+    { id: 'bulk', title: 'Bulk Fermentation', items: ['x'], itemIds: ['x'] },
+  ]
+  const bindings = { autolyse: 'autolyse', bulk: 'bulk', levain: 'levain' }
+  const process = { mixingMethod: 'hand' as const, foldMethod: 'coil-fold' as const, autolyseMinutes: 180, saltDelayMinutes: 10, bulkMinutes: 320, benchMinutes: 40, bulkTemperatureF: 75, folds: [{ id: 'f1', atMinutes: 30 }, { id: 'f2', atMinutes: 60 }] }
+  it('puts elapsed times on a rail through the refrigerator', () => {
+    const bulk = resolveSourdoughSteps(sections, bindings, process).find((section) => section.id === 'bulk')!
+    assert.deepEqual(bulk.itemTimes!.map((time) => time.label), ['0m', '10m', '30m', '1h', '5:20h', '6h'])
+    assert.equal(bulk.itemTimes![1].rest, 'Cover at 75°F for 20m.')
+    assert.equal(bulk.itemTimes![4].rest, 'Preshape and shaping rests: 40m.')
+    assert.ok(bulk.items.every((item) => !item.includes('elapsed')))
+  })
+  it('drops autolyse and fermentolyse steps that are turned off', () => {
+    const steps = (autolyseMinutes: number, saltDelayMinutes: number) => resolveSourdoughSteps(sections, bindings, { ...process, autolyseMinutes, saltDelayMinutes })
+    assert.equal(steps(180, 10).length, 2)
+    assert.equal(steps(0, 10).length, 1)
+    assert.match(steps(0, 10)[0].items[0], /^Mix the flour, the first portion of water \(\{\{initialWaterGrams\}\}\) and the ripe levain/)
+    assert.match(steps(180, 0)[1].items[0], /^Mix in the ripe levain .*Add fine sea salt and the remaining water/)
+    assert.equal(steps(180, 0)[1].itemTimes![1].label, '30m')
+    assert.match(steps(0, 0)[0].items[0], /all of the water \(\{\{addedWaterGrams\}\}\), the ripe levain and fine sea salt/)
+  })
+  it('splits preshape, shape and refrigerate onto the rail and replaces the bound Shape section', () => {
+    const withShape = [...sections, { id: 'shape', title: 'Shape', items: ['Divide…', 'Shape…', 'Stitch, cover and place in 37°F refrigerator for 12-18h'], itemIds: ['a', 'b', 'c'] }]
+    const result = resolveSourdoughSteps(withShape, { ...bindings, shape: 'shape' }, { ...process, preshapeMinutes: 30 })
+    assert.equal(result.some((section) => section.id === 'shape'), false)
+    const bulk = result.find((section) => section.id === 'bulk')!
+    assert.deepEqual(bulk.itemTimes!.slice(-3).map((time) => time.label), ['5:20h', '5:50h', '6h'])
+    assert.deepEqual(bulk.itemTimes!.slice(-3).map((time) => time.rest), ['Rest at 75°F for 30m.', 'Rest at 75°F for 10m.', undefined])
+    assert.match(bulk.items.at(-3)!, /^Divide into \{\{pieceCount\}\}/)
+    assert.equal(bulk.items.at(-1), 'Stitch, cover and place in 37°F refrigerator for 12-18h')
+    assert.deepEqual(sourdoughSchedule({ ...process, preshapeMinutes: 30 }).slice(-3).map((row) => `${row.time} ${row.label}`), ['5:20h Divide and preshape', '5:50h Shape', '6h Stitch and refrigerate'])
+  })
+  it('summarizes the schedule and flags folds after dividing', () => {
+    assert.deepEqual(sourdoughSchedule(process).map((row) => `${row.time} ${row.label}`), ['Before Autolyse, 3h', '0m Mix in the levain', '10m Salt and remaining water', '30m 2 × coil folds, every 30m', '5:20h Divide, preshape and shape', '6h Into the refrigerator'])
+    assert.ok(sourdoughSchedule({ ...process, bulkMinutes: 60 }).some((row) => row.problem))
   })
 })
