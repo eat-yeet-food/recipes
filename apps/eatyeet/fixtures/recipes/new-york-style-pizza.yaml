@@ -5,9 +5,9 @@ title: New York Style Pizza
 order: 4
 description: 'A crisp, foldable New York-style pizza with a chewy crust, bright tomato sauce, and bubbling cheese.'
 category: savory
-prepMinutes: 4590
+prepMinutes: 4680
 cookMinutes: 6
-totalMinutes: 4596
+totalMinutes: 4686
 yieldAmount: 3
 yieldUnit: 16-inch pizzas
 image: charred-crust-pizza.jpg
@@ -114,17 +114,17 @@ methodOptions:
   - id: outdoor-oven
     label: Outdoor Oven
     description: 'A crisp, foldable New York-style pizza with a blistered, chewy crust and bubbling cheese.'
-    prepMinutes: 4590
+    prepMinutes: 4680
     cookMinutes: 6
-    totalMinutes: 4596
+    totalMinutes: 4686
     yieldAmount: 3
     yieldUnit: 16-inch pizzas
   - id: indoor-steel
     label: Indoor Steel
     description: 'A crisp, foldable New York-style pizza with a deeply browned crust and bubbling cheese, adapted for a home oven.'
-    prepMinutes: 4590
+    prepMinutes: 4680
     cookMinutes: 7
-    totalMinutes: 4597
+    totalMinutes: 4687
     yieldAmount: 3
     yieldUnit: 16-inch pizzas
     blocks:
@@ -238,7 +238,7 @@ methodOptions:
               - id: steps-1-item-4
                 text: >-
                   Transfer the dough to your bench. Knead shortly, guide dough with bench scraper into the form of a
-                  ball, place in a bowl, cover with saran wrap, and allow it to rest at room temperature for 1.5h.
+                  ball, place in a bowl, cover with saran wrap, and allow it to bulk ferment at 76°F for 1h.
               - id: divide-dough
                 text: >-
                   Divide and shape dough into {{pieceCount}} {{pieceLabelPlural}}, shooting for {{pieceWeightGrams}}
@@ -248,7 +248,7 @@ methodOptions:
                 text: >-
                   Grease your proofing container with canola oil. Transfer the dough to the container with your bench
                   scraper. After placing in a proofing container, lightly oil your hands and gently rub the top of the
-                  dough to make it less sticky and retain moisture. Cover and place in the refrigerator for 2-3 days.
+                  dough to make it less sticky and retain moisture. Cover and place in the refrigerator for 2–4 days.
             id: steps-1
           - title: Pre-Assembly
             items:
@@ -266,7 +266,7 @@ methodOptions:
           - title: Pizza Assembly
             items:
               - id: steps-3-item-1
-                text: 'The day you plan to bake, remove dough from the refrigerator and allow the dough to rest for 2 hours.'
+                text: 'The day you plan to bake, remove dough from the refrigerator and let it come to room temperature: 4h after 2 days in the refrigerator, 3h after 3 days, or 2h after 4 days.'
               - id: steps-3-item-2
                 text: >-
                   Place the baking steel on the top rack and preheat the oven at its highest setting, ideally 550F, for
@@ -443,14 +443,14 @@ blocks:
           - id: steps-1-item-4
             text: >-
               Transfer the dough to your bench. Knead shortly, guide dough with bench scraper into the form of a ball,
-              place in a bowl, cover with saran wrap, and allow it to rest at room temperature for 1.5h.
+              place in a bowl, cover with saran wrap, and allow it to bulk ferment at 76°F for 1h.
           - id: divide-dough
             text: "Divide and shape dough into {{pieceCount}} {{pieceLabelPlural}}, shooting for {{pieceWeightGrams}} each ({{totalDoughGrams}} total dough). Pull four times in gentle circles on your unfloured bench until smooth on the top. Pinch any bottom seam that remains. Circular dough balls make circular pizzas \U0001F642 ([video](https://www.youtube.com/watch?v=Vo5OW8Xkah4&t=9s))."
           - id: steps-1-item-6
             text: >-
               Grease your proofing container with canola oil. Transfer the dough to the container with your bench
               scraper. After placing in a proofing container, lightly oil your hands and gently rub the top of the dough
-              to make it less sticky and retain moisture. Cover and place in the refrigerator for 2-3 days.
+              to make it less sticky and retain moisture. Cover and place in the refrigerator for 2–4 days.
         id: steps-1
       - title: Pre-Assembly
         items:
@@ -467,7 +467,7 @@ blocks:
       - title: Pizza Assembly
         items:
           - id: steps-3-item-1
-            text: 'The day you plan to bake, remove dough from the refrigerator and allow the dough to rest for 2 hours.'
+            text: 'The day you plan to bake, remove dough from the refrigerator and let it come to room temperature: 4h after 2 days in the refrigerator, 3h after 3 days, or 2h after 4 days.'
           - id: steps-3-item-2
             text: 'Preheat your oven on low for 30 minutes with rotation activated, then begin prepping the pizza.'
           - id: steps-3-item-3
