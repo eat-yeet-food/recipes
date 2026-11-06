@@ -8,7 +8,7 @@ category: savory
 prepMinutes: 45
 cookMinutes: 35
 totalMinutes: 80
-yieldAmount: 400
+yieldAmount: 575
 yieldUnit: g
 image: chipotles-in-adobo.jpg
 courses:
@@ -40,13 +40,13 @@ blocks:
           - id: ingredients-1-item-2
             text: Boiling water, for soaking
           - id: ingredients-1-item-3
-            text: 6 tbsp fresh water
+            text: 90g fresh water
           - id: ingredients-1-item-4
-            text: ¼ cup finely minced onion
+            text: ½ medium onion (about 75g), finely minced
           - id: ingredients-1-item-5
-            text: 45g white vinegar
+            text: 75g white vinegar
           - id: ingredients-1-item-6
-            text: 4 tsp tomato paste
+            text: 1 can (5 oz, 142g) tomato paste
           - id: ingredients-1-item-7
             text: 1 tsp kosher salt
           - id: ingredients-1-item-8
@@ -70,6 +70,6 @@ blocks:
             text: '**Reduce:** Simmer uncovered briefly until thick and saucy.'
         id: steps-1
     notes:
-      - 'Makes about 400g, equal to two 7 oz cans. Actual yield may vary.'
+      - 'Makes about 575g, about three 7 oz cans. Actual yield may vary.'
     tips:
       - 'Refrigerate promptly; freeze portions for longer storage.'
