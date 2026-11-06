@@ -31,6 +31,7 @@ export const ChangesFromTheRecipe: Story = {
       { label: 'Flour', from: '100% Kirkland Organic All-Purpose Flour', to: '80% Kirkland Organic All-Purpose Flour, 20% Caputo Pizzeria 00 flour with a long name' },
     ]} onReset={() => {}} />
     <ChangeStrip changes={[]} />
+    <div className="max-w-[384px]"><ChangeStrip tone="ink" onReset={() => {}} changes={[{ label: 'Hydration', from: '65%', to: '68%' }]} /></div>
   </div>,
   play: async ({ canvasElement }) => {
     const screen = within(canvasElement)

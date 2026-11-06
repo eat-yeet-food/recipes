@@ -15,7 +15,6 @@ import { clone, formatWorkbenchGrams, pieceCountLabel, starterFrom, yeastGramPre
 import { formulasMatch } from './dough-formula-match'
 import { levainYield } from './dough-kitchen-model'
 import { formatDuration } from './sourdough-process'
-import { PIZZA_MIXING_LABELS } from './pizza-process'
 import { COLD_DAYS, FOOD_PROCESSOR_MAX_BALLS, HAND_REST_MINUTES, PIZZA_TEMPERATURE_RANGE_F, warmUpForColdDays, type PizzaMixingMethod, type PizzaProcess } from '@eat-yeet/l2-recipe-domain/pizza-process'
 
 const NumericFields = createContext<{ report: NumberFieldValidation; resetKey: number } | null>(null)
@@ -357,11 +356,14 @@ export function DoughFormulaEditor({ recipe, config, state, onChange, onErrorsCh
       {pizzaProcess && <Section title="Mixing and fermentation" description="Times count from when you start mixing.">
         <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-2">
           <ChoiceGroup size="compact" label="Mixing method" className="w-[420px] max-w-full" value={pizzaProcess.mixingMethod} onChange={(mixingMethod: PizzaMixingMethod) => updatePizza({ mixingMethod })}
-            options={(['spiral', 'food-processor', 'hand'] as const).map((value) => ({ value, label: PIZZA_MIXING_LABELS[value] }))} />
-          {batch.count <= FOOD_PROCESSOR_MAX_BALLS && pizzaProcess.mixingMethod !== 'food-processor' && <p className="text-[13px] leading-normal text-muted-foreground">
-            For {batch.count === 1 ? 'one ball' : 'two balls'}, a food processor is easiest. <Button variant="link" type="button" className="text-[13px]" onClick={() => updatePizza({ mixingMethod: 'food-processor' })}>Use food processor</Button>
-          </p>}
-          {pizzaProcess.mixingMethod === 'hand' && <p className="text-[13px] leading-normal text-muted-foreground">Mix, rest {formatDuration(HAND_REST_MINUTES)}, then knead; the rest counts toward bulk.</p>}
+            options={(['spiral', 'food-processor', 'hand'] as const).map((value) => ({ value, label: { spiral: 'Mixer', 'food-processor': 'Processor', hand: 'By hand' }[value] }))} />
+          {/* One reserved hint, so switching methods never moves the page. */}
+          <p className="min-h-[3lh] text-[13px] leading-normal text-muted-foreground">
+            {pizzaProcess.mixingMethod === 'food-processor' ? 'Use ice-cold water with no ice. Run on high until the dough reaches about 77°F.'
+              : pizzaProcess.mixingMethod === 'hand' ? `Mix, rest ${formatDuration(HAND_REST_MINUTES)}, then knead; the rest counts toward bulk.`
+              : 'Mix until smooth and about 77°F.'}
+            {batch.count <= FOOD_PROCESSOR_MAX_BALLS && pizzaProcess.mixingMethod !== 'food-processor' && <> For {batch.count === 1 ? 'one ball' : 'two balls'}, a food processor is easiest. <Button variant="link" type="button" className="text-[13px]" onClick={() => updatePizza({ mixingMethod: 'food-processor' })}>Use food processor</Button></>}
+          </p>
         </div>
         <Group title="Fermentation">
           <div className="grid grid-cols-2 items-end gap-x-6 gap-y-5 md:grid-cols-4">

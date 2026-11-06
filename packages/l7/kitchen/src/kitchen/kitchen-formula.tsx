@@ -6,7 +6,7 @@ import { useNavigate } from '@eat-yeet/l5-ui-primitives/primitives/navigation'
 import { SignInLink } from '@eat-yeet/l6-ui-shell/account/account-nav'
 import { kitchenErrorCode, kitchenErrorMessage, type KitchenClient, type KitchenFormula, type KitchenRevision } from './kitchen-client'
 import { decodeKitchenState, kitchenPath, type KitchenRecipe } from './kitchen-plugin'
-import { ChangeStrip, changeSummary, FormulaTitle, HistorySheet, KitchenHeader, KitchenNotice, SaveStatus, timeAgo, type KitchenNoticeValue, type SaveState } from './kitchen-ui'
+import { changeSummary, FormulaTitle, HistorySheet, KitchenHeader, KitchenNotice, SaveStatus, timeAgo, type KitchenNoticeValue, type SaveState } from './kitchen-ui'
 import { KitchenNotes, KitchenWorkspace } from './kitchen-workspace'
 import { KitchenGate, KitchenMessage } from './kitchen-gate'
 
@@ -265,8 +265,8 @@ function KitchenFormulaEditor({ kitchen, formulaId, client, local }: { kitchen: 
           </>}
         />
         {editor.mismatch && <p role="status" className="mt-4 rounded-field bg-tint p-4 text-sm">This formula no longer matches the recipe’s options, so it opens with the recipe’s values. Your earlier versions are still in History.</p>}
-        <div className="mt-6"><ChangeStrip changes={changes} onReset={() => editor.resetTo(defaultState)} /></div>
       </>}
+      changes={changes} onReset={() => editor.resetTo(defaultState)}
       notes={<KitchenNotes value={draft.notes} onChange={(notes) => editor.update({ notes })} />}
       footer={<div className="border-t border-border pt-6">
         <Button variant="danger" size="sm" disabled={deleting} onClick={() => void remove()}><Trash2 className="size-4" />{deleting ? 'Deleting…' : 'Delete formula'}</Button>

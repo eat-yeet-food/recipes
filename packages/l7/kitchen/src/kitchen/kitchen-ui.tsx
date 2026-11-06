@@ -91,19 +91,20 @@ export function SaveStatus({ state, local = false }: { state: SaveState; local?:
   </span>
 }
 
-/** What differs from the recipe as written, with a way back to it. */
-export function ChangeStrip({ changes, onReset }: { changes: KitchenChange[]; onReset?: () => void }) {
-  return <section aria-label="Changed from the recipe" className="flex flex-wrap items-center gap-2.5 border-y border-border py-3.5">
-    <h2 className={cn(eyebrow, 'mr-1.5')}>Changed from the recipe</h2>
+/** What differs from the recipe as written, with a way back to it. On ink, it sits with the dough results. */
+export function ChangeStrip({ changes, onReset, tone = 'page' }: { changes: KitchenChange[]; onReset?: () => void; tone?: 'page' | 'ink' }) {
+  const ink = tone === 'ink'
+  return <section aria-label="Changed from the recipe" className={cn('flex flex-wrap items-center gap-2.5', ink ? 'rounded-field bg-ink p-5 text-action-label' : 'border-y border-border py-3.5')}>
+    <h2 className={cn(eyebrow, 'mr-1.5', ink && 'w-full text-brand')}>Changed from the recipe</h2>
     {changes.length
       ? <ul className="contents">{changes.map((change) => <ChangeChip key={change.label} change={change} />)}</ul>
-      : <p className="text-sm text-muted-foreground">Nothing yet. This matches the recipe.</p>}
-    {changes.length > 0 && onReset && <Button variant="link" className="ml-auto gap-1.5 max-[640px]:ml-0" onClick={onReset}><Undo2 aria-hidden="true" className="size-3.5" />Reset to recipe</Button>}
+      : <p className={cn('text-sm', !ink && 'text-muted-foreground')}>Nothing yet. This matches the recipe.</p>}
+    {changes.length > 0 && onReset && <Button variant={ink ? 'quiet-on-ink' : 'link'} className={cn('gap-1.5', ink ? 'w-full' : 'ml-auto max-[640px]:ml-0')} onClick={onReset}><Undo2 aria-hidden="true" className="size-3.5" />Reset to recipe</Button>}
   </section>
 }
 
 export function ChangeChip({ change, as: Tag = 'li' }: { change: KitchenChange; as?: 'li' | 'span' }) {
-  return <Tag className="inline-flex max-w-full flex-wrap items-baseline gap-x-1.5 rounded-control border border-border bg-white px-3 py-1 text-[13.5px] leading-snug">
+  return <Tag className="inline-flex max-w-full flex-wrap items-baseline gap-x-1.5 rounded-control border border-border bg-white px-3 py-1 text-[13.5px] text-ink leading-snug">
     <span>{change.label}</span>
     <s className="text-muted-foreground decoration-1"><span className="sr-only">was </span>{change.from}</s>
     <strong className="font-action font-bold"><span className="sr-only">now </span>{change.to}</strong>
@@ -276,7 +277,7 @@ export function HistorySheet({ open, onOpenChange, title, revisions, describe, o
  * Phones keep the dough totals docked at the bottom while editing; the
  * button expands the full results panel.
  */
-export function DoughDock({ total, detail, children, action }: { total: string; detail: string; children: ReactNode; action: ReactNode }) {
+export function DoughDock({ total, detail, changeCount = 0, children, action }: { total: string; detail: string; changeCount?: number; children: ReactNode; action: ReactNode }) {
   const [open, setOpen] = useState(false)
   const id = useId()
   return <div data-dough-dock="" className="fixed inset-x-0 bottom-0 z-[var(--z-recipe-actions)] lg:hidden print:hidden">
@@ -285,7 +286,7 @@ export function DoughDock({ total, detail, children, action }: { total: string; 
       <button type="button" aria-expanded={open} aria-controls={`${id}-panel`} onClick={() => setOpen((value) => !value)}
         className="grid min-h-11 min-w-0 flex-1 justify-items-start rounded-field text-left focus-visible:outline-2 focus-visible:outline-action-label focus-visible:outline-offset-2">
         <span className="flex items-center gap-1.5 font-action text-xs font-bold uppercase tracking-[0.12em] text-brand">Your dough {open ? <ChevronDown aria-hidden="true" className="size-3.5" /> : <ChevronUp aria-hidden="true" className="size-3.5" />}</span>
-        <span className="flex min-w-0 items-baseline gap-2"><strong className="font-action text-2xl font-bold tabular-nums text-brand">{total}</strong><span className="truncate text-[13px]">{detail}</span></span>
+        <span className="flex min-w-0 items-baseline gap-2"><strong className="font-action text-2xl font-bold tabular-nums text-brand">{total}</strong><span className="truncate text-[13px]">{detail}{changeCount > 0 && ` · ${changeCount} ${changeCount === 1 ? 'change' : 'changes'}`}</span></span>
       </button>
       {action}
     </div>

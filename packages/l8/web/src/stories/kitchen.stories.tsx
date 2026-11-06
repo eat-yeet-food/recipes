@@ -93,6 +93,12 @@ export const Library: Story = {
     await expect(await screen.findByText('Restored Kids’ 10-inch.')).toBeVisible()
   },
 }
+/** The changes strip sits with the dough results: in the dock on phones. */
+async function changesRegion(screen: ReturnType<typeof within>) {
+  const dock = screen.queryByRole('button', { name: /Your dough/, expanded: false })
+  if (dock) await userEvent.click(dock)
+  return screen.getByRole('region', { name: 'Changed from the recipe' })
+}
 export const Calculator: Story = {
   args: { view: 'scratch', signedIn: false },
   play: async ({ canvasElement }) => {
@@ -100,7 +106,7 @@ export const Calculator: Story = {
     const hydration = await screen.findByRole('textbox', { name: 'Hydration' })
     await userEvent.clear(hydration)
     await userEvent.type(hydration, '68')
-    await waitFor(() => expect(screen.getByRole('region', { name: 'Changed from the recipe' })).toHaveTextContent('now 68%'))
+    await waitFor(async () => expect(await changesRegion(screen)).toHaveTextContent('now 68%'))
     await userEvent.click(screen.getByRole('button', { name: 'Reset to recipe' }))
     await expect(screen.getByRole('textbox', { name: 'Hydration' })).toHaveValue('65')
   },
@@ -121,7 +127,7 @@ export const Formula: Story = {
   play: async ({ canvasElement }) => {
     const screen = within(canvasElement)
     await screen.findByRole('heading', { level: 1, name: 'Friday pies' })
-    await expect(screen.getByRole('region', { name: 'Changed from the recipe' })).toHaveTextContent('Batch')
+    await expect(await changesRegion(screen)).toHaveTextContent('Batch')
     const yeast = screen.getByRole('textbox', { name: 'SAF red instant yeast' })
     await userEvent.clear(yeast)
     await userEvent.type(yeast, '0.15')

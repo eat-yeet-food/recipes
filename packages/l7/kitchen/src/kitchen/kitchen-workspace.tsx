@@ -1,14 +1,14 @@
 'use client'
 import { useCallback, useId, type ReactNode } from 'react'
 import { cn } from '@eat-yeet/l0-foundation/utils'
-import { DoughDock, kitchenPageClass } from './kitchen-ui'
-import type { KitchenRecipe } from './kitchen-plugin'
+import { ChangeStrip, DoughDock, kitchenPageClass } from './kitchen-ui'
+import type { KitchenChange, KitchenRecipe } from './kitchen-plugin'
 
 /**
  * Shared editing layout for saved and unsaved formulas: the app's editor on
  * the left, its dough results pinned on the right (docked on phones).
  */
-export function KitchenWorkspace({ kitchen, state, onChange, resetKey, errors, onErrorsChange, header, notes, aside, dockAction, footer }: {
+export function KitchenWorkspace({ kitchen, state, onChange, resetKey, errors, onErrorsChange, header, changes, onReset, notes, aside, dockAction, footer }: {
   kitchen: KitchenRecipe
   state: unknown
   onChange: (state: unknown) => void
@@ -16,6 +16,9 @@ export function KitchenWorkspace({ kitchen, state, onChange, resetKey, errors, o
   errors: string[]
   onErrorsChange: (errors: string[]) => void
   header: ReactNode
+  /** Shown with the dough results, which never move the editor's controls. */
+  changes: KitchenChange[]
+  onReset: () => void
   notes?: ReactNode
   aside?: ReactNode
   dockAction: ReactNode
@@ -25,6 +28,7 @@ export function KitchenWorkspace({ kitchen, state, onChange, resetKey, errors, o
   const { Editor, Results } = plugin
   const totals = plugin.totals(recipe, config, state)
   const errorsId = useId()
+  const strip = <ChangeStrip tone="ink" changes={changes} onReset={onReset} />
   const reportErrors = useCallback((next: string[]) => onErrorsChange(next), [onErrorsChange])
   return <div data-kitchen-workspace="" className={cn(kitchenPageClass, 'pt-7 pb-16 max-lg:pb-40')}>
     {header}
@@ -40,11 +44,13 @@ export function KitchenWorkspace({ kitchen, state, onChange, resetKey, errors, o
       </div>
       <aside aria-label="Your dough" className="sticky top-24 hidden gap-6 lg:grid">
         <Results recipe={recipe} config={config} state={state} />
+        {strip}
         {aside}
       </aside>
     </div>
-    <DoughDock total={totals.total} detail={totals.detail} action={dockAction}>
+    <DoughDock total={totals.total} detail={totals.detail} changeCount={changes.length} action={dockAction}>
       <Results recipe={recipe} config={config} state={state} />
+      {strip}
     </DoughDock>
   </div>
 }

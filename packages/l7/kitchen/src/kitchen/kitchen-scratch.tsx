@@ -6,7 +6,7 @@ import { useNavigate } from '@eat-yeet/l5-ui-primitives/primitives/navigation'
 import { useNotebookClient } from './kitchen-local'
 import { kitchenErrorMessage, type KitchenClient } from './kitchen-client'
 import { decodeKitchenState, kitchenPath, type KitchenRecipe } from './kitchen-plugin'
-import { ChangeStrip, FormulaTitle, KitchenHeader, KitchenNotice, SaveStatus, type KitchenNoticeValue } from './kitchen-ui'
+import { FormulaTitle, KitchenHeader, KitchenNotice, SaveStatus, type KitchenNoticeValue } from './kitchen-ui'
 import { KitchenWorkspace } from './kitchen-workspace'
 
 // Unsaved work is a per-browser convenience; storage may be unavailable.
@@ -132,8 +132,8 @@ export function KitchenScratchPage({ kitchen, client, sharedConfig, saveOnArriva
             <Button disabled={errors.length > 0 || saving || !store} onClick={save}><Save className="size-4" />{saveLabel}</Button>
           </>}
         />
-        <div className="mt-6"><ChangeStrip changes={plugin.changes(recipe, config, defaultState, state)} onReset={reset} /></div>
       </>}
+      changes={plugin.changes(recipe, config, defaultState, state)} onReset={reset}
       aside={<section aria-labelledby="keep-it" className="grid gap-2 rounded-field bg-tint p-5">
         <h2 id="keep-it" className="font-action text-lg font-bold">Want to keep it?</h2>
         <p className="text-sm leading-relaxed">Saving keeps every change in History. Click the name above to change it, now or later. {notebook.local ? 'Without an account it stays in this browser; sign in any time to move it to your account and open it anywhere.' : 'It opens on any device you sign in on.'}</p>
