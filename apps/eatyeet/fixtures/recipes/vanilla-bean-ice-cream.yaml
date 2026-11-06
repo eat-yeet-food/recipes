@@ -45,15 +45,15 @@ blocks:
       - title: ''
         items:
           - id: ingredients-1-item-1
-            text: 460g heavy whipping cream
+            text: 473g heavy whipping cream
           - id: ingredients-1-item-2
-            text: 320g skim milk
+            text: 305g skim milk
           - id: ingredients-1-item-3
             text: 170g granulated sugar
           - id: ingredients-1-item-4
-            text: 32g egg yolk
+            text: 2 large egg yolks (about 35g)
           - id: ingredients-1-item-7
-            text: 1 tbsp vanilla bean paste
+            text: 20g vanilla bean paste
           - id: ingredients-1-item-8
             text: 3 vanilla beans, split and scraped
         id: ingredients-1
@@ -62,8 +62,8 @@ blocks:
         items:
           - id: steps-1-item-1
             text: >-
-              **Combine:** In a saucepan, whisk the egg yolk with 30g of the skim milk until smooth, then whisk in
-              another 50g of skim milk. This keeps the yolk from clumping. Add the cream, the remaining skim milk, the
+              **Combine:** In a saucepan, whisk the egg yolks with 30g of the skim milk until smooth, then whisk in
+              another 50g of skim milk. This keeps the yolks from clumping. Add the cream, the remaining skim milk, the
               sugar, and the scraped vanilla seeds, and whisk thoroughly.
           - id: steps-1-item-3
             text: >-
@@ -81,7 +81,7 @@ blocks:
     notes:
       - 'Just cream, milk, sugar, yolks, and vanilla.'
       - '170g sugar makes a sweet, scoop-shop-style ice cream that scoops softly.'
-      - '32g of yolk (about two large) adds just enough richness while keeping the color pale and the vanilla front and center.'
+      - 'Two large yolks (about 35g) add just enough richness while keeping the color pale and the vanilla front and center.'
       - 'Cream plus skim milk gives a high-fat, low-water base for a dense, smooth scoop.'
     tips:
       - 'Pulling the base at 168°F sets the proteins gently for a silky, clean-tasting custard.'
