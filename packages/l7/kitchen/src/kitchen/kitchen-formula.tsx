@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState, type MouseEvent } from 'react
 import { ArrowRight, Copy, History, Trash2 } from 'lucide-react'
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
 import { useNavigate } from '@eat-yeet/l5-ui-primitives/primitives/navigation'
-import { useAccount } from '@eat-yeet/l6-ui-shell/account/account'
+import { SignInLink } from '@eat-yeet/l6-ui-shell/account/account-nav'
 import { kitchenErrorCode, kitchenErrorMessage, type KitchenClient, type KitchenFormula, type KitchenRevision } from './kitchen-client'
 import { decodeKitchenState, kitchenPath, type KitchenRecipe } from './kitchen-plugin'
 import { ChangeStrip, changeSummary, FormulaTitle, HistorySheet, KitchenHeader, KitchenNotice, SaveStatus, timeAgo, type KitchenNoticeValue, type SaveState } from './kitchen-ui'
@@ -146,13 +146,19 @@ export function describeRevision(kitchen: KitchenRecipe, revision: KitchenRevisi
   return text || 'No value changes'
 }
 
-export function KitchenFormulaPage({ kitchen, formulaId, client }: { kitchen: KitchenRecipe; formulaId: string; client: KitchenClient }) {
-  return <KitchenGate what="this formula">
-    <KitchenFormulaEditor kitchen={kitchen} formulaId={formulaId} client={client} />
-  </KitchenGate>
+/** Browser formulas invite signing in, which moves them to the account. */
+export function KeepEverywhere() {
+  return <section aria-labelledby="keep-everywhere" className="grid gap-2 rounded-field bg-tint p-5">
+    <h2 id="keep-everywhere" className="font-action text-lg font-bold">Saved in this browser</h2>
+    <p className="text-sm leading-relaxed">Your formulas and their History stay on this device. <SignInLink className="font-action font-bold underline decoration-1 underline-offset-4 hover:decoration-2">Sign in with Google</SignInLink> to keep them in your account and open them anywhere; everything here moves over.</p>
+  </section>
 }
 
-function KitchenFormulaEditor({ kitchen, formulaId, client }: { kitchen: KitchenRecipe; formulaId: string; client: KitchenClient }) {
+export function KitchenFormulaPage({ kitchen, formulaId, client }: { kitchen: KitchenRecipe; formulaId: string; client: KitchenClient }) {
+  return <KitchenGate client={client}>{(store, local) => <KitchenFormulaEditor kitchen={kitchen} formulaId={formulaId} client={store} local={local} />}</KitchenGate>
+}
+
+function KitchenFormulaEditor({ kitchen, formulaId, client, local }: { kitchen: KitchenRecipe; formulaId: string; client: KitchenClient; local: boolean }) {
   const { recipe, plugin, config, defaultState } = kitchen
   const navigate = useNavigate()
   const editor = useKitchenFormula(client, formulaId, kitchen)
@@ -172,6 +178,11 @@ function KitchenFormulaEditor({ kitchen, formulaId, client }: { kitchen: Kitchen
     setCopied(true)
     setNotice({ message: 'Copy created. The original is unchanged.' })
   }, [])
+
+  // A browser formula that moved to the account opens at its new address.
+  useEffect(() => {
+    if (formula && formula.id !== formulaId) window.location.replace(kitchenPath(recipe.slug, formula.id))
+  }, [formula, formulaId, recipe.slug])
 
   if (editor.loadError) return <KitchenMessage title={editor.loadError.missing ? 'Formula not found' : 'Notebook is unavailable'}
     action={editor.loadError.missing ? <Button asChild><a href="/notebook">Back to Notebook</a></Button> : <Button onClick={() => void editor.reload()}>Try again</Button>}>
@@ -245,7 +256,7 @@ function KitchenFormulaEditor({ kitchen, formulaId, client }: { kitchen: Kitchen
           title={<FormulaTitle key={formulaId} name={draft.name} onRename={rename} autoEdit={copied} />}
           meta={<>
             <span>From <a href={`/recipes/${recipe.slug}`} className="font-action font-bold underline decoration-1 underline-offset-4 hover:decoration-2">{recipe.title}</a></span>
-            <SaveStatus state={save} />
+            <SaveStatus state={save} local={local} />
           </>}
           actions={<>
             <Button variant="utility" size="sm" onClick={() => setHistoryOpen(true)}><History className="size-4" />History</Button>
@@ -261,7 +272,7 @@ function KitchenFormulaEditor({ kitchen, formulaId, client }: { kitchen: Kitchen
         <Button variant="danger" size="sm" disabled={deleting} onClick={() => void remove()}><Trash2 className="size-4" />{deleting ? 'Deleting…' : 'Delete formula'}</Button>
         <p className="mt-2 text-xs text-muted-foreground">Deleted formulas stay in Recently deleted for 30 days.</p>
       </div>}
-      aside={<section aria-labelledby="recent-changes" className="grid gap-1">
+      aside={<>{local && <KeepEverywhere />}<section aria-labelledby="recent-changes" className="grid gap-1">
         <div className="flex items-baseline justify-between gap-3">
           <h2 id="recent-changes" className="font-action text-lg font-bold">Recent changes</h2>
           <Button variant="link" className="text-[13px]" onClick={() => setHistoryOpen(true)}>All history</Button>
@@ -270,7 +281,7 @@ function KitchenFormulaEditor({ kitchen, formulaId, client }: { kitchen: Kitchen
           <span>{index === revisions.length - 1 && revisions.length < 100 ? 'Created' : describeRevision(kitchen, revision, revisions[index + 1] ?? null)}</span>
           <span className="whitespace-nowrap text-muted-foreground">{timeAgo(revision.updatedAt)}</span>
         </li>)}</ul>
-      </section>}
+      </section></>}
       dockAction={<Button asChild variant="on-ink" size="sm"><a href={bakeHref} onClick={openBakeSheet}>Apply</a></Button>}
     />
     <HistorySheet open={historyOpen} onOpenChange={setHistoryOpen} title={draft.name} revisions={revisions}

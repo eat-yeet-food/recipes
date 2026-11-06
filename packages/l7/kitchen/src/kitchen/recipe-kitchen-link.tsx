@@ -1,25 +1,26 @@
 'use client'
 import { Fragment, useEffect, useState } from 'react'
 import { FlaskConical } from 'lucide-react'
-import { useAccount } from '@eat-yeet/l6-ui-shell/account/account'
+import { useNotebookClient } from './kitchen-local'
 import type { KitchenClient, KitchenFormulaSummary } from './kitchen-client'
 import { kitchenPath } from './kitchen-plugin'
 
 const textLink = 'font-action font-bold underline decoration-1 underline-offset-4 hover:decoration-2'
 
 /**
- * The recipe page's only calculator entry point. Members see their own
- * versions after hydration; everyone else is invited to make one.
+ * The recipe page's only calculator entry point. Readers see their own
+ * versions (from the account or this browser) after hydration; everyone else
+ * is invited to make one.
  */
 export function RecipeKitchenLink({ recipeSlug, client }: { recipeSlug: string; client: KitchenClient }) {
-  const { status } = useAccount()
+  const { client: store } = useNotebookClient(client)
   const [mine, setMine] = useState<KitchenFormulaSummary[]>([])
   useEffect(() => {
-    if (status !== 'signed-in') { setMine([]); return }
+    if (!store) { setMine([]); return }
     let active = true
-    client.list().then(({ formulas }) => { if (active) setMine(formulas.filter((formula) => formula.recipeSlug === recipeSlug)) }, () => {})
+    store.list().then(({ formulas }) => { if (active) setMine(formulas.filter((formula) => formula.recipeSlug === recipeSlug)) }, () => {})
     return () => { active = false }
-  }, [status, client, recipeSlug])
+  }, [store, recipeSlug])
   return <div data-recipe-kitchen="" className="mb-6 flex items-center gap-3.5 py-3 print:hidden">
     <span aria-hidden="true" className="grid size-10 shrink-0 place-items-center rounded-full bg-brand"><FlaskConical className="size-5" /></span>
     <p className="min-w-0 text-[15px] leading-relaxed">

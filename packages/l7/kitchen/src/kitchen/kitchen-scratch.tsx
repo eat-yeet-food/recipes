@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Save } from 'lucide-react'
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
 import { useNavigate } from '@eat-yeet/l5-ui-primitives/primitives/navigation'
-import { useAccount } from '@eat-yeet/l6-ui-shell/account/account'
+import { useNotebookClient } from './kitchen-local'
 import { kitchenErrorMessage, type KitchenClient } from './kitchen-client'
 import { decodeKitchenState, kitchenPath, type KitchenRecipe } from './kitchen-plugin'
 import { ChangeStrip, FormulaTitle, KitchenHeader, KitchenNotice, SaveStatus, type KitchenNoticeValue } from './kitchen-ui'
@@ -35,12 +35,14 @@ export function sharedState(kitchen: KitchenRecipe, config?: string) {
 }
 
 /**
- * The calculator for anyone: starts from the recipe as written, keeps
- * changes in this browser, and saves to the account only when asked.
+ * The calculator for anyone: starts from the recipe as written and keeps
+ * changes in this browser. Saving adds it to Notebook: the account when
+ * signed in, otherwise this browser until the visitor signs in.
  */
 export function KitchenScratchPage({ kitchen, client, sharedConfig, saveOnArrival = false }: { kitchen: KitchenRecipe; client: KitchenClient; sharedConfig?: string; saveOnArrival?: boolean }) {
   const { recipe, plugin, config, defaultState } = kitchen
-  const { member, status } = useAccount()
+  const notebook = useNotebookClient(client)
+  const store = notebook.client
   const navigate = useNavigate()
   const [state, setState] = useState<unknown>(defaultState)
   const [resetKey, setResetKey] = useState(0)
@@ -66,30 +68,30 @@ export function KitchenScratchPage({ kitchen, client, sharedConfig, saveOnArriva
 
   /** Saves at once under the typed name or the recipe's title; the server picks a free variant. */
   const create = useCallback(async (values: unknown) => {
+    if (!store) return
     setSaving(true)
     try {
-      const formula = await client.create({ recipeSlug: recipe.slug, name: readScratchName(recipe.slug) ?? recipe.title, state: values, notes: '' })
+      const formula = await store.create({ recipeSlug: recipe.slug, name: readScratchName(recipe.slug) ?? recipe.title, state: values, notes: '' })
       clearScratch(recipe.slug)
       navigate({ to: kitchenPath(recipe.slug, formula.id, true), search: { saved: '1' } })
     } catch (error) {
       setSaving(false)
       setNotice({ tone: 'error', message: kitchenErrorMessage(error, 'Your formula could not be saved. Please try again.') })
     }
-  }, [client, navigate, recipe.slug, recipe.title])
+  }, [store, navigate, recipe.slug, recipe.title])
 
   const save = useCallback(() => {
     if (errors.length || saving) return
-    if (member) { void create(state); return }
-    // Sign in, then come back here and save straight away.
-    navigate({ to: '/account/sign-in', search: { returnTo: `${kitchenPath(recipe.slug)}?save=1` } })
-  }, [errors.length, saving, member, create, state, navigate, recipe.slug])
+    void create(state)
+  }, [errors.length, saving, create, state])
 
   useEffect(() => {
-    if (!saveOnArrival || arrived.current || status === 'unknown') return
+    // Older sign-in links return with `?save=1`.
+    if (!saveOnArrival || arrived.current || !store) return
     arrived.current = true
     window.history.replaceState(window.history.state, '', kitchenPath(recipe.slug))
-    if (member) void create(readScratch(kitchen) ?? defaultState)
-  }, [saveOnArrival, status, member, recipe.slug, create, kitchen, defaultState])
+    void create(readScratch(kitchen) ?? defaultState)
+  }, [saveOnArrival, store, recipe.slug, create, kitchen, defaultState])
 
   const change = (next: unknown) => {
     setState(next)
@@ -106,7 +108,7 @@ export function KitchenScratchPage({ kitchen, client, sharedConfig, saveOnArriva
     writeScratchName(recipe.slug, kept)
     return null
   }
-  const saveLabel = saving ? 'Saving…' : member ? 'Save to Notebook' : 'Sign in to save'
+  const saveLabel = saving ? 'Saving…' : 'Save to Notebook'
   const bakeHref = kitchenPath(recipe.slug, undefined, true)
 
   return <>
@@ -127,16 +129,16 @@ export function KitchenScratchPage({ kitchen, client, sharedConfig, saveOnArriva
           </>}
           actions={<>
             <Button asChild variant="utility" size="sm" className="max-[640px]:hidden"><a href={bakeHref}>Apply</a></Button>
-            <Button disabled={errors.length > 0 || saving} onClick={save}><Save className="size-4" />{saveLabel}</Button>
+            <Button disabled={errors.length > 0 || saving || !store} onClick={save}><Save className="size-4" />{saveLabel}</Button>
           </>}
         />
         <div className="mt-6"><ChangeStrip changes={plugin.changes(recipe, config, defaultState, state)} onReset={reset} /></div>
       </>}
       aside={<section aria-labelledby="keep-it" className="grid gap-2 rounded-field bg-tint p-5">
         <h2 id="keep-it" className="font-action text-lg font-bold">Want to keep it?</h2>
-        <p className="text-sm leading-relaxed">Saving keeps every change in History and opens this formula on any device. Click the name above to change it, now or later. {member ? '' : 'You’ll sign in with Google first, then come straight back.'}</p>
+        <p className="text-sm leading-relaxed">Saving keeps every change in History. Click the name above to change it, now or later. {notebook.local ? 'Without an account it stays in this browser; sign in any time to move it to your account and open it anywhere.' : 'It opens on any device you sign in on.'}</p>
       </section>}
-      dockAction={<Button variant="on-ink" size="sm" disabled={errors.length > 0 || saving} onClick={save}>{saving ? 'Saving…' : member ? 'Save' : 'Sign in to save'}</Button>}
+      dockAction={<Button variant="on-ink" size="sm" disabled={errors.length > 0 || saving || !store} onClick={save}>{saving ? 'Saving…' : 'Save'}</Button>}
     />
     <KitchenNotice notice={notice} onDismiss={() => setNotice(null)} raised />
   </>

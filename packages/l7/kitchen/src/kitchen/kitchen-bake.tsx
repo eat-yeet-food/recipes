@@ -62,10 +62,11 @@ export function KitchenScratchBakePage(props: BakeSheetProps) {
 }
 
 export function KitchenFormulaBakePage(props: BakeSheetProps & { formulaId: string; client: KitchenClient }) {
-  return <KitchenGate what="this bake sheet"><FormulaBakeSheet {...props} /></KitchenGate>
+  const { client, ...rest } = props
+  return <KitchenGate client={client}>{(store, local) => <FormulaBakeSheet {...rest} client={store} local={local} />}</KitchenGate>
 }
 
-function FormulaBakeSheet({ formulaId, client, ...props }: BakeSheetProps & { formulaId: string; client: KitchenClient }) {
+function FormulaBakeSheet({ formulaId, client, local, ...props }: BakeSheetProps & { formulaId: string; client: KitchenClient; local: boolean }) {
   const { kitchen } = props
   const [formula, setFormula] = useState<KitchenFormula | null>(null)
   const [failure, setFailure] = useState<{ message: string; missing: boolean } | null>(null)
@@ -76,15 +77,20 @@ function FormulaBakeSheet({ formulaId, client, ...props }: BakeSheetProps & { fo
     if (!url.searchParams.has('saved')) return
     url.searchParams.delete('saved')
     window.history.replaceState(window.history.state, '', url)
-    setNotice({ message: 'Saved to Notebook. Click the name to rename it.' })
-  }, [])
+    setNotice({ message: local ? 'Saved in this browser. Click the name to rename it.' : 'Saved to Notebook. Click the name to rename it.' })
+  }, [local])
   useEffect(() => {
     let active = true
-    client.read(formulaId).then((result) => { if (active) setFormula(result) }, (error: unknown) => {
+    client.read(formulaId).then((result) => {
+      if (!active) return
+      setFormula(result)
+      // A browser formula that moved to the account keeps working at its old address.
+      if (result.id !== formulaId) window.history.replaceState(window.history.state, '', kitchenPath(kitchen.recipe.slug, result.id, true))
+    }, (error: unknown) => {
       if (active) setFailure({ message: kitchenErrorMessage(error, 'This bake sheet could not be loaded.'), missing: kitchenErrorCode(error) === 'not-found' })
     })
     return () => { active = false }
-  }, [client, formulaId])
+  }, [client, formulaId, kitchen.recipe.slug])
   if (failure) return <KitchenMessage title={failure.missing ? 'Formula not found' : 'Notebook is unavailable'}
     action={<Button asChild><a href="/notebook">Back to Notebook</a></Button>}>{failure.message}</KitchenMessage>
   if (!formula) return <KitchenMessage title="Opening the bake sheet…" busy>Loading your formula.</KitchenMessage>

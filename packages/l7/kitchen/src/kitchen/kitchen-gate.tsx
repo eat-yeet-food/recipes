@@ -1,9 +1,8 @@
 'use client'
 import type { ReactNode } from 'react'
 import { cn } from '@eat-yeet/l0-foundation/utils'
-import { SignInLink } from '@eat-yeet/l6-ui-shell/account/account-nav'
-import { useAccount } from '@eat-yeet/l6-ui-shell/account/account'
-import { buttonVariants } from '@eat-yeet/l5-ui-primitives/primitives/button'
+import type { KitchenClient } from './kitchen-client'
+import { useNotebookClient } from './kitchen-local'
 import { kitchenPageClass } from './kitchen-ui'
 
 /** A short status page in the kitchen's white layout: loading, signed out, missing or failed. */
@@ -17,13 +16,9 @@ export function KitchenMessage({ title, children, action, busy = false }: { titl
   </section>
 }
 
-/** Saved formulas belong to a member; signed-out visitors sign in and come back here. */
-export function KitchenGate({ what, children }: { what: string; children: ReactNode }) {
-  const { status } = useAccount()
-  if (status === 'unknown') return <KitchenMessage title="Opening Notebook…" busy>Checking your account.</KitchenMessage>
-  if (status === 'signed-out') return <KitchenMessage title="Sign in to open this formula"
-    action={<SignInLink className={buttonVariants()}>Sign in with Google</SignInLink>}>
-    Notebook formulas are saved to your account. Sign in to see {what}; you’ll come straight back here.
-  </KitchenMessage>
-  return <>{children}</>
+/** Waits for the account check (and any move of browser formulas to the account), then hands over the store. */
+export function KitchenGate({ client, children }: { client: KitchenClient; children: (client: KitchenClient, local: boolean) => ReactNode }) {
+  const notebook = useNotebookClient(client)
+  if (!notebook.client) return <KitchenMessage title="Opening Notebook…" busy>Checking your account.</KitchenMessage>
+  return <>{children(notebook.client, notebook.local)}</>
 }

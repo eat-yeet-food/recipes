@@ -1,6 +1,6 @@
 /**
- * Notebook in a real browser: the signed-out calculator, saving through
- * sign-in, autosave and History, duplicate, delete with undo, bake sheets and
+ * Notebook in a real browser: the signed-out calculator, saving in the
+ * browser, moving those formulas to the account on sign-in, autosave and History, duplicate, delete with undo, bake sheets and
  * phone layouts. Runs against the production build with a local test member.
  */
 import { signIn } from '#web-test/member-session'
@@ -29,8 +29,9 @@ async function open(context, path) {
 const dough = (page) => page.locator('aside [data-dough-results]')
 const savedAfter = (page) => page.waitForResponse((response) => response.request().method() === 'PATCH' && response.url().includes('/api/public/account/kitchen/formulas/'), { timeout: 10000 })
 
+const visitorName = `Visitor pies ${Date.now().toString(36)}`
 try {
-  // Signed out: the calculator works, keeps work in this browser, and saving signs in first.
+  // Signed out: the calculator works, keeps work in this browser and saves formulas there without an account.
   const visitor = await browser.newContext({ viewport: { width: 1280, height: 900 } })
   const sessionReads = []
   visitor.on('request', (request) => request.url().includes('/api/public/account/') && sessionReads.push(request.url()))
@@ -51,15 +52,43 @@ try {
   const scratchBake = await page.locator('#recipe-card').textContent()
   check('scratch bake sheet uses the browser formula and today\'s count', scratchBake.includes('Making 5 pizzas today') && scratchBake.includes('Divide and shape dough into 5 balls'), scratchBake.slice(0, 400))
   await page.goto(`${BASE}/notebook/new-york-style-pizza`, { waitUntil: 'networkidle' })
-  await page.getByRole('button', { name: 'Sign in to save' }).first().click()
-  await page.waitForURL('**/account/sign-in**')
-  check('saving signs in and returns to the formula', new URL(page.url()).searchParams.get('returnTo') === '/notebook/new-york-style-pizza?save=1', page.url())
+  await page.getByRole('heading', { level: 1 }).click()
+  await page.getByRole('textbox', { name: 'Formula name' }).fill(visitorName)
+  await page.keyboard.press('Enter')
+  await page.getByRole('textbox', { name: 'Formula name' }).waitFor({ state: 'detached' })
+  await page.getByRole('button', { name: 'Save to Notebook' }).first().click()
+  await page.waitForURL(/\/notebook\/new-york-style-pizza\/local[A-Za-z0-9]{11}\/bake$/)
+  const localBake = page.url()
+  await page.getByRole('status').filter({ hasText: 'Saved in this browser' }).waitFor()
+  check('visitors save to Notebook without signing in', (await page.locator('#recipe-card').textContent()).includes('Making'))
+  await page.getByRole('link', { name: 'Edit formula' }).click()
+  await page.waitForURL(/\/local[A-Za-z0-9]{11}$/)
+  await page.getByRole('textbox', { name: 'Hydration' }).fill('70')
+  await page.locator('[data-save-status="saved"]').filter({ hasText: 'Saved in this browser' }).waitFor()
+  check('browser formulas autosave and keep History', await page.getByRole('heading', { name: 'Recent changes' }).isVisible() && await page.getByRole('heading', { name: 'Saved in this browser' }).isVisible())
+  await page.goto(`${BASE}/notebook`, { waitUntil: 'networkidle' })
+  check('the library lists browser formulas', await page.locator('[data-kitchen-formula]').filter({ hasText: visitorName }).count() === 1)
   await page.goto(`${BASE}/notebook/sourdough-bread`, { waitUntil: 'networkidle' })
   await page.getByRole('button', { name: 'Add flour' }).first().click()
   await page.getByLabel('Flour 3 name').fill('Rye')
   await page.getByLabel('Rye percentage').fill('10')
   await page.getByRole('alert').filter({ hasText: 'must total 100%' }).first().waitFor()
-  check('an invalid blend blocks saving and explains why', await page.getByRole('button', { name: 'Sign in to save' }).first().isDisabled() && (await page.getByRole('alert').first().textContent()).includes('must total 100%'))
+  check('an invalid blend blocks saving and explains why', await page.getByRole('button', { name: 'Save to Notebook' }).first().isDisabled() && (await page.getByRole('alert').first().textContent()).includes('must total 100%'))
+  check('anonymous Notebook use makes no account requests', sessionReads.length === 0, sessionReads.join(', '))
+
+  // Signing in moves browser formulas to the account; old local links still open them.
+  await signIn(visitor, BASE)
+  page = await open(visitor, '/notebook')
+  await page.getByRole('status').filter({ hasText: 'Moved 1 formula from this browser to your account' }).waitFor()
+  const movedCard = page.locator('[data-kitchen-formula]').filter({ hasText: visitorName })
+  check('moved formulas get account IDs', await movedCard.count() === 1 && !(await movedCard.getAttribute('data-kitchen-formula')).startsWith('local'))
+  check('the browser copy is cleared after moving', await page.evaluate(() => localStorage.getItem('eatyeet:kitchen:formulas')) === null)
+  await page.goto(localBake, { waitUntil: 'networkidle' })
+  await page.waitForURL(/\/notebook\/new-york-style-pizza\/(?!local)[A-Za-z0-9_-]{16}\/bake$/)
+  check('old browser links open the moved formula', await page.getByRole('heading', { level: 1, name: visitorName }).isVisible())
+  const movedId = new URL(page.url()).pathname.split('/')[3]
+  const removed = await page.evaluate((id) => fetch(`/api/public/account/kitchen/formulas/${id}`, { method: 'DELETE', credentials: 'same-origin' }).then((response) => response.ok), movedId)
+  check('the moved test formula is cleaned up', removed)
   await visitor.close()
 
   // Signed in: the typed name and the browser formula save on return from sign-in, with no extra step.

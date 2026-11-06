@@ -75,11 +75,11 @@ function useNow(interval = 30000) {
 }
 
 /** Announces saves politely; a failed save never claims success. */
-export function SaveStatus({ state }: { state: SaveState }) {
+export function SaveStatus({ state, local = false }: { state: SaveState; local?: boolean }) {
   const now = useNow()
-  const text = state.kind === 'saved' ? `Saved · ${state.at ? timeAgo(state.at, now) : 'up to date'}`
+  const text = state.kind === 'saved' ? `Saved${local ? ' in this browser' : ''} · ${state.at ? timeAgo(state.at, now) : 'up to date'}`
     : state.kind === 'saving' ? 'Saving…'
-    : state.kind === 'local' ? 'Kept in this browser · not saved to your account'
+    : state.kind === 'local' ? 'Unsaved · kept in this browser'
     : state.kind === 'invalid' ? 'Not saved · fix the highlighted values'
     : state.message
   const failed = state.kind === 'error' || state.kind === 'invalid'

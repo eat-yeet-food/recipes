@@ -7,7 +7,7 @@ import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
 import { Link } from '@eat-yeet/l5-ui-primitives/primitives/navigation'
 import { ResponsiveImage } from '@eat-yeet/l5-ui-primitives/primitives/responsive-image'
 import { SignInLink } from '@eat-yeet/l6-ui-shell/account/account-nav'
-import { useAccount } from '@eat-yeet/l6-ui-shell/account/account'
+import { useNotebookClient } from './kitchen-local'
 import { kitchenErrorMessage, type KitchenClient, type KitchenFormulaSummary, type KitchenList } from './kitchen-client'
 import { decodeKitchenState, kitchenPath, type KitchenRecipe } from './kitchen-plugin'
 import { KitchenBand, KitchenNotice, kitchenPageClass, timeAgo, type KitchenNoticeValue } from './kitchen-ui'
@@ -60,8 +60,9 @@ function GroupHeading({ id, title, count }: { id: string; title: string; count?:
   </h2>
 }
 
-export function KitchenLibraryPage({ recipes, client, deletedId }: { recipes: KitchenRecipe[]; client: KitchenClient; deletedId?: string }) {
-  const { status } = useAccount()
+export function KitchenLibraryPage({ recipes, client: remote, deletedId }: { recipes: KitchenRecipe[]; client: KitchenClient; deletedId?: string }) {
+  const notebook = useNotebookClient(remote)
+  const client = notebook.client
   const [list, setList] = useState<KitchenList | null>(null)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState<KitchenNoticeValue | null>(null)
@@ -72,6 +73,7 @@ export function KitchenLibraryPage({ recipes, client, deletedId }: { recipes: Ki
   const bySlug = useMemo(() => new Map(recipes.map((kitchen) => [kitchen.recipe.slug, kitchen])), [recipes])
 
   const load = useCallback(async () => {
+    if (!client) return null
     setError('')
     try {
       const next = await client.list()
@@ -84,6 +86,7 @@ export function KitchenLibraryPage({ recipes, client, deletedId }: { recipes: Ki
   }, [client])
 
   const restore = useCallback(async (formula: KitchenFormulaSummary) => {
+    if (!client) return
     setRestoring(formula.id)
     try {
       const restored = await client.undelete(formula.id)
@@ -95,14 +98,16 @@ export function KitchenLibraryPage({ recipes, client, deletedId }: { recipes: Ki
   }, [client, load])
 
   useEffect(() => {
-    if (status !== 'signed-in') return
+    if (!client) return
+    setList(null)
     void load().then((next) => {
+      if (notebook.moved) setNotice({ message: notebook.moved === 1 ? 'Moved 1 formula from this browser to your account.' : `Moved ${notebook.moved} formulas from this browser to your account.` })
       const deleted = deletedId ? next?.deleted.find((formula) => formula.id === deletedId) : undefined
       if (!deleted) return
       window.history.replaceState(window.history.state, '', '/notebook')
       setNotice({ message: `Deleted ${deleted.name}. It stays in Recently deleted for 30 days.`, action: { label: 'Undo', run: () => { void restore(deleted) } } })
     })
-  }, [status, load, deletedId, restore])
+  }, [client, load, deletedId, restore, notebook.moved])
 
   const groups = useMemo(() => {
     const result = new Map<string, { label: string; items: { kitchen: KitchenRecipe; formula: KitchenFormulaSummary }[] }>()
@@ -116,26 +121,27 @@ export function KitchenLibraryPage({ recipes, client, deletedId }: { recipes: Ki
     return [...result.entries()]
   }, [list, bySlug])
   const deleted = (list?.deleted ?? []).filter((formula) => bySlug.has(formula.recipeSlug))
-  const signedIn = status === 'signed-in'
+  const ready = client !== null
+  const local = notebook.local
   const count = list?.formulas.filter((formula) => bySlug.has(formula.recipeSlug)).length
 
   return <>
     <KitchenBand
-      eyebrow={signedIn && count !== undefined ? `Your formulas · ${count}` : 'Your own versions'}
+      eyebrow={ready && count ? `Your formulas · ${count}` : 'Your own versions'}
       title="Notebook"
-      actions={signedIn ? <Button asChild><a href={`#${startId}`}><Plus className="size-4" />New formula</a></Button> : undefined}
+      actions={ready ? <Button asChild><a href={`#${startId}`}><Plus className="size-4" />New formula</a></Button> : undefined}
     >
-      <p>Your own versions of the dough recipes. Recipes stay as written; everything you change lives here{signedIn ? ' and saves as you go.' : '.'}</p>
+      <p>Your own versions of the dough recipes. Recipes stay as written; everything you change lives here and saves as you go.</p>
     </KitchenBand>
     <div className={cn(kitchenPageClass, 'grid gap-12 py-11 max-[640px]:py-8')}>
-      {status === 'signed-out' && <p className="max-w-[640px] text-base leading-relaxed">
-        Try any change below without an account; your work stays in this browser. <SignInLink className="font-action font-bold underline decoration-1 underline-offset-4 hover:decoration-2">Sign in</SignInLink> to save named formulas with full history on every device.
+      {local && <p className="max-w-[640px] text-base leading-relaxed">
+        No account needed: formulas you save are kept in this browser. <SignInLink className="font-action font-bold underline decoration-1 underline-offset-4 hover:decoration-2">Sign in</SignInLink> to keep them in your account and open them on every device; anything saved here moves over.
       </p>}
-      {signedIn && !list && !error && <p role="status" className="text-muted-foreground">Loading your formulas…</p>}
+      {ready && !list && !error && <p role="status" className="text-muted-foreground">Loading your formulas…</p>}
       {error && <div role="alert" className="flex flex-wrap items-center gap-4 rounded-field bg-danger-soft p-4 text-sm text-danger">
         <span>{error}</span><Button variant="link" className="text-danger" onClick={() => void load()}>Try again</Button>
       </div>}
-      {signedIn && list && count === 0 && <p className="text-base leading-relaxed">No formulas yet. Start from a recipe below, change anything, then save it here.</p>}
+      {ready && list && count === 0 && <p className="text-base leading-relaxed">No formulas yet. Start from a recipe below, change anything, then save it here.</p>}
       {groups.map(([id, group]) => <section key={id} aria-labelledby={`group-${id}`} className="grid gap-6">
         <GroupHeading id={`group-${id}`} title={group.label} count={group.items.length} />
         <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
