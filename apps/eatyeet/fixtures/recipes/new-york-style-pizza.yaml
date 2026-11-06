@@ -238,7 +238,7 @@ methodOptions:
               - id: steps-1-item-4
                 text: >-
                   Transfer the dough to your bench. Knead shortly, guide dough with bench scraper into the form of a
-                  ball, place in a bowl, cover with saran wrap, and allow it to bulk ferment at 76°F for 1h.
+                  ball, place in a bowl, and cover with saran wrap. Bulk ferment at 76°F for 1h.
               - id: divide-dough
                 text: >-
                   Divide and shape dough into {{pieceCount}} {{pieceLabelPlural}}, shooting for {{pieceWeightGrams}}
@@ -444,7 +444,7 @@ blocks:
           - id: steps-1-item-4
             text: >-
               Transfer the dough to your bench. Knead shortly, guide dough with bench scraper into the form of a ball,
-              place in a bowl, cover with saran wrap, and allow it to bulk ferment at 76°F for 1h.
+              place in a bowl, and cover with saran wrap. Bulk ferment at 76°F for 1h.
           - id: divide-dough
             text: "Divide and shape dough into {{pieceCount}} {{pieceLabelPlural}}, shooting for {{pieceWeightGrams}} each ({{totalDoughGrams}} total dough). Pull four times in gentle circles on your unfloured bench until smooth on the top. Pinch any bottom seam that remains. Circular dough balls make circular pizzas \U0001F642 ([video](https://www.youtube.com/watch?v=Vo5OW8Xkah4&t=9s))."
           - id: steps-1-item-6

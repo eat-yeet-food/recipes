@@ -5,6 +5,7 @@
   "exports": {
     "./pizza-sizing": "./src/pizza-sizing.ts",
     "./sourdough-process": "./src/sourdough-process.ts",
+    "./pizza-process": "./src/pizza-process.ts",
     "./formula": "./src/formula.ts",
     "./format": "./src/format.ts",
     "./search": "./src/search.ts",

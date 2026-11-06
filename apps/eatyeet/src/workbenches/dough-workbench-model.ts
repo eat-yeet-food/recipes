@@ -1,11 +1,13 @@
 import { isPizzaSizing, pizzaAreaScale, pizzaBallWeight, type PizzaSizing } from '@eat-yeet/l2-recipe-domain/pizza-sizing'
 import { DEFAULT_SOURDOUGH_PROCESS, levainToFridgeMinutes } from '@eat-yeet/l2-recipe-domain/sourdough-process'
+import { DEFAULT_PIZZA_PROCESS, type PizzaProcess } from '@eat-yeet/l2-recipe-domain/pizza-process'
 import { isDoughFormula, isDoughFormulaState, type DoughFormulaState } from '@eat-yeet/l2-recipe-domain/formula-state'
 import { calculateDoughLevainBuild, calculateFormula, formatPercent, type DoughFormula, type StarterProfile } from '@eat-yeet/l2-recipe-domain/formula'
 import { formatNumberFieldValue, type NumberFieldPrecision } from '@eat-yeet/l5-ui-primitives/primitives/number-field-format'
 import type { RecipeContent } from '@eat-yeet/l4-content-model/recipes'
 import { recipeWithSelectedMethod } from '@eat-yeet/l4-content-model/recipes'
 import { formatYeastGrams, formatYeastTeaspoons, formatEighths, levainYield } from './dough-kitchen-model'
+import { resolvePizzaSteps } from './pizza-process'
 import { resolveSourdoughSteps, type SourdoughProcessSections, type SpiralMixerProfile } from './sourdough-process'
 
 export type InputMode = 'weights' | 'target'
@@ -39,7 +41,10 @@ export const completeFormula = (formula: DoughFormula, fallback?: DoughFormula):
   ...formula,
   process: clone(formula.process ?? fallback?.process ?? DEFAULT_SOURDOUGH_PROCESS),
   levainBuild: clone(formula.levainBuild ?? { seed: starterFrom(formula), flourPerSeed: 2 }),
-} : formula
+} : { ...formula, pizzaProcess: clone(formula.pizzaProcess ?? fallback?.pizzaProcess ?? DEFAULT_PIZZA_PROCESS) }
+
+/** Bulk through warm-up: the part of the recipe's time a pizza schedule changes. */
+const pizzaMinutes = (process: PizzaProcess) => process.bulkMinutes + process.coldDays * 24 * 60 + process.warmUpMinutes
 
 
 function dynamicDoughItems(selection: DoughWorkbenchState, formatWeight = formatWorkbenchGrams) {
@@ -88,6 +93,7 @@ export function resolveWorkbenchRecipe(recipe: RecipeContent, selection: DoughWo
   if (!recipe.workbench) return selected
   const { result, items: rawItems } = dynamicDoughItems(selection, formatAppliedGrams)
   const process = selection.formula.process
+  const pizzaProcess = selection.formula.family === 'pizza' ? selection.formula.pizzaProcess : undefined
   const seedBuild = selection.formula.levainBuild
   const levain = seedBuild && selection.formula.starter && result.levainGrams > 0
     ? calculateDoughLevainBuild(result.levainGrams, selection.formula.starter, seedBuild) : null
@@ -120,7 +126,8 @@ export function resolveWorkbenchRecipe(recipe: RecipeContent, selection: DoughWo
         }),
       }
     })]
-    const processSteps = process && config.processSections ? resolveSourdoughSteps(block.steps, config.processSections, process, levainIngredients, config.spiralMixer) : block.steps
+    const processSteps = process && config.processSections ? resolveSourdoughSteps(block.steps, config.processSections, process, levainIngredients, config.spiralMixer)
+      : pizzaProcess ? resolvePizzaSteps(block.steps, pizzaProcess) : block.steps
     const steps = processSteps.map((section) => ({
       ...section,
       items: section.items.map((item) => renderFormulaBindings(item, selection, config, result)),
@@ -129,7 +136,7 @@ export function resolveWorkbenchRecipe(recipe: RecipeContent, selection: DoughWo
       ? `This dough is ${formatPercent(selection.formula.hydrationPercent)} hydration and makes ${selection.batch.count === 1 ? `one ${formatAppliedGrams(selection.batch.pieceWeightGrams)} ball` : `${selection.batch.count} × ${formatAppliedGrams(selection.batch.pieceWeightGrams)} balls (${formatAppliedGrams(result.totalDoughGrams)} total)`}.`.replace(/^(.*makes) 1 × (\S+) balls \(.*\)\.$/, '$1 one $2 ball.')
       : `This dough is ${formatPercent(selection.formula.hydrationPercent)} hydration with ${formatPercent(result.prefermentedFlourPercent)} prefermented flour and makes ${selection.batch.count} × ${formatAppliedGrams(selection.batch.pieceWeightGrams)} ${pieceCountLabel(selection.batch.count, 'loaf')}.`
     const notes = [formulaNote, ...block.notes.filter((note) => !/formula uses|dough formula|lands around/i.test(note))]
-    const equipment = process?.mixingMethod === 'hand' ? block.equipment.map((section) => {
+    const equipment = process?.mixingMethod === 'hand' || (pizzaProcess && pizzaProcess.mixingMethod !== 'spiral') ? block.equipment.map((section) => {
       const keep = section.items.map((item, index) => ({ item, id: section.itemIds[index] })).filter(({ item }) => !/spiral mixer/i.test(item))
       return { ...section, items: keep.map(({ item }) => item), itemIds: keep.map(({ id }) => id) }
     }) : block.equipment
@@ -141,6 +148,10 @@ export function resolveWorkbenchRecipe(recipe: RecipeContent, selection: DoughWo
     ...(process && config.processSections ? {
       totalMinutes: selected.totalMinutes === null ? null : Math.max(0, selected.totalMinutes + process.autolyseMinutes + levainToFridgeMinutes(process) - (config.defaultSelection.formula.process ?? DEFAULT_SOURDOUGH_PROCESS).autolyseMinutes - levainToFridgeMinutes(config.defaultSelection.formula.process ?? DEFAULT_SOURDOUGH_PROCESS)),
       learning: selected.learning?.mixing ? { ...selected.learning, mixing: { ...selected.learning.mixing, defaultMethod: process.mixingMethod } } : selected.learning,
+    } : {}),
+    ...(pizzaProcess ? {
+      ...(['prepMinutes', 'totalMinutes'] as const).reduce((times, key) => ({ ...times, [key]: selected[key] === null ? null : Math.max(0, selected[key]! + pizzaMinutes(pizzaProcess) - pizzaMinutes(config.defaultSelection.formula.pizzaProcess ?? DEFAULT_PIZZA_PROCESS)) }), {}),
+      learning: selected.learning?.mixing && pizzaProcess.mixingMethod !== 'food-processor' ? { ...selected.learning, mixing: { ...selected.learning.mixing, defaultMethod: pizzaProcess.mixingMethod } } : selected.learning,
     } : {}),
     yieldAmount: selection.batch.count,
     yieldUnit: selection.formula.family === 'pizza' ? selection.batch.diameterInches ? `${selection.batch.diameterInches}-inch pizzas` : 'pizzas' : selection.batch.count === 1 ? 'loaf' : 'loaves',

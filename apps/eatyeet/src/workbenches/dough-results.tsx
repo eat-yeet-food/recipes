@@ -3,12 +3,13 @@ import { useId } from 'react'
 import type { DoughWorkbenchState } from './dough-workbench-model'
 import { doughRows } from './dough-kitchen-model'
 import { sourdoughSchedule } from './sourdough-process'
+import { pizzaSchedule } from './pizza-process'
 
 /** The ink result panel: yellow total, ingredient labels left and tabular weights right. */
 export function DoughResults({ state }: { state: DoughWorkbenchState }) {
   const id = useId()
   const { total, totalDetail, rows, levainBuild } = doughRows(state)
-  const schedule = state.formula.process ? sourdoughSchedule(state.formula.process) : null
+  const schedule = state.formula.process ? sourdoughSchedule(state.formula.process) : state.formula.pizzaProcess ? pizzaSchedule(state.formula.pizzaProcess) : null
   return <section aria-labelledby={id} data-dough-results="" className="grid gap-4 rounded-field bg-ink p-5 text-action-label">
     <h2 id={id} className="font-action text-2xl leading-tight font-bold text-brand">Your dough</h2>
     <p className="grid gap-2">

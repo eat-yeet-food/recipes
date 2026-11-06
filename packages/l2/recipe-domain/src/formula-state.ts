@@ -1,4 +1,5 @@
 import { MAX_LEVAIN_EXTRA_PERCENT, calculateDoughLevainBuild, calculateFormula, type DoughBatch, type DoughFormula, type FlourComponent, type StarterProfile } from './formula.ts'
+import { isPizzaProcess } from './pizza-process.ts'
 import { isSourdoughProcess } from './sourdough-process.ts'
 
 /** A complete dough configuration: the formula, one batch of it and the recipe method it follows. */
@@ -31,6 +32,7 @@ export function isDoughFormula(value: unknown): value is DoughFormula {
     percentages.every(Number.isFinite) &&
     isFlourBlend(formula.flour) &&
     (formula.starter === undefined || isStarterProfile(formula.starter)) &&
+    (formula.pizzaProcess === undefined || (formula.family === 'pizza' && isPizzaProcess(formula.pizzaProcess))) &&
     (formula.process === undefined || (formula.family === 'sourdough' && isSourdoughProcess(formula.process) && formula.process.folds.length <= MAX_FOLDS)) &&
     (formula.levainBuild === undefined || (formula.levainBuild !== null && typeof formula.levainBuild === 'object' && isStarterProfile(formula.levainBuild.seed) && Number.isFinite(formula.levainBuild.flourPerSeed) && formula.levainBuild.flourPerSeed > 0 &&
       (formula.levainBuild.extraPercent === undefined || (Number.isFinite(formula.levainBuild.extraPercent) && formula.levainBuild.extraPercent >= 0 && formula.levainBuild.extraPercent <= MAX_LEVAIN_EXTRA_PERCENT))))

@@ -1,6 +1,8 @@
 import { calculateDoughLevainBuild, calculateFormula, formatPercent, levainExtraPercent, type DoughFormula, type FlourComponent, type StarterProfile } from '@eat-yeet/l2-recipe-domain/formula'
 import type { DoughFormulaState } from '@eat-yeet/l2-recipe-domain/formula-state'
 import type { SourdoughProcess } from '@eat-yeet/l2-recipe-domain/sourdough-process'
+import { DEFAULT_PIZZA_PROCESS } from '@eat-yeet/l2-recipe-domain/pizza-process'
+import { PIZZA_MIXING_LABELS } from './pizza-process.ts'
 
 /** One difference between two formulas, written for a chip or a History entry. */
 export type FormulaChange = { label: string; from: string; to: string }
@@ -43,6 +45,7 @@ export function formulaFacts(state: DoughFormulaState, methodLabel?: string) {
   ]
   if (methodLabel) parts.push(methodLabel)
   else if (formula.process) parts.push(formula.process.mixingMethod === 'hand' ? 'Hand mixed' : 'Spiral mixer')
+  else if (formula.pizzaProcess && formula.pizzaProcess.mixingMethod !== 'spiral') parts.push(PIZZA_MIXING_LABELS[formula.pizzaProcess.mixingMethod])
   return parts.join(' · ')
 }
 
@@ -117,6 +120,14 @@ export function formulaChanges(from: DoughFormulaState, to: DoughFormulaState, m
       add('Seed starter', starterText(a.levainBuild.seed), starterText(b.levainBuild.seed))
       add('Extra levain', formatPercent(levainExtraPercent(a.levainBuild)), formatPercent(levainExtraPercent(b.levainBuild)))
     }
+  }
+  if (b.family === 'pizza') {
+    const [x, y] = [a.pizzaProcess ?? DEFAULT_PIZZA_PROCESS, b.pizzaProcess ?? DEFAULT_PIZZA_PROCESS]
+    add('Mixing', PIZZA_MIXING_LABELS[x.mixingMethod], PIZZA_MIXING_LABELS[y.mixingMethod])
+    add('Dough temperature', temperature(x.bulkTemperatureF), temperature(y.bulkTemperatureF))
+    add('Divide and ball at', duration(x.bulkMinutes), duration(y.bulkMinutes))
+    add('Cold ferment', `${x.coldDays} days`, `${y.coldDays} days`)
+    add('Warm-up', duration(x.warmUpMinutes), duration(y.warmUpMinutes))
   }
   if (a.process && b.process) {
     add('Mixing', a.process.mixingMethod === 'hand' ? 'By hand' : 'Spiral mixer', b.process.mixingMethod === 'hand' ? 'By hand' : 'Spiral mixer')

@@ -15,6 +15,8 @@ import { clone, formatWorkbenchGrams, pieceCountLabel, starterFrom, yeastGramPre
 import { formulasMatch } from './dough-formula-match'
 import { levainYield } from './dough-kitchen-model'
 import { formatDuration } from './sourdough-process'
+import { PIZZA_MIXING_LABELS } from './pizza-process'
+import { COLD_DAYS, FOOD_PROCESSOR_MAX_BALLS, HAND_REST_MINUTES, PIZZA_TEMPERATURE_RANGE_F, warmUpForColdDays, type PizzaMixingMethod, type PizzaProcess } from '@eat-yeet/l2-recipe-domain/pizza-process'
 
 const NumericFields = createContext<{ report: NumberFieldValidation; resetKey: number } | null>(null)
 
@@ -246,6 +248,8 @@ export function DoughFormulaEditor({ recipe, config, state, onChange, onErrorsCh
     if (reversed.errors.length) return
     onChange({ ...state, formula: { ...formula, ...reversed.formula }, batch: { ...batch, diameterInches: undefined, pieceWeightGrams: reversed.totalDoughGrams / batch.count } })
   }
+  const pizzaProcess = pizza ? formula.pizzaProcess : undefined
+  const updatePizza = (changes: Partial<PizzaProcess>) => { if (pizzaProcess) { updateFormula({ pizzaProcess: { ...pizzaProcess, ...changes } }); setLocalReset((key) => key + 1) } }
   const updateProcess = (changes: Partial<SourdoughProcess>) => { if (process) updateFormula({ process: { ...process, ...changes } }) }
   const plan: FoldPlan | null = useMemo(() => process ? foldGroups(process) : null, [process])
   const newFoldId = () => `fold-${crypto.randomUUID()}`
@@ -348,6 +352,30 @@ export function DoughFormulaEditor({ recipe, config, state, onChange, onErrorsCh
           ? <ChoiceGroup size="compact" label={pizza ? 'Oven method' : 'Baking method'} className="w-[380px] max-w-full" value={state.methodId} onChange={(methodId) => onChange({ ...state, methodId })} options={recipe.methodOptions.map((option) => ({ value: option.id, label: option.label }))} />
           : <div className="grid max-w-[380px] gap-1"><label htmlFor={`${prefix}-method`} className="font-action text-sm font-bold">{pizza ? 'Oven method' : 'Baking method'}</label><Select surface="underline" id={`${prefix}-method`} value={state.methodId} onChange={(event) => onChange({ ...state, methodId: event.target.value })}>{recipe.methodOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}</Select></div>}
         {recommended && !formulasMatch(recommended, formula) && <Button variant="link" type="button" className="justify-self-start" onClick={() => { setLocalReset((key) => key + 1); updateFormula(clone(recommended)) }}>Use the recommended formula for {method?.label ?? 'this method'}</Button>}
+      </Section>}
+
+      {pizzaProcess && <Section title="Mixing and fermentation" description="Times count from when you start mixing.">
+        <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-2">
+          <ChoiceGroup size="compact" label="Mixing method" className="w-[420px] max-w-full" value={pizzaProcess.mixingMethod} onChange={(mixingMethod: PizzaMixingMethod) => updatePizza({ mixingMethod })}
+            options={(['spiral', 'food-processor', 'hand'] as const).map((value) => ({ value, label: PIZZA_MIXING_LABELS[value] }))} />
+          {batch.count <= FOOD_PROCESSOR_MAX_BALLS && pizzaProcess.mixingMethod !== 'food-processor' && <p className="text-[13px] leading-normal text-muted-foreground">
+            For {batch.count === 1 ? 'one ball' : 'two balls'}, a food processor is easiest. <Button variant="link" type="button" className="text-[13px]" onClick={() => updatePizza({ mixingMethod: 'food-processor' })}>Use food processor</Button>
+          </p>}
+          {pizzaProcess.mixingMethod === 'hand' && <p className="text-[13px] leading-normal text-muted-foreground">Mix, rest {formatDuration(HAND_REST_MINUTES)}, then knead; the rest counts toward bulk.</p>}
+        </div>
+        <Group title="Fermentation">
+          <div className="grid grid-cols-2 items-end gap-x-6 gap-y-5 md:grid-cols-4">
+            <Field label="Dough temperature" suffix="°F" step="1" decimalPlaces={0} min={PIZZA_TEMPERATURE_RANGE_F[0]} max={PIZZA_TEMPERATURE_RANGE_F[1]} value={pizzaProcess.bulkTemperatureF} onChange={(bulkTemperatureF) => updateFormula({ pizzaProcess: { ...pizzaProcess, bulkTemperatureF } })} />
+            <DurationField label="Divide and ball at" min={pizzaProcess.mixingMethod === 'hand' ? HAND_REST_MINUTES + 1 : 1} value={pizzaProcess.bulkMinutes} onChange={(bulkMinutes) => updateFormula({ pizzaProcess: { ...pizzaProcess, bulkMinutes } })} />
+            <div className="col-span-2 grid min-w-0 gap-1">
+              <span aria-hidden="true" className="font-action text-sm font-bold">Cold ferment</span>
+              <ChoiceGroup size="compact" label="Cold ferment days" value={String(pizzaProcess.coldDays) as `${typeof COLD_DAYS[number]}`} onChange={(days) => updatePizza({ coldDays: Number(days), warmUpMinutes: warmUpForColdDays(Number(days)) })}
+                options={COLD_DAYS.map((days) => ({ value: String(days) as `${typeof days}`, label: `${days} days` }))} />
+            </div>
+            <DurationField label="Warm-up" value={pizzaProcess.warmUpMinutes} describedBy={`${prefix}-warm-hint`} onChange={(warmUpMinutes) => updateFormula({ pizzaProcess: { ...pizzaProcess, warmUpMinutes } })} />
+          </div>
+          <p id={`${prefix}-warm-hint`} className="text-[13px] leading-normal text-muted-foreground">Warm-up follows the cold ferment: 4h after 2 days, 3h after 3, 2h after 4.</p>
+        </Group>
       </Section>}
 
       {process && plan && <Section title="Mixing and fermentation" description="Times count from mixing in the levain. Follow the dough’s rise as well as the clock.">

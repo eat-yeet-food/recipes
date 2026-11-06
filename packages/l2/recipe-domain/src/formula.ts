@@ -1,4 +1,5 @@
 import { sourdoughProcessErrors, type SourdoughProcess } from './sourdough-process.ts'
+import { pizzaProcessErrors, type PizzaProcess } from './pizza-process.ts'
 
 export interface FlourComponent {
   id: string
@@ -23,6 +24,8 @@ export interface DoughFormula {
   flour: FlourComponent[]
   starter?: StarterProfile
   process?: SourdoughProcess
+  /** Pizza mixing and fermentation; absent means the recipe's schedule. */
+  pizzaProcess?: PizzaProcess
   levainBuild?: LevainBuild
 }
 
@@ -92,6 +95,7 @@ export function calculateFormula(formula: DoughFormula, batch: DoughBatch): Form
   const errors = [
     ...flourBlendErrors(formula.flour),
     ...(formula.process ? sourdoughProcessErrors(formula.process) : []),
+    ...(formula.pizzaProcess ? pizzaProcessErrors(formula.pizzaProcess) : []),
     ...(starter ? flourBlendErrors(starter.flour, 'Starter flour blend') : []),
   ]
   const percentages = [formula.hydrationPercent, formula.saltPercent, formula.oilPercent, formula.sugarPercent, formula.maltPercent, formula.yeastPercent]

@@ -3,6 +3,7 @@ import { describe, it } from 'node:test'
 import type { DoughFormulaState } from '@eat-yeet/l2-recipe-domain/formula-state'
 import { batchNoun, doughRows, formulaChanges, formulaFacts, withBatchCount } from './dough-kitchen-model.ts'
 import { resolveSourdoughSteps, sourdoughSchedule } from './sourdough-process.ts'
+import { pizzaSchedule, resolvePizzaSteps } from './pizza-process.ts'
 
 const recipe: DoughFormulaState = {
   version: 1,
@@ -118,5 +119,52 @@ describe('sourdough steps', () => {
   it('summarizes the schedule and flags folds after dividing', () => {
     assert.deepEqual(sourdoughSchedule(process).map((row) => `${row.time} ${row.label}`), ['Before Autolyse, 3h', '0m Mix in the levain', '10m Salt and remaining water', '30m 2 × coil folds, every 30m', '5:20h Divide, preshape and shape', '6h Into the refrigerator'])
     assert.ok(sourdoughSchedule({ ...process, bulkMinutes: 60 }).some((row) => row.problem))
+  })
+})
+
+describe('pizza steps', () => {
+  const section = (id: string, items: [string, string][]) => ({ id, title: id, items: items.map(([, text]) => text), itemIds: items.map(([itemId]) => itemId) })
+  const steps = [
+    section('steps-1', [
+      ['steps-1-item-1', 'Chill the water.'], ['combine-dough', 'Add the {{mixingIngredients}} to the spiral mixer.'], ['steps-1-item-3', 'Mix until 72°F.'],
+      ['steps-1-item-4', 'Ball and cover. Bulk ferment at 76°F for 1h.'], ['divide-dough', 'Divide into balls.'], ['steps-1-item-6', 'Cover and place in the refrigerator for 2–4 days.'],
+    ]),
+    section('steps-3', [['steps-3-item-1', 'Warm up.'], ['steps-3-item-2', 'Preheat.']]),
+  ]
+  const base = { mixingMethod: 'spiral', bulkTemperatureF: 76, bulkMinutes: 60, coldDays: 2, warmUpMinutes: 240 } as const
+
+  it('puts the spiral mixer dough on a rail from the start of mixing', () => {
+    const [dough, bake] = resolvePizzaSteps(steps, base)
+    assert.deepEqual(dough.itemTimes!.map((time) => [time.label, time.rest]), [['0m', 'Bulk ferment at 76°F for 1h.'], ['1h', undefined]])
+    assert.equal(dough.items[0], 'Chill the water. Add the {{mixingIngredients}} to the spiral mixer. Mix until 72°F. Ball and cover.')
+    assert.equal(dough.items[1], 'Divide into balls. Cover and place in the refrigerator for 2 days.')
+    assert.equal(dough.timeOrigin, 'Time since you start mixing')
+    assert.match(bake.items[0], /room temperature for 4h\.$/)
+  })
+
+  it('rests by hand within bulk and matches the warm-up to the cold ferment', () => {
+    const [dough, bake] = resolvePizzaSteps(steps, { ...base, mixingMethod: 'hand', coldDays: 4, warmUpMinutes: 120 })
+    assert.deepEqual(dough.itemTimes!.map((time) => [time.label, time.rest]), [['0m', 'Cover and rest for 20m.'], ['20m', 'Bulk ferment at 76°F for 40m.'], ['1h', undefined]])
+    assert.match(dough.items[2], /refrigerator for 4 days\.$/)
+    assert.match(bake.items[0], /for 2h\.$/)
+  })
+
+  it('mixes in a food processor to about 77°F', () => {
+    const [dough] = resolvePizzaSteps(steps, { ...base, mixingMethod: 'food-processor' })
+    assert.match(dough.items[0], /food processor fitted with the dough blade and run on high until the dough reaches about 77°F/)
+    assert.equal(dough.items.length, 2)
+  })
+
+  it('lists the schedule through bake day', () => {
+    assert.deepEqual(pizzaSchedule({ ...base, coldDays: 3, warmUpMinutes: 180 }).map((row) => [row.time, row.label]), [
+      ['0m', 'Mix in the spiral mixer'], ['1h', 'Divide, ball and refrigerate 3 days'], ['Day 4', 'Out of the refrigerator 3h before baking'],
+    ])
+  })
+
+  it('reports schedule changes against the recipe', () => {
+    const changed = { ...recipe, formula: { ...recipe.formula, pizzaProcess: { ...base, mixingMethod: 'food-processor' as const, coldDays: 3, warmUpMinutes: 180 } } }
+    assert.deepEqual(formulaChanges(recipe, changed, methods).map((change) => [change.label, change.from, change.to]), [
+      ['Mixing', 'Spiral mixer', 'Food processor'], ['Cold ferment', '2 days', '3 days'], ['Warm-up', '4 hr', '3 hr'],
+    ])
   })
 })
