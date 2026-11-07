@@ -77,7 +77,7 @@ function CommandInput({
 }) {
   return (
     <div data-slot="command-input-wrapper" className={cn("flex items-center p-3", wrapperClassName)}>
-      <InputGroup className="h-12 px-3 focus-within:outline-2 focus-within:outline-ink focus-within:-outline-offset-4">
+      <InputGroup className="h-12 pl-4 pr-5 focus-within:outline-2 focus-within:outline-ink focus-within:-outline-offset-4">
         <InputGroupAddon className="p-0 text-ink">
           <SearchIcon className="size-4 shrink-0" />
         </InputGroupAddon>

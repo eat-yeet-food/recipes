@@ -10,7 +10,7 @@ import { imageUrl } from '@eat-yeet/l1-recipe-model/recipes'
 import { ContentPageArticle } from '@eat-yeet/l6-ui-content-blocks/page-article'
 import type { PageBlockRegistry } from '@eat-yeet/l6-ui-content-blocks/page-blocks'
 import type { RecipeContent } from '@eat-yeet/l4-content-model/recipes'
-import { RecipeAction } from './recipe-actions'
+import { RecipeAction, RecipeIconAction, CookingViewHint } from './recipe-actions'
 import type { RecipePageBlockContext } from './recipe-blocks'
 
 type ScreenWakeLockSentinel = {
@@ -59,21 +59,16 @@ export function RecipeArticleHeader({
   return (
     <div className="@container">
       <Breadcrumbs crumbs={crumbs} className="mb-5" />
-      <div>
-        {heading?.titleElement ?? <h1 className={`m-0 min-w-0 ${recipeTitleClass}`}>{heading?.title ?? page.title}</h1>}
-        <Eyebrow as="div" size="small" tone="muted" className="mt-1.5">{heading?.byline ?? 'By Patrick Hogan'}</Eyebrow>
+      {heading?.titleElement ?? <h1 className={`m-0 min-w-0 ${recipeTitleClass}`}>{heading?.title ?? page.title}</h1>}
+      <div className="mb-6 mt-1.5 flex items-center justify-between gap-4">
+        <Eyebrow as="div" size="small" tone="muted">{heading?.byline ?? 'By Patrick Hogan'}</Eyebrow>
+        <div className="relative flex shrink-0 gap-2 print:hidden" role="group" aria-label="Page actions">
+          <RecipeIconAction label="Print Recipe" onClick={printPage}><Printer /></RecipeIconAction>
+          <RecipeIconAction label="Cooking view" onClick={toggleFocusedCooking} pressed={focusedCooking}><ChefHat /></RecipeIconAction>
+          <CookingViewHint used={focusedCooking} />
+        </div>
       </div>
-      <div className="mb-6 mt-4 flex flex-wrap gap-3 print:hidden" role="group" aria-label="Page actions">
-        {heading?.actions}
-        <RecipeAction variant="hero" onClick={printPage}>
-          <Printer className="size-3.5" />
-          Print Recipe
-        </RecipeAction>
-        <RecipeAction variant="hero" onClick={toggleFocusedCooking} pressed={focusedCooking}>
-          <ChefHat className="size-3.5" />
-          Cooking view
-        </RecipeAction>
-      </div>
+      {heading?.actions && <div className="-mt-2 mb-6 flex flex-wrap gap-3 print:hidden">{heading.actions}</div>}
       {page.description && <p className="max-w-[var(--layout-recipe-copy)] m-0 text-base leading-[1.625]">{page.description}</p>}
     </div>
   )

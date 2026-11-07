@@ -48,10 +48,10 @@ for (const recipe of INDEX) {
       hasRecipeCard: !!document.querySelector('#recipe-card'),
       shareRailCount: document.querySelectorAll('[aria-label="Share"], .yeet-social').length,
       printButtons: Array.from(document.querySelectorAll('button')).filter((button) =>
-        button.textContent?.includes('Print'),
+        (button.getAttribute('aria-label') ?? button.textContent)?.includes('Print'),
       ).length,
       cookingButtons: Array.from(document.querySelectorAll('button')).filter((button) =>
-        button.textContent?.includes('Cooking view'),
+        (button.getAttribute('aria-label') ?? button.textContent)?.includes('Cooking view'),
       ).length,
       browseCards: document.querySelectorAll('[data-yeet-browse] a[href^="/recipes/"]').length,
       sidebarDisplay: getComputedStyle(document.querySelector('[data-yeet-browse]')).display,
@@ -117,6 +117,7 @@ await desktop.getByRole('button', { name: 'Cooking view' }).click()
 await desktop.waitForTimeout(200)
 check('cooking view enables cook mode', await desktop.locator('.yeet[data-cook-mode="true"]').count() === 1)
 check('start cooking hides browse sidebar', await desktop.locator('[data-yeet-browse]').count() === 0)
+check('using Cooking view retires its first-visit hint', await desktop.locator('[data-cooking-view-hint]').count() === 0 && await desktop.evaluate(() => localStorage.getItem('eatyeet:hint:cooking-view')) === '1')
 check('focused cooking exposes the active button state', await desktop.getByRole('button', { name: 'Cooking view' }).getAttribute('aria-pressed') === 'true')
 check('Cooking view preserves horizontal page geometry', await desktop.evaluate((before) => before.every(({ selector, left, width }) => {
   const rect = document.querySelector(selector).getBoundingClientRect()

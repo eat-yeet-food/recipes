@@ -151,7 +151,7 @@ check(
 for (const [path, want] of [
   ['/browse', 'Browse Recipes'],
   ['/recipes', 'All Recipes'],
-  ['/search', 'Search Recipes'],
+  ['/search', 'Recipes'],
 ]) {
   await page.goto(BASE + path, { waitUntil: 'networkidle' })
   const h1s = await page.evaluate(() =>

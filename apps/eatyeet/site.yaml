@@ -35,7 +35,7 @@ copy:
     browseHeading: Browse Recipes
     browseDescription: 'Browse recipes by course, cuisine, cooking method, and dietary preference. Find your next meal without the clutter.'
     browseIntro: 'Explore our collection by course, cuisine, cooking method, or dietary preference.'
-    searchTitle: Search Recipes | Eat / Yeet
+    searchTitle: Recipes | Eat / Yeet
     searchDescription: 'Search and filter recipes by cuisine, course, method, dietary restrictions, and more.'
     learnTitle: Learn | Eat / Yeet
     learnHeading: Learn

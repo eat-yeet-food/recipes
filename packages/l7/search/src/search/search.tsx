@@ -155,7 +155,7 @@ export function SearchPage({
   return (
     <div className="mx-auto max-w-[var(--max-width)] px-6 pt-8 pb-20 md:px-8">
       <div className="mb-8 flex items-center justify-between gap-4">
-        <PageTitle className="min-w-0">Search Recipes</PageTitle>
+        <PageTitle className="min-w-0">Recipes</PageTitle>
         {/* The desktop sidebar is hidden below lg; phones use this disclosure. */}
         <Toggle
           pressed={mobileOpen}
