@@ -7,13 +7,13 @@ import { pizzaSchedule } from './pizza-process'
 import { Eyebrow } from '@eat-yeet/l5-ui-primitives/primitives/typography'
 
 /** The ink result panel: yellow total, ingredient labels left and tabular weights right. */
-export function DoughResults({ state }: { state: DoughWorkbenchState }) {
+export function DoughResults({ state, docked = false }: { state: DoughWorkbenchState; docked?: boolean }) {
   const id = useId()
   const { total, totalDetail, rows, levainBuild } = doughRows(state)
   const schedule = state.formula.process ? sourdoughSchedule(state.formula.process) : state.formula.pizzaProcess ? pizzaSchedule(state.formula.pizzaProcess) : null
-  return <section aria-labelledby={id} data-dough-results="" className="grid gap-4 rounded-field bg-ink p-5 text-on-dark-label">
-    <h2 id={id} className="font-action text-2xl leading-tight font-bold text-brand">Your dough</h2>
-    <p className="grid gap-2">
+  return <section aria-labelledby={id} data-dough-results="" className={docked ? "grid gap-4 text-on-dark-label" : "grid gap-4 rounded-field bg-ink p-5 text-on-dark-label"}>
+    <h2 id={id} className={docked ? "sr-only" : "font-action text-2xl leading-tight font-bold text-brand"}>Your dough</h2>
+    <p className={docked ? "sr-only" : "grid gap-2"}>
       <span className="font-action text-section leading-none font-bold tabular-nums text-brand">{total}</span>
       <span className="text-sm">Total dough for {totalDetail}</span>
     </p>

@@ -32,7 +32,7 @@ export function KitchenWorkspace({ kitchen, state, onChange, resetKey, errors, o
   const errorsId = useId()
   const strip = <ChangeStrip tone="ink" changes={changes} onReset={onReset} />
   const reportErrors = useCallback((next: string[]) => onErrorsChange(next), [onErrorsChange])
-  return <div data-kitchen-workspace="" className={cn(kitchenPageClass, 'pt-7 pb-16 max-lg:pb-40')}>
+  return <div data-kitchen-workspace="" className={cn(kitchenPageClass, 'pt-7 pb-16')}>
     {header}
     <div className="mt-8 grid grid-cols-[minmax(0,1fr)] items-start gap-14 lg:grid-cols-[minmax(0,1fr)_384px]">
       <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-10">
@@ -51,7 +51,7 @@ export function KitchenWorkspace({ kitchen, state, onChange, resetKey, errors, o
       </aside>
     </div>
     <DoughDock total={totals.total} detail={totals.detail} changeCount={changes.length} action={dockAction}>
-      <Results recipe={recipe} config={config} state={state} />
+      <Results recipe={recipe} config={config} state={state} docked />
       {strip}
     </DoughDock>
   </div>

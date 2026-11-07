@@ -16,7 +16,8 @@ export type KitchenEditorProps = {
   resetKey: number
 }
 
-export type KitchenResultsProps = { recipe: RecipeContent; config: unknown; state: unknown }
+/** `docked`: rendered inside the phone drawer, whose header already shows the heading and total. */
+export type KitchenResultsProps = { recipe: RecipeContent; config: unknown; state: unknown; docked?: boolean }
 
 /**
  * A recipe calculator that Notebook can edit. The app supplies the

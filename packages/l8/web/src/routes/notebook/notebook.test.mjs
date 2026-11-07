@@ -216,7 +216,7 @@ try {
     const dock = page.locator('[data-dough-dock]')
     check(`dough total is docked at ${width}px`, await dock.isVisible() && (await dock.textContent()).includes('1,440g'))
     await dock.getByRole('button', { name: /Your dough/ }).click()
-    check(`docked dough expands at ${width}px`, await dock.locator('[data-dough-results]').isVisible())
+    check(`docked dough expands at ${width}px`, await page.locator('[data-dough-drawer] [data-dough-results]').waitFor().then(() => true, () => false))
     page = await open(phone, '/notebook/sourdough-bread')
     check(`sourdough calculator fits ${width}px`, await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth))
     await phone.close()

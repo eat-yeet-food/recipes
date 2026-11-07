@@ -39,7 +39,7 @@ function createDoughWorkbenchPlugin(id: string, family: DoughFormula['family'], 
     Editor: ({ recipe, config, state, onChange, onErrorsChange, resetKey }) => isDoughConfig(config)
       ? <DoughFormulaEditor recipe={recipe} config={config} state={dough(state)} onChange={onChange} onErrorsChange={onErrorsChange} resetKey={resetKey} />
       : null,
-    Results: ({ state }) => <DoughResults state={dough(state)} />,
+    Results: ({ state, docked }) => <DoughResults state={dough(state)} docked={docked} />,
   }
 }
 
