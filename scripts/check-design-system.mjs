@@ -54,10 +54,23 @@ export function storyCoverage(files) {
 }
 
 function walk(dir) { return readdirSync(dir, { withFileTypes: true }).filter(e => !['.next', '.open-next', '.wrangler', 'node_modules', 'generated', 'dist', '.nx', 'storybook-static'].includes(e.name)).flatMap(e => e.isDirectory() ? walk(join(dir,e.name)) : [join(dir,e.name)]) }
+/** cn()'s tailwind-merge must list every custom scale token, or it drops sizes it mistakes for colors. */
+export function mergeConfigDrift(css, utils) {
+  const out = []
+  for (const [scale, prefix] of [['text','text'],['tracking','tracking'],['radius','radius'],['shadow','shadow']]) {
+    const theme = [...css.matchAll(new RegExp(`^\\s*--${prefix}-([a-z-]+):`, 'gm'))].map(m => m[1]).filter(n => !(prefix === 'text' && n.includes('--')))
+    const listed = (utils.match(new RegExp(`${scale}: \\[([^\\]]*)\\]`)) ?? [, ''])[1].match(/'([^']+)'/g)?.map(x => x.slice(1, -1)) ?? []
+    for (const n of theme.filter(n => !listed.includes(n))) out.push(`--${prefix}-${n} is missing from cn()'s tailwind-merge ${scale} list`)
+    for (const n of listed.filter(n => !theme.includes(n))) out.push(`tailwind-merge ${scale} list names ${n}, which global.css does not define`)
+  }
+  return out
+}
+
 export function checkDesignSystem() {
   const files = [...walk(join(ROOT,'packages')), ...readdirSync(join(ROOT,'apps')).flatMap(app => walk(join(ROOT,'apps',app,'src')))]
   const failures = [
     ...files.filter(p => /\.(tsx|css)$/.test(p)).flatMap(p => designViolations(readFileSync(p,'utf8'),p).map(message => `${relative(ROOT,p)}: ${message}`)),
+    ...mergeConfigDrift(readFileSync(join(ROOT,'packages/l8/web/src/styles/global.css'),'utf8'), readFileSync(join(ROOT,'packages/l0/foundation/src/utils.ts'),'utf8')).map(m => `packages/l0/foundation/src/utils.ts: ${m}`),
     ...storyCoverage(files).map((m) => relative(ROOT, m.split(':')[0]) + ':' + m.split(':').slice(1).join(':')),
   ]
   if (failures.length) throw new Error(failures.join('\n'))

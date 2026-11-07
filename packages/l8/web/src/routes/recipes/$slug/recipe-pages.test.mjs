@@ -83,6 +83,7 @@ check('jump to recipe is removed', await desktop.getByRole('link', { name: 'Jump
 check('recipes have no Adjust recipe control', await desktop.getByRole('button', { name: /Adjust recipe/i }).count() === 0 && await desktop.locator('[data-recipe-adjustment]').count() === 0)
 await desktop.locator('[data-recipe-kitchen]').getByRole('link').first().waitFor()
 check('the calculator lives in your Notebook', await desktop.locator('[data-recipe-kitchen] a[href="/notebook/new-york-style-pizza"]').count() === 1, await desktop.locator('[data-recipe-kitchen]').textContent())
+check('recipe title and byline use their type scale', await desktop.evaluate(() => { const h = document.querySelector('h1'); const b = document.querySelector('[data-slot="eyebrow"]'); return parseFloat(getComputedStyle(h).fontSize) >= 38 && parseFloat(getComputedStyle(b).fontSize) <= 13 }))
 check('recipe controls appear once in the header', await desktop.getByRole('button', { name: 'Cooking view' }).count() === 1 && await desktop.getByRole('button', { name: 'Print Recipe' }).count() === 1 && await desktop.getByRole('link', { name: 'Pin Recipe' }).count() === 0 && await desktop.getByRole('switch', { name: 'Cook Mode' }).count() === 0)
 check('recipes start with one pizza today', (await desktop.locator('[data-today-batch]').textContent()).includes('Making 1 pizza today') && !desktop.url().includes('count='))
 const onePizzaText = await desktop.locator('#recipe-card').textContent()

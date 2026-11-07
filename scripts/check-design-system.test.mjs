@@ -47,3 +47,10 @@ test('allows semantic tokens, scales, owned patterns and prose', () => {
   passes('<div className="brand-stripe pt-[34px]" />', 'packages/l5/ui-primitives/src/primitives/surface.tsx')
   passes('<Surface action><Toggle pressed={on}>Savory</Toggle></Surface>')
 })
+
+test('cn merge config must match the theme scales', async () => {
+  const { mergeConfigDrift } = await import('./check-design-system.mjs')
+  const css = '  --text-page: 1px;\n  --tracking-title: 1px;\n  --radius-field: 1px;\n  --shadow-card: x;\n'
+  assert.deepEqual(mergeConfigDrift(css, "text: ['page'], tracking: ['title'], radius: ['field'], shadow: ['card']"), [])
+  assert.match(mergeConfigDrift(css, "text: [], tracking: ['title'], radius: ['field'], shadow: ['card']").join(), /--text-page is missing/)
+})
