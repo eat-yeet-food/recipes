@@ -14,5 +14,7 @@ export function Surface<T extends ElementType = 'section'>({ as, action = false,
 
 /** The short pink→orange line under a title. `section` 60×3 (section headings), `band` 64×4 (page-band titles). */
 export function AccentRule({ size = 'section', align = 'start', className }: { size?: 'section' | 'band'; align?: 'start' | 'center'; className?: string }) {
-  return <span aria-hidden="true" data-slot="accent-rule" className={cn('block rounded-full bg-gradient-accent', size === 'section' ? 'h-[3px] w-[60px]' : 'h-1 w-16', align === 'center' && 'mx-auto', className)} />
+  const isSection = size === 'section'
+  const centered = align === 'center'
+  return <span aria-hidden="true" data-slot="accent-rule" className={cn('block rounded-full bg-gradient-accent', isSection ? 'h-[3px] w-[60px]' : 'h-1 w-16', centered && 'mx-auto', className)} />
 }

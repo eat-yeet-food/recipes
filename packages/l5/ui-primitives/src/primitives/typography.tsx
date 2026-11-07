@@ -9,7 +9,8 @@ const EYEBROW_TONES = { ink: 'text-ink', muted: 'text-muted-foreground', brand: 
  */
 export function Eyebrow<T extends ElementType = 'p'>({ as, size = 'default', tone = 'ink', className, ...props }: { as?: T; size?: 'default' | 'small'; tone?: keyof typeof EYEBROW_TONES } & Omit<ComponentProps<T>, 'as'>) {
   const Tag = (as ?? 'p') as ElementType
-  return <Tag data-slot="eyebrow" className={cn('m-0 font-action font-bold uppercase leading-snug tracking-eyebrow', size === 'default' ? 'text-xs' : 'text-micro', EYEBROW_TONES[tone], className)} {...props} />
+  const isDefault = size === 'default'
+  return <Tag data-slot="eyebrow" className={cn('m-0 font-action font-bold uppercase leading-snug tracking-eyebrow', isDefault ? 'text-xs' : 'text-micro', EYEBROW_TONES[tone], className)} {...props} />
 }
 
 export const pageTitleClasses = {
@@ -28,5 +29,8 @@ export function PageTitle({ size = 'standard', className, ...props }: { size?: k
  */
 export function SectionTitle<T extends ElementType = 'h2'>({ as, size = 'section', rule = 'none', className, children, ...props }: { as?: T; size?: 'section' | 'title'; rule?: 'none' | 'trailing' | 'top'; children: ReactNode } & Omit<ComponentProps<T>, 'as' | 'children'>) {
   const Tag = (as ?? 'h2') as ElementType
-  return <Tag data-slot="section-title" className={cn('m-0 font-display font-bold leading-[1.15] text-ink', size === 'section' ? 'text-section max-[640px]:text-title' : 'text-title', rule === 'trailing' && 'flex items-center gap-4 after:h-px after:flex-1 after:bg-border', rule === 'top' && 'border-t border-border pt-8', className)} {...props}>{children}</Tag>
+  const isSection = size === 'section'
+  const trailing = rule === 'trailing'
+  const top = rule === 'top'
+  return <Tag data-slot="section-title" className={cn('m-0 font-display font-bold leading-[1.15] text-ink', isSection ? 'text-section max-[640px]:text-title' : 'text-title', trailing && 'flex items-center gap-4 after:h-px after:flex-1 after:bg-border', top && 'border-t border-border pt-8', className)} {...props}>{children}</Tag>
 }
