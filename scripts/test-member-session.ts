@@ -6,7 +6,10 @@ import { createSession, upsertGoogleMember } from '@eat-yeet/l4-content-cms/memb
 if (process.env.DEPLOY_ENV && process.env.DEPLOY_ENV !== 'local') throw new Error('Test sessions are local-only')
 const cms = await openLocalCMS()
 try {
-  const member = await upsertGoogleMember(cms.payload, { sub: 'local-browser-test', email: 'browser-test@local.example', emailVerified: true, name: 'Test Cook' })
+  // TEST_MEMBER gives parallel suites separate members, since each session reset clears that member's formulas.
+  const lane = process.env.TEST_MEMBER?.replace(/[^a-z0-9-]/gi, '') ?? ''
+  const suffix = lane ? `-${lane}` : ''
+  const member = await upsertGoogleMember(cms.payload, { sub: `local-browser-test${suffix}`, email: `browser-test${suffix}@local.example`, emailVerified: true, name: 'Test Cook' })
   if (!member) throw new Error('Test member could not be created')
   await cms.payload.update({ collection: 'members', id: Number(member.id), overrideAccess: true, data: { displayNameConfirmed: true } })
   // Each browser run starts without Notebook formulas.

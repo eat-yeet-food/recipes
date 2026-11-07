@@ -14,6 +14,8 @@
     "build": "node scripts/prepare-next.mjs && node scripts/local.mjs build && pnpm run classes",
     "preview": "node scripts/local.mjs preview",
     "test": "pnpm run test:design-system && pnpm run test:unit && pnpm run test:remote && pnpm run typecheck:infra && pnpm run boundaries && pnpm run typecheck:ts && pnpm run build && pnpm run test:content && node test/runtime-http.mjs && node packages/l8/web/src/routes/interact.test.mjs && node 'packages/l8/web/src/routes/recipes/$slug/recipe-pages.test.mjs' && node packages/l8/web/src/routes/notebook/notebook.test.mjs && pnpm run test:storybook",
+    "check": "node scripts/check.mjs",
+    "verify": "pnpm run test && pnpm run test:a11y && pnpm run test:lighthouse && pnpm run shots && pnpm run parity",
     "test:unit": "node --test packages/l8/web/src/lib/seo.test.ts packages/l4/content-build/src/parse.test.mjs packages/l2/recipe-domain/src/formula.test.ts packages/l2/recipe-domain/src/sourdough-process.test.ts packages/l2/recipe-domain/src/formula-state.test.ts apps/eatyeet/src/workbenches/dough-kitchen-model.test.ts packages/l5/ui-primitives/src/primitives/number-field-format.test.ts scripts/deploy-manifest.test.mjs packages/l4/content-build/src/build-content.test.ts packages/l3/api-static/src/generated.test.ts scripts/check-layer-imports.test.mjs scripts/app-build-config.test.mjs test/static-server.test.mjs test/content-media.test.mjs scripts/check-classes.test.mjs test/block-storage.test.ts test/content-source.test.mjs",
     "test:seo": "node test/runtime-http.mjs",
     "test:a11y": "node packages/l8/web/src/routes/accessibility.test.mjs",
