@@ -89,14 +89,16 @@ await page.keyboard.press('Escape')
 
 // --- filter sidebar -----------------------------------------------------
 await page.goto(BASE + '/search', { waitUntil: 'networkidle' })
-await page.waitForTimeout(300)
+// Clicks before hydration are lost under load, so wait until React owns the filters.
+await page.waitForFunction(() => { const el = document.querySelector('main aside [data-facet][data-value]'); return el && Object.keys(el).some((key) => key.startsWith('__reactProps')) })
 const boxes = await page.locator('main aside [data-facet][data-value]').count()
 check('sidebar renders checkboxes', boxes > 0, `boxes=${boxes}`)
 check('category toggle renders', (await page.locator('main aside [data-category]').count()) > 0)
 
 const before = await page.locator('text=/^\\d+ recipes?$/').first().textContent()
 await page.locator('main aside [data-facet="methods"][data-value="grilling"]').click()
-await page.waitForTimeout(300)
+await page.waitForURL(/methods=grilling/, { timeout: 5000 }).catch(() => {})
+await page.waitForFunction((before) => document.body.innerText.match(/^\d+ recipes?$/m)?.[0] !== before, before, { timeout: 5000 }).catch(() => {})
 const after = await page.locator('text=/^\\d+ recipes?$/').first().textContent()
 check('checkbox filters results', before !== after, `${before} -> ${after}`)
 check(
@@ -110,7 +112,7 @@ await page.screenshot({ path: join(SHOTS, 'search-filtered.png') })
 
 // --- category single-select --------------------------------------------
 await page.locator('main aside [data-category="savory"]').click()
-await page.waitForTimeout(300)
+await page.waitForURL(/category=savory/, { timeout: 5000 }).catch(() => {})
 check('category toggle filters', page.url().includes('category=savory'), page.url())
 
 // --- clear all ----------------------------------------------------------

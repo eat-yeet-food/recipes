@@ -83,7 +83,9 @@ export function CookingViewHint({ used }: { used: boolean }) {
     // Wait until the page has loaded and settled so the hint never competes
     // with the hero image for first paint (it cost ~400ms of mobile LCP).
     let timer: ReturnType<typeof setTimeout> | undefined
-    const show = () => { timer = setTimeout(() => setOpen(true), 1200) }
+    // Re-check on firing: using Cooking view during the wait retires the hint.
+    const stillUnseen = () => { try { return !localStorage.getItem(COOKING_VIEW_HINT_KEY) } catch { return false } }
+    const show = () => { timer = setTimeout(() => { if (stillUnseen()) setOpen(true) }, 1200) }
     if (document.readyState === 'complete') show()
     else window.addEventListener('load', show, { once: true })
     return () => { window.removeEventListener('load', show); if (timer) clearTimeout(timer) }

@@ -113,8 +113,11 @@ const readingLayout = await desktop.evaluate(() => ['.yeet > header', '.yeet mai
   const rect = document.querySelector(selector).getBoundingClientRect()
   return { selector, left: rect.left, width: rect.width }
 }))
+// Clicks before hydration are lost under load, so wait until React owns the button.
+await desktop.waitForFunction(() => { const el = document.querySelector('[data-recipe-action="Cooking view"]'); return el && Object.keys(el).some((key) => key.startsWith('__reactProps')) })
 await desktop.getByRole('button', { name: 'Cooking view' }).click()
-await desktop.waitForTimeout(200)
+await desktop.locator('.yeet[data-cook-mode="true"]').waitFor({ timeout: 5000 }).catch(() => {})
+await desktop.waitForTimeout(1500) // past the hint's delay: it must stay retired
 check('cooking view enables cook mode', await desktop.locator('.yeet[data-cook-mode="true"]').count() === 1)
 check('start cooking hides browse sidebar', await desktop.locator('[data-yeet-browse]').count() === 0)
 check('using Cooking view retires its first-visit hint', await desktop.locator('[data-cooking-view-hint]').count() === 0 && await desktop.evaluate(() => localStorage.getItem('eatyeet:hint:cooking-view')) === '1')
