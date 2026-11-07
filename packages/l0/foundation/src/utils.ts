@@ -12,7 +12,7 @@ const twMerge = extendTailwindMerge({
       text: ['micro', 'caption', 'body-sm', 'title-sm', 'title', 'section', 'page', 'display', 'hero', 'wordmark'],
       tracking: ['eyebrow', 'label', 'title'],
       radius: ['control', 'field', 'filter', 'surface', 'choice', 'choice-item'],
-      shadow: ['card', 'raised', 'glow', 'overlay'],
+      shadow: ['card', 'raised', 'glow', 'overlay', 'peel'],
     },
   },
 })

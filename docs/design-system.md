@@ -41,7 +41,7 @@ Measured pairs: plum on white 17.62:1, on tint 15.99:1; plum on pink and pink on
 ### Gradients
 
 - `gradient-hero` (`bg-gradient-hero`): plum 950 → 900 (45%) → 800 (65%) → 600 (85%) → 400. It stays dark and flares only at the far right.
-- `gradient-accent` (`bg-gradient-accent`): pink → orange. Used **only** by the brand stripe and the accent rule.
+- `gradient-accent` (`bg-gradient-accent`, `text-gradient-accent`): pink → orange. Used **only** by the brand stripe, the accent rule and the wordmark’s second word (pink → orange lettering on a −4° plum sticker with the orange `shadow-peel`, shimmering once on hover or tap when motion is allowed; forced-colors falls back to system text).
 
 ### The rules
 
@@ -95,7 +95,7 @@ Button roles: `default` (plum, light label) is the one primary action; `utility`
 
 Binary settings use Switch with an adjacent visible label, grouped at content width; no hover or selected row fill.
 
-The wordmark component owns every size. App bar and footer use the text lockup alone (EAT · YEET in the pink sticker with plum text); the doughnut appears in the favicon and larger brand contexts. The approved favicon is the bitten doughnut with **pink icing and cream dough** (restored from the earlier pink identity); its colors are self-contained SVG values.
+The wordmark component owns every size. App bar and footer use the text lockup alone (EAT · YEET, the second word in pink → orange lettering on the tilted plum sticker with an orange peel); the doughnut appears in the favicon and larger brand contexts. The approved favicon is the bitten doughnut with **pink icing and cream dough** (restored from the earlier pink identity); its colors are self-contained SVG values.
 
 ## Hero and shell
 
@@ -105,7 +105,7 @@ The wordmark component owns every size. App bar and footer use the text lockup a
 - **Phone (under `md`):** a full-bleed 330px photo, then the plum headline card overlapping it by 64px, inset 14px, with corners 28/28/28/8, `shadow-glow`, the dot grid and the orange blob inside it. The section behind is white.
 - One `<img>` serves both layouts and is the page’s one eager, high-priority image with real mobile `sizes`.
 
-Navigation and footer keep their wordmark sizes and the pink sticker; nav links, Sign in and the search icon are plum. `Wordmark` in `packages/l6/ui-shell` owns this; Shell/Wordmark and Shell/Layout render the production variants.
+Navigation and footer keep their wordmark sizes and the plum sticker; nav links, Sign in and the search icon are plum. `Wordmark` in `packages/l6/ui-shell` owns this; Shell/Wordmark and Shell/Layout render the production variants.
 
 ## Search layout
 

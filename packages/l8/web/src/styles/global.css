@@ -104,6 +104,8 @@
   --shadow-raised: 0 8px 24px color-mix(in srgb, var(--color-ink) 12%, transparent);
   --shadow-glow: 0 16px 40px color-mix(in srgb, var(--color-brand) 25%, transparent);
   --shadow-overlay: 0 24px 56px color-mix(in srgb, var(--color-ink) 22%, transparent);
+  /* The wordmark sticker's orange "peel", scaled with the lettering. */
+  --shadow-peel: 0.07em 0.09em 0 var(--color-brand-alt);
 
   /* ---- gradients ---- */
   --gradient-hero: linear-gradient(90deg, var(--color-plum-950) 0%, var(--color-plum-900) 45%, var(--color-plum-800) 65%, var(--color-plum-600) 85%, var(--color-plum-400) 100%);
@@ -183,6 +185,24 @@
 /* The action-surface stripe, painted as a background layer so the parent
    radius clips it (an overlay pokes past rounded corners). Owned by
    ui-primitives' ActionSurface and Dialog's `stripe` prop. */
+/* Pink → orange lettering (the wordmark's second word). Falls back to the
+   system text color in forced-colors mode, where clipped backgrounds vanish. */
+@utility text-gradient-accent {
+  /* Pink → orange across the word, mirrored past it so the shimmer can slide. */
+  background-image: linear-gradient(90deg, var(--color-brand), var(--color-brand-alt) 50%, var(--color-brand));
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  @media (forced-colors: active) { color: CanvasText; background: none; }
+}
+
+/* One shimmer across the gradient lettering on hover or tap. */
+@keyframes wordmark-shimmer { from { background-position: 0% 0; } 50% { background-position: 100% 0; } to { background-position: 0% 0; } }
+@utility animate-wordmark-shimmer {
+  @media (prefers-reduced-motion: no-preference) { animation: wordmark-shimmer 700ms ease-in-out 1; }
+}
+
 @utility brand-stripe {
   background: var(--gradient-accent) top / 100% 8px no-repeat, var(--color-white);
 }
