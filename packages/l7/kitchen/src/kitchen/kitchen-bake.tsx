@@ -56,7 +56,6 @@ export function KitchenScratchBakePage(props: BakeSheetProps) {
     crumbs: [{ label: 'Notebook', href: '/notebook' }, { label: title }],
     title,
     byline: 'Bake sheet · unsaved formula from this browser',
-    pin: false,
     actions: <RecipeAction variant="hero" href={kitchenPath(kitchen.recipe.slug)}><Pencil className="size-3.5" />Edit formula</RecipeAction>,
   }} />
 }
@@ -106,7 +105,6 @@ function FormulaBakeSheet({ formulaId, client, local, ...props }: BakeSheetProps
     title: formula.name,
     titleElement: <FormulaTitle name={formula.name} onRename={rename} className={recipeTitleClass} />,
     byline: byline(kitchen),
-    pin: false,
     actions: <RecipeAction variant="hero" href={kitchenPath(kitchen.recipe.slug, formula.id)}><Pencil className="size-3.5" />Edit formula</RecipeAction>,
   }} />
   <KitchenNotice notice={notice} onDismiss={() => setNotice(null)} /></>

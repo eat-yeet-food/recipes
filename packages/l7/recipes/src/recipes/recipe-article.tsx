@@ -38,8 +38,6 @@ export type RecipeArticleHeading = {
   /** Replaces the plain h1, e.g. a formula name that can be renamed in place; gets `recipeTitleClass`. */
   titleElement?: ReactNode
   byline: ReactNode
-  /** Sharing a member's private bake sheet to Pinterest makes no sense. */
-  pin: boolean
   /** Shown first in the page actions, e.g. Edit formula. */
   actions?: ReactNode
 }
@@ -47,14 +45,12 @@ export type RecipeArticleHeading = {
 export function RecipeArticleHeader({
   page,
   heading,
-  pinUrl,
   printPage,
   focusedCooking,
   toggleFocusedCooking,
 }: {
   page: Pick<RecipeContent, 'title' | 'description'>
   heading?: RecipeArticleHeading
-  pinUrl: URL
   printPage: () => void
   focusedCooking: boolean
   toggleFocusedCooking: () => void
@@ -69,10 +65,6 @@ export function RecipeArticleHeader({
       </div>
       <div className="mb-6 mt-4 flex flex-wrap gap-3 print:hidden" role="group" aria-label="Page actions">
         {heading?.actions}
-        {heading?.pin !== false && <RecipeAction variant="hero" href={pinUrl.toString()} target="_blank" rel="noreferrer">
-          <Share2 className="size-3.5" />
-          Pin Recipe
-        </RecipeAction>}
         <RecipeAction variant="hero" onClick={printPage}>
           <Printer className="size-3.5" />
           Print Recipe
@@ -110,9 +102,6 @@ export function RecipeArticle({
   const wakeLockRef = useRef<ScreenWakeLockSentinel | null>(null)
   const photo = imageUrl(page)
   const heroAlt = `${page.title} hero image`
-  const [pageUrl, setPageUrl] = useState(`${siteUrl}/recipes/${page.slug}`)
-  useEffect(() => { setPageUrl(window.location.href) }, [page])
-  const pinUrl = new URL('https://www.pinterest.com/pin/create/button/')
   const firstRecipeBlockIndex = page.blocks.findIndex((block) => block.type === 'recipe')
   const hasRecipeBlock = firstRecipeBlockIndex >= 0
   const printPage = () => {
@@ -125,9 +114,6 @@ export function RecipeArticle({
     })
   }
 
-  pinUrl.searchParams.set('url', pageUrl)
-  pinUrl.searchParams.set('description', page.title)
-  if (photo) pinUrl.searchParams.set('media', `${siteUrl}${photo}`)
 
   useEffect(() => {
     if (!cookMode) return
@@ -193,7 +179,6 @@ export function RecipeArticle({
         <RecipeArticleHeader
           page={page}
           heading={heading}
-          pinUrl={pinUrl}
           printPage={printPage}
           focusedCooking={focusedCooking}
           toggleFocusedCooking={toggleFocusedCooking}

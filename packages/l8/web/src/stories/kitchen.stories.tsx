@@ -68,7 +68,7 @@ function Page({ view, signedIn = true }: { view: 'library' | 'scratch' | 'formul
     {(view === 'scratch' || view === 'sourdough') && <KitchenScratchPage kitchen={kitchen} client={client} />}
     {view === 'formula' && firstId && <KitchenFormulaPage kitchen={kitchen} formulaId={firstId} client={client} />}
     {view === 'bake' && <KitchenBakeSheet kitchen={kitchen} state={friday} name="Friday pies" siteUrl="https://eatyeet.com" blockRegistry={pageBlockRegistry}
-      heading={{ crumbs: [{ label: 'Notebook', href: '/notebook' }, { label: 'Friday pies' }, { label: 'Bake sheet' }], title: 'Friday pies', byline: 'Bake sheet · New York Style Pizza', pin: false }} />}
+      heading={{ crumbs: [{ label: 'Notebook', href: '/notebook' }, { label: 'Friday pies' }, { label: 'Bake sheet' }], title: 'Friday pies', byline: 'Bake sheet · New York Style Pizza' }} />}
   </Account>
 }
 

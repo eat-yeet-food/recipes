@@ -14,14 +14,14 @@ import type { KitchenChange } from './kitchen-plugin'
 export const kitchenPageClass = 'mx-auto w-full max-w-[var(--max-width)] px-6 max-[640px]:px-4'
 
 /** The collection header: white, no fill. Eyebrow, Bowlby title, the accent rule, copy and actions. */
-export function KitchenBand({ eyebrow: label, title, children, actions }: { eyebrow: string; title: string; children: ReactNode; actions?: ReactNode }) {
+export function KitchenBand({ eyebrow: label, title, children, actions }: { eyebrow?: string; title: string; children: ReactNode; actions?: ReactNode }) {
   return <section aria-labelledby="kitchen-title" className="border-b border-border bg-white text-ink">
     <div className={cn(kitchenPageClass, 'flex flex-wrap items-end justify-between gap-x-10 gap-y-5 py-11 max-[640px]:py-7')}>
       <div className="grid max-w-[640px] gap-3">
-        <Eyebrow size="small">{label}</Eyebrow>
+        {label && <Eyebrow size="small">{label}</Eyebrow>}
         <PageTitle id="kitchen-title" size="display">{title}</PageTitle>
         <AccentRule size="band" className="mt-1" />
-        <div className="text-lg leading-relaxed max-[640px]:text-body-sm">{children}</div>
+        <div className="text-base leading-relaxed text-muted-foreground">{children}</div>
       </div>
       {actions && <div className="flex flex-wrap items-center gap-5">{actions}</div>}
     </div>

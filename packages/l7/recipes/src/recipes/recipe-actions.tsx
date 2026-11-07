@@ -22,9 +22,9 @@ export function RecipeAction({
   pressed,
   children,
 }: RecipeActionProps) {
-  const buttonVariant = pressed !== undefined ? 'toggle' : variant === 'hero' ? 'utility' : 'default'
+  const buttonVariant = pressed !== undefined && variant !== 'hero' ? 'toggle' : 'default'
   const size = variant === 'hero' ? 'sm' : 'default'
-  const className = variant === 'hero' ? 'w-40 max-w-full' : undefined
+  const className = variant === 'hero' ? 'w-40 max-w-full aria-pressed:bg-brand aria-pressed:text-ink aria-pressed:hover:bg-brand-soft' : undefined
   if (href) return <Button asChild variant={buttonVariant} size={size} className={className}><a href={href} target={target} rel={rel}>{children}</a></Button>
   return <Button
     variant={buttonVariant}

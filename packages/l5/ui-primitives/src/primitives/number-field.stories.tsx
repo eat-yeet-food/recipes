@@ -5,7 +5,7 @@ import { NumberField, type NumberFieldPrecision } from './number-field'
 
 function Example({ integer = false, initialValue = 1, decimalPlaces = 1, max, surface = 'default' }: { max?: number; integer?: boolean; initialValue?: number; decimalPlaces?: NumberFieldPrecision; surface?: 'default' | 'underline' }) {
   const [value, setValue] = useState(initialValue)
-  return <div className={`max-w-80 p-5 ${surface === 'underline' ? 'bg-white' : 'bg-brand'}`}>
+  return <div className="max-w-80 bg-white p-5">
     <NumberField label={integer ? 'Quantity' : 'Weight'} value={value} onValueChange={setValue} integer={integer} min={integer ? 1 : 0} max={max} suffix={integer ? undefined : 'g'} decimalPlaces={decimalPlaces} surface={surface} />
     <p role="status">Accepted value: {value}</p>
   </div>

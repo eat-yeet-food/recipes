@@ -14,7 +14,7 @@ export function Eyebrow<T extends ElementType = 'p'>({ as, size = 'default', ton
 }
 
 export const pageTitleClasses = {
-  standard: 'm-0 font-display text-page leading-[1.08] font-bold text-ink',
+  standard: 'm-0 font-display text-page leading-[1.05] font-bold tracking-title text-ink',
   display: 'm-0 font-hero text-display leading-[0.92] font-normal text-ink',
 } as const
 
@@ -32,5 +32,5 @@ export function SectionTitle<T extends ElementType = 'h2'>({ as, size = 'section
   const isSection = size === 'section'
   const trailing = rule === 'trailing'
   const top = rule === 'top'
-  return <Tag data-slot="section-title" className={cn('m-0 font-display font-bold leading-[1.15] text-ink', isSection ? 'text-section max-[640px]:text-title' : 'text-title', trailing && 'flex items-center gap-4 after:h-px after:flex-1 after:bg-border', top && 'border-t border-border pt-8', className)} {...props}>{children}</Tag>
+  return <Tag data-slot="section-title" className={cn('m-0 font-display font-bold leading-[1.15] text-ink', isSection ? 'text-section' : 'text-title', trailing && 'flex items-center gap-4 after:h-px after:flex-1 after:bg-border', top && 'border-t border-border pt-8', className)} {...props}>{children}</Tag>
 }

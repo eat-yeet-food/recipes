@@ -87,16 +87,17 @@
   --text-caption: 13px;
   --text-body-sm: 15px;
   --text-title-sm: 22px;
-  --text-title: 26px;
+  --text-title: 30px;
   --text-section: 34px;
-  --text-page: clamp(32px, 4vw, 40px);
-  --text-display: clamp(44px, 6vw, 64px);
+  --text-page: clamp(38px, 5vw, 52px);
+  --text-display: clamp(56px, 7vw, 80px);
   --text-hero: clamp(42px, 7vw, 104px);
   --text-wordmark: clamp(38px, 6vw, 80px);
 
   /* ---- uppercase letter-spacing: two steps ---- */
   --tracking-eyebrow: 0.16em;
   --tracking-label: 0.06em;
+  --tracking-title: 0.02em;
 
   /* ---- elevation ---- */
   --shadow-card: 0 1px 0 color-mix(in srgb, var(--color-ink) 8%, transparent);

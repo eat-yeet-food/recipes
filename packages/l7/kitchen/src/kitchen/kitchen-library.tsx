@@ -106,16 +106,12 @@ export function KitchenLibraryPage({ recipes, client: remote, deletedId }: { rec
 
   return <>
     <KitchenBand
-      eyebrow={ready && count ? `Your formulas · ${count}` : 'Your own versions'}
       title="Notebook"
-      actions={ready ? <Button asChild><a href={`#${startId}`}><Plus className="size-4" />New formula</a></Button> : undefined}
+      actions={ready ? <>{local && <SignInLink className="font-action font-bold underline decoration-1 underline-offset-4 hover:decoration-2">Sign in</SignInLink>}<Button asChild><a href={`#${startId}`}><Plus className="size-4" />New formula</a></Button></> : undefined}
     >
-      <p>Your own versions of the dough recipes. Recipes stay as written; everything you change lives here and saves as you go.</p>
+      <p>Your versions of the dough recipes. Saves as you go.</p>
     </KitchenBand>
     <div className={cn(kitchenPageClass, 'grid gap-12 py-11 max-[640px]:py-8')}>
-      {local && <Callout className="max-w-[640px] text-base">
-        No account needed: formulas you save are kept in this browser. <SignInLink className="font-action font-bold underline decoration-1 underline-offset-4 hover:decoration-2">Sign in</SignInLink> to keep them in your account and open them on every device; anything saved here moves over.
-      </Callout>}
       {ready && !list && !error && <p role="status" className="text-muted-foreground">Loading your formulas…</p>}
       {error && <Callout tone="danger" className="flex flex-wrap items-center gap-4">
         <span>{error}</span><Button variant="link" className="text-danger" onClick={() => void load()}>Try again</Button>
@@ -129,7 +125,6 @@ export function KitchenLibraryPage({ recipes, client: remote, deletedId }: { rec
       </section>)}
       <section id={startId} aria-labelledby={`${startId}-heading`} className="grid scroll-mt-24 gap-6">
         <GroupHeading id={`${startId}-heading`} title="Start from a recipe" />
-        <p className="-mt-2 max-w-[640px] text-body-sm leading-relaxed text-muted-foreground">Copies the recipe’s formula into a page you can change freely. The recipe itself never changes.</p>
         <StartCards recipes={recipes} headingId={`${startId}-heading`} />
       </section>
       {deleted.length > 0 && <section aria-label="Recently deleted" className="grid gap-4 border-t border-border pt-6">

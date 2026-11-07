@@ -9,7 +9,6 @@ function ActionsExample({ width = 'full', title = 'New York Style Pizza' }: { wi
   const [checked, setChecked] = useState(false)
   return <div className={`yeet bg-white p-4 ${HEADER_WIDTHS[width]}`}><RecipeArticleHeader
     page={{ title, description: 'A high-hydration pizza dough with a long, cold fermentation.' }}
-    pinUrl={new URL('https://www.pinterest.com/pin/create/button/')}
     printPage={() => {}}
     focusedCooking={checked}
     toggleFocusedCooking={() => setChecked((value) => !value)}
@@ -17,7 +16,7 @@ function ActionsExample({ width = 'full', title = 'New York Style Pizza' }: { wi
 
 }
 
-const meta = { title: 'Features/Recipes/Actions', component: ActionsExample, subcomponents: { RecipeArticleHeader, RecipeAction }, parameters: { docs: { description: { component: 'The production header keeps the title and byline together. Pin, Print, and Cooking view use equal-width buttons that retain their size when the action row wraps; Pin and Print are utility buttons; Cooking view is a Toggle: plum outline when off, pink fill with aria-pressed when on.' } } } } satisfies Meta<typeof ActionsExample>
+const meta = { title: 'Features/Recipes/Actions', component: ActionsExample, subcomponents: { RecipeArticleHeader, RecipeAction }, parameters: { docs: { description: { component: 'The production header keeps the title and byline together. Print and Cooking view are equal-width plum buttons with white labels; Cooking view turns pink with a plum label (aria-pressed) when on.' } } } } satisfies Meta<typeof ActionsExample>
 export default meta
 export const Header: StoryObj<typeof meta> = {}
 export const PhoneHeader: StoryObj<typeof meta> = { args: { width: 'phone' } }
