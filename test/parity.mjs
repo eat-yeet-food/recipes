@@ -7,7 +7,7 @@
  *
  *   node test/parity.mjs <baselineDir> [--update]
  */
-import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from 'node:fs'
+import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, copyFileSync, rmSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { PNG } from 'pngjs'
@@ -32,6 +32,16 @@ if (!existsSync(BASELINE) || readdirSync(BASELINE).length === 0) {
 
 console.log('Capturing current rendering...')
 const errors = await capture(CURRENT)
+
+// --update: the reviewed current rendering becomes the baseline; shots no longer captured are dropped.
+if (args.includes('--update')) {
+  if (errors.length) { console.error(errors.join('\n')); process.exit(1) }
+  const names = new Set(SHOTS.map((shot) => `${shot.name}.png`))
+  for (const name of names) copyFileSync(join(CURRENT, name), join(BASELINE, name))
+  for (const name of readdirSync(BASELINE)) if (name.endsWith('.png') && !names.has(name)) rmSync(join(BASELINE, name))
+  console.log(`Updated ${names.size} baselines in ${BASELINE}`)
+  process.exit(0)
+}
 mkdirSync(DIFF, { recursive: true })
 
 const results = []
