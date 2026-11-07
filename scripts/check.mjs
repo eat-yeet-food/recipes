@@ -6,7 +6,7 @@
  * Lighthouse, shots, parity, content/remote integration) stays in
  * `pnpm verify` before deploys.
  */
-import { spawn } from 'node:child_process'
+import { execFileSync, spawn } from 'node:child_process'
 import { startApp } from '../test/app-server.mjs'
 
 const started = Date.now()
@@ -51,10 +51,13 @@ try {
   // Each suite signs in as its own test member: creating a test session
   // clears that member's Notebook formulas, so a shared member races.
   const env = { TEST_ORIGIN: server.url }
+  // One session per suite, created sequentially: concurrent local CMS opens fail.
+  const session = (lane) => execFileSync('pnpm', ['-s', 'exec', 'tsx', 'scripts/test-member-session.ts'], { env: { ...process.env, TEST_MEMBER: lane }, encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] }).trim().split('\n').at(-1)
+  const lanes = Object.fromEntries(['recipes', 'notebook', 'interaction'].map((lane) => [lane, { TEST_MEMBER: lane, TEST_MEMBER_TOKEN: session(lane) }]))
   await stage([
-    ['recipe pages', node, ['packages/l8/web/src/routes/recipes/$slug/recipe-pages.test.mjs'], { ...env, TEST_MEMBER: 'recipes' }],
-    ['notebook', node, ['packages/l8/web/src/routes/notebook/notebook.test.mjs'], { ...env, TEST_MEMBER: 'notebook' }],
-    ['interaction', node, ['packages/l8/web/src/routes/interact.test.mjs'], { ...env, TEST_MEMBER: 'interaction' }],
+    ['recipe pages', node, ['packages/l8/web/src/routes/recipes/$slug/recipe-pages.test.mjs'], { ...env, ...lanes.recipes }],
+    ['notebook', node, ['packages/l8/web/src/routes/notebook/notebook.test.mjs'], { ...env, ...lanes.notebook }],
+    ['interaction', node, ['packages/l8/web/src/routes/interact.test.mjs'], { ...env, ...lanes.interaction }],
   ])
 } finally {
   await server.close()

@@ -75,7 +75,7 @@ Check compiled utility availability with `pnpm classes` or `node scripts/has-cla
 
 ## Verification
 
-While iterating, run `pnpm check` (about a minute): design policy, units, boundaries, TypeScript, one production build, then the recipe, Notebook and interaction browser suites in parallel against one app server, each signed in as its own test member (`TEST_MEMBER`). Before committing app, routing, styling, SEO, content or dependency changes, run `pnpm verify` (the full gate below, about ten minutes on an idle machine) plus `pnpm test:security`.
+While iterating, run `pnpm check` (about a minute): design policy, units, boundaries, TypeScript, one production build, then the recipe, Notebook and interaction browser suites in parallel against one app server, each signed in as its own test member (`TEST_MEMBER`; sessions are created one at a time beforehand because concurrent local CMS opens fail). Before committing app, routing, styling, SEO, content or dependency changes, run `pnpm verify` (the full gate below, about ten minutes on an idle machine) plus `pnpm test:security`.
 
 For app, routing, styling, SEO, content or dependency changes:
 
