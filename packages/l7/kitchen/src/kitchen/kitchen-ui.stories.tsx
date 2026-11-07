@@ -47,25 +47,24 @@ function FormulaTitleExample({ taken = 'Friday pies' }: { taken?: string }) {
   </div>
 }
 
-export const RenameInPlace: Story = {
+export const NameField: Story = {
   render: () => <FormulaTitleExample />,
   play: async ({ canvasElement }) => {
     const screen = within(canvasElement)
-    await expect(screen.getByRole('heading', { level: 1, name: 'Friday pies copy' })).toBeVisible()
-    await userEvent.click(screen.getByRole('button', { name: 'Rename Friday pies copy' }))
-    const field = screen.getByRole('textbox', { name: 'Formula name' })
-    await waitFor(() => expect(field).toHaveFocus())
+    await expect(screen.getByRole('heading', { level: 1, name: 'Friday pies copy' })).toBeInTheDocument()
+    const field = screen.getByRole('textbox', { name: /^formula name$/i })
+    await expect(field).toHaveValue('Friday pies copy')
     await userEvent.clear(field)
     await userEvent.type(field, 'FRIDAY pies{Enter}')
     await expect(await screen.findByRole('alert')).toHaveTextContent('already have a formula')
     await expect(field).toHaveFocus()
     await userEvent.keyboard('{Escape}')
-    await expect(screen.getByRole('heading', { level: 1, name: 'Friday pies copy' })).toBeVisible()
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Rename Friday pies copy' })).toHaveFocus())
-    await userEvent.click(screen.getByRole('heading', { level: 1 }))
-    await userEvent.clear(screen.getByRole('textbox', { name: 'Formula name' }))
-    await userEvent.type(screen.getByRole('textbox', { name: 'Formula name' }), 'Friday pies, 70%{Enter}')
-    await expect(await screen.findByRole('heading', { level: 1, name: 'Friday pies, 70%' })).toBeVisible()
+    await expect(field).toHaveValue('Friday pies copy')
+    await expect(screen.queryByRole('alert')).toBeNull()
+    await userEvent.clear(field)
+    await userEvent.type(field, 'Friday pies, 70%{Enter}')
+    await expect(await screen.findByRole('heading', { level: 1, name: 'Friday pies, 70%' })).toBeInTheDocument()
+    await expect(field).toHaveValue('Friday pies, 70%')
   },
 }
 

@@ -1,17 +1,15 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { TodayBatch, useTodayCount } from './today-batch'
-import { Pencil } from 'lucide-react'
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
-import { RecipeAction } from '@eat-yeet/l7-recipes/recipes/recipe-actions'
 import type { PageBlockRegistry } from '@eat-yeet/l6-ui-content-blocks/page-blocks'
-import { RecipeArticle, recipeTitleClass, type RecipeArticleHeading } from '@eat-yeet/l7-recipes/recipes/recipe-article'
+import { RecipeArticle, type RecipeArticleHeading } from '@eat-yeet/l7-recipes/recipes/recipe-article'
 import type { RecipePageBlockContext } from '@eat-yeet/l7-recipes/recipes/recipe-blocks'
 import { kitchenErrorCode, kitchenErrorMessage, type KitchenClient, type KitchenFormula } from './kitchen-client'
 import { KitchenGate, KitchenMessage } from './kitchen-gate'
 import { decodeKitchenState, kitchenPath, type KitchenRecipe } from './kitchen-plugin'
 import { readScratch, readScratchName } from './kitchen-scratch'
-import { FormulaTitle, KitchenNotice, type KitchenNoticeValue } from './kitchen-ui'
+import { KitchenNotice, type KitchenNoticeValue } from './kitchen-ui'
 
 type BakeSheetProps = {
   kitchen: KitchenRecipe
@@ -56,7 +54,7 @@ export function KitchenScratchBakePage(props: BakeSheetProps) {
     crumbs: [{ label: 'Notebook', href: '/notebook' }, { label: title }],
     title,
     byline: 'Bake sheet · unsaved formula from this browser',
-    actions: <RecipeAction variant="hero" href={kitchenPath(kitchen.recipe.slug)}><Pencil className="size-3.5" />Edit formula</RecipeAction>,
+    edit: { href: kitchenPath(kitchen.recipe.slug), label: 'Edit formula' },
   }} />
 }
 
@@ -76,7 +74,7 @@ function FormulaBakeSheet({ formulaId, client, local, ...props }: BakeSheetProps
     if (!url.searchParams.has('saved')) return
     url.searchParams.delete('saved')
     window.history.replaceState(window.history.state, '', url)
-    setNotice({ message: local ? 'Saved in this browser. Click the name to rename it.' : 'Saved to Notebook. Click the name to rename it.' })
+    setNotice({ message: local ? 'Saved in this browser.' : 'Saved to Notebook.' })
   }, [local])
   useEffect(() => {
     let active = true
@@ -94,18 +92,11 @@ function FormulaBakeSheet({ formulaId, client, local, ...props }: BakeSheetProps
     action={<Button asChild><a href="/notebook">Back to Notebook</a></Button>}>{failure.message}</KitchenMessage>
   if (!formula) return <KitchenMessage title="Opening the bake sheet…" busy>Loading your formula.</KitchenMessage>
   const state = decodeKitchenState(kitchen, formula.state) ?? kitchen.defaultState
-  const rename = async (name: string) => {
-    try {
-      setFormula(await client.save(formula.id, { baseRevision: formula.revision, name, state: formula.state, notes: formula.notes }))
-      return null
-    } catch (error) { return kitchenErrorMessage(error, 'The formula could not be renamed. Please try again.') }
-  }
   return <><KitchenBakeSheet {...props} state={state} name={formula.name} heading={{
     crumbs: [{ label: 'Notebook', href: '/notebook' }, { label: formula.name }],
     title: formula.name,
-    titleElement: <FormulaTitle name={formula.name} onRename={rename} className={recipeTitleClass} />,
     byline: byline(kitchen),
-    actions: <RecipeAction variant="hero" href={kitchenPath(kitchen.recipe.slug, formula.id)}><Pencil className="size-3.5" />Edit formula</RecipeAction>,
+    edit: { href: kitchenPath(kitchen.recipe.slug, formula.id), label: 'Edit formula' },
   }} />
   <KitchenNotice notice={notice} onDismiss={() => setNotice(null)} /></>
 }

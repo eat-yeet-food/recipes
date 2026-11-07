@@ -1,6 +1,6 @@
 'use client'
-import { Fragment, useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
-import { ChevronDown, ChevronUp, CloudCheck, CloudOff, History, Minus, Pencil, Plus, Undo2, X } from 'lucide-react'
+import { Fragment, useEffect, useId, useLayoutEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
+import { ChevronDown, ChevronUp, CloudCheck, CloudOff, History, Minus, Plus, Undo2, X } from 'lucide-react'
 import { cn } from '@eat-yeet/l0-foundation/utils'
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@eat-yeet/l5-ui-primitives/primitives/dialog'
@@ -36,12 +36,10 @@ export const kitchenTitleClass = pageTitleClasses.standard
 export function KitchenHeader({ crumbs, title, meta, actions }: { crumbs: KitchenCrumb[]; title: ReactNode; meta: ReactNode; actions: ReactNode }) {
   return <header className="grid gap-4">
     <Breadcrumbs crumbs={crumbs} />
-    <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
-      <div className="grid min-w-0 gap-2">
-        {typeof title === 'string' ? <h1 className={cn('min-w-0 break-words', kitchenTitleClass)}>{title}</h1> : title}
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-body-sm">{meta}</div>
-      </div>
-      <div className="flex flex-wrap items-center gap-3 max-[640px]:w-full max-[640px]:[&>*]:flex-1">{actions}</div>
+    {typeof title === 'string' ? <h1 className={cn('min-w-0 break-words', kitchenTitleClass)}>{title}</h1> : title}
+    <div className="flex flex-wrap items-center justify-between gap-x-8 gap-y-3">
+      <div className="flex min-w-0 flex-wrap items-center gap-x-5 gap-y-1 text-body-sm">{meta}</div>
+      <div className="ml-auto flex shrink-0 flex-wrap items-center gap-2 print:hidden">{actions}</div>
     </div>
   </header>
 }
@@ -118,71 +116,64 @@ export function changeSummary(changes: KitchenChange[], limit = 2) {
 }
 
 /**
- * A formula's name as its page heading, renamed in place: click the name or
- * the pencil, type, then Enter or click away. Escape, or clearing the
- * field, keeps the old name. A refused name stays in the field with the
- * reason below it.
+ * The editor's title is the formula's name as a field, at title size, so the
+ * name edits like every other value. Enter or leaving the field saves it;
+ * Escape, or clearing it, puts the old name back. A refused name stays in
+ * the field with the reason below it. The page's h1 carries the saved name
+ * for assistive technology.
  */
-export function FormulaTitle({ name, onRename, className, autoEdit = false }: {
+export function FormulaTitle({ name, onRename, autoEdit = false }: {
   name: string
   /** Resolves to an error message to show below the field, or null once renamed. */
   onRename: (name: string) => Promise<string | null> | string | null
-  /** Heading typography; defaults to the Notebook page title. */
-  className?: string
   /** Opens with the name selected, e.g. for a new copy. */
   autoEdit?: boolean
 }) {
   const id = useId()
-  const [editing, setEditing] = useState(autoEdit)
   const [value, setValue] = useState(name)
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
-  const input = useRef<HTMLInputElement>(null)
-  const pencil = useRef<HTMLButtonElement>(null)
-  useEffect(() => { if (!editing) setValue(name) }, [name, editing])
+  const field = useRef<HTMLTextAreaElement>(null)
+  const focused = useRef(false)
+  // Follow outside changes (History restore, a copy) unless the reader is typing.
+  useEffect(() => { if (!focused.current) setValue(name) }, [name])
   useEffect(() => {
-    if (!editing) return
-    input.current?.focus()
-    input.current?.select()
-  }, [editing])
-  const close = (refocus: boolean) => {
-    setEditing(false)
-    setError('')
-    if (refocus) requestAnimationFrame(() => pencil.current?.focus())
-  }
-  const commit = async (refocus: boolean) => {
+    if (!autoEdit) return
+    field.current?.focus()
+    field.current?.select()
+  }, [autoEdit])
+  // Grow with the name so it wraps like a title instead of scrolling sideways.
+  useLayoutEffect(() => {
+    const el = field.current
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = `${el.scrollHeight}px`
+  }, [value])
+  const commit = async () => {
     if (busy) return
     const next = cleanFormulaName(value)
-    if (!next || next === name) { close(refocus); return }
+    if (!next || next === name) { setValue(name); setError(''); return }
     setBusy(true)
     const failure = await Promise.resolve(onRename(next)).catch((reason: unknown) => reason instanceof Error ? reason.message : 'The name could not be saved. Please try again.')
     setBusy(false)
-    if (failure) { setError(failure); input.current?.focus() }
-    else close(refocus)
+    if (failure) setError(failure)
+    else setValue(next)
   }
-  const keys = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter') { event.preventDefault(); void commit(true) }
-    if (event.key === 'Escape') { event.preventDefault(); setValue(name); close(true) }
+  const keys = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === 'Enter') { event.preventDefault(); void commit() }
+    if (event.key === 'Escape') { event.preventDefault(); setValue(name); setError('') }
   }
-  const heading = cn('min-w-0 break-words', className ?? kitchenTitleClass)
-  return <div className="grid min-w-0 gap-1.5" data-formula-title="">
-    <div className="flex min-w-0 items-center gap-1">
-      {editing
-        ? <h1 className={cn(heading, 'w-full')}>
-          <input ref={input} id={`${id}-name`} aria-label="Formula name" autoComplete="off" maxLength={80} value={value} readOnly={busy}
-            aria-invalid={Boolean(error)} aria-describedby={error ? `${id}-error` : `${id}-hint`}
-            onChange={(event) => { setValue(event.target.value); setError('') }}
-            onKeyDown={keys} onBlur={() => { if (!error) void commit(false) }}
-            className="w-full min-w-0 border-b-2 border-ink bg-transparent p-0 font-[inherit] text-inherit outline-none aria-invalid:border-danger" />
-        </h1>
-        : <>
-          <h1 className={cn(heading, 'cursor-text decoration-2 decoration-dotted underline-offset-[6px] hover:underline')} onClick={() => setEditing(true)}>{name}</h1>
-          <Button ref={pencil} variant="ghost" size="icon" className="print:hidden" aria-label={`Rename ${name}`} onClick={() => setEditing(true)}><Pencil className="size-5" /></Button>
-        </>}
-    </div>
-    {editing && (error
+  return <div className="grid min-w-0 gap-1" data-formula-title="">
+    <h1 className="sr-only">{name}</h1>
+    <label htmlFor={`${id}-name`} className="font-action text-caption font-bold text-muted-foreground"><span className="sr-only">Formula </span>Name</label>
+    <textarea ref={field} id={`${id}-name`} rows={1} autoComplete="off" spellCheck={false} maxLength={80} value={value} readOnly={busy}
+      aria-invalid={Boolean(error)} aria-describedby={error ? `${id}-error` : undefined}
+      onChange={(event) => { setValue(event.target.value.replace(/\s*\n\s*/g, ' ')); setError('') }}
+      onKeyDown={keys} onFocus={() => { focused.current = true }} onBlur={() => { focused.current = false; if (!error) void commit() }}
+      className={cn(kitchenTitleClass, 'block w-full min-w-0 resize-none overflow-hidden border-b-2 border-ink bg-transparent p-0 pb-1 text-ink outline-none focus-visible:border-b-4 aria-invalid:border-danger')} />
+    {error
       ? <p id={`${id}-error`} role="alert" className="text-sm text-danger">{error} Press Escape to keep “{name}”.</p>
-      : <p id={`${id}-hint`} className="text-caption text-muted-foreground">{busy ? 'Saving the name…' : 'Enter to save · Escape to cancel'}</p>)}
+      : busy && <p role="status" className="text-caption text-muted-foreground">Saving the name…</p>}
   </div>
 }
 

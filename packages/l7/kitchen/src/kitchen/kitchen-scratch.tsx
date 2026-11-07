@@ -1,6 +1,7 @@
 'use client'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Save } from 'lucide-react'
+import { Check, Save } from 'lucide-react'
+import { RecipeIconAction } from '@eat-yeet/l7-recipes/recipes/recipe-actions'
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
 import { useNavigate } from '@eat-yeet/l5-ui-primitives/primitives/navigation'
 import { useNotebookClient } from './kitchen-local'
@@ -129,7 +130,7 @@ export function KitchenScratchPage({ kitchen, client, sharedConfig, saveOnArriva
             <SaveStatus state={errors.length ? { kind: 'invalid' } : { kind: 'local' }} />
           </>}
           actions={<>
-            <Button asChild variant="utility" size="sm" className="max-[640px]:hidden"><a href={bakeHref}>Apply</a></Button>
+            <RecipeIconAction label="Done" tone="done" href={bakeHref}><Check /></RecipeIconAction>
             <Button disabled={errors.length > 0 || saving || !store} onClick={save}><Save className="size-4" />{saveLabel}</Button>
           </>}
         />
@@ -137,7 +138,7 @@ export function KitchenScratchPage({ kitchen, client, sharedConfig, saveOnArriva
       changes={plugin.changes(recipe, config, defaultState, state)} onReset={reset}
       aside={<Callout as="section" aria-labelledby="keep-it" className="grid gap-2 p-5">
         <h2 id="keep-it" className="font-action text-lg font-bold">Want to keep it?</h2>
-        <p className="text-sm leading-relaxed">Saving keeps every change in History. Click the name above to change it, now or later. {notebook.local ? 'Without an account it stays in this browser; sign in any time to move it to your account and open it anywhere.' : 'It opens on any device you sign in on.'}</p>
+        <p className="text-sm leading-relaxed">Saving keeps every change in History. Change the name above, now or later. {notebook.local ? 'Without an account it stays in this browser; sign in any time to move it to your account and open it anywhere.' : 'It opens on any device you sign in on.'}</p>
       </Callout>}
       dockAction={<Button variant="on-dark" size="sm" disabled={errors.length > 0 || saving || !store} onClick={save}>{saving ? 'Saving…' : 'Save'}</Button>}
     />

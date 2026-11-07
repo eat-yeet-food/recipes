@@ -1,5 +1,6 @@
 'use client'
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useState, type MouseEvent, type ReactNode } from 'react'
+import { cn } from '@eat-yeet/l0-foundation/utils'
 import { X } from 'lucide-react'
 
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
@@ -36,16 +37,33 @@ export function RecipeAction({
   >{children}</Button>
 }
 
-/** Recipe header action: a 44px plum circle; pink with a plum icon when pressed. */
-export function RecipeIconAction({ label, onClick, pressed, children }: { label: string; onClick: () => void; pressed?: boolean; children: ReactNode }) {
+/**
+ * Page header action: a 44px plum circle; pink with a plum icon when pressed
+ * or when it is the page's finishing step (`tone="done"`). Links when given
+ * an href.
+ */
+export function RecipeIconAction({ label, onClick, href, pressed, disabled, tone, children }: {
+  label: string
+  onClick?: (event: MouseEvent<HTMLElement>) => void
+  href?: string
+  pressed?: boolean
+  disabled?: boolean
+  tone?: 'done'
+  children: ReactNode
+}) {
+  const className = cn('[&_svg]:size-5 aria-pressed:bg-brand aria-pressed:text-ink aria-pressed:hover:bg-brand-soft', tone && 'bg-brand text-ink hover:bg-brand-soft')
+  if (href) return <Button asChild size="icon" className={className}>
+    <a href={href} aria-label={label} title={label} data-recipe-action={label} onClick={onClick}>{children}</a>
+  </Button>
   return <Button
     size="icon"
     aria-label={label}
     title={label}
     aria-pressed={pressed}
+    disabled={disabled}
     data-recipe-action={label}
     onClick={onClick}
-    className="[&_svg]:size-5 aria-pressed:bg-brand aria-pressed:text-ink aria-pressed:hover:bg-brand-soft"
+    className={className}
   >{children}</Button>
 }
 

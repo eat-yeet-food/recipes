@@ -4,7 +4,7 @@ import { Eyebrow, pageTitleClasses } from '@eat-yeet/l5-ui-primitives/primitives
 import { ResponsiveImage } from '@eat-yeet/l5-ui-primitives/primitives/responsive-image'
 import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react'
 
-import { ChefHat, Printer, Share2 } from 'lucide-react'
+import { ChefHat, Pencil, Printer } from 'lucide-react'
 import { cn } from '@eat-yeet/l0-foundation/utils'
 import { imageUrl } from '@eat-yeet/l1-recipe-model/recipes'
 import { ContentPageArticle } from '@eat-yeet/l6-ui-content-blocks/page-article'
@@ -35,11 +35,9 @@ export const recipeTitleClass = cn(pageTitleClasses.standard, 'max-w-[var(--layo
 export type RecipeArticleHeading = {
   crumbs: { label: string; href?: string }[]
   title: string
-  /** Replaces the plain h1, e.g. a formula name that can be renamed in place; gets `recipeTitleClass`. */
-  titleElement?: ReactNode
   byline: ReactNode
-  /** Shown first in the page actions, e.g. Edit formula. */
-  actions?: ReactNode
+  /** Adds an Edit circle after Print and Cooking view, e.g. to edit a Notebook formula. */
+  edit?: { href: string; label: string }
 }
 
 export function RecipeArticleHeader({
@@ -59,16 +57,17 @@ export function RecipeArticleHeader({
   return (
     <div className="@container">
       <Breadcrumbs crumbs={crumbs} className="mb-5" />
-      {heading?.titleElement ?? <h1 className={`m-0 min-w-0 ${recipeTitleClass}`}>{heading?.title ?? page.title}</h1>}
+      <h1 className={`m-0 min-w-0 ${recipeTitleClass}`}>{heading?.title ?? page.title}</h1>
       <div className="mb-6 mt-1.5 flex items-center justify-between gap-4">
         <Eyebrow as="div" size="small" tone="muted">{heading?.byline ?? 'By Patrick Hogan'}</Eyebrow>
         <div className="relative flex shrink-0 gap-2 print:hidden" role="group" aria-label="Page actions">
           <RecipeIconAction label="Print Recipe" onClick={printPage}><Printer /></RecipeIconAction>
           <RecipeIconAction label="Cooking view" onClick={toggleFocusedCooking} pressed={focusedCooking}><ChefHat /></RecipeIconAction>
-          {!heading?.actions && <CookingViewHint used={focusedCooking} />}
+          {heading?.edit && <RecipeIconAction label={heading.edit.label} href={heading.edit.href}><Pencil /></RecipeIconAction>}
+          {/* The hint points at the last circle, so pages with an Edit circle skip it. */}
+          {!heading?.edit && <CookingViewHint used={focusedCooking} />}
         </div>
       </div>
-      {heading?.actions && <div className="-mt-2 mb-6 flex flex-wrap gap-3 print:hidden">{heading.actions}</div>}
       {page.description && <p className="max-w-[var(--layout-recipe-copy)] m-0 text-base leading-[1.625]">{page.description}</p>}
     </div>
   )
