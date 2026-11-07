@@ -65,7 +65,7 @@ export function RecipeArticleHeader({
         <div className="relative flex shrink-0 gap-2 print:hidden" role="group" aria-label="Page actions">
           <RecipeIconAction label="Print Recipe" onClick={printPage}><Printer /></RecipeIconAction>
           <RecipeIconAction label="Cooking view" onClick={toggleFocusedCooking} pressed={focusedCooking}><ChefHat /></RecipeIconAction>
-          <CookingViewHint used={focusedCooking} />
+          {!heading?.actions && <CookingViewHint used={focusedCooking} />}
         </div>
       </div>
       {heading?.actions && <div className="-mt-2 mb-6 flex flex-wrap gap-3 print:hidden">{heading.actions}</div>}

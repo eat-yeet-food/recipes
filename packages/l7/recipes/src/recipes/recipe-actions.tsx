@@ -59,7 +59,16 @@ export const COOKING_VIEW_HINT_KEY = 'eatyeet:hint:cooking-view'
 export function CookingViewHint({ used }: { used: boolean }) {
   const [open, setOpen] = useState(false)
   useEffect(() => {
-    try { setOpen(!localStorage.getItem(COOKING_VIEW_HINT_KEY)) } catch { /* storage blocked: never show */ }
+    let unseen = false
+    try { unseen = !localStorage.getItem(COOKING_VIEW_HINT_KEY) } catch { /* storage blocked: never show */ }
+    if (!unseen) return
+    // Wait until the page has loaded and settled so the hint never competes
+    // with the hero image for first paint (it cost ~400ms of mobile LCP).
+    let timer: ReturnType<typeof setTimeout> | undefined
+    const show = () => { timer = setTimeout(() => setOpen(true), 1200) }
+    if (document.readyState === 'complete') show()
+    else window.addEventListener('load', show, { once: true })
+    return () => { window.removeEventListener('load', show); if (timer) clearTimeout(timer) }
   }, [])
   useEffect(() => { if (used) dismiss() }, [used])
   function dismiss() {

@@ -90,7 +90,7 @@
   --text-title: 30px;
   --text-section: 34px;
   --text-page: clamp(38px, 5vw, 52px);
-  --text-display: clamp(56px, 7vw, 80px);
+  --text-display: clamp(44px, 7vw, 80px);
   --text-hero: clamp(42px, 7vw, 104px);
   --text-wordmark: clamp(38px, 6vw, 80px);
 
