@@ -1,5 +1,4 @@
 'use client'
-import { Drawer } from 'vaul'
 import { Fragment, useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
 import { ChevronDown, ChevronUp, CloudCheck, CloudOff, History, Minus, Pencil, Plus, Undo2, X } from 'lucide-react'
 import { cn } from '@eat-yeet/l0-foundation/utils'
@@ -274,68 +273,135 @@ export function HistorySheet({ open, onOpenChange, title, revisions, describe, o
 }
 
 /**
- * Phones keep the dough totals in a peek bar at the bottom. Tapping it or
- * swiping it up opens the results in a Vaul drawer (modal: it dims the page)
- * with a half and a full snap; dragging down returns to the bar. The page
- * reserves exactly the bar's measured height (--dough-dock-peek) so the
- * footer ends right above it.
+ * Phones keep the dough totals in one bottom sheet with three resting
+ * heights: the peek bar (total and Save), half, and nearly full. The sheet
+ * follows a finger dragged on it in either direction (only on its header at
+ * full height, where the list scrolls by touch) and settles on the nearest
+ * height, or the next one in the direction of a flick; tapping
+ * the summary toggles peek and half, and Escape or the dimmed page returns
+ * to peek. It is a non-modal disclosure, so the page stays available to
+ * assistive technology. The page reserves exactly the peek height
+ * (--dough-dock-peek) so the footer ends right above it.
  */
-const DOCK_SNAPS: (number | string)[] = [0.6, 0.94]
+type DockStop = 'peek' | 'half' | 'full'
+const DOCK_STOPS: DockStop[] = ['peek', 'half', 'full']
 export function DoughDock({ total, detail, changeCount = 0, children, action }: { total: string; detail: string; changeCount?: number; children: ReactNode; action: ReactNode }) {
-  const barRef = useRef<HTMLDivElement>(null)
-  const [open, setOpen] = useState(false)
-  const [snap, setSnap] = useState<number | string | null>(DOCK_SNAPS[0])
-  const swipeStart = useRef<number | null>(null)
+  const headRef = useRef<HTMLDivElement>(null)
+  const [peek, setPeek] = useState(112)
+  const [viewport, setViewport] = useState(800)
+  const [stop, setStop] = useState<DockStop>('peek')
+  const [drag, setDrag] = useState<number | null>(null)
+  // No slide until the real heights are measured, so the first paint doesn't animate.
+  const [measured, setMeasured] = useState(false)
+  const gesture = useRef<{ pointer: number; y: number; start: number; height: number; lastY: number; t: number; v: number; moved: boolean } | null>(null)
+  const summaryRef = useRef<HTMLButtonElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
+  const justDragged = useRef(false)
+  const id = useId()
   useEffect(() => {
-    const el = barRef.current
+    const el = headRef.current
     if (!el) return
     const root = document.documentElement
-    const update = () => root.style.setProperty('--dough-dock-peek', `${Math.ceil(el.getBoundingClientRect().height)}px`)
+    const update = () => {
+      const height = Math.ceil(el.getBoundingClientRect().height)
+      setPeek(height)
+      setViewport(window.innerHeight)
+      root.style.setProperty('--dough-dock-peek', `${height}px`)
+    }
     update()
+    const frame = requestAnimationFrame(() => setMeasured(true))
     const observer = new ResizeObserver(update)
     observer.observe(el)
-    return () => { observer.disconnect(); root.style.removeProperty('--dough-dock-peek') }
+    window.addEventListener('resize', update)
+    return () => { cancelAnimationFrame(frame); observer.disconnect(); window.removeEventListener('resize', update); root.style.removeProperty('--dough-dock-peek') }
   }, [])
-  const openAt = (point: number | string) => { setSnap(point); setOpen(true) }
-  const summary = (expanded: boolean) => <>
-    <span className="flex items-center gap-1.5 font-action text-xs font-bold uppercase tracking-eyebrow text-brand">Your dough {expanded ? <ChevronDown aria-hidden="true" className="size-3.5" /> : <ChevronUp aria-hidden="true" className="size-3.5" />}</span>
-    <span className="flex min-w-0 items-baseline gap-2"><strong className="font-action text-2xl font-bold tabular-nums text-brand">{total}</strong><span className="truncate text-caption">{detail}{changeCount > 0 && ` · ${changeCount} ${changeCount === 1 ? 'change' : 'changes'}`}</span></span>
-  </>
-  const summaryClass = 'grid min-h-11 min-w-0 flex-1 justify-items-start rounded-field text-left focus-visible:outline-2 focus-visible:outline-on-dark-label focus-visible:outline-offset-2'
-  const grip = <span aria-hidden="true" className="mx-auto mb-3 block h-1.5 w-10 rounded-full bg-plum-400" />
+  const heights: Record<DockStop, number> = { peek, half: Math.round(viewport * 0.6), full: Math.round(viewport * 0.94) }
+  const shown = drag ?? heights[stop]
+  const expanded = stop !== 'peek'
+  const scrolls = stop === 'full'
+  const settle = (height: number, velocity: number) => {
+    // A flick (px/ms; positive is upward) moves one stop that way; otherwise the nearest stop wins.
+    const order = DOCK_STOPS.map((name) => ({ name, height: heights[name] }))
+    if (Math.abs(velocity) > 0.4) {
+      const next = velocity > 0 ? order.find((s) => s.height > height + 8) ?? order[2] : [...order].reverse().find((s) => s.height < height - 8) ?? order[0]
+      return next.name
+    }
+    return order.reduce((best, s) => Math.abs(s.height - height) < Math.abs(best.height - height) ? s : best).name
+  }
+  const onPointerDown = (event: React.PointerEvent) => {
+    if (event.button !== 0 || gesture.current) return
+    justDragged.current = false
+    // At full height the list scrolls, so only the header drags the sheet.
+    if (scrolls && panelRef.current?.contains(event.target as Node)) return
+    gesture.current = { pointer: event.pointerId, y: event.clientY, start: heights[stop], height: heights[stop], lastY: event.clientY, t: event.timeStamp, v: 0, moved: false }
+  }
+  const onPointerMove = (event: React.PointerEvent) => {
+    const g = gesture.current
+    if (!g || g.pointer !== event.pointerId) return
+    const dy = g.y - event.clientY
+    if (!g.moved && Math.abs(dy) < 6) return
+    if (!g.moved) { g.moved = true; (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId) }
+    const dt = Math.max(1, event.timeStamp - g.t)
+    g.v = (g.lastY - event.clientY) / dt
+    g.lastY = event.clientY
+    g.t = event.timeStamp
+    g.height = Math.min(heights.full, Math.max(peek, g.start + dy))
+    setDrag(g.height)
+  }
+  const onPointerUp = (event: React.PointerEvent) => {
+    const g = gesture.current
+    if (!g || g.pointer !== event.pointerId) return
+    gesture.current = null
+    if (!g.moved) return
+    // Cleared by the next pointerdown, so the click that ends this drag can't toggle the sheet.
+    justDragged.current = true
+    // A finger that rested before lifting is not a flick.
+    const velocity = event.timeStamp - g.t > 100 ? 0 : g.v
+    setStop(settle(g.height, velocity))
+    setDrag(null)
+  }
+  // The click that ends a drag must not also toggle the sheet.
+  const swallowTapAfterDrag = (event: React.MouseEvent) => { if (justDragged.current) { event.preventDefault(); event.stopPropagation() } }
+  useEffect(() => {
+    if (!expanded) return
+    const onKey = (event: globalThis.KeyboardEvent) => { if (event.key === 'Escape') setStop('peek') }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [expanded])
+  useEffect(() => {
+    if (stop !== 'peek') return
+    // Collapsing makes the list inert: keep focus on the sheet, and start the list at the top next time.
+    const panel = panelRef.current
+    if (panel?.contains(document.activeElement)) summaryRef.current?.focus()
+    if (panel) panel.scrollTop = 0
+  }, [stop])
+  const animate = measured && drag === null
+  const dim = Math.min(1, Math.max(0, (shown - peek) / Math.max(1, heights.half - peek)))
   return <>
-    <div
-      ref={barRef}
+    <div aria-hidden="true" onClick={() => setStop('peek')}
+      className={cn('fixed inset-0 z-[var(--z-nav)] touch-none motion-reduce:!transition-none bg-ink/30 lg:hidden print:hidden', dim === 0 && 'pointer-events-none')}
+      style={{ opacity: dim, transition: animate ? 'opacity 300ms ease' : undefined }} />
+    <section
+      aria-label="Your dough"
       data-dough-dock=""
-      onPointerDown={(event) => { swipeStart.current = event.clientY }}
-      onPointerUp={(event) => { if (swipeStart.current !== null && swipeStart.current - event.clientY > 24) openAt(DOCK_SNAPS[0]); swipeStart.current = null }}
-      className="fixed inset-x-0 bottom-0 z-[var(--z-recipe-actions)] touch-pan-x rounded-t-surface bg-ink px-4 pt-2.5 pb-[max(1rem,env(safe-area-inset-bottom))] text-on-dark-label shadow-overlay lg:hidden print:hidden"
+      data-stop={stop}
+      className="fixed inset-x-0 bottom-0 z-[var(--z-nav)] flex motion-reduce:!transition-none flex-col overflow-hidden rounded-t-surface bg-ink text-on-dark-label shadow-overlay lg:hidden print:hidden"
+      style={{ height: heights.full, transform: `translateY(${heights.full - shown}px)`, transition: animate ? 'transform 320ms cubic-bezier(0.32, 0.72, 0, 1)' : undefined }}
+      onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp} onClickCapture={swallowTapAfterDrag}
     >
-      {grip}
-      <div className="flex items-center gap-3">
-        <button type="button" aria-haspopup="dialog" aria-expanded={open} onClick={() => openAt(DOCK_SNAPS[0])} className={summaryClass}>{summary(false)}</button>
-        {action}
+      <div ref={headRef}
+        className="shrink-0 cursor-grab touch-none px-4 pt-2.5 pb-[max(1rem,env(safe-area-inset-bottom))] select-none active:cursor-grabbing">
+        <span aria-hidden="true" className="mx-auto mb-3 block h-1.5 w-10 rounded-full bg-plum-400" />
+        <div className="flex items-center gap-3">
+          <button ref={summaryRef} type="button" aria-expanded={expanded} aria-controls={`${id}-panel`} onClick={() => setStop(expanded ? 'peek' : 'half')}
+            className="grid min-h-11 min-w-0 flex-1 justify-items-start rounded-field text-left focus-visible:outline-2 focus-visible:outline-on-dark-label focus-visible:outline-offset-2">
+            <span className="flex items-center gap-1.5 font-action text-xs font-bold uppercase tracking-eyebrow text-brand">Your dough {expanded ? <ChevronDown aria-hidden="true" className="size-3.5" /> : <ChevronUp aria-hidden="true" className="size-3.5" />}</span>
+            <span className="flex min-w-0 items-baseline gap-2"><strong className="font-action text-2xl font-bold tabular-nums text-brand">{total}</strong><span className="truncate text-caption">{detail}{changeCount > 0 && ` · ${changeCount} ${changeCount === 1 ? 'change' : 'changes'}`}</span></span>
+          </button>
+          {action}
+        </div>
       </div>
-    </div>
-    <Drawer.Root open={open} onOpenChange={setOpen} snapPoints={DOCK_SNAPS} activeSnapPoint={snap} setActiveSnapPoint={setSnap} fadeFromIndex={0}>
-      <Drawer.Portal>
-        <Drawer.Overlay className="fixed inset-0 z-[var(--z-recipe-actions)] bg-ink/30 lg:hidden" />
-        <Drawer.Content
-          data-dough-drawer=""
-          aria-describedby={undefined}
-          className="fixed inset-x-0 bottom-0 z-[var(--z-recipe-actions)] flex h-[94dvh] flex-col rounded-t-surface bg-ink text-on-dark-label shadow-overlay outline-none lg:hidden"
-        >
-          <Drawer.Title className="sr-only">Your dough</Drawer.Title>
-          <div className="shrink-0 px-4 pt-2.5 pb-4">
-            {grip}
-            <div className="flex items-center gap-3">
-              <button type="button" aria-expanded="true" onClick={() => setOpen(false)} className={summaryClass}>{summary(true)}</button>
-              {action}
-            </div>
-          </div>
-          <div className={cn('min-h-0 flex-1 px-4 pb-[max(1rem,env(safe-area-inset-bottom))]', snap === DOCK_SNAPS[1] ? 'overflow-y-auto' : 'overflow-hidden')}>{children}</div>
-        </Drawer.Content>
-      </Drawer.Portal>
-    </Drawer.Root>
+      <div ref={panelRef} id={`${id}-panel`} inert={!expanded} className={cn('min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-[max(1rem,env(safe-area-inset-bottom))]', !scrolls && 'touch-none')}>{children}</div>
+    </section>
   </>
 }

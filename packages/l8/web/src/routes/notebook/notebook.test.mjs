@@ -206,8 +206,9 @@ try {
   await member.close()
 
   // Phones: no sideways scroll, and the dough total stays docked.
-  for (const width of [390, 320]) {
-    const phone = await browser.newContext({ viewport: { width, height: 800 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true })
+  // 320×568 is a small phone where the full sheet's list must scroll.
+  for (const [width, height] of [[390, 800], [320, 568]]) {
+    const phone = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: 2, isMobile: true, hasTouch: true })
     await signIn(phone, BASE)
     page = await open(phone, new URL(formulaUrl).pathname)
     await page.getByRole('heading', { level: 1, name: 'Friday pies' }).waitFor()
@@ -216,7 +217,46 @@ try {
     const dock = page.locator('[data-dough-dock]')
     check(`dough total is docked at ${width}px`, await dock.isVisible() && (await dock.textContent()).includes('1,440g'))
     await dock.getByRole('button', { name: /Your dough/ }).click()
-    check(`docked dough expands at ${width}px`, await page.locator('[data-dough-drawer] [data-dough-results]').waitFor().then(() => true, () => false))
+    check(`docked dough expands at ${width}px`, await dock.locator('[data-dough-results]').isVisible() && await dock.getAttribute('data-stop') === 'half')
+    // Real touch swipes: the one sheet follows the finger both ways; nothing else animates.
+    await page.waitForTimeout(400) // let the opening slide finish before measuring the handle
+    const stopAfter = async (from, to, options) => { await swipe(page, width / 2, from, to, options); await page.waitForTimeout(400); return dock.getAttribute('data-stop') }
+    const handleY = async () => { const box = await dock.boundingBox(); return box.y + 12 }
+    check(`swiping down closes the dough sheet at ${width}px`, await stopAfter(await handleY(), height - 10) === 'peek')
+    check(`swiping up opens the dough sheet at ${width}px`, await stopAfter(await handleY(), height * 0.4) !== 'peek')
+    check(`a slow drag to the top settles full at ${width}px`, await stopAfter(await handleY(), 40, { hold: true }) === 'full')
+    check(`swiping down from full steps back at ${width}px`, await stopAfter(await handleY(), height - 10) === 'peek')
+    // A drag that starts on the summary button must not also toggle the sheet on release.
+    const summary = await dock.getByRole('button', { name: /Your dough/ }).boundingBox()
+    check(`a drag from the summary settles where it is dropped at ${width}px`, await stopAfter(summary.y + summary.height / 2, height * 0.4, { hold: true }) === 'half')
+    await page.mouse.click(width / 2, 40)
+    await page.waitForTimeout(400)
+    check(`tapping the dimmed page closes the sheet at ${width}px`, await dock.getAttribute('data-stop') === 'peek')
+    check(`the page is tappable while the sheet rests at ${width}px`, await page.evaluate(() => !document.elementFromPoint(innerWidth / 2, innerHeight / 2)?.closest('[aria-hidden="true"].fixed')))
+    const reserved = await page.evaluate(() => parseFloat(getComputedStyle(document.body).paddingBottom))
+    const resting = await page.evaluate(() => innerHeight - document.querySelector('[data-dough-dock]').getBoundingClientRect().top)
+    check(`the page reserves exactly the resting sheet at ${width}px`, Math.abs(reserved - resting) <= 1, `${reserved} vs ${resting}`)
+    await dock.getByRole('button', { name: /Your dough/ }).click()
+    await page.waitForTimeout(400)
+    await dock.locator('[data-dough-results]').locator('xpath=..').evaluate((panel) => { panel.tabIndex = -1; panel.focus() })
+    await page.keyboard.press('Escape')
+    await page.waitForTimeout(400)
+    check(`Escape closes the sheet and keeps focus on it at ${width}px`, await dock.getAttribute('data-stop') === 'peek' && await page.evaluate(() => document.activeElement?.getAttribute('aria-expanded') === 'false'))
+    // At full height the list scrolls by touch instead of moving the sheet.
+    await stopAfter(await handleY(), 40, { hold: true })
+    const panel = dock.locator('[data-dough-results]').locator('xpath=..')
+    if (height < 800) {
+      await swipe(page, width / 2, height * 0.8, height * 0.4)
+      await page.waitForTimeout(400)
+      check(`the full sheet's list scrolls by touch at ${width}px`, await dock.getAttribute('data-stop') === 'full' && await panel.evaluate((el) => el.scrollTop > 0))
+      await stopAfter(await handleY(), height - 10)
+      await dock.getByRole('button', { name: /Your dough/ }).click()
+      await page.waitForTimeout(400)
+      check(`the list starts at the top after collapsing at ${width}px`, await panel.evaluate((el) => el.scrollTop === 0))
+      await page.keyboard.press('Escape')
+      await page.waitForTimeout(400)
+    } else await stopAfter(await handleY(), height - 10)
+    check(`the dough sheet is one element, not a modal at ${width}px`, await page.locator('[data-dough-dock]').count() === 1 && await page.locator('[role="dialog"]').count() === 0)
     page = await open(phone, '/notebook/sourdough-bread')
     check(`sourdough calculator fits ${width}px`, await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth))
     await phone.close()
@@ -224,6 +264,23 @@ try {
 } finally {
   await browser.close()
   await server.close()
+}
+
+async function swipe(page, x, fromY, toY, { steps = 8, hold = false } = {}) {
+  const cdp = await page.context().newCDPSession(page)
+  const point = (y) => [{ x, y, id: 1 }]
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: point(fromY) })
+  for (let i = 1; i <= steps; i++) {
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: point(fromY + ((toY - fromY) * i) / steps) })
+    await page.waitForTimeout(16)
+  }
+  if (hold) {
+    // Rest the finger before lifting: no flick, so the nearest height wins.
+    await page.waitForTimeout(150)
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: point(toY) })
+  }
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+  await cdp.detach()
 }
 
 for (const result of results) console.log(`${result.ok ? 'ok  ' : 'FAIL'}  ${result.name}${result.detail ? ' :: ' + result.detail : ''}`)
