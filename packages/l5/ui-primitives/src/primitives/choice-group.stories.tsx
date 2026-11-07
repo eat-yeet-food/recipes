@@ -6,7 +6,7 @@ function Example({ long = false, size }: { long?: boolean; size?: 'default' | 'c
   const [value, setValue] = useState('weights')
   return <div className="max-w-sm rounded-surface bg-brand p-6"><ChoiceGroup label="Calculator input mode" size={size} value={value} onChange={setValue} options={[{ value: 'target', label: long ? 'Baker’s percentages for a weekend bake' : 'Percentages' }, { value: 'weights', label: 'Weights' }]} /><p className="mt-4 text-ink" role="status">{value === 'weights' ? 'Ingredient weights' : 'Baker’s percentages'}</p></div>
 }
-const meta = { title: 'Controls/Choice Group', component: Example, subcomponents: { ChoiceGroup }, parameters: { layout: 'padded', docs: { description: { component: 'Exclusive pressed buttons in a dark group. Outer radius minus the shared inset equals inner radius, including wrapped labels. Native Tab / Enter / Space. Selection and focus remain distinct; no label underlines.' } } } } satisfies Meta<typeof Example>
+const meta = { title: 'Primitives/Choice Group', component: Example, subcomponents: { ChoiceGroup }, parameters: { layout: 'padded', docs: { description: { component: 'One of several choices inside a form: a plum track with the selected option in the shared selected look (pink fill, plum label); unselected labels are light on plum. Use Toggle for standalone on/off controls. Outer radius minus the shared inset equals inner radius, including wrapped labels. Native Tab / Enter / Space. Selection and focus remain distinct; no label underlines.' } } } } satisfies Meta<typeof Example>
 export default meta
 type Story = StoryObj<typeof meta>
 export const Weights: Story = {}

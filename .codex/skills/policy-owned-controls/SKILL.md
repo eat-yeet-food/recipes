@@ -19,3 +19,10 @@ before adding another selector like `.surface a, .surface button`.
 Stories must render the production-owned control with working callbacks and
 isolated state. Update its documented variants and interaction cases with the
 component. Consult `docs/design-system.md`; avoid independent story-only CSS.
+
+The owned set lives in `packages/l5/ui-primitives/src/primitives`: Button and
+Toggle, the fields, Choice Group, Dialog, Surface (with the action stripe),
+AccentRule, Eyebrow, PageTitle, SectionTitle, Breadcrumbs, Callout and
+Disclosure; catalog and Notebook cards use `CatalogCard` in `ui-catalog`. Never
+hand-roll a pill `<button>`, a stripe, an accent rule, a breadcrumb trail or a
+disclosure; `pnpm test:design-system` fails on those copies.

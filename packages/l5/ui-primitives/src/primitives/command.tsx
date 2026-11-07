@@ -77,14 +77,14 @@ function CommandInput({
 }) {
   return (
     <div data-slot="command-input-wrapper" className={cn("flex items-center p-3", wrapperClassName)}>
-      <InputGroup className="h-12 border-0 px-3 shadow-none! focus-within:outline-2 focus-within:outline-current focus-within:-outline-offset-4">
-        <InputGroupAddon className="p-0 text-action-label">
+      <InputGroup className="h-12 px-3 focus-within:outline-2 focus-within:outline-ink focus-within:-outline-offset-4">
+        <InputGroupAddon className="p-0 text-ink">
           <SearchIcon className="size-4 shrink-0" />
         </InputGroupAddon>
         <CommandPrimitive.Input
           data-slot="command-input"
           className={cn(
-            "h-12 flex-1 bg-transparent px-3 font-body text-base text-action-label outline-none placeholder:text-action-label/80 disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm",
+            "h-12 flex-1 bg-transparent px-3 font-body text-base text-ink outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm",
             className
           )}
           {...props}
@@ -162,7 +162,7 @@ function CommandItem({
     <CommandPrimitive.Item
       data-slot="command-item"
       className={cn(
-        "group/command-item relative flex cursor-default items-center gap-2 rounded-field px-3 py-3 text-sm outline-hidden select-none in-data-[slot=dialog-content]:rounded-field! data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 data-selected:bg-ink data-selected:text-primary-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 data-selected:*:[svg]:text-primary-foreground",
+        "group/command-item relative flex cursor-default items-center gap-2 rounded-field px-3 py-3 text-sm outline-hidden select-none in-data-[slot=dialog-content]:rounded-field! data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 data-selected:bg-brand data-selected:text-ink [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 data-selected:*:[svg]:text-ink",
         className
       )}
       {...props}
@@ -181,7 +181,7 @@ function CommandShortcut({
     <span
       data-slot="command-shortcut"
       className={cn(
-        "ml-auto text-xs tracking-widest text-muted-foreground group-data-selected/command-item:text-foreground",
+        "ml-auto text-xs tracking-label text-muted-foreground group-data-selected/command-item:text-foreground",
         className
       )}
       {...props}

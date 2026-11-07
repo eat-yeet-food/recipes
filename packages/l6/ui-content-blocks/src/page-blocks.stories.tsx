@@ -5,6 +5,8 @@ import type { PageBlock } from '@eat-yeet/l4-content-model/blocks'
 
 import { ContentPageArticle } from './page-article'
 import { createSharedPageBlockRegistry, PageBlocks } from './page-blocks'
+import { Breadcrumbs } from '@eat-yeet/l5-ui-primitives/primitives/breadcrumbs'
+import { PageTitle } from '@eat-yeet/l5-ui-primitives/primitives/typography'
 
 const blocks: PageBlock[] = [
   {
@@ -116,7 +118,7 @@ function BlockGallery() {
 }
 
 const meta = {
-  title: 'Content Blocks/Page Blocks',
+  title: 'Patterns/Content Blocks',
   subcomponents: { PageBlocks },
   parameters: {
     layout: 'fullscreen',
@@ -148,14 +150,8 @@ export const BlockPage: Story = {
             articleLabel="Example page content"
             header={(
               <div className="max-w-[690px]">
-                <nav className="flex flex-wrap gap-1.5 mb-5 text-[var(--color-ink)] text-xs leading-[1.6] uppercase" aria-label="Breadcrumb">
-                  <a href="/">Home</a>
-                  <span>&gt;</span>
-                  <span>Guides</span>
-                </nav>
-                <h1 className="m-0 max-w-[690px] text-[34px] leading-[1.25] tracking-[1.2px] font-bold">
-                  Generic Content Article
-                </h1>
+                <Breadcrumbs className="mb-5" crumbs={[{ label: 'Home', href: '/' }, { label: 'Guides' }]} />
+                <PageTitle className="max-w-[690px]">Generic Content Article</PageTitle>
                 <p className="max-w-[690px] mt-4 mb-0 text-base leading-[1.625]">
                   A reusable article layout can render arbitrary registered page blocks.
                 </p>

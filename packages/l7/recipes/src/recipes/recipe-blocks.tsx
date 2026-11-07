@@ -5,6 +5,7 @@ import type { RecipeContent } from '@eat-yeet/l4-content-model/recipes'
 import { createPageBlockRegistry, registerSharedPageBlocks, type PageBlockRegistry } from '@eat-yeet/l6-ui-content-blocks/page-blocks'
 import { useId, type ReactNode } from 'react'
 import { RecipeFacts } from './recipe-facts'
+import { Eyebrow, SectionTitle } from '@eat-yeet/l5-ui-primitives/primitives/typography'
 
 const Html = ({ as: Tag = 'div', html, ...rest }: { as?: any; html: string } & Record<string, unknown>) => (
   <Tag {...rest} data-prose="" dangerouslySetInnerHTML={{ __html: html }} />
@@ -37,7 +38,7 @@ function TimedList({ section }: { section: Section }) {
   const times = section.itemTimes!
   const originId = useId()
   return (<>
-    {section.timeOrigin && <p id={originId} className="-mt-1 mb-3.5 text-[13px] text-muted-foreground">{section.timeOrigin}</p>}
+    {section.timeOrigin && <p id={originId} className="-mt-1 mb-3.5 text-caption text-muted-foreground">{section.timeOrigin}</p>}
     <ol data-timed-steps="" aria-describedby={section.timeOrigin ? originId : undefined} className="m-0 grid list-none gap-[18px] p-0">
       {section.items.map((item, index) => {
         const time = times[index]
@@ -45,7 +46,7 @@ function TimedList({ section }: { section: Section }) {
           <li key={section.itemIds[index] ?? index} className="relative grid grid-cols-[64px_minmax(0,1fr)] gap-3 text-base leading-[1.72] [&:not(:last-child)]:before:absolute [&:not(:last-child)]:before:top-4 [&:not(:last-child)]:before:-bottom-[34px] [&:not(:last-child)]:before:left-[31px] [&:not(:last-child)]:before:w-0.5 [&:not(:last-child)]:before:bg-border print:before:bg-ink">
             <time
               dateTime={`PT${time.minutes}M`}
-              className={`relative z-[1] mt-0.5 self-start justify-self-center min-w-14 rounded-control px-2 py-0.5 text-center font-action text-sm leading-[1.6] font-bold tabular-nums ${time.emphasis ? 'bg-ink text-action-label' : 'bg-white text-ink shadow-[inset_0_0_0_1px_var(--color-ink)]'}`}
+              className={`relative z-[1] mt-0.5 self-start justify-self-center min-w-14 rounded-control px-2 py-0.5 text-center font-action text-sm leading-[1.6] font-bold tabular-nums ${time.emphasis ? 'bg-ink text-on-dark-label' : 'bg-white text-ink shadow-[inset_0_0_0_1px_currentColor]'}`}
             >
               {time.label}
             </time>
@@ -70,13 +71,13 @@ export function RecipeList({ sections, ordered = false }: { sections: Section[];
       {sections.map((section) => (
         <section key={section.id}>
           {section.title && (
-            <h3 className="mt-[22px] mb-2.5 text-[13px] font-bold uppercase text-[var(--color-primary)]">{section.title}</h3>
+            <Eyebrow as="h3" className="mt-[22px] mb-2.5">{section.title}</Eyebrow>
           )}
           {ordered && section.itemTimes?.length === section.items.length ? <TimedList section={section} /> : <List className={listClass}>
             {section.items.map((item, itemIndex) => (
               <li
                 key={section.itemIds[itemIndex] ?? itemIndex}
-                className="mb-[13px] pl-1.5 text-base leading-[1.72] marker:font-[family-name:var(--font-body)] marker:text-base marker:font-extrabold marker:text-[var(--color-ink)]"
+                className="mb-[13px] pl-1.5 text-base leading-[1.72] marker:font-body marker:text-base marker:font-extrabold marker:text-ink"
               >
                 <Html as="span" html={item} />
               </li>
@@ -98,7 +99,7 @@ function FlatList({ items, ordered = false }: { items: string[]; ordered?: boole
       {items.map((item, index) => (
         <li
           key={index}
-          className="mb-[13px] pl-1.5 text-base leading-[1.72] marker:font-[family-name:var(--font-body)] marker:text-base marker:font-extrabold marker:text-[var(--color-ink)]"
+          className="mb-[13px] pl-1.5 text-base leading-[1.72] marker:font-body marker:text-base marker:font-extrabold marker:text-ink"
         >
           <Html as="span" html={item} />
         </li>
@@ -128,36 +129,36 @@ function RecipeBlockView({
       {block.ingredients.length > 0 && (
         <section>
           {index === context.firstRecipeBlockIndex && context.beforeIngredients}
-          <h2 className="m-0 pt-[30px] pb-3 border-t border-[var(--color-border)] text-[34px] leading-none font-bold">
+          <SectionTitle rule="top" className="pb-3">
             Ingredients
-          </h2>
+          </SectionTitle>
           <RecipeList sections={block.ingredients} />
         </section>
       )}
 
       {block.steps.length > 0 && (
         <section>
-          <h2 className="m-0 pt-[30px] pb-3 border-t border-[var(--color-border)] text-[34px] leading-none font-bold">
+          <SectionTitle rule="top" className="pb-3">
             Instructions
-          </h2>
+          </SectionTitle>
           <RecipeList sections={block.steps} ordered />
         </section>
       )}
 
       {block.equipment.length > 0 && (
         <section>
-          <h2 className="m-0 pt-[30px] pb-3 border-t border-[var(--color-border)] text-[34px] leading-none font-bold">
+          <SectionTitle rule="top" className="pb-3">
             Equipment
-          </h2>
+          </SectionTitle>
           <RecipeList sections={block.equipment} />
         </section>
       )}
 
       {(block.notes.length > 0 || block.tips.length > 0) && (
         <section>
-          <h2 className="m-0 pt-[30px] pb-3 border-t border-[var(--color-border)] text-[34px] leading-none font-bold">
+          <SectionTitle rule="top" className="pb-3">
             Notes
-          </h2>
+          </SectionTitle>
           <FlatList items={[...block.notes, ...block.tips]} />
         </section>
       )}

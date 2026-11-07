@@ -8,6 +8,8 @@ import type { ArticleContent } from '@eat-yeet/l4-content-model/articles'
 import { ArticleCard } from '@eat-yeet/l6-ui-catalog/cards'
 import { ContentPageArticle } from '@eat-yeet/l6-ui-content-blocks/page-article'
 import { createSharedPageBlockRegistry } from '@eat-yeet/l6-ui-content-blocks/page-blocks'
+import { Breadcrumbs } from '@eat-yeet/l5-ui-primitives/primitives/breadcrumbs'
+import { Eyebrow, PageTitle, SectionTitle } from '@eat-yeet/l5-ui-primitives/primitives/typography'
 
 type LearnCopy = {
   pages: {
@@ -28,10 +30,8 @@ function categoryLabel(category: string) {
 
 function ArticleGroup({ category, articles, priority=false }: { category: string; articles: ArticleSummary[]; priority?:boolean }) {
   return (
-    <section className="border-t border-border-light pt-10">
-      <h2 className="mb-6 font-display text-[28px] font-extrabold leading-tight text-ink">
-        {categoryLabel(category)}
-      </h2>
+    <section>
+      <SectionTitle size="title" rule="trailing" className="mb-6">{categoryLabel(category)}</SectionTitle>
       <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
         {articles.map((article,index) => (
           <ArticleCard key={article.slug} article={article} priority={priority&&index===0} />
@@ -51,17 +51,15 @@ export function LearnIndexPage({ articles, copy }: { articles: ArticleSummary[];
   return (
     <div className="mx-auto max-w-[var(--max-width)] px-6 pb-20 pt-8 md:px-8">
       <div className="mb-10">
-        <h1 className="font-display text-[clamp(34px,5vw,56px)] font-extrabold leading-none text-ink">
-          {copy.pages.learnHeading}
-        </h1>
-        <p className="mt-4 max-w-2xl text-base leading-relaxed text-ink/65">
+        <PageTitle>{copy.pages.learnHeading}</PageTitle>
+        <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground">
           {copy.pages.learnIntro}
         </p>
       </div>
 
       {articles.length === 0 ? (
-        <section className="border-t border-border-light py-16">
-          <p className="text-lg text-ink/65">No learning articles are available yet.</p>
+        <section className="border-t border-border py-16">
+          <p className="text-lg text-muted-foreground">No learning articles are available yet.</p>
         </section>
       ) : (
         <div className="grid gap-12">
@@ -86,7 +84,7 @@ function MoreLearnSection({
   if (articles.length === 0) return null
 
   const heading = (
-    <div className="mb-[22px] text-center font-[family-name:var(--font-display)] text-[36px] font-bold leading-[1.05] tracking-[0.8px] text-[var(--color-ink)]">
+    <div className="mb-[22px] text-center font-display text-page font-bold leading-[1.05] text-ink">
       <span role="heading" aria-level={2}>
         Learn More
       </span>
@@ -107,7 +105,7 @@ function MoreLearnSection({
   }
 
   return (
-    <section className="mt-14 border-t border-[var(--color-border)] pt-8 min-[1081px]:hidden" aria-label="More to learn">
+    <section className="mt-14 border-t border-border pt-8 min-[1081px]:hidden" aria-label="More to learn">
       {heading}
       <div className="grid gap-8 sm:grid-cols-2">
         {articles.map((candidate) => (
@@ -150,21 +148,11 @@ export function ArticleDetailPage({
       )}
     >
       <div className="min-[901px]:pt-10 max-[900px]:px-8 max-[640px]:px-[15px]">
-        <nav className="mb-5 flex flex-wrap gap-1.5 text-xs uppercase leading-[1.6] text-[var(--color-ink)]" aria-label="Breadcrumb">
-          <a href="/">Home</a>
-          <span>&gt;</span>
-          <a href="/learn">Learn</a>
-          <span>&gt;</span>
-          <span>{categoryLabel(article.category)}</span>
-        </nav>
-        <p className="mb-4 text-xs font-semibold uppercase tracking-[2px] text-[var(--color-primary)]">
-          {ARTICLE_TYPE_LABELS[article.type]}
-        </p>
-        <h1 className="m-0 max-w-[560px] text-[46px] font-bold leading-[1.08] max-[640px]:text-[32px]">
-          {article.title}
-        </h1>
+        <Breadcrumbs className="mb-5" crumbs={[{ label: 'Home', href: '/' }, { label: 'Learn', href: '/learn' }, { label: categoryLabel(article.category) }]} />
+        <Eyebrow className="mb-4">{ARTICLE_TYPE_LABELS[article.type]}</Eyebrow>
+        <PageTitle className="max-w-[560px]">{article.title}</PageTitle>
         {article.description && (
-          <p className="mt-5 max-w-[560px] text-xl leading-[1.45] text-[var(--color-ink)]/80 max-[640px]:text-lg">
+          <p className="mt-5 max-w-[560px] text-xl leading-[1.45] text-ink max-[640px]:text-lg">
             {article.description}
           </p>
         )}
@@ -196,7 +184,7 @@ export function ArticleDetailPage({
         hasRelated ? 'grid-cols-[minmax(0,770px)_280px] gap-20' : '!grid-cols-1',
       )}
       articleClassName={cn(
-        '!m-0 !border-0 !bg-transparent !p-0 !shadow-none text-lg leading-[1.72] max-[1080px]:mx-auto max-[640px]:text-[17px] [&_section]:!text-lg [&_section]:!leading-[1.72] max-[640px]:[&_section]:!text-[17px]',
+        '!m-0 !border-0 !bg-transparent !p-0 !shadow-none text-lg leading-[1.72] max-[1080px]:mx-auto max-[640px]:text-lg [&_section]:!text-lg [&_section]:!leading-[1.72] max-[640px]:[&_section]:!text-lg',
         hasRelated ? '!max-w-[770px]' : '!max-w-none',
       )}
       aside={hasRelated ? (

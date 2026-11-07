@@ -69,8 +69,8 @@ function RatingExample({ count = 0, ownRating = null, fail = false, unavailable 
     <div className="max-w-[var(--layout-recipe-copy)] bg-white p-6 text-ink"><RecipeRating title="New York Style Pizza" client={client} /></div>
   </AccountProvider>
 }
-const meta = { title: 'Recipes/Ratings', component: RatingExample,
-  parameters: { docs: { description: { component: 'Shared recipe rating form on the workbench yellow surface, with ink fields, ink selected stars and an ink submit action. Ratings, reviews and replies belong to the signed-in member, who can edit or delete them; signed-out readers see the aggregate and a sign-in action. Aggregate stars remain orange on the white reading surface.' } } },
+const meta = { title: 'Features/Recipes/Ratings', component: RatingExample,
+  parameters: { docs: { description: { component: 'The rating card is a white action Surface with the brand stripe: Geller title, star-orange filled stars over plum outlines, a light review field and a plum submit. The reply form is inline (no second stripe); replies sit behind a pink rule; chips and avatars use brand-soft. Ratings, reviews and replies belong to the signed-in member, who can edit or delete them; signed-out readers see the aggregate and a sign-in action. Aggregate stars remain orange on the white reading surface.' } } },
 } satisfies Meta<typeof RatingExample>
 export default meta
 type Story = StoryObj<typeof meta>

@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./cards": "./src/cards.tsx"
+    "./cards": "./src/cards.tsx",
+    "./catalog-fixtures": "./src/catalog-fixtures.ts"
   },
   "dependencies": {
     "@eat-yeet/l0-foundation": "workspace:*",

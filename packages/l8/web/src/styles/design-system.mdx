@@ -1,30 +1,31 @@
 import { Meta } from '@storybook/addon-docs/blocks';
-import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button';
 
 <Meta title="Foundations/Start Here" />
 
-# Eat / Yeet — Yellow + ink
+# Eat / Yeet: plum + pink
 
-Sunshine fields, almost-black ink, real food, and plain playful controls. Avenir carries reading, Geller article headings, and Bowlby the brand. The canonical usage and release contract is **docs/design-system.md** in the repository.
+Deep plum ink, bubblegum pink, an orange accent, real food on white. Avenir carries reading, Geller headings, Bowlby the brand. The normative contract is **docs/design-system.md** in the repository; this handbook shows the production components that implement it. If the two ever disagree, the doc wins and the handbook is a bug.
 
-## Start with the job
+## Foundations
 
-Use saturated yellow for brand moments, recipe facts, and unselected category buttons; white for long reading. Pale yellow is reserved for occasional prose callouts. Actions use ink with cream labels. Red means a genuine error or destructive action. Learn, recipes, and workbench share these roles.
+- **Color**: role tokens, the plum ramp, and the one selected look (pink fill, plum label).
+- **Typography**: the named type scale and two uppercase letter-spacings.
+- **Spacing & Radius**: five radii by role; nested radii are outer minus inset.
+- **Elevation & Motion**: card, raised, overlay.
+- **Gradients & Accents**: the plum hero gradient, and the pink→orange accent used only as the **stripe** (top of an action card or dialog, one per view) and the **accent rule** (under a title).
+- **Iconography**: Lucide in currentColor; the pink-icing doughnut favicon.
 
-<Button>Make it yours</Button>
+## The rules that come up most
 
-## Choose a real control
+- **Fields** are light (white, 1px edge, plum text) in dialogs and cards, or `underline` on page forms. There are no dark fields, and no fields on solid pink or plum.
+- **Tint** is only for informational asides and History's current row. Controls sit on white.
+- **Selected** is always pink with a plum label: Choice Group, Toggle, the highlighted search result.
+- **Pink is never text on white.** Secondary text is `muted-foreground`, never transparent ink.
 
-Open **Controls / Button**, **Fields**, and **Choice Group** for live variants, states, API controls, and interactions. These are production components. Press Tab to inspect the inset focus indicator. Button labels are never underlined. Prose links still are.
+## Where to look
 
-Text fields use flat ink fills with light text and no bottom borders. Full-height sheets have square corners. Recipe facts share a strong yellow panel; dough summaries use ink with prominent yellow totals and aligned ingredient weights.
+**Primitives** are the owned controls (Button, Toggle, Fields, Choice Group, Dialog…). **Patterns** compose them (Surface, Accent Rule, Typography, Breadcrumbs, Callout, Disclosure, Catalog Cards, Content Blocks). **Shell** is navigation, account and error states. **Features** are Home, Recipes, Learn, Search and Notebook; **Pages** are full compositions.
 
-Nested radii follow one rule: outer radius minus inset equals inner radius. Do not independently round a selected pill and its track. Do not add decorative drops, colored button undersides, or white pills on pale tracks.
+Home and Notebook page stories live in `packages/l8/web/src/stories` because they compose the active app's configuration and registries (`@app/*`), which only web composition may import. Every other story lives beside its component.
 
-## Compose and verify
-
-Use **Catalog**, **Content Blocks**, and **Shell** for shared patterns. **Recipes / Dough workbench** includes weights, target batch, pizza, invalid flour blend, and apply/close behavior. Route-level tests cover real recipe persistence and configuration.
-
-Every adopted control needs default, hover, keyboard focus, selected/pressed where meaningful, disabled, error, long-label, and narrow-layout evidence. Test actual text/fill pairs, semantics and keyboard operation. `pnpm test:storybook` runs rendered stories and axe; it does not replace visual or screen-reader review.
-
-The approved favicon keeps the existing bite and sprinkles, with yellow icing and golden-orange dough. App-bar navigation uses the text lockup alone.
+Every component page opens with when to use it, when not to, and its variants by role. `pnpm test:storybook` renders every story with axe and play functions; it does not replace keyboard, visual or screen-reader review.

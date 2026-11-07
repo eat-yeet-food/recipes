@@ -3,27 +3,33 @@ import { expect, userEvent, within } from 'storybook/test'
 import { Button } from './button'
 import { Trash2 } from 'lucide-react'
 
+const usage = `**When to use:** any action. Filled \`default\` (plum, light label) is the one primary action in a group; \`utility\` (thin plum outline) for page utilities such as Print or History; \`link\` for quiet, flush text actions; \`danger\` only for destructive actions.
+
+**On dark surfaces** (plum panels, the hero): \`on-dark\` is the pink fill with a plum label; \`quiet-on-dark\` is the flush text action in the light label color.
+
+**When not to use:** on/off state belongs to **Toggle**; one-of-several choices belong to **Choice Group**; navigation uses \`asChild\` with a real anchor.
+
+**Do:** keep labels plain (never underlined unless the variant is a text action). **Don't:** override colors per call site, put two filled actions side by side, or place filled buttons on solid pink.`
+
 const meta = {
-  title: 'Controls/Button', component: Button,
+  title: 'Primitives/Button', component: Button,
   args: { children: 'Save to Notebook' },
-  parameters: { layout: 'padded', docs: { description: { component: 'Filled and outlined actions retain their padding and plain labels. Borderless text actions (link, ghost, quiet-on-ink) are flush, underlined, and have no padding or hover fill; their minimum target is 24px with outward keyboard focus. Icon sizes retain dedicated targets. Use asChild for navigation links. Outline remains a compatibility alias for secondary; utility owns the thin border.' } } },
-  argTypes: { variant: { control: 'select', options: ['default', 'secondary', 'ghost', 'utility', 'on-ink', 'quiet-on-ink', 'danger', 'link'] }, size: { control: 'select', options: ['default', 'sm', 'lg', 'icon'] } },
+  parameters: { layout: 'padded', docs: { description: { component: usage } } },
+  argTypes: { variant: { control: 'select', options: ['default', 'utility', 'ghost', 'link', 'on-dark', 'quiet-on-dark', 'danger'] }, size: { control: 'select', options: ['default', 'sm', 'lg', 'icon'] } },
 } satisfies Meta<typeof Button>
 export default meta
 type Story = StoryObj<typeof meta>
+const OnDark = (Story: () => React.ReactNode) => <div className="rounded-field bg-ink p-6"><Story /></div>
 export const Primary: Story = {}
-export const Secondary: Story = { args: { variant: 'secondary' } }
-export const Quiet: Story = { args: { variant: 'link', children: 'Cancel' } }
+export const Utility: Story = { args: { variant: 'utility', size: 'sm', children: 'Print Recipe' } }
+export const TextAction: Story = { args: { variant: 'link', children: 'Cancel' } }
 export const Ghost: Story = { args: { variant: 'ghost', children: 'New formula' } }
-export const TextActionOnYellow: Story = { decorators: [(Story) => <div className="max-w-80 bg-brand p-6"><p className="mb-4 text-sm font-bold">Oven method</p><Story /></div>], args: { variant: 'link', children: 'Use recommended formula for Outdoor Oven' } }
 export const DisabledTextAction: Story = { args: { variant: 'link', disabled: true, children: 'Make default' } }
 export const IconAction: Story = { args: { variant: 'ghost', size: 'icon', 'aria-label': 'Delete formula', children: <Trash2 /> } }
-export const Utility: Story = { args: { variant: 'utility', size: 'sm', children: 'Print Recipe' } }
-export const OnInk: Story = { decorators: [(Story) => <div className="rounded-field bg-ink p-6"><Story /></div>], args: { variant: 'on-ink', children: 'Save formula' } }
-export const DisabledOnInk: Story = { decorators: [(Story) => <div className="rounded-field bg-ink p-6"><Story /></div>], args: { variant: 'on-ink', disabled: true, children: 'Save new' } }
-export const QuietOnInk: Story = { decorators: [(Story) => <div className="rounded-field bg-ink p-6"><Story /></div>], args: { variant: 'quiet-on-ink', children: 'New formula' } }
+export const OnDarkSurface: Story = { decorators: [OnDark], args: { variant: 'on-dark', children: 'Save formula' } }
+export const DisabledOnDarkSurface: Story = { decorators: [OnDark], args: { variant: 'on-dark', disabled: true, children: 'Save new' } }
+export const QuietOnDarkSurface: Story = { decorators: [OnDark], args: { variant: 'quiet-on-dark', children: 'Undo' } }
 export const Destructive: Story = { args: { variant: 'danger', children: 'Delete formula' } }
 export const Disabled: Story = { args: { disabled: true, children: 'Apply recipe' } }
-export const OnYellow: Story = { decorators: [(Story) => <div className="rounded-surface bg-brand p-8"><Story /></div>], args: { children: 'Use this batch →' } }
 export const LongLabel: Story = { decorators: [(Story) => <div className="max-w-56"><Story /></div>], args: { children: 'Use the recommended formula for this oven' } }
 export const KeyboardFocus: Story = { play: async ({ canvasElement }) => { const button = within(canvasElement).getByRole('button'); button.focus(); await userEvent.tab(); await userEvent.tab({ shift: true }); await expect(button).toHaveFocus() } }

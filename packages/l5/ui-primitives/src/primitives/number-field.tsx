@@ -73,7 +73,7 @@ export function NumberField({ label, value, onValueChange, suffix, min = 0, max 
         onBlur={() => { setFocused(false); if (!error) setEdit(null) }}
         onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); event.currentTarget.blur() } }}
       />
-      {suffix && <span id={`${id}-unit`} className={cn('pointer-events-none absolute top-1/2 -translate-y-1/2', underline ? 'right-0 text-sm text-muted-foreground' : showError ? 'right-3 text-xs text-white' : 'right-3 text-xs text-action-label')}>{suffix}</span>}
+      {suffix && <span id={`${id}-unit`} className={cn('pointer-events-none absolute top-1/2 -translate-y-1/2', underline ? 'right-0 text-sm text-muted-foreground' : showError ? 'right-3 text-xs text-white' : 'right-3 text-xs text-on-dark-label')}>{suffix}</span>}
     </div>
     {showError && <p id={`${id}-error`} className="text-xs text-danger">{error}</p>}
   </div>

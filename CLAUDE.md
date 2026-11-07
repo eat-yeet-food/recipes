@@ -69,7 +69,7 @@ Metadata is server-rendered, uses a trusted canonical origin and strips query pa
 
 Tailwind compiles `packages/l8/web/src/styles/global.css`. Use semantic tokens; avoid raw component colors. `site-overrides.css` is for fonts, root variables, scoped content and app surface hooks. Shared owned controls should remain shared across pages and Storybook.
 
-`docs/design-system.md` defines Yellow + ink. Filled/outlined labels remain plain; borderless text actions use the shared unpadded, underlined treatment. Selection radii derive from an outer radius and inset. Preserve the approved yellow-icing/orange-dough favicon.
+`docs/design-system.md` defines plum + pink. Filled/outlined labels remain plain; borderless text actions use the shared unpadded, underlined treatment. Selection radii derive from an outer radius and inset; selected is always pink with a plum label. Fields are light or underline, never dark, and never on a solid brand fill. The pink→orange stripe tops only white action cards and dialogs (one per view) and comes from the shared Surface/Dialog primitives. Preserve the approved pink-icing doughnut favicon.
 
 Check compiled utility availability with `pnpm classes` or `node scripts/has-class.mjs 'mt-12'`. These read the public Next CSS, excluding Payload admin CSS. Ignore generated Next/OpenNext output in source policy scans.
 

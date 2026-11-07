@@ -73,7 +73,7 @@ function Page({ view, signedIn = true }: { view: 'library' | 'scratch' | 'formul
 }
 
 const meta = {
-  title: 'Kitchen/Pages',
+  title: 'Features/Notebook/Pages',
   component: Page,
   parameters: { layout: 'fullscreen', docs: { description: { component: 'Notebook pages composed with the app’s dough calculator and in-memory account and kitchen transports. Recipes stay as written; each formula has its own page, saves automatically and keeps History.' } } },
 } satisfies Meta<typeof Page>

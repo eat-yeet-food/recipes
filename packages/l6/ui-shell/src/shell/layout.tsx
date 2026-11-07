@@ -64,7 +64,7 @@ export function Nav({
   const heroVisible = routeHasDarkHero(pathname) && !scrolled
   const navBg = onHeroPage
     ? 'bg-white'
-    : 'bg-white/92 backdrop-blur-[16px] shadow-[0_1px_0_color-mix(in_srgb,var(--color-ink)_8%,transparent)]'
+    : 'bg-white/92 backdrop-blur-[16px] shadow-card'
 
   // <Wordmark> carries its own color, so only the over-photo shadow varies.
   const wordmarkClass = onHeroPage
@@ -72,12 +72,12 @@ export function Nav({
     : 'transition-nav-icon'
 
   const linkClass = heroVisible
-    ? 'min-h-11 inline-flex items-center font-nav text-sm font-bold transition-nav-text text-white [text-shadow:0_1px_8px_color-mix(in_srgb,var(--color-black)_45%,transparent),0_0_16px_color-mix(in_srgb,var(--color-black)_20%,transparent)] hover:text-highlight'
-    : 'min-h-11 inline-flex items-center font-nav text-sm font-bold transition-nav-text text-ink hover:text-ink/70'
+    ? 'min-h-11 inline-flex items-center font-nav text-sm font-bold transition-nav-text text-white [text-shadow:0_1px_8px_rgb(0_0_0/45%),0_0_16px_rgb(0_0_0/20%)] hover:text-brand'
+    : 'min-h-11 inline-flex items-center font-nav text-sm font-bold transition-nav-text text-ink underline-offset-8 hover:underline'
 
   const searchBtnClass = heroVisible
-    ? 'text-white/80 hover:bg-white/10 hover:text-white'
-    : 'text-ink/65 hover:text-ink'
+    ? 'text-white hover:bg-white/10'
+    : 'text-ink hover:bg-muted'
 
   return (
     <nav
@@ -127,7 +127,7 @@ export function Nav({
               className={cn(
                 'size-11',
                 '',
-                heroVisible ? 'text-white hover:text-white/80' : '',
+                heroVisible ? 'text-white hover:bg-white/10' : 'text-ink',
               )}
               aria-label="Open menu"
               aria-expanded={menuOpen}
@@ -139,10 +139,10 @@ export function Nav({
           </div>
         </div>
       </div>
-      <div id="mobile-nav-menu" hidden={!menuOpen} className="border-t border-ink/10 bg-white px-4 py-3 md:hidden">
+      <div id="mobile-nav-menu" hidden={!menuOpen} className="border-t border-border bg-white px-4 py-3 md:hidden">
         <div className="mx-auto flex max-w-[var(--max-width)] flex-col gap-1">
-          {navigation.filter(item=>item.mobile!==false).map(item=><Link key={item.href} to={item.href} onClick={()=>setMenuOpen(false)} className="rounded px-2 py-3 min-h-11 inline-flex items-center font-nav text-sm font-bold text-ink hover:bg-ink/5">{item.label}</Link>)}
-          <AccountMenuRow onNavigate={()=>setMenuOpen(false)} className="rounded px-2 py-3 min-h-11 inline-flex items-center font-nav text-sm font-bold text-ink hover:bg-ink/5" />
+          {navigation.filter(item=>item.mobile!==false).map(item=><Link key={item.href} to={item.href} onClick={()=>setMenuOpen(false)} className="rounded-field px-2 py-3 min-h-11 inline-flex items-center font-nav text-sm font-bold text-ink hover:bg-muted">{item.label}</Link>)}
+          <AccountMenuRow onNavigate={()=>setMenuOpen(false)} className="rounded-field px-2 py-3 min-h-11 inline-flex items-center font-nav text-sm font-bold text-ink hover:bg-muted" />
         </div>
       </div>
     </nav>
@@ -168,7 +168,7 @@ export function Footer({ siteName, wordmark, navigation = [{label:"Home",href:"/
         <nav data-site-footer-links="" className="mt-4 flex flex-wrap justify-center gap-x-6 gap-y-1" aria-label="Footer">
           {navigation.map(item=><Link key={item.href} to={item.href} className={linkClass}>{item.label}</Link>)}
         </nav>
-        <p className="mt-4 text-[11px] tracking-[1px] text-ink/70">
+        <p className="mt-4 text-micro tracking-label text-muted-foreground">
           &copy; {year} {siteName}. All rights reserved.
         </p>
       </div>

@@ -1,4 +1,6 @@
 'use client'
+import { Breadcrumbs } from '@eat-yeet/l5-ui-primitives/primitives/breadcrumbs'
+import { Eyebrow, pageTitleClasses } from '@eat-yeet/l5-ui-primitives/primitives/typography'
 import { ResponsiveImage } from '@eat-yeet/l5-ui-primitives/primitives/responsive-image'
 import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react'
 
@@ -27,7 +29,7 @@ type RecipeArticleAsideProps = {
   focusedCooking: boolean
 }
 
-export const recipeTitleClass = 'max-w-[var(--layout-recipe-copy)] text-[34px] leading-[1.15] tracking-[1.2px] font-bold'
+export const recipeTitleClass = cn(pageTitleClasses.standard, 'max-w-[var(--layout-recipe-copy)]')
 
 /** Overrides for pages that present a recipe under another title, such as a Notebook bake sheet. */
 export type RecipeArticleHeading = {
@@ -60,15 +62,10 @@ export function RecipeArticleHeader({
   const crumbs = heading?.crumbs ?? [{ label: 'Home', href: '/' }, { label: 'Recipes', href: '/recipes' }, { label: page.title }]
   return (
     <div className="@container">
-      <nav className="flex flex-wrap gap-1.5 mb-5 text-[var(--color-ink)] text-xs leading-[1.6] uppercase print:hidden" aria-label="Breadcrumb">
-        {crumbs.map((crumb, index) => <Fragment key={`${crumb.label}-${index}`}>
-          {index > 0 && <span>&gt;</span>}
-          {crumb.href ? <a href={crumb.href}>{crumb.label}</a> : <span>{crumb.label}</span>}
-        </Fragment>)}
-      </nav>
+      <Breadcrumbs crumbs={crumbs} className="mb-5" />
       <div>
         {heading?.titleElement ?? <h1 className={`m-0 min-w-0 ${recipeTitleClass}`}>{heading?.title ?? page.title}</h1>}
-        <div className="mt-1.5 text-xs uppercase text-[var(--color-primary)]">{heading?.byline ?? 'By Patrick Hogan'}</div>
+        <Eyebrow as="div" size="small" tone="muted" className="mt-1.5">{heading?.byline ?? 'By Patrick Hogan'}</Eyebrow>
       </div>
       <div className="mb-6 mt-4 flex flex-wrap gap-3 print:hidden" role="group" aria-label="Page actions">
         {heading?.actions}
@@ -211,7 +208,6 @@ export function RecipeArticle({
       )}
       articleClassName={cn(
         'mt-0 max-w-[var(--layout-recipe-copy)] bg-white pt-0 pb-[38px] max-[640px]:pb-[30px]',
-        focusedCooking && 'shadow-none',
       )}
       aside={aside?.({ page, focusedCooking })}
     />

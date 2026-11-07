@@ -8,6 +8,7 @@ import { kitchenErrorMessage, type KitchenClient } from './kitchen-client'
 import { decodeKitchenState, kitchenPath, type KitchenRecipe } from './kitchen-plugin'
 import { FormulaTitle, KitchenHeader, KitchenNotice, SaveStatus, type KitchenNoticeValue } from './kitchen-ui'
 import { KitchenWorkspace } from './kitchen-workspace'
+import { Callout } from '@eat-yeet/l5-ui-primitives/primitives/callout'
 
 // Unsaved work is a per-browser convenience; storage may be unavailable.
 const scratchKey = (slug: string) => `eatyeet:kitchen:${slug}`
@@ -134,11 +135,11 @@ export function KitchenScratchPage({ kitchen, client, sharedConfig, saveOnArriva
         />
       </>}
       changes={plugin.changes(recipe, config, defaultState, state)} onReset={reset}
-      aside={<section aria-labelledby="keep-it" className="grid gap-2 rounded-field bg-tint p-5">
+      aside={<Callout as="section" aria-labelledby="keep-it" className="grid gap-2 p-5">
         <h2 id="keep-it" className="font-action text-lg font-bold">Want to keep it?</h2>
         <p className="text-sm leading-relaxed">Saving keeps every change in History. Click the name above to change it, now or later. {notebook.local ? 'Without an account it stays in this browser; sign in any time to move it to your account and open it anywhere.' : 'It opens on any device you sign in on.'}</p>
-      </section>}
-      dockAction={<Button variant="on-ink" size="sm" disabled={errors.length > 0 || saving || !store} onClick={save}>{saving ? 'Saving…' : 'Save'}</Button>}
+      </Callout>}
+      dockAction={<Button variant="on-dark" size="sm" disabled={errors.length > 0 || saving || !store} onClick={save}>{saving ? 'Saving…' : 'Save'}</Button>}
     />
     <KitchenNotice notice={notice} onDismiss={() => setNotice(null)} raised />
   </>

@@ -23,7 +23,7 @@ export function RecipeKitchenLink({ recipeSlug, client }: { recipeSlug: string; 
   }, [store, recipeSlug])
   return <div data-recipe-kitchen="" className="mb-6 flex items-center gap-3.5 py-3 print:hidden">
     <span aria-hidden="true" className="grid size-10 shrink-0 place-items-center rounded-full bg-brand"><FlaskConical className="size-5" /></span>
-    <p className="min-w-0 text-[15px] leading-relaxed">
+    <p className="min-w-0 text-body-sm leading-relaxed">
       {mine.length
         ? <>Your versions in Notebook: {mine.slice(0, 3).map((formula, index) => <Fragment key={formula.id}>
             {index > 0 && ', '}<a className={textLink} href={kitchenPath(recipeSlug, formula.id, true)}>{formula.name}</a>

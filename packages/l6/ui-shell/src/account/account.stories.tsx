@@ -22,7 +22,7 @@ const nav = <Nav pathname="/recipes" siteName="Eat / Yeet" wordmark={{ first: 'E
 const meta = {
   title: 'Shell/Account',
   component: SignInPage,
-  parameters: { layout: 'fullscreen', docs: { description: { component: 'Member sign-in. The app bar shows Sign in or the member’s initials menu. Account pages use one yellow panel with ink fields, a full-width ink primary action and underlined text actions; Google uses the utility treatment. New Google members confirm a public name before it appears on reviews.' } } },
+  parameters: { layout: 'fullscreen', docs: { description: { component: 'Member sign-in. The app bar shows Sign in or the member’s initials menu. Account pages are white with a PageTitle, underline fields, a full-width plum primary action and underlined text actions; Google uses the utility treatment. The avatar is a pink initials circle. The public-name prompt is a white dialog with the brand stripe and a light field. New Google members confirm a public name before it appears on reviews.' } } },
 } satisfies Meta<typeof SignInPage>
 export default meta
 type Story = StoryObj<typeof meta>

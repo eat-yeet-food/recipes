@@ -1,3 +1,5 @@
+> **Historical record.** This file records verification of the September 2026 yellow + ink rollout. The current system is plum + pink (`docs/design-system.md`); its verification is in `docs/changes/plum-pink/verification.md`.
+
 # Yellow + ink release verification
 
 Reviewed September 7, 2026. The approved usage contract is [design-system.md](design-system.md); runtime tokens and production components remain the implementation source of truth.

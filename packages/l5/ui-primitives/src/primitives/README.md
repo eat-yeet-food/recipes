@@ -1,21 +1,21 @@
-# Owned controls
+# Owned controls and patterns
 
 These components own shared interaction and styling. Import through
 `@eat-yeet/l5-ui-primitives/primitives/<name>` and follow `docs/design-system.md`.
-Their colocated Storybook pages show production components and supported states.
+Every file here has a colocated Storybook page with its usage rules and states.
 
-Button uses flat fills, plain labels and inset keyboard focus. `asChild` renders
-a real navigation anchor. The legacy `outline` variant is a filled-secondary
-alias; new callers should say `secondary`. `link` means a quiet button treatment,
-not underlined text or a change in semantics.
+**Controls.** Button (`default`, `utility`, `ghost`, `link`, `on-dark`,
+`quiet-on-dark`, `danger`) and Toggle (the pressed on/off control) in `button`;
+Choice Group; Fields (`input`, `select`, `textarea`, `checkbox`, `input-group`)
+with two surfaces, light (default) and `underline`; Number Field; Switch; Dialog
+(`stripe` for action dialogs, `sheet` for viewport sheets); Command;
+Navigation Link; Responsive Image.
 
-ChoiceGroup derives nested radii from the shared outer radius and inset. Input,
-Select and Textarea share field geometry; visible labels and associated errors
-remain the caller's responsibility. Fields use flat ink fills with inset focus and no bottom edge. DialogContent's `sheet` variant removes every corner radius for viewport-attached sheets; floating dialogs retain surface rounding. Dialog and Checkbox retain Radix semantics.
+**Patterns.** Surface (white card; `action` adds the brand stripe) and
+AccentRule in `surface`; Eyebrow, PageTitle and SectionTitle in `typography`;
+Breadcrumbs; Callout (`aside`, `danger`, `notice`); Disclosure.
 
-TextSelect is a native select presented as a borderless text action for a
-choice inside a line of label text. It inherits the surrounding type and
-truncates long labels; it is not a standalone form field.
-
-Do not override these with feature-wide descendant selectors or story-only form
-CSS. Add meaningful variants here and update their usage and state stories.
+Do not override these with feature-wide descendant selectors or story-only CSS,
+and do not hand-roll their look elsewhere (the design-system checker fails on
+hand-rolled pills, stripes, accent rules and dark fields). Add meaningful
+variants here and update their usage and state stories.

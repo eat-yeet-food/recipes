@@ -60,10 +60,22 @@ For a new pattern, record purpose, owner, supported states, keyboard semantics,
 responsive behavior and adoption status in the handbook. Explicitly record
 untested states; don't label a token swap or story build a completed system.
 
+The plum + pink rules agents most often break: **selected** is always the pink
+fill with a plum label (Choice Group, Toggle, palette highlight); the **stripe**
+tops only a white card or dialog that asks the reader to act, one per view, via
+`Surface action` or `DialogContent stripe`; the **accent rule** comes only from
+`AccentRule`; **tint** is only for aside Callouts and History's current row;
+**fields** are light or `underline`, never dark and never on a solid pink or
+plum container. Use the owned Eyebrow, PageTitle, SectionTitle, Breadcrumbs,
+Callout, Disclosure and CatalogCard patterns instead of restyling headings,
+crumbs, alerts, show/hide rows or cards. Read the doc's **Color**, **Type,
+spacing, elevation** and **Owned patterns** sections for values and owners.
+
 Classify the surface before styling it: action, editable field, passive facts, result summary, floating dialog, or viewport sheet. Consult the handbook for that role; do not make every surface a pale rounded card. Verify the component in its actual parent background, including nested shapes and input edges.
 
 Verify actual text/fill pairings, keyboard focus, selected/error/disabled states,
 long labels and narrow layouts. Run the CLAUDE checks, review rendered story/app
 screenshots, and investigate axe incomplete results. Never auto-accept visual
 baselines merely to pass a check. Context-appropriate action affordances, coordinated nested radii,
-and the approved favicon belong to the contract, not local exceptions.
+and the approved pink-icing doughnut favicon belong to the contract, not local
+exceptions.

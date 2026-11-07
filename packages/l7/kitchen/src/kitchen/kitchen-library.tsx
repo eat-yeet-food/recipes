@@ -1,63 +1,43 @@
 'use client'
 import { useCallback, useEffect, useId, useMemo, useState } from 'react'
-import { ArrowRight, ChevronDown, ChevronUp, Clock, Plus, UtensilsCrossed } from 'lucide-react'
+import { ArrowRight, Clock, Plus } from 'lucide-react'
 import { cn } from '@eat-yeet/l0-foundation/utils'
 import { imageUrl } from '@eat-yeet/l1-recipe-model/recipes'
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
-import { Link } from '@eat-yeet/l5-ui-primitives/primitives/navigation'
-import { ResponsiveImage } from '@eat-yeet/l5-ui-primitives/primitives/responsive-image'
+import { Callout } from '@eat-yeet/l5-ui-primitives/primitives/callout'
+import { Disclosure } from '@eat-yeet/l5-ui-primitives/primitives/disclosure'
+import { SectionTitle } from '@eat-yeet/l5-ui-primitives/primitives/typography'
+import { CatalogCard } from '@eat-yeet/l6-ui-catalog/cards'
 import { SignInLink } from '@eat-yeet/l6-ui-shell/account/account-nav'
 import { useNotebookClient } from './kitchen-local'
 import { kitchenErrorMessage, type KitchenClient, type KitchenFormulaSummary, type KitchenList } from './kitchen-client'
 import { decodeKitchenState, kitchenPath, type KitchenRecipe } from './kitchen-plugin'
 import { KitchenBand, KitchenNotice, kitchenPageClass, timeAgo, type KitchenNoticeValue } from './kitchen-ui'
 
-const cardClass = 'group flex flex-col overflow-hidden rounded-surface bg-white text-ink no-underline transition-card-hover hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink'
-const imageSizes = '(max-width: 640px) calc(100vw - 32px), (max-width: 1024px) calc((100vw - 72px) / 2), 368px'
-
-function CardImage({ kitchen }: { kitchen: KitchenRecipe }) {
-  const src = imageUrl(kitchen.recipe)
-  return <div className="relative aspect-[16/10] w-full overflow-hidden bg-tint">
-    {src
-      ? <ResponsiveImage src={src} alt="" width="800" height="500" sizes={imageSizes} className="absolute inset-0 h-full w-full object-cover transition-image-zoom group-hover:scale-[1.06]" />
-      : <UtensilsCrossed aria-hidden="true" className="absolute inset-0 m-auto size-10 text-ink/15" strokeWidth="1.25" />}
-  </div>
-}
-
 function FormulaCard({ kitchen, formula }: { kitchen: KitchenRecipe; formula: KitchenFormulaSummary }) {
   const state = decodeKitchenState(kitchen, formula.state)
-  return <Link to={kitchenPath(formula.recipeSlug, formula.id, true)} className={cardClass} data-kitchen-formula={formula.id}>
-    <CardImage kitchen={kitchen} />
-    <div className="flex flex-1 flex-col gap-2 px-5 pt-5 pb-1.5">
-      <h3 className="break-words font-display text-[21px] leading-tight font-bold">{formula.name}</h3>
-      <p className="text-sm text-muted-foreground">From {kitchen.recipe.title}</p>
-      <p className="flex-1 text-sm leading-normal">{state ? kitchen.plugin.facts(kitchen.recipe, kitchen.config, state) : 'Open to update this formula for the current recipe.'}</p>
-      <p className="mt-2 flex items-center gap-1.5 border-t border-border pt-3 text-xs text-muted-foreground">
-        <Clock aria-hidden="true" className="size-3.5 opacity-60" />Edited {timeAgo(formula.updatedAt)}
-      </p>
-    </div>
-  </Link>
+  return <CatalogCard to={kitchenPath(formula.recipeSlug, formula.id, true)} image={imageUrl(kitchen.recipe)} title={formula.name} data-kitchen-formula={formula.id}
+    meta={<span className="flex items-center gap-1.5"><Clock aria-hidden="true" className="size-3.5" />Edited {timeAgo(formula.updatedAt)}</span>}>
+    <p className="text-sm text-muted-foreground">From {kitchen.recipe.title}</p>
+    <p className="mt-2 text-sm leading-normal">{state ? kitchen.plugin.facts(kitchen.recipe, kitchen.config, state) : 'Open to update this formula for the current recipe.'}</p>
+  </CatalogCard>
 }
 
 function StartCards({ recipes, headingId }: { recipes: KitchenRecipe[]; headingId: string }) {
   return <ul aria-labelledby={headingId} className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
     {recipes.map((kitchen) => <li key={kitchen.recipe.slug} className="contents">
-      <Link to={kitchenPath(kitchen.recipe.slug)} className={cn(cardClass, 'bg-muted')} data-kitchen-start={kitchen.recipe.slug}>
-        <CardImage kitchen={kitchen} />
-        <div className="flex flex-1 flex-col gap-2 p-5">
-          <h3 className="font-display text-[21px] leading-tight font-bold">{kitchen.recipe.title}</h3>
-          <p className="flex-1 text-sm leading-normal text-muted-foreground">{kitchen.plugin.facts(kitchen.recipe, kitchen.config, kitchen.defaultState)}</p>
-          <span className="mt-2 inline-flex items-center gap-1.5 font-action text-sm font-bold underline decoration-1 underline-offset-4 group-hover:decoration-2">Start from this recipe<ArrowRight aria-hidden="true" className="size-4" /></span>
-        </div>
-      </Link>
+      <CatalogCard to={kitchenPath(kitchen.recipe.slug)} image={imageUrl(kitchen.recipe)} title={kitchen.recipe.title} data-kitchen-start={kitchen.recipe.slug}
+        description={kitchen.plugin.facts(kitchen.recipe, kitchen.config, kitchen.defaultState)}>
+        <span className="mt-3 inline-flex items-center gap-1.5 font-action text-sm font-bold underline decoration-1 underline-offset-4 group-hover:decoration-2">Start from this recipe<ArrowRight aria-hidden="true" className="size-4" /></span>
+      </CatalogCard>
     </li>)}
   </ul>
 }
 
 function GroupHeading({ id, title, count }: { id: string; title: string; count?: number }) {
-  return <h2 id={id} className="flex items-center gap-4 font-display text-[28px] leading-tight font-bold after:h-px after:flex-1 after:bg-border">
-    {title}{count !== undefined && <span className="font-body text-[15px] font-normal text-muted-foreground">{count}</span>}
-  </h2>
+  return <SectionTitle id={id} size="title" rule="trailing">
+    {title}{count !== undefined && <span className="font-body text-body-sm font-normal text-muted-foreground">{count}</span>}
+  </SectionTitle>
 }
 
 export function KitchenLibraryPage({ recipes, client: remote, deletedId }: { recipes: KitchenRecipe[]; client: KitchenClient; deletedId?: string }) {
@@ -69,7 +49,6 @@ export function KitchenLibraryPage({ recipes, client: remote, deletedId }: { rec
   const [deletedOpen, setDeletedOpen] = useState(false)
   const [restoring, setRestoring] = useState<string | null>(null)
   const startId = useId()
-  const deletedPanel = useId()
   const bySlug = useMemo(() => new Map(recipes.map((kitchen) => [kitchen.recipe.slug, kitchen])), [recipes])
 
   const load = useCallback(async () => {
@@ -134,13 +113,13 @@ export function KitchenLibraryPage({ recipes, client: remote, deletedId }: { rec
       <p>Your own versions of the dough recipes. Recipes stay as written; everything you change lives here and saves as you go.</p>
     </KitchenBand>
     <div className={cn(kitchenPageClass, 'grid gap-12 py-11 max-[640px]:py-8')}>
-      {local && <p className="max-w-[640px] text-base leading-relaxed">
+      {local && <Callout className="max-w-[640px] text-base">
         No account needed: formulas you save are kept in this browser. <SignInLink className="font-action font-bold underline decoration-1 underline-offset-4 hover:decoration-2">Sign in</SignInLink> to keep them in your account and open them on every device; anything saved here moves over.
-      </p>}
+      </Callout>}
       {ready && !list && !error && <p role="status" className="text-muted-foreground">Loading your formulas…</p>}
-      {error && <div role="alert" className="flex flex-wrap items-center gap-4 rounded-field bg-danger-soft p-4 text-sm text-danger">
+      {error && <Callout tone="danger" className="flex flex-wrap items-center gap-4">
         <span>{error}</span><Button variant="link" className="text-danger" onClick={() => void load()}>Try again</Button>
-      </div>}
+      </Callout>}
       {ready && list && count === 0 && <p className="text-base leading-relaxed">No formulas yet. Start from a recipe below, change anything, then save it here.</p>}
       {groups.map(([id, group]) => <section key={id} aria-labelledby={`group-${id}`} className="grid gap-6">
         <GroupHeading id={`group-${id}`} title={group.label} count={group.items.length} />
@@ -150,19 +129,18 @@ export function KitchenLibraryPage({ recipes, client: remote, deletedId }: { rec
       </section>)}
       <section id={startId} aria-labelledby={`${startId}-heading`} className="grid scroll-mt-24 gap-6">
         <GroupHeading id={`${startId}-heading`} title="Start from a recipe" />
-        <p className="-mt-2 max-w-[640px] text-[15px] leading-relaxed text-muted-foreground">Copies the recipe’s formula into a page you can change freely. The recipe itself never changes.</p>
+        <p className="-mt-2 max-w-[640px] text-body-sm leading-relaxed text-muted-foreground">Copies the recipe’s formula into a page you can change freely. The recipe itself never changes.</p>
         <StartCards recipes={recipes} headingId={`${startId}-heading`} />
       </section>
       {deleted.length > 0 && <section aria-label="Recently deleted" className="grid gap-4 border-t border-border pt-6">
-        <Button variant="link" className="justify-self-start gap-1.5" aria-expanded={deletedOpen} aria-controls={deletedPanel} onClick={() => setDeletedOpen((open) => !open)}>
-          Recently deleted ({deleted.length}){deletedOpen ? <ChevronUp aria-hidden="true" className="size-4" /> : <ChevronDown aria-hidden="true" className="size-4" />}
-        </Button>
-        <ul id={deletedPanel} hidden={!deletedOpen} className="grid">
+        <Disclosure label={`Recently deleted (${deleted.length})`} open={deletedOpen} onOpenChange={setDeletedOpen} triggerClassName="w-auto justify-start">
+        <ul className="grid">
           {deleted.map((formula) => <li key={formula.id} className="flex flex-wrap items-center justify-between gap-3 border-b border-border py-3 last:border-b-0">
             <div className="min-w-0"><p className="break-words font-action font-bold">{formula.name}</p><p className="text-sm text-muted-foreground">From {bySlug.get(formula.recipeSlug)!.recipe.title} · deleted {timeAgo(formula.deletedAt!)}</p></div>
             <Button variant="utility" size="sm" disabled={restoring !== null} onClick={() => void restore(formula)}>{restoring === formula.id ? 'Restoring…' : 'Restore'}</Button>
           </li>)}
         </ul>
+        </Disclosure>
       </section>}
     </div>
     <KitchenNotice notice={notice} onDismiss={() => setNotice(null)} />

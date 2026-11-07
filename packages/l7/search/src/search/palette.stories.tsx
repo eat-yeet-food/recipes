@@ -14,7 +14,7 @@ function PaletteExample({ loading = false, unavailable = false }: { loading?: bo
   const [error, setError] = useState(unavailable ? 'Search is unavailable. Please try again.' : '')
   return <><Button onClick={() => setOpen(true)}>Search recipes</Button><SearchPalette recipes={loading || error ? [] : recipes} loading={loading} error={error} onRetry={() => setError('')} open={open} onClose={() => setOpen(false)} /></>
 }
-const meta = { title: 'Search/Palette', component: PaletteExample, subcomponents: { SearchPalette }, parameters: { docs: { description: { component: 'The production command palette: flat search field, named dialog, keyboard navigation, empty results and Escape with focus restoration. Recipe routing is exercised in app tests.' } } } } satisfies Meta<typeof PaletteExample>
+const meta = { title: 'Features/Search/Palette', component: PaletteExample, subcomponents: { SearchPalette }, parameters: { docs: { description: { component: 'The production command palette: light search field (Input Group), the highlighted result in pink with plum text, named dialog, keyboard navigation, empty results and Escape with focus restoration. Recipe routing is exercised in app tests.' } } } } satisfies Meta<typeof PaletteExample>
 export default meta
 export const Open: StoryObj<typeof meta> = {}
 export const Loading: StoryObj<typeof meta> = { args: { loading: true }, play: async ({ canvasElement }) => {

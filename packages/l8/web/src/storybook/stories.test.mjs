@@ -23,23 +23,23 @@ try {
       try {
         await page.goto(`${server.url}iframe.html?id=${story.id}&viewMode=story`, { waitUntil:'load' })
         await page.waitForFunction(id => document.documentElement.dataset.storyReady === id, story.id, { timeout:20000 })
-        if (story.id === 'kitchen-pages--formula') await page.getByText(/^Saved ·/).waitFor()
-        if (story.id === 'kitchen-pages--library') await page.getByText('Restored Kids’ 10-inch.').waitFor()
-        if (story.id === 'kitchen-controls--history') await page.getByRole('status').filter({ hasText: 'Restored version 3' }).waitFor()
+        if (story.id === 'features-notebook-pages--formula') await page.getByText(/^Saved ·/).waitFor()
+        if (story.id === 'features-notebook-pages--library') await page.getByText('Restored Kids’ 10-inch.').waitFor()
+        if (story.id === 'features-notebook-controls--history') await page.getByRole('status').filter({ hasText: 'Restored version 3' }).waitFor()
         await page.evaluate(()=>document.fonts.ready)
-        if (story.id === 'search-palette--results') await page.getByRole('option', { name: /New York Style Pizza/ }).waitFor()
-        if (story.id === 'search-palette--keyboard-selection') await page.locator('[data-palette-all][data-selected=true]').waitFor()
-        if (story.id === 'search-palette--empty-results') await page.getByText(/No recipes found for/).waitFor()
+        if (story.id === 'features-search-palette--results') await page.getByRole('option', { name: /New York Style Pizza/ }).waitFor()
+        if (story.id === 'features-search-palette--keyboard-selection') await page.locator('[data-palette-all][data-selected=true]').waitFor()
+        if (story.id === 'features-search-palette--empty-results') await page.getByText(/No recipes found for/).waitFor()
 
         const audit = await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']).analyze()
-        if (story.id.startsWith('controls-button--') || story.id.startsWith('controls-choice-group--')) {
+        if (story.id.startsWith('primitives-button--') || story.id.startsWith('primitives-toggle--') || story.id.startsWith('primitives-choice-group--')) {
           for (const control of await page.locator('[data-slot=button]:not(:disabled), [data-slot=choice-group] button:not(:disabled)').all()) {
             for (const state of ['rest','hover','keyboard']) {
               if (state === 'hover') await control.hover()
               else if (state === 'keyboard') { await page.mouse.move(0,0);await control.focus();await page.keyboard.press('Tab');await page.keyboard.press('Shift+Tab') }
               const style = await control.evaluate(el => {
                 const s=getComputedStyle(el)
-                const textAction=['link','ghost','quiet-on-ink'].includes(el.dataset.variant) && !el.dataset.size?.startsWith('icon')
+                const textAction=['link','ghost','quiet-on-dark'].includes(el.dataset.variant) && !el.dataset.size?.startsWith('icon')
                 return {textAction,underline:s.textDecorationLine.includes('underline'),padding:[s.paddingTop,s.paddingRight,s.paddingBottom,s.paddingLeft].some(value=>parseFloat(value)!==0),background:s.backgroundColor,focus:el.matches(':focus-visible'),outline:s.outlineStyle}
               })
               if (style.underline !== style.textAction || (style.textAction && (style.padding || style.background !== 'rgba(0, 0, 0, 0)')) || (state === 'keyboard' && (!style.focus || style.outline === 'none'))) errors.push(`${state}: action affordance, padding or visible focus contract failed`)
@@ -57,8 +57,10 @@ try {
           if (corners.some(radius => parseFloat(radius) !== 0)) errors.push('Viewport sheet must have square corners')
         }
         if (await page.locator('[data-wordmark-size=nav] img').count()) errors.push('App bar must use the text-only wordmark')
-        for (const field of await page.locator('[data-slot=input]:not([data-surface=underline]), [data-slot=select]:not([data-surface=underline]), [data-slot=textarea]').all()) {
-          if (await field.evaluate(el => parseFloat(getComputedStyle(el).borderBottomWidth) > 0)) errors.push('Filled fields must not have bottom edges')
+        for (const field of await page.locator('[data-slot=input]:not([data-surface=underline]):not([data-slot=input-group-control]), [data-slot=select]:not([data-surface=underline]), [data-slot=textarea]:not([data-surface=underline]):not([data-slot=input-group-control])').all()) {
+          const field_ = await field.evaluate(el => { const s=getComputedStyle(el); return { edges: [s.borderTopWidth,s.borderRightWidth,s.borderBottomWidth,s.borderLeftWidth].map(parseFloat), background: s.backgroundColor } })
+          if (field_.edges.some(width => width < 1)) errors.push('Light fields need a full 1px input edge')
+          if (field_.background === 'rgb(42, 14, 40)') errors.push('Dark form fields are retired')
         }
         const overflow = await page.evaluate(()=>document.documentElement.scrollWidth > innerWidth)
         const result = {id:story.id,width,overflow,errors,violations:audit.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))})),incomplete:audit.incomplete.map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)}))}

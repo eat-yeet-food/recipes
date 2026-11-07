@@ -10,6 +10,7 @@
     "@eat-yeet/l1-recipe-model": "workspace:*",
     "@eat-yeet/l4-content-model": "workspace:*",
     "@eat-yeet/l5-ui-primitives": "workspace:*",
+    "@eat-yeet/l6-ui-catalog": "workspace:*",
     "@eat-yeet/l6-ui-content-blocks": "workspace:*",
     "@eat-yeet/l6-ui-shell": "workspace:*",
     "@eat-yeet/l7-recipes": "workspace:*",

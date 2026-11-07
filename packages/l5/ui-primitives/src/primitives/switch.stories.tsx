@@ -10,7 +10,7 @@ function SwitchExample({ initialChecked = false, disabled = false }: { initialCh
 }
 
 const meta = {
-  title: 'Controls/Switch', component: SwitchExample, subcomponents: { Switch },
+  title: 'Primitives/Switch', component: SwitchExample, subcomponents: { Switch },
   parameters: { docs: { description: { component: 'Dedicated Radix switch with an external label, visible thumb, 44px hit area, and focus on the track. The label and surrounding row never gain a hover or selected fill.' } } },
 } satisfies Meta<typeof SwitchExample>
 export default meta
@@ -18,7 +18,6 @@ type Story = StoryObj<typeof meta>
 export const Off: Story = {}
 export const On: Story = { args: { initialChecked: true } }
 export const Disabled: Story = { args: { disabled: true } }
-export const OnYellow: Story = { decorators: [(Story) => <div className="bg-brand p-6"><Story /></div>] }
 export const Keyboard: Story = { play: async ({ canvasElement }) => {
   const control = within(canvasElement).getByRole('switch', { name: 'Cook Mode' })
   control.focus()

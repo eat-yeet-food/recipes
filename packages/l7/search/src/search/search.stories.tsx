@@ -37,12 +37,12 @@ function SearchExample({ initialState = emptySearch() }: { initialState?: Search
 }
 
 const meta = {
-  title: 'Search/Page',
+  title: 'Features/Search/Page',
   component: SearchExample,
   subcomponents: { SearchPage, FacetGroup },
   parameters: {
     layout: 'fullscreen',
-    docs: { description: { component: 'The mobile title and Filters disclosure share a row with space between. The title can wrap at narrow widths; the button retains its touch target. Expanded filters appear below the row. Desktop uses the sidebar. Both use compact filter groups: 14px labels without counts, 16px checkboxes, 24px minimum clickable rows, and 8px row gaps. The matching recipe total appears above the results.' } },
+    docs: { description: { component: 'Category filters are Toggles (plum outline off, pink on). The mobile title and Filters toggle share a row with space between. The title can wrap at narrow widths; the button retains its touch target. Expanded filters appear below the row. Desktop uses the sidebar. Both use compact filter groups: 14px labels without counts, 16px checkboxes, 24px minimum clickable rows, and 8px row gaps. The matching recipe total appears above the results.' } },
   },
 } satisfies Meta<typeof SearchExample>
 

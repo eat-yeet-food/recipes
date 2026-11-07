@@ -24,7 +24,7 @@ const MIN_QUERY = 2
 const MAX_RESULTS = 8
 
 const KBD =
-  'rounded border border-ink/10 bg-ink/5 px-1.5 py-0.5 font-body text-[10px] text-ink/65'
+  'rounded-filter border border-border bg-muted px-1.5 py-0.5 font-body text-micro text-muted-foreground'
 
 const hitsFor = (recipes: RecipeSummary[], query: string): RecipeSummary[] => {
   const q = query.trim().toLowerCase()
@@ -36,12 +36,12 @@ const hitsFor = (recipes: RecipeSummary[], query: string): RecipeSummary[] => {
 function ResultImage({ recipe }: { recipe: RecipeSummary }) {
   const src = imageUrl(recipe)
   return (
-    <div className="relative size-10 shrink-0 overflow-hidden rounded-md bg-ink/5">
+    <div className="relative size-10 shrink-0 overflow-hidden rounded-filter bg-muted">
       {src ? (
         <ResponsiveImage src={src} sizes="40px" alt="" className="absolute inset-0 size-full object-cover" />
       ) : (
         <div className="absolute inset-0 flex items-center justify-center">
-          <UtensilsCrossed className="size-4 text-ink/15" strokeWidth="1.25" />
+          <UtensilsCrossed aria-hidden="true" className="size-4 text-border" strokeWidth="1.25" />
         </div>
       )}
     </div>
@@ -103,7 +103,7 @@ export function SearchPalette({
       description="Search recipes by title, ingredient, or category"
       // Full-screen below sm, centered with a fixed width and sitting a fifth
       // of the way down the viewport at sm and up.
-      className="gap-0 border border-border-medium bg-white p-0 shadow-xl ring-0 max-sm:top-0 max-sm:left-0 max-sm:w-full max-sm:max-w-full max-sm:translate-x-0 max-sm:translate-y-0 max-sm:rounded-none max-sm:border-0 sm:top-[20%] sm:left-[50%] sm:max-w-lg sm:-translate-x-1/2 sm:translate-y-0"
+      className="gap-0 border border-border bg-white p-0 shadow-overlay ring-0 max-sm:top-0 max-sm:left-0 max-sm:w-full max-sm:max-w-full max-sm:translate-x-0 max-sm:translate-y-0 max-sm:rounded-none max-sm:border-0 sm:top-[20%] sm:left-[50%] sm:max-w-lg sm:-translate-x-1/2 sm:translate-y-0"
     >
       {/* shouldFilter=false: hitsFor()/matchesQuery() already filtered `hits`
           against recipe.searchText (title, ingredients, category, ...), not
@@ -119,17 +119,12 @@ export function SearchPalette({
           endAddon={
             <>
               <div className="hidden items-center gap-1.5 sm:flex">
-                <kbd className="font-body text-[10px] text-action-label">&#8984;K</kbd>
-                <kbd className="font-body text-[10px] text-action-label">ESC</kbd>
+                <kbd className={KBD}>&#8984;K</kbd>
+                <kbd className={KBD}>ESC</kbd>
               </div>
-              <button
-                type="button"
-                data-palette-close
-                onClick={onClose}
-                className="control-focus min-h-11 rounded-control px-2 font-body text-sm font-bold text-action-label sm:hidden"
-              >
+              <Button variant="link" data-palette-close onClick={onClose} className="sm:hidden">
                 Cancel
-              </button>
+              </Button>
             </>
           }
         />
@@ -163,8 +158,8 @@ export function SearchPalette({
                   >
                     <ResultImage recipe={recipe} />
                     <div className="min-w-0 flex-1">
-                      <p className="truncate font-body text-sm font-medium text-ink group-data-selected/command-item:text-action-label">{recipe.title}</p>
-                      <div className="mt-0.5 flex gap-3 text-xs text-ink/65 group-data-selected/command-item:text-action-label">
+                      <p className="truncate font-body text-sm font-medium text-ink ">{recipe.title}</p>
+                      <div className="mt-0.5 flex gap-3 text-xs text-muted-foreground group-data-selected/command-item:text-ink">
                         {time && (
                           <span className="flex items-center gap-1">
                             <Clock className="size-3" />
@@ -192,9 +187,9 @@ export function SearchPalette({
               every other result instead of a parallel onKeyDown branch. */}
           {showFooter && !loading && !error && (
             <CommandGroup>
-              <CommandItem value="__view-all__" onSelect={openAll} data-palette-all className="px-4 py-2 text-xs font-medium text-ink/65 data-selected:text-action-label">
+              <CommandItem value="__view-all__" onSelect={openAll} data-palette-all className="px-4 py-2 text-xs font-medium text-muted-foreground data-selected:text-ink">
                 View all results for &ldquo;{query}&rdquo;
-                <span className="ml-1 text-ink/65 group-data-selected/command-item:text-action-label">&rarr;</span>
+                <span aria-hidden="true" className="ml-1">&rarr;</span>
               </CommandItem>
             </CommandGroup>
           )}

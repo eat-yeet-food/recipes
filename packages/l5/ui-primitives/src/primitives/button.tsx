@@ -9,12 +9,12 @@ const buttonStyles = cva(
     variants: {
       variant: {
         default: 'bg-primary text-primary-foreground hover:bg-action-hover',
-        secondary: 'bg-secondary text-secondary-foreground hover:bg-action-hover',
-        outline: 'bg-secondary text-secondary-foreground hover:bg-action-hover',
         ghost: 'bg-transparent text-ink',
         utility: 'border border-ink bg-transparent text-ink hover:bg-muted',
-        'on-ink': 'bg-brand text-ink hover:bg-brand-alt',
-        'quiet-on-ink': 'bg-transparent text-action-label',
+        // Standalone pressed toggle (D22): plum outline when off, pink fill when on. Use <Toggle>.
+        toggle: 'bg-transparent text-ink shadow-[inset_0_0_0_1.5px_currentColor] hover:bg-muted aria-pressed:bg-brand aria-pressed:shadow-none aria-pressed:hover:bg-brand forced-colors:aria-pressed:outline-2 forced-colors:aria-pressed:outline-[Highlight]',
+        'on-dark': 'bg-brand text-ink hover:bg-brand-soft',
+        'quiet-on-dark': 'bg-transparent text-on-dark-label',
         danger: 'bg-danger text-white hover:bg-danger',
         link: 'bg-transparent text-ink',
       },
@@ -30,15 +30,15 @@ const buttonStyles = cva(
       },
     },
     compoundVariants: [
-      { variant: ['default', 'secondary', 'outline', 'utility', 'on-ink', 'danger'], className: 'control-focus' },
+      { variant: ['default', 'utility', 'toggle', 'on-dark', 'danger'], className: 'control-focus' },
       {
-        variant: ['link', 'ghost', 'quiet-on-ink'],
+        variant: ['link', 'ghost', 'quiet-on-dark'],
         size: ['default', 'xs', 'sm', 'lg'],
         className: 'min-h-6 justify-start rounded-none p-0 text-left underline decoration-1 underline-offset-4 cursor-pointer hover:decoration-2 focus-visible:underline focus-visible:outline-2 focus-visible:outline-current focus-visible:outline-offset-4 disabled:bg-transparent disabled:no-underline',
       },
-      { variant: ['link', 'ghost'], size: ['icon', 'icon-xs', 'icon-sm', 'icon-lg'], className: 'control-focus hover:bg-accent' },
-      { variant: 'quiet-on-ink', size: ['icon', 'icon-xs', 'icon-sm', 'icon-lg'], className: 'control-focus hover:bg-action-hover' },
-      { variant: 'quiet-on-ink', className: 'disabled:text-action-label/60' },
+      { variant: ['link', 'ghost'], size: ['icon', 'icon-xs', 'icon-sm', 'icon-lg'], className: 'control-focus hover:bg-muted' },
+      { variant: 'quiet-on-dark', size: ['icon', 'icon-xs', 'icon-sm', 'icon-lg'], className: 'control-focus hover:bg-action-hover' },
+      { variant: 'quiet-on-dark', className: 'disabled:text-on-dark-label disabled:opacity-60' },
     ],
     defaultVariants: { variant: 'default', size: 'default' },
   },
@@ -52,4 +52,8 @@ function Button({ className, variant = 'default', size = 'default', asChild = fa
   const Comp = asChild ? Slot.Root : 'button'
   return <Comp data-slot="button" data-variant={variant} data-size={size} type={asChild ? undefined : type} className={cn(buttonVariants({ variant, size }), className)} {...props} />
 }
-export { Button, buttonVariants }
+/** A standalone on/off control (search categories, Filters, Cooking view). Always exposes aria-pressed. */
+function Toggle({ pressed, size = 'sm', ...props }: Omit<React.ComponentProps<typeof Button>, 'variant' | 'aria-pressed'> & { pressed: boolean }) {
+  return <Button variant="toggle" size={size} aria-pressed={pressed} {...props} />
+}
+export { Button, buttonVariants, Toggle }

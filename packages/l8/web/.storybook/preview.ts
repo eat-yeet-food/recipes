@@ -19,6 +19,16 @@ const preview: Preview = {
       },
     },
     layout: 'fullscreen',
+    options: {
+      storySort: {
+        order: [
+          'Foundations', ['Start Here', 'Color', 'Typography', 'Spacing & Radius', 'Elevation & Motion', 'Gradients & Accents', 'Iconography'],
+          'Primitives', 'Patterns', 'Shell',
+          'Features', ['Home', 'Recipes', 'Learn', 'Search', 'Notebook'],
+          'Pages',
+        ],
+      },
+    },
   },
 }
 

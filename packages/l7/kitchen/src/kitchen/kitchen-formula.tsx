@@ -9,6 +9,7 @@ import { decodeKitchenState, kitchenPath, type KitchenRecipe } from './kitchen-p
 import { changeSummary, FormulaTitle, HistorySheet, KitchenHeader, KitchenNotice, SaveStatus, timeAgo, type KitchenNoticeValue, type SaveState } from './kitchen-ui'
 import { KitchenNotes, KitchenWorkspace } from './kitchen-workspace'
 import { KitchenGate, KitchenMessage } from './kitchen-gate'
+import { Callout } from '@eat-yeet/l5-ui-primitives/primitives/callout'
 
 type Draft = { name: string; state: unknown; notes: string }
 const AUTOSAVE_DELAY = 800
@@ -148,10 +149,10 @@ export function describeRevision(kitchen: KitchenRecipe, revision: KitchenRevisi
 
 /** Browser formulas invite signing in, which moves them to the account. */
 export function KeepEverywhere() {
-  return <section aria-labelledby="keep-everywhere" className="grid gap-2 rounded-field bg-tint p-5">
+  return <Callout as="section" aria-labelledby="keep-everywhere" className="grid gap-2 p-5">
     <h2 id="keep-everywhere" className="font-action text-lg font-bold">Saved in this browser</h2>
     <p className="text-sm leading-relaxed">Your formulas and their History stay on this device. <SignInLink className="font-action font-bold underline decoration-1 underline-offset-4 hover:decoration-2">Sign in with Google</SignInLink> to keep them in your account and open them anywhere; everything here moves over.</p>
-  </section>
+  </Callout>
 }
 
 export function KitchenFormulaPage({ kitchen, formulaId, client }: { kitchen: KitchenRecipe; formulaId: string; client: KitchenClient }) {
@@ -264,7 +265,7 @@ function KitchenFormulaEditor({ kitchen, formulaId, client, local }: { kitchen: 
             <Button asChild className="max-[640px]:hidden"><a href={bakeHref} onClick={openBakeSheet}>Apply<ArrowRight className="size-4" /></a></Button>
           </>}
         />
-        {editor.mismatch && <p role="status" className="mt-4 rounded-field bg-tint p-4 text-sm">This formula no longer matches the recipe’s options, so it opens with the recipe’s values. Your earlier versions are still in History.</p>}
+        {editor.mismatch && <Callout role="status" className="mt-4">This formula no longer matches the recipe’s options, so it opens with the recipe’s values. Your earlier versions are still in History.</Callout>}
       </>}
       changes={changes} onReset={() => editor.resetTo(defaultState)}
       notes={<KitchenNotes value={draft.notes} onChange={(notes) => editor.update({ notes })} />}
@@ -275,14 +276,14 @@ function KitchenFormulaEditor({ kitchen, formulaId, client, local }: { kitchen: 
       aside={<>{local && <KeepEverywhere />}<section aria-labelledby="recent-changes" className="grid gap-1">
         <div className="flex items-baseline justify-between gap-3">
           <h2 id="recent-changes" className="font-action text-lg font-bold">Recent changes</h2>
-          <Button variant="link" className="text-[13px]" onClick={() => setHistoryOpen(true)}>All history</Button>
+          <Button variant="link" className="text-caption" onClick={() => setHistoryOpen(true)}>All history</Button>
         </div>
         <ul>{revisions.slice(0, 3).map((revision, index) => <li key={revision.id} className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 border-b border-border py-3 text-sm leading-snug last:border-b-0">
           <span>{index === revisions.length - 1 && revisions.length < 100 ? 'Created' : describeRevision(kitchen, revision, revisions[index + 1] ?? null)}</span>
           <span className="whitespace-nowrap text-muted-foreground">{timeAgo(revision.updatedAt)}</span>
         </li>)}</ul>
       </section></>}
-      dockAction={<Button asChild variant="on-ink" size="sm"><a href={bakeHref} onClick={openBakeSheet}>Apply</a></Button>}
+      dockAction={<Button asChild variant="on-dark" size="sm"><a href={bakeHref} onClick={openBakeSheet}>Apply</a></Button>}
     />
     <HistorySheet open={historyOpen} onOpenChange={setHistoryOpen} title={draft.name} revisions={revisions}
       complete={revisions.length < 100} restoring={restoring} onRestore={(revision) => void restore(revision)}

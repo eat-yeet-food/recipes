@@ -1,5 +1,6 @@
 'use client'
-import { buttonVariants } from '@eat-yeet/l5-ui-primitives/primitives/button'
+import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
+import { PageTitle } from '@eat-yeet/l5-ui-primitives/primitives/typography'
 /**
  * The dead ends a visitor can reach, styled as one thing.
  *
@@ -28,17 +29,13 @@ function DeadEnd({
 }) {
   return (
     <div className="mx-auto max-w-[var(--max-width)] px-8 py-20 text-center max-sm:px-4">
-      <h1 className="font-display text-4xl font-extrabold text-ink max-sm:text-3xl">
-        {title}
-      </h1>
-      <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-ink/65">{message}</p>
+      <PageTitle>{title}</PageTitle>
+      <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">{message}</p>
       <div className="mt-10 flex flex-wrap items-center justify-center gap-4">{children}</div>
     </div>
   )
 }
 
-const PRIMARY = buttonVariants({ size: 'lg' })
-const SECONDARY = buttonVariants({ variant: 'link' })
 
 /** Rendered for any path the router cannot match. */
 export function NotFound() {
@@ -47,13 +44,13 @@ export function NotFound() {
       title="Page Not Found"
       message="That page isn't here. It may have been renamed, or it may never have existed."
     >
-      <Link to="/recipes" className={PRIMARY} data-cta>
+      <Button asChild size="lg" data-cta=""><Link to="/recipes">
         All Recipes
         <ArrowRight className="size-4" />
-      </Link>
-      <Link to="/browse" className={SECONDARY}>
+      </Link></Button>
+      <Button asChild variant="link"><Link to="/browse">
         Browse by Category
-      </Link>
+      </Link></Button>
     </DeadEnd>
   )
 }
@@ -78,10 +75,10 @@ export function ErrorState({ error, reset }: { error: Error; reset?: () => void 
         title="Reload to Continue"
         message="This page was updated while your browser was holding an older copy. A reload picks up the current version."
       >
-        <button type="button" onClick={() => window.location.reload()} className={PRIMARY} data-cta>
+        <Button size="lg" onClick={() => window.location.reload()} data-cta="">
           Reload the Page
           <ArrowRight className="size-4" />
-        </button>
+        </Button>
       </DeadEnd>
     )
   }
@@ -92,14 +89,14 @@ export function ErrorState({ error, reset }: { error: Error; reset?: () => void 
       message="This page didn't load properly. Trying again often works; if it doesn't, the recipes are all still there."
     >
       {reset ? (
-        <button type="button" onClick={reset} className={PRIMARY} data-cta>
+        <Button size="lg" onClick={reset} data-cta="">
           Try Again
           <ArrowRight className="size-4" />
-        </button>
+        </Button>
       ) : null}
-      <Link to="/recipes" className={SECONDARY}>
+      <Button asChild variant="link"><Link to="/recipes">
         All Recipes
-      </Link>
+      </Link></Button>
     </DeadEnd>
   )
 }

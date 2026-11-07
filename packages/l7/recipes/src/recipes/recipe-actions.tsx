@@ -22,7 +22,7 @@ export function RecipeAction({
   pressed,
   children,
 }: RecipeActionProps) {
-  const buttonVariant = pressed ? 'on-ink' : variant === 'hero' ? 'utility' : 'default'
+  const buttonVariant = pressed !== undefined ? 'toggle' : variant === 'hero' ? 'utility' : 'default'
   const size = variant === 'hero' ? 'sm' : 'default'
   const className = variant === 'hero' ? 'w-40 max-w-full' : undefined
   if (href) return <Button asChild variant={buttonVariant} size={size} className={className}><a href={href} target={target} rel={rel}>{children}</a></Button>

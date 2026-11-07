@@ -13,6 +13,7 @@
     { "path": "../../l1/recipe-model/tsconfig.json" },
     { "path": "../../l4/content-model/tsconfig.json" },
     { "path": "../../l5/ui-primitives/tsconfig.json" },
+    { "path": "../../l6/ui-catalog/tsconfig.json" },
     { "path": "../../l6/ui-content-blocks/tsconfig.json" },
     { "path": "../../l6/ui-shell/tsconfig.json" },
     { "path": "../recipes/tsconfig.json" }

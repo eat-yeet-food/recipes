@@ -1,11 +1,12 @@
 import type { ReactNode } from 'react'
+import { PageTitle } from '@eat-yeet/l5-ui-primitives/primitives/typography'
 
 export type LegalSection = { heading: string; body: ReactNode }
 
 /** Long-form policy page on the white reading surface with a dated heading. */
 export function LegalPage({ title, updated, intro, sections }: { title: string; updated: string; intro: ReactNode; sections: LegalSection[] }) {
   return <article className="mx-auto w-full max-w-[var(--layout-recipe-copy)] px-4 py-12 text-ink">
-    <h1 className="font-display text-[36px] font-extrabold leading-tight">{title}</h1>
+    <PageTitle>{title}</PageTitle>
     <p className="mt-2 text-sm text-muted-foreground">Last updated {updated}</p>
     <div className="mt-6 text-base leading-relaxed">{intro}</div>
     {sections.map((section) => <section key={section.heading} className="mt-8">

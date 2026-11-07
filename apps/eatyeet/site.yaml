@@ -10,13 +10,13 @@ copy:
     second: Yeet
     background: YEET
   hero:
-    image: /images/charred-crust-pizza.jpg
-    imageAlt: New York style pizza with a charred golden crust
-    imageCaption: New York Style Pizza
+    image: /images/hero-donuts.jpg
+    imageAlt: Pink-glazed donuts covered in rainbow sprinkles
     headline: |-
       SAVORY,
       SWEET,
       OR YEET
+    headlineSticker: YEET
     kicker: 'Eat / Yeet'
     motto: 'Eat the best, yeet the rest'
     cta: Let’s eat

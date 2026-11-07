@@ -1,6 +1,7 @@
 'use client'
 import { ResponsiveImage } from '@eat-yeet/l5-ui-primitives/primitives/responsive-image'
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
+import { Eyebrow } from '@eat-yeet/l5-ui-primitives/primitives/typography'
 /**
  * Landing page feature composition.
  *
@@ -28,8 +29,9 @@ type HomeCopy = {
   hero: {
     image: string
     imageAlt: string
-    imageCaption?: string
     headline?: string
+    /** The headline word set in the pink sticker; defaults to the last word. */
+    headlineSticker?: string
     kicker?: string
     tagline: string
     motto?: string
@@ -53,24 +55,37 @@ export interface Category {
   featured?: boolean
 }
 
+/** Wraps the headline's sticker word (default: its last word) in the pink logo sticker. */
+function HeroHeadline({ text, sticker }: { text: string; sticker?: string }) {
+  const word = sticker ?? text.trim().split(/\s+/).pop() ?? ''
+  const at = word ? text.lastIndexOf(word) : -1
+  if (at < 0) return <>{text}</>
+  return <>{text.slice(0, at)}<span data-hero-sticker="" className="-ml-[.04em] -mt-[.04em] inline-block -rotate-3 rounded-[40%_35%_40%_25%] bg-brand px-[.2em] pt-[.07em] pb-[.1em] text-ink">{word}</span>{text.slice(at + word.length)}</>
+}
+
+/**
+ * The plum hero. Desktop: split photo/copy on one continuous plum gradient, the
+ * orange blob anchored to the section's right edge. Phone (M3): a full-bleed
+ * photo with the headline card overlapping it. One <img> serves both.
+ */
 export function HomeHero({ copy }: { copy: HomeCopy }) {
   const { hero, wordmark } = copy
 
   return (
-    <section className="overflow-hidden bg-brand text-ink">
-      <div className="mx-auto grid max-w-[var(--layout-hero-max)] md:grid-cols-2">
-        <figure className="order-2 m-0 hidden min-w-0 md:flex flex-col bg-ink p-6 md:order-1 md:py-10 md:pl-10 md:pr-0">
-          <ResponsiveImage src={hero.image} alt={hero.imageAlt} sizes="(max-width: 767px) 1px, (max-width: 1500px) calc(50vw - 40px), 710px" className="aspect-[4/3] w-full flex-1 object-cover [clip-path:polygon(0_0,100%_0,100%_90%,0_100%)]" loading="eager" fetchPriority="high" />
-          {hero.imageCaption && <figcaption className="pt-5 text-sm font-bold text-white">{hero.imageCaption}</figcaption>}
+    <section data-home-hero="" className="relative isolate overflow-hidden bg-white text-white md:bg-gradient-hero">
+      <span aria-hidden="true" className="absolute -bottom-28 -right-28 -z-10 hidden h-72 w-80 -rotate-12 rounded-full bg-brand-alt md:block" />
+      <div className="relative mx-auto grid max-w-[var(--layout-hero-max)] md:grid-cols-2">
+        <figure className="m-0 min-w-0 md:flex md:flex-col md:py-10 md:pl-10">
+          <ResponsiveImage src={hero.image} alt={hero.imageAlt} sizes="(max-width: 767px) 100vw, (max-width: 1500px) calc(50vw - 40px), 710px" className="h-[330px] w-full object-cover object-[50%_30%] md:aspect-[4/3] md:h-auto md:flex-1 md:object-[50%_40%] md:[clip-path:polygon(0_0,100%_0,100%_90%,0_100%)]" loading="eager" fetchPriority="high" />
         </figure>
-        <div className="relative isolate order-1 overflow-hidden px-6 py-10 md:order-2 md:p-12 lg:p-14">
-          <div aria-hidden="true" className="brand-dots absolute right-5 top-6 -z-10 size-12 rotate-6" />
-          {hero.kicker && <p className="mb-7 max-w-[80%] text-xs font-bold uppercase tracking-widest">{hero.kicker}</p>}
-          <h1 className="m-0 whitespace-pre-line font-hero text-[clamp(48px,7vw,104px)] leading-none tracking-tight">{hero.headline ?? `${wordmark.first} / ${wordmark.second}`}</h1>
-          <p className="mt-8 whitespace-pre-line text-lg leading-relaxed">{hero.tagline}</p>
-          {hero.motto && <p className="mt-4 text-lg">{hero.motto}</p>}
-          <Button asChild size="lg" className="mt-7"><Link to="/search">{hero.cta}<ArrowRight aria-hidden="true" className="size-6 -rotate-45" /></Link></Button>
-          <span aria-hidden="true" className="absolute -bottom-28 -right-28 -z-10 h-72 w-80 -rotate-12 rounded-full bg-brand-alt" />
+        <div className="relative isolate mx-3.5 -mt-16 overflow-hidden rounded-[28px_28px_28px_8px] bg-gradient-hero px-[22px] pt-7 pb-[26px] shadow-glow md:m-0 md:overflow-visible md:rounded-none md:bg-none md:p-12 md:shadow-none lg:p-14">
+          <div aria-hidden="true" className="brand-dots absolute right-4 top-[18px] -z-10 size-12 rotate-6 md:right-5 md:top-6" />
+          <span aria-hidden="true" className="absolute -bottom-[170px] -right-[170px] -z-10 h-72 w-80 -rotate-12 rounded-full bg-brand-alt md:hidden" />
+          {hero.kicker && <Eyebrow tone="brand" className="mb-3.5 max-w-[80%] md:mb-7">{hero.kicker}</Eyebrow>}
+          <h1 className="m-0 whitespace-pre-line font-hero text-hero leading-none tracking-tight text-white"><HeroHeadline text={hero.headline ?? `${wordmark.first} / ${wordmark.second}`} sticker={hero.headlineSticker} /></h1>
+          {hero.tagline && <p className="mt-8 whitespace-pre-line text-lg leading-relaxed">{hero.tagline}</p>}
+          {hero.motto && <p className="mt-4 text-base md:text-lg">{hero.motto}</p>}
+          <Button asChild size="lg" variant="on-dark" className="mt-5 md:mt-7"><Link to="/search">{hero.cta}<ArrowRight aria-hidden="true" className="size-6 -rotate-45" /></Link></Button>
         </div>
       </div>
     </section>
@@ -88,7 +103,7 @@ export function ViewAll({ to, label, className }: { to: string; label: string; c
     <div className={`${className} text-center`}>
       <Link
         to={to}
-        className="inline-flex items-center gap-2 min-h-11 text-sm font-bold text-brand-strong transition-colors hover:text-ink"
+        className="inline-flex items-center gap-2 min-h-11 text-sm font-bold text-ink underline-offset-4 hover:underline"
       >
         {label}
         <ArrowRight className="size-4" />

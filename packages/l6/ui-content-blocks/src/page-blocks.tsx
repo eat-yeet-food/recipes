@@ -3,6 +3,7 @@ import { ResponsiveImage } from '@eat-yeet/l5-ui-primitives/primitives/responsiv
 import { Fragment, type ReactNode } from 'react'
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
 
+import { Callout } from '@eat-yeet/l5-ui-primitives/primitives/callout'
 import type {
   CalloutBlock,
   ComparisonBlock,
@@ -77,7 +78,7 @@ function blockImageUrl(image: { src: string; imageHash?: string }) {
 
 function MarkdownBlockView({ block }: { block: MarkdownBlock }) {
   return (
-    <section className="text-base leading-[1.72] [&>div>*:first-child]:mt-0 [&_blockquote]:my-5 [&_blockquote]:border-l-4 [&_blockquote]:border-[var(--color-brand)] [&_blockquote]:pl-4 [&_blockquote]:text-[var(--color-ink)] [&_h2]:mb-4 [&_h2]:mt-12 [&_h2]:text-[34px] [&_h2]:font-bold [&_h2]:leading-none [&_h2+h3]:mt-4 [&_h3]:mb-3 [&_h3]:mt-9 [&_h3]:text-[26px] [&_h3]:font-bold [&_h4]:mb-2.5 [&_h4]:mt-7 [&_h4]:text-[13px] [&_h4]:uppercase [&_h4]:text-[var(--color-primary)] [&_hr]:my-7 [&_hr]:border-[var(--color-border)] [&_li]:mb-2 [&_ol]:mb-5 [&_ol]:list-decimal [&_ol]:pl-[22px] [&_p]:mb-5 [&_p:last-child]:mb-0 [&_ul]:mb-5 [&_ul]:list-disc [&_ul]:pl-[22px]">
+    <section className="text-base leading-[1.72] [&>div>*:first-child]:mt-0 [&_blockquote]:my-5 [&_blockquote]:border-l-4 [&_blockquote]:border-brand [&_blockquote]:pl-4 [&_blockquote]:text-ink [&_h2]:mb-4 [&_h2]:mt-12 [&_h2]:text-section [&_h2]:font-bold [&_h2]:leading-none [&_h2+h3]:mt-4 [&_h3]:mb-3 [&_h3]:mt-9 [&_h3]:text-title [&_h3]:font-bold [&_h4]:mb-2.5 [&_h4]:mt-7 [&_h4]:font-action [&_h4]:text-xs [&_h4]:font-bold [&_h4]:uppercase [&_h4]:tracking-eyebrow [&_h4]:text-ink [&_hr]:my-7 [&_hr]:border-border [&_li]:mb-2 [&_ol]:mb-5 [&_ol]:list-decimal [&_ol]:pl-[22px] [&_p]:mb-5 [&_p:last-child]:mb-0 [&_ul]:mb-5 [&_ul]:list-disc [&_ul]:pl-[22px]">
       <Html html={block.html} />
     </section>
   )
@@ -99,7 +100,7 @@ function ImageBlockView({ block }: { block: ImageBlock }) {
       <div className={layoutClass}>
         {block.images.map((image, index) => (
           <figure key={`${image.src}-${index}`} className="m-0 h-full">
-            <div className={aspectClass ? 'overflow-hidden bg-[var(--color-tint)]' : undefined}>
+            <div className={aspectClass ? 'overflow-hidden bg-muted' : undefined}>
               <ResponsiveImage
                 src={blockImageUrl(image)}
                 alt={image.alt}
@@ -111,7 +112,7 @@ function ImageBlockView({ block }: { block: ImageBlock }) {
               <Html
                 as="figcaption"
                 html={image.caption}
-                className="mt-2 text-sm leading-relaxed text-[var(--color-ink)]/75"
+                className="mt-2 text-sm leading-relaxed text-muted-foreground"
               />
             )}
           </figure>
@@ -154,28 +155,22 @@ function SectionBlockView<TContext>({
 }
 
 function CalloutBlockView({ block }: { block: CalloutBlock }) {
-  const toneClass =
-    block.tone === 'warning'
-      ? 'bg-tint'
-      : block.tone === 'tip'
-        ? 'bg-warm'
-        : 'bg-tint'
-
+  // Authored callouts are informational asides: every tone uses the aside Callout (tint).
   return (
     <section className="my-8">
-      <div className={`rounded-surface px-5 py-5 ${toneClass}`}>
+      <Callout data-tone-authored={block.tone} className="rounded-surface px-5 py-5 text-base">
         {block.title && (
-          <h3 className="mb-2 text-[22px] font-bold leading-tight text-[var(--color-action-hover)]">
+          <h3 className="mb-2 text-title-sm font-bold leading-tight text-ink">
             {block.title}
           </h3>
         )}
         {block.html && (
           <Html
             html={block.html}
-            className="text-base leading-relaxed text-[var(--color-ink)] [&_p]:mb-3 [&_p:last-child]:mb-0"
+            className="text-base leading-relaxed text-ink [&_p]:mb-3 [&_p:last-child]:mb-0"
           />
         )}
-      </div>
+      </Callout>
     </section>
   )
 }
@@ -184,8 +179,8 @@ function StepsBlockView({ block }: { block: StepsBlock }) {
   const Heading = block.headingLevel === 3 ? 'h3' : 'h2'
   const headingClass =
     block.headingLevel === 3
-      ? 'mb-5 text-[26px] font-bold leading-tight text-[var(--color-ink)]'
-      : 'mb-5 text-[34px] font-bold leading-none text-[var(--color-ink)]'
+      ? 'mb-5 text-title font-bold leading-tight text-ink'
+      : 'mb-5 text-section font-bold leading-none text-ink'
 
   return (
     <section className="my-8">
@@ -202,9 +197,9 @@ function StepsBlockView({ block }: { block: StepsBlock }) {
           return (
             <li
               key={index}
-              className="grid grid-cols-[40px_minmax(0,1fr)] gap-4 [counter-increment:step] before:grid before:size-10 before:place-items-center before:rounded-full before:bg-[var(--color-primary)] before:text-sm before:font-extrabold before:text-white before:content-[counter(step)]"
+              className="grid grid-cols-[40px_minmax(0,1fr)] gap-4 [counter-increment:step] before:grid before:size-10 before:place-items-center before:rounded-full before:bg-ink before:text-sm before:font-extrabold before:text-on-dark-label before:content-[counter(step)]"
             >
-              <div className="text-base leading-relaxed text-[var(--color-ink)]">
+              <div className="text-base leading-relaxed text-ink">
                 {item.title && inlineHtml !== null ? (
                   <p>
                     <strong className="font-semibold">
@@ -242,19 +237,19 @@ function ComparisonBlockView({ block }: { block: ComparisonBlock }) {
   return (
     <section className="my-8">
       {block.title && (
-        <h2 className="mb-5 text-[34px] font-bold leading-none text-[var(--color-ink)]">
+        <h2 className="mb-5 text-section font-bold leading-none text-ink">
           {block.title}
         </h2>
       )}
-      <div role="region" aria-label={block.title || "Comparison table"} tabIndex={0} className="overflow-x-auto rounded-field border border-[var(--color-border)]">
+      <div role="region" aria-label={block.title || "Comparison table"} tabIndex={0} className="overflow-x-auto rounded-field border border-border">
         <table className="w-full min-w-[620px] border-collapse text-left text-sm leading-relaxed">
           <thead>
-            <tr className="bg-[var(--color-tint)]">
-              <th className="border-b border-[var(--color-border)] px-4 py-3 font-extrabold text-[var(--color-ink)]">
+            <tr className="bg-muted">
+              <th className="border-b border-border px-4 py-3 font-extrabold text-ink">
                 Factor
               </th>
               {block.columns.map((column) => (
-                <th key={column} className="border-b border-[var(--color-border)] px-4 py-3 font-extrabold text-[var(--color-ink)]">
+                <th key={column} className="border-b border-border px-4 py-3 font-extrabold text-ink">
                   {column}
                 </th>
               ))}
@@ -262,12 +257,12 @@ function ComparisonBlockView({ block }: { block: ComparisonBlock }) {
           </thead>
           <tbody>
             {block.rows.map((row) => (
-              <tr key={row.label} className="border-t border-[var(--color-border)] align-top">
-                <th className="px-4 py-3 font-extrabold text-[var(--color-ink)]">
+              <tr key={row.label} className="border-t border-border align-top">
+                <th className="px-4 py-3 font-extrabold text-ink">
                   {row.label}
                 </th>
                 {block.columns.map((column, index) => (
-                  <td key={`${row.label}-${column}`} className="px-4 py-3 text-[var(--color-ink)]/80">
+                  <td key={`${row.label}-${column}`} className="px-4 py-3 text-ink">
                     <Html html={row.values[index] ?? ''} className="[&_p]:mb-2 [&_p:last-child]:mb-0" />
                   </td>
                 ))}
@@ -286,9 +281,9 @@ function FootnotesBlockView({ block, index }: { block: FootnotesBlock; index: nu
   return (
     <section
       aria-labelledby={headingId}
-      className="mb-8 mt-12 border-t border-[var(--color-border)] pt-8 text-sm leading-relaxed text-[var(--color-ink)]"
+      className="mb-8 mt-12 border-t border-border pt-8 text-sm leading-relaxed text-ink"
     >
-      <h2 id={headingId} className="mb-4 text-[26px] font-bold leading-tight">
+      <h2 id={headingId} className="mb-4 text-title font-bold leading-tight">
         {block.title}
       </h2>
       <ol className="list-decimal space-y-3 pl-[22px]">
@@ -298,14 +293,14 @@ function FootnotesBlockView({ block, index }: { block: FootnotesBlock; index: nu
               href={item.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[var(--color-action-hover)] underline underline-offset-2"
+              className="text-action-hover underline underline-offset-2"
             >
               <Html as="span" html={item.html} />
             </a>{' '}
             <a
               href={`#footnote-ref-${item.id}`}
               aria-label={`Back to source ${item.id} reference`}
-              className="ml-1 inline-flex size-8 items-center justify-center rounded-control text-ink no-underline hover:bg-tint"
+              className="ml-1 inline-flex size-8 items-center justify-center rounded-control text-ink no-underline hover:bg-muted"
             >
               ↩
             </a>

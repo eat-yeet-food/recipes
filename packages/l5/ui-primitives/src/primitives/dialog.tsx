@@ -39,7 +39,7 @@ function DialogOverlay({
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        "fixed inset-0 isolate z-[var(--z-dialog)] bg-black/10 duration-100 supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
+        "fixed inset-0 isolate z-[var(--z-dialog)] bg-ink/20 duration-100 supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
         className
       )}
       {...props}
@@ -53,11 +53,14 @@ function DialogContent({
   showCloseButton = true,
   overlayClassName,
   variant = 'dialog',
+  stripe = false,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
   overlayClassName?: string
   variant?: 'dialog' | 'sheet'
+  /** The brand stripe: only for a dialog that asks the reader to act (one per view). */
+  stripe?: boolean
 }) {
   const surfaceRadius = variant === 'sheet' ? 'rounded-none' : 'rounded-surface'
   return (
@@ -65,9 +68,11 @@ function DialogContent({
       <DialogOverlay className={overlayClassName} />
       <DialogPrimitive.Content
         data-slot="dialog-content"
+        data-stripe={stripe || undefined}
         className={cn(
           "fixed top-1/2 left-1/2 z-[var(--z-dialog)] grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 bg-popover p-4 text-sm text-popover-foreground  duration-100 outline-none sm:max-w-sm data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
           surfaceRadius,
+          stripe && 'brand-stripe pt-[34px]',
           className
         )}
         {...props}
@@ -113,7 +118,7 @@ function DialogFooter({
     <div
       data-slot="dialog-footer"
       className={cn(
-        "-mx-4 -mb-4 flex flex-col-reverse gap-2 rounded-b-surface border-t bg-muted/50 p-4 sm:flex-row sm:justify-end",
+        "-mx-4 -mb-4 flex flex-col-reverse gap-2 rounded-b-surface border-t bg-muted p-4 sm:flex-row sm:justify-end",
         className
       )}
       {...props}
@@ -121,7 +126,7 @@ function DialogFooter({
       {children}
       {showCloseButton && (
         <DialogPrimitive.Close asChild>
-          <Button variant="outline">Close</Button>
+          <Button variant="utility">Close</Button>
         </DialogPrimitive.Close>
       )}
     </div>

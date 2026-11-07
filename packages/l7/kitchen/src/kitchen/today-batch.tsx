@@ -35,10 +35,10 @@ export function TodayBatch({ count, noun, plural, note, onChange }: {
   note?: string
   onChange: (count: number) => void
 }) {
-  return <div data-today-batch="" className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-field bg-tint px-4 py-3">
+  return <div data-today-batch="" className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-field border border-border bg-white px-4 py-3">
     <div className="grid">
-      <p className="font-action text-[15px] font-bold">Making {count} {noun} today</p>
-      {note ? <p className="text-[13px] leading-snug text-muted-foreground">{note}</p> : null}
+      <p className="font-action text-body-sm font-bold">Making {count} {noun} today</p>
+      {note ? <p className="text-caption leading-snug text-muted-foreground">{note}</p> : null}
     </div>
     <div className="print:hidden"><CountStepper label={`How many ${plural} today`} unit={plural} value={count} onChange={onChange} /></div>
   </div>

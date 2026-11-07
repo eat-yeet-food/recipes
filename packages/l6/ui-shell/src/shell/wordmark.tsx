@@ -1,9 +1,9 @@
 'use client'
-/** One lockup for navigation, home, footer, and handbook. */
+/** One lockup for navigation, home, footer, and handbook. The second word sits in the pink sticker with plum text. */
 const SIZES = {
-  hero: { root: 'gap-3 text-[clamp(38px,6vw,80px)] max-md:gap-2', icon: 'size-14 md:size-20', dot: 'size-2' },
-  nav: { root: 'gap-2 text-[22px]', icon: 'size-8', dot: 'size-1' },
-  footer: { root: 'gap-2 text-[28px]', icon: 'size-9', dot: 'size-1.5' },
+  hero: { root: 'gap-3 text-wordmark max-md:gap-2', icon: 'size-14 md:size-20', dot: 'size-2' },
+  nav: { root: 'gap-2 text-title-sm', icon: 'size-8', dot: 'size-1' },
+  footer: { root: 'gap-2 text-title', icon: 'size-9', dot: 'size-1.5' },
 } as const
 export type WordmarkCopy = { first: string; second: string }
 export function Wordmark({ copy, size, onPhoto = false, className = '' }: { copy: WordmarkCopy; size: keyof typeof SIZES; onPhoto?: boolean; className?: string }) {

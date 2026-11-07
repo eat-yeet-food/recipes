@@ -8,7 +8,7 @@ import { cn } from '@eat-yeet/l0-foundation/utils'
 import { initials, useAccount, type AccountMember } from './account'
 
 // Menu rows: full-width 44px targets without the underlined text-action treatment.
-const menuItem = '-mx-2 flex min-h-11 items-center rounded-control px-2 text-left font-action text-sm font-bold text-ink hover:bg-ink/5 focus-visible:outline-2 focus-visible:outline-ink focus-visible:-outline-offset-2'
+const menuItem = '-mx-2 flex min-h-11 items-center rounded-control px-2 text-left font-action text-sm font-bold text-ink hover:bg-muted focus-visible:outline-2 focus-visible:outline-ink focus-visible:-outline-offset-2'
 const currentPath = () => typeof window === 'undefined' ? '/' : window.location.pathname + window.location.search
 
 /** Navigates to sign-in, returning to the current page (including its query) afterwards. */
@@ -67,7 +67,7 @@ export function AccountNav({ linkClassName }: { linkClassName: string }) {
       <AccountAvatar name={member.displayName} />
     </Button>
     <div id={panelId} hidden={!open}
-      className="absolute right-0 top-full z-[var(--z-nav)] mt-2 w-64 rounded-surface bg-white p-4 text-ink shadow-[0_8px_24px_color-mix(in_srgb,var(--color-ink)_16%,transparent)]">
+      className="absolute right-0 top-full z-[var(--z-nav)] mt-2 w-64 rounded-surface bg-white p-4 text-ink shadow-overlay">
       <p className="truncate font-action text-sm font-bold">{member.displayName}</p>
       <p className="truncate text-xs text-muted-foreground">{member.email}</p>
       <div className="mt-3 grid border-t border-border pt-2">
@@ -120,7 +120,7 @@ export function DisplayNamePrompt({ member }: { member: AccountMember }) {
   }
 
   return <Dialog open={open} onOpenChange={(next) => { if (!next) setDismissed(true) }}>
-    <DialogContent className="bg-brand p-6 text-ink sm:max-w-md">
+    <DialogContent stripe className="p-6 text-ink sm:max-w-md">
       <DialogTitle className="font-display text-2xl font-extrabold leading-tight">Choose your public name</DialogTitle>
       <DialogDescription className="text-sm text-ink">This name appears on your reviews and replies. Your email stays private.</DialogDescription>
       <form className="grid gap-4" onSubmit={submit} noValidate>
@@ -129,7 +129,7 @@ export function DisplayNamePrompt({ member }: { member: AccountMember }) {
           <Input id={`${id}-name`} autoComplete="nickname" maxLength={80} value={name} disabled={saving}
             aria-invalid={Boolean(error)} aria-describedby={error ? `${id}-error` : undefined}
             onChange={(event) => { setName(event.target.value); setError('') }} />
-          {error ? <p id={`${id}-error`} role="alert" className="mt-2 rounded-field bg-danger-soft px-3 py-2 text-sm text-danger">{error}</p> : null}
+          {error ? <p id={`${id}-error`} role="alert" className="mt-2 text-sm text-danger">{error}</p> : null}
         </div>
         <Button type="submit" className="w-full" disabled={saving}>{saving ? 'Saving...' : 'Save name'}</Button>
       </form>

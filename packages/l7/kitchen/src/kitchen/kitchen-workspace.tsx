@@ -3,6 +3,8 @@ import { useCallback, useId, type ReactNode } from 'react'
 import { cn } from '@eat-yeet/l0-foundation/utils'
 import { ChangeStrip, DoughDock, kitchenPageClass } from './kitchen-ui'
 import type { KitchenChange, KitchenRecipe } from './kitchen-plugin'
+import { Callout } from '@eat-yeet/l5-ui-primitives/primitives/callout'
+import { Textarea } from '@eat-yeet/l5-ui-primitives/primitives/textarea'
 
 /**
  * Shared editing layout for saved and unsaved formulas: the app's editor on
@@ -35,10 +37,10 @@ export function KitchenWorkspace({ kitchen, state, onChange, resetKey, errors, o
     <div className="mt-8 grid grid-cols-[minmax(0,1fr)] items-start gap-14 lg:grid-cols-[minmax(0,1fr)_384px]">
       <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-10">
         <Editor recipe={recipe} config={config} state={state} onChange={onChange} onErrorsChange={reportErrors} resetKey={resetKey} />
-        {errors.length > 0 && <div id={errorsId} role="alert" className="rounded-field bg-danger-soft p-4 text-sm text-danger">
+        {errors.length > 0 && <Callout id={errorsId} tone="danger">
           <strong className="font-action">Fix these to save and see updated weights:</strong>
           <ul className="mt-1 list-disc pl-5">{errors.map((error) => <li key={error}>{error}</li>)}</ul>
-        </div>}
+        </Callout>}
         {notes}
         {footer}
       </div>
@@ -59,11 +61,10 @@ export function KitchenWorkspace({ kitchen, state, onChange, resetKey, errors, o
 export function KitchenNotes({ value, onChange }: { value: string; onChange: (value: string) => void }) {
   const id = useId()
   return <section aria-labelledby={`${id}-heading`} className="grid gap-2.5">
-    <h2 id={`${id}-heading`} className="font-action text-[22px] font-bold">Notes</h2>
+    <h2 id={`${id}-heading`} className="font-action text-title-sm font-bold">Notes</h2>
     <label htmlFor={`${id}-notes`} className="sr-only">Notes</label>
-    <textarea id={`${id}-notes`} rows={3} maxLength={2000} value={value} onChange={(event) => onChange(event.target.value)}
-      placeholder="Fermentation times, oven temperature, what to try next…"
-      className="min-h-24 w-full resize-y border-0 border-b border-ink bg-transparent px-0 py-3 font-body text-base leading-relaxed text-ink placeholder:text-muted-foreground focus-visible:border-b-2 focus-visible:outline-none" />
+    <Textarea id={`${id}-notes`} surface="underline" rows={3} maxLength={2000} value={value} onChange={(event) => onChange(event.target.value)}
+      placeholder="Fermentation times, oven temperature, what to try next…" className="resize-y leading-relaxed" />
     <p className="text-xs text-muted-foreground">{value.length}/2000</p>
   </section>
 }

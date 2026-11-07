@@ -16,6 +16,7 @@ import { formulasMatch } from './dough-formula-match'
 import { levainYield } from './dough-kitchen-model'
 import { formatDuration } from './sourdough-process'
 import { COLD_DAYS, FOOD_PROCESSOR_MAX_BALLS, HAND_REST_MINUTES, PIZZA_TEMPERATURE_RANGE_F, warmUpForColdDays, type PizzaMixingMethod, type PizzaProcess } from '@eat-yeet/l2-recipe-domain/pizza-process'
+import { Eyebrow } from '@eat-yeet/l5-ui-primitives/primitives/typography'
 
 const NumericFields = createContext<{ report: NumberFieldValidation; resetKey: number } | null>(null)
 
@@ -94,10 +95,10 @@ function BulkHint({ id, config, formula, batch, temperatureF, onUseBulk, onUseWe
   const lastFold = process.folds.at(-1)?.atMinutes ?? process.saltDelayMinutes
   const fits = total !== null && total - bench > lastFold
   const useWeight = weight !== null && Math.abs(weight - batch.pieceWeightGrams) >= 1
-  return <div id={id} aria-live="polite" className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[13px] leading-normal text-muted-foreground" data-bulk-hint>
+  return <div id={id} aria-live="polite" className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-caption leading-normal text-muted-foreground" data-bulk-hint>
     <span>At {temperatureF}°F: {total !== null && <>about <strong className="font-action text-ink">{formatDuration(total)}</strong> and </>}<strong className="font-action text-ink">{targetRisePercent(temperatureF)}% rise</strong>.{weight !== null && <> Smaller loaves fill the same banneton: <strong className="font-action text-ink">{formatWorkbenchGrams(weight)}</strong>.</>}{total === planned && !useWeight && ' Matches your plan.'}{total !== null && total !== planned && !fits && ' Move folds earlier to use this estimate.'}</span>
-    {total !== null && total !== planned && fits && <Button variant="link" type="button" className="text-[13px]" onClick={() => onUseBulk(total)}>Use {formatDuration(total)}</Button>}
-    {useWeight && <Button variant="link" type="button" className="text-[13px]" onClick={() => onUseWeight(weight!)}>Use {formatWorkbenchGrams(weight!)} loaves</Button>}
+    {total !== null && total !== planned && fits && <Button variant="link" type="button" className="text-caption" onClick={() => onUseBulk(total)}>Use {formatDuration(total)}</Button>}
+    {useWeight && <Button variant="link" type="button" className="text-caption" onClick={() => onUseWeight(weight!)}>Use {formatWorkbenchGrams(weight!)} loaves</Button>}
   </div>
 }
 
@@ -105,7 +106,7 @@ function BulkHint({ id, config, formula, batch, temperatureF, onUseBulk, onUseWe
 function Group({ title, children }: { title: string; children: ReactNode }) {
   const id = useId()
   return <div role="group" aria-labelledby={id} className="grid min-w-0 gap-4 border-t border-border pt-5">
-    <h3 id={id} className="font-action text-[13px] font-bold uppercase">{title}</h3>
+    <Eyebrow as="h3" id={id}>{title}</Eyebrow>
     {children}
   </div>
 }
@@ -120,7 +121,7 @@ function RestToggle({ label, hint, value, onToggle, onChange }: { label: string;
         <Switch id={id} checked={on} onCheckedChange={onToggle} aria-describedby={`${id}-hint`} />
         <label htmlFor={id} className="font-action text-base font-bold">{label}</label>
       </div>
-      <p id={`${id}-hint`} className="pl-14 text-[13px] leading-normal text-muted-foreground">{hint}</p>
+      <p id={`${id}-hint`} className="pl-14 text-caption leading-normal text-muted-foreground">{hint}</p>
     </div>
     <div className={on ? 'max-[520px]:pl-14' : 'invisible max-[520px]:hidden'}>
       {on && <DurationField hideLabel label={`${label} length`} min={1} value={value} onChange={onChange} />}
@@ -134,7 +135,7 @@ function Section({ title, children, aside, description }: { title: string; child
   const id = useId()
   return <section aria-labelledby={id} className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-5">
     <div className="flex flex-wrap items-center justify-between gap-x-5 gap-y-3">
-      <div className="grid gap-1"><h2 id={id} className="font-action text-[22px] leading-tight font-bold">{title}</h2>{description && <p className="text-sm leading-relaxed text-muted-foreground">{description}</p>}</div>
+      <div className="grid gap-1"><h2 id={id} className="font-action text-title-sm leading-tight font-bold">{title}</h2>{description && <p className="text-sm leading-relaxed text-muted-foreground">{description}</p>}</div>
       {aside}
     </div>
     {children}
@@ -333,7 +334,7 @@ export function DoughFormulaEditor({ recipe, config, state, onChange, onErrorsCh
         </div>
         <FlourEditor label="Starter flour" prefix="Starter" value={editableStarter.flour} onChange={(flour) => mode === 'weights' ? applyReverse({ starter: { ...editableStarter, flour } }) : updateFormula({ starter: { ...editableStarter, flour } })} />
         <Button variant="link" type="button" className="justify-self-start" aria-expanded={buildOpen} aria-controls={`${prefix}-build`} onClick={() => setBuildOpen((open) => !open)}>{buildOpen ? 'Hide levain build' : 'Build this levain'}</Button>
-        <div id={`${prefix}-build`} hidden={!buildOpen || !build} className="grid gap-5 rounded-field bg-tint p-5">
+        <div id={`${prefix}-build`} hidden={!buildOpen || !build} className="grid gap-5 rounded-field border border-border bg-white p-5">
           {build && <>
             <div className="grid grid-cols-2 gap-x-6 gap-y-5 md:grid-cols-3">
               <Field label="Fresh flour per 1 part seed" positive suffix="parts" value={seedRatio} onChange={(flourPerSeed) => updateFormula({ levainBuild: { ...levainBuild, flourPerSeed } })} />
@@ -358,11 +359,11 @@ export function DoughFormulaEditor({ recipe, config, state, onChange, onErrorsCh
           <ChoiceGroup size="compact" label="Mixing method" className="w-[420px] max-w-full" value={pizzaProcess.mixingMethod} onChange={(mixingMethod: PizzaMixingMethod) => updatePizza({ mixingMethod })}
             options={(['spiral', 'food-processor', 'hand'] as const).map((value) => ({ value, label: { spiral: 'Mixer', 'food-processor': 'Processor', hand: 'By hand' }[value] }))} />
           {/* One reserved hint, so switching methods never moves the page. */}
-          <p className="min-h-[3lh] text-[13px] leading-normal text-muted-foreground">
+          <p className="min-h-[3lh] text-caption leading-normal text-muted-foreground">
             {pizzaProcess.mixingMethod === 'food-processor' ? 'Use ice-cold water with no ice. Run on high until the dough reaches about 77°F.'
               : pizzaProcess.mixingMethod === 'hand' ? `Mix, rest ${formatDuration(HAND_REST_MINUTES)}, then knead; the rest counts toward bulk.`
               : 'Mix until smooth and about 77°F.'}
-            {batch.count <= FOOD_PROCESSOR_MAX_BALLS && pizzaProcess.mixingMethod !== 'food-processor' && <> For {batch.count === 1 ? 'one ball' : 'two balls'}, a food processor is easiest. <Button variant="link" type="button" className="text-[13px]" onClick={() => updatePizza({ mixingMethod: 'food-processor' })}>Use food processor</Button></>}
+            {batch.count <= FOOD_PROCESSOR_MAX_BALLS && pizzaProcess.mixingMethod !== 'food-processor' && <> For {batch.count === 1 ? 'one ball' : 'two balls'}, a food processor is easiest. <Button variant="link" type="button" className="text-caption" onClick={() => updatePizza({ mixingMethod: 'food-processor' })}>Use food processor</Button></>}
           </p>
         </div>
         <Group title="Fermentation">
@@ -376,7 +377,7 @@ export function DoughFormulaEditor({ recipe, config, state, onChange, onErrorsCh
             </div>
             <DurationField label="Warm-up" value={pizzaProcess.warmUpMinutes} describedBy={`${prefix}-warm-hint`} onChange={(warmUpMinutes) => updateFormula({ pizzaProcess: { ...pizzaProcess, warmUpMinutes } })} />
           </div>
-          <p id={`${prefix}-warm-hint`} className="text-[13px] leading-normal text-muted-foreground">Warm-up follows the cold ferment: 4h after 2 days, 3h after 3, 2h after 4.</p>
+          <p id={`${prefix}-warm-hint`} className="text-caption leading-normal text-muted-foreground">Warm-up follows the cold ferment: 4h after 2 days, 3h after 3, 2h after 4.</p>
         </Group>
       </Section>}
 
@@ -405,7 +406,7 @@ export function DoughFormulaEditor({ recipe, config, state, onChange, onErrorsCh
                 <DurationField hideLabel label={`Group ${index + 1} every`} min={1} value={group.everyMinutes} onChange={(everyMinutes) => updateGroup(index, { everyMinutes })} />
                 <Button variant="danger" size="icon" type="button" aria-label={`Remove group ${index + 1}: ${FOLD_LABELS[group.method]}`} onClick={() => { updatePlan({ ...plan, groups: plan.groups.filter((_, groupIndex) => groupIndex !== index) }); setFocusGroup(index < plan.groups.length - 1 ? index : 'add') }}><Trash2 className="size-4" /></Button>
               </div>
-              <p className="text-[13px] tabular-nums text-muted-foreground">At {times.join(', ')}</p>
+              <p className="text-caption tabular-nums text-muted-foreground">At {times.join(', ')}</p>
             </div>
           })}
           {plan.groups.length === 0 && <p className="text-sm">No folds scheduled.</p>}
@@ -425,7 +426,7 @@ export function DoughFormulaEditor({ recipe, config, state, onChange, onErrorsCh
           </div>
           <BulkHint id={`${prefix}-bulk-hint`} config={config} formula={formula} batch={batch} temperatureF={bulkTemperature} onUseBulk={(minutes) => { updateProcess({ bulkMinutes: minutes - (process.benchMinutes ?? 0) }); setLocalReset((key) => key + 1) }} onUseWeight={(pieceWeightGrams) => { updateBatch({ pieceWeightGrams }); setLocalReset((key) => key + 1) }} />
         </Group>
-        <p className="text-[13px] text-muted-foreground">Estimates follow <Button variant="link" className="inline text-[13px]" asChild><a href={GUIDELINES_URL} target="_blank" rel="noreferrer">The Sourdough Journey’s bulk fermentation guidelines</a></Button>. Times are estimates; follow the rise.</p>
+        <p className="text-caption text-muted-foreground">Estimates follow <Button variant="link" className="inline text-caption" asChild><a href={GUIDELINES_URL} target="_blank" rel="noreferrer">The Sourdough Journey’s bulk fermentation guidelines</a></Button>. Times are estimates; follow the rise.</p>
       </Section>}
       {!pizza && <p className="text-sm text-muted-foreground">{formatPercent(result.prefermentedFlourPercent)} of the flour is prefermented in the levain.</p>}
     </div>

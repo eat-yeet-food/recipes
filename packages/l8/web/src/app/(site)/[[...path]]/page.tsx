@@ -10,6 +10,7 @@ import {
 } from '@eat-yeet/l7-learn/learn/learn'
 import { recipesInCategory } from '@eat-yeet/l2-recipe-domain/search'
 import { imageUrl } from '@eat-yeet/l1-recipe-model/recipes'
+import { Eyebrow, PageTitle } from '@eat-yeet/l5-ui-primitives/primitives/typography'
 const pathFor = (parts?: string[]) => '/' + (parts?.join('/') || '')
 const documentFor = cache(async (path: string) => {
   const match = path.match(/^\/learn\/([^/]+)$/)
@@ -72,10 +73,8 @@ export default async function Page({
     return (
       <div className="mx-auto max-w-[var(--max-width)] px-6 pt-8 pb-20 md:px-8">
         <div className="mb-8">
-          <h1 className="font-display text-[clamp(28px,4vw,40px)] font-extrabold text-ink">
-            {copy.pages.recipesHeading}
-          </h1>
-          <p className="mt-3 max-w-lg text-sm leading-relaxed text-ink/65">
+          <PageTitle>{copy.pages.recipesHeading}</PageTitle>
+          <p className="mt-3 max-w-lg text-sm leading-relaxed text-muted-foreground">
             {copy.pages.recipesIntro}
           </p>
         </div>
@@ -89,10 +88,8 @@ export default async function Page({
     const used = new Set<string>()
     return (
       <div className="mx-auto max-w-[var(--max-width)] px-8 py-16 max-sm:px-4">
-        <h1 className="text-center font-display text-4xl font-extrabold text-ink max-sm:text-3xl">
-          {copy.pages.browseHeading}
-        </h1>
-        <p className="mx-auto mt-3 max-w-lg text-center text-sm leading-relaxed text-ink/65">
+        <PageTitle className="text-center">{copy.pages.browseHeading}</PageTitle>
+        <p className="mx-auto mt-3 max-w-lg text-center text-sm leading-relaxed text-muted-foreground">
           {copy.pages.browseIntro}
         </p>
         <div className="mt-12 space-y-14">
@@ -109,9 +106,7 @@ export default async function Page({
               })
             return cards.length ? (
               <section key={section.facet} aria-label={section.title}>
-                <p className="mb-2 text-xs font-semibold uppercase tracking-[3px] text-support-strong">
-                  {section.eyebrow}
-                </p>
+                <Eyebrow className="mb-2">{section.eyebrow}</Eyebrow>
                 <h2 className="mb-6 font-display text-2xl font-extrabold text-ink">
                   {section.title}
                 </h2>

@@ -37,23 +37,24 @@
 }
 
 @theme {
-  /* Yellow + ink. The normative roles are documented in docs/design-system.md. */
-  --color-brand: #ffda17;
-  --color-brand-strong: #25231f;
-  --color-brand-alt: #ffad09;
-  --color-brand-soft: #fff7cc;
-  --color-ink: #25231f;
-  --color-action-hover: #4d3c22;
-  --color-action-label: #fff7cc;
+  /* Plum + pink. The normative roles are documented in docs/design-system.md;
+     components use the role tokens, never the plum ramp or raw values. */
+  --color-plum-950: #1c0819;
+  --color-plum-900: #2a0e28;
+  --color-plum-800: #3a1638;
+  --color-plum-700: #4a1d47;
+  --color-plum-600: #5a2456;
+  --color-plum-400: #9a4590;
+  --color-brand: #ff7ac0;
+  --color-brand-alt: #ff8a3d;
+  --color-brand-soft: #ffe0ef;
+  --color-star: #e06414;
+  --color-ink: var(--color-plum-900);
+  --color-action-hover: var(--color-plum-700);
+  --color-on-dark-label: #ffe3f1;
   --color-danger: #ad2939;
   --color-danger-soft: #fff0f2;
-  --color-tint: #fff7cc;
-  --color-warm: var(--color-tint);
-  --color-warm-deep: var(--color-tint);
-  --color-highlight: var(--color-brand);
-  --color-support: var(--color-ink);
-  --color-support-strong: var(--color-ink);
-  --color-support-soft: var(--color-tint);
+  --color-tint: #fff0f7;
   --color-background: #ffffff;
   --color-black: #000000;
   --color-white: #ffffff;
@@ -62,27 +63,14 @@
   --color-popover: var(--color-white);
   --color-popover-foreground: var(--color-ink);
   --color-primary: var(--color-ink);
-  --color-primary-foreground: var(--color-action-label);
-  --color-secondary: var(--color-ink);
-  --color-secondary-foreground: var(--color-white);
-  --color-muted: #eeece7;
-  --color-muted-foreground: #5c5140;
-  --color-accent: var(--color-tint);
-  --color-accent-foreground: var(--color-ink);
+  --color-primary-foreground: var(--color-on-dark-label);
+  --color-muted: #f3ecf1;
+  --color-muted-foreground: #634a5f;
   --color-foreground: var(--color-ink);
-  --color-border: #d6d0c5;
-  --color-border-on-brand: color-mix(in srgb, var(--color-ink) 40%, var(--color-brand));
-  --color-border-on-ink: color-mix(in srgb, var(--color-action-label) 30%, var(--color-ink));
-  --color-border-light: var(--color-border);
-  --color-border-medium: var(--color-border);
-  --color-input: #807563;
+  --color-border: #ddcfd8;
+  --color-border-on-dark: color-mix(in srgb, var(--color-on-dark-label) 30%, var(--color-ink));
+  --color-input: #86697f;
   --color-ring: var(--color-ink);
-  --color-sidebar: var(--color-tint);
-  --color-sidebar-foreground: var(--color-ink);
-  --color-sidebar-accent: var(--color-brand);
-  --color-sidebar-accent-foreground: var(--color-ink);
-  --color-sidebar-border: var(--color-border);
-  --color-sidebar-ring: var(--color-ink);
   --radius-control: 999px;
   --radius-field: 18px;
   --radius-filter: 4px;
@@ -92,6 +80,33 @@
   --radius-choice: 24px;
   --spacing-choice-inset: 6px;
   --radius-choice-item: calc(var(--radius-choice) - var(--spacing-choice-inset));
+
+  /* ---- type scale (docs/design-system.md "Type scale"). Tailwind's xs/sm/
+     base/lg/xl/2xl steps remain; these name the brand's other sizes. ---- */
+  --text-micro: 11px;
+  --text-caption: 13px;
+  --text-body-sm: 15px;
+  --text-title-sm: 22px;
+  --text-title: 26px;
+  --text-section: 34px;
+  --text-page: clamp(32px, 4vw, 40px);
+  --text-display: clamp(44px, 6vw, 64px);
+  --text-hero: clamp(42px, 7vw, 104px);
+  --text-wordmark: clamp(38px, 6vw, 80px);
+
+  /* ---- uppercase letter-spacing: two steps ---- */
+  --tracking-eyebrow: 0.16em;
+  --tracking-label: 0.06em;
+
+  /* ---- elevation ---- */
+  --shadow-card: 0 1px 0 color-mix(in srgb, var(--color-ink) 8%, transparent);
+  --shadow-raised: 0 8px 24px color-mix(in srgb, var(--color-ink) 12%, transparent);
+  --shadow-glow: 0 16px 40px color-mix(in srgb, var(--color-brand) 25%, transparent);
+  --shadow-overlay: 0 24px 56px color-mix(in srgb, var(--color-ink) 22%, transparent);
+
+  /* ---- gradients ---- */
+  --gradient-hero: linear-gradient(90deg, var(--color-plum-950) 0%, var(--color-plum-900) 45%, var(--color-plum-800) 65%, var(--color-plum-600) 85%, var(--color-plum-400) 100%);
+  --gradient-accent: linear-gradient(90deg, var(--color-brand), var(--color-brand-alt));
 
   /* ---- non-colour tokens the app already depends on via custom utilities
      and arbitrary values. @font-face declarations for Avenir/Geller live in
@@ -139,7 +154,7 @@
 }
 
 /* ---- custom named utilities the app already uses with variants
-   (hover:shadow-card-hover etc.) — Tailwind v4's @utility directive so they
+   (hover:scale etc.) — Tailwind v4's @utility directive so they
    get full variant support, matching what the frozen build compiled. ---- */
 @utility transition-card-hover {
   transition: translate var(--transition-medium), box-shadow var(--transition-medium);
@@ -156,8 +171,19 @@
 @utility transition-nav-text {
   transition: color var(--transition-nav), text-shadow var(--transition-nav), font-size var(--transition-nav);
 }
-@utility shadow-card-hover {
-  box-shadow: 0 8px 24px color-mix(in srgb, var(--color-ink) 10%, transparent);
+/* The two brand gradients. bg-gradient-accent is for AccentRule and the
+   BrandStripe surface only; the checker rejects other uses. */
+@utility bg-gradient-hero {
+  background-image: var(--gradient-hero);
+}
+@utility bg-gradient-accent {
+  background-image: var(--gradient-accent);
+}
+/* The action-surface stripe, painted as a background layer so the parent
+   radius clips it (an overlay pokes past rounded corners). Owned by
+   ui-primitives' ActionSurface and Dialog's `stripe` prop. */
+@utility brand-stripe {
+  background: var(--gradient-accent) top / 100% 8px no-repeat, var(--color-white);
 }
 
 /* ---- base-layer rules the app needs in addition to Tailwind's own preflight;
@@ -189,7 +215,7 @@
     text-decoration: none;
   }
   a:hover {
-    color: var(--color-brand-strong);
+    color: var(--color-ink);
   }
   ::selection {
     color: var(--color-ink);
@@ -218,6 +244,6 @@
 
 /* Sparse decoration for the brand hero; never applied to controls. */
 @utility brand-dots {
-  background-image: radial-gradient(var(--color-ink) 1.5px, transparent 1.5px);
+  background-image: radial-gradient(var(--color-brand) 1.5px, transparent 1.5px);
   background-size: 8px 8px;
 }

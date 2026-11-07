@@ -4,12 +4,13 @@ import { cn } from '@eat-yeet/l0-foundation/utils'
 import type { KitchenClient } from './kitchen-client'
 import { useNotebookClient } from './kitchen-local'
 import { kitchenPageClass } from './kitchen-ui'
+import { PageTitle } from '@eat-yeet/l5-ui-primitives/primitives/typography'
 
 /** A short status page in the kitchen's white layout: loading, signed out, missing or failed. */
 export function KitchenMessage({ title, children, action, busy = false }: { title: string; children: ReactNode; action?: ReactNode; busy?: boolean }) {
   return <section aria-busy={busy || undefined} className={cn(kitchenPageClass, 'py-16')}>
     <div className="grid max-w-[560px] gap-3">
-      <h1 className="font-display text-[36px] leading-tight font-bold">{title}</h1>
+      <PageTitle>{title}</PageTitle>
       <p role={busy ? 'status' : undefined} className="text-base leading-relaxed text-muted-foreground">{children}</p>
       {action && <div className="mt-3 flex flex-wrap gap-4">{action}</div>}
     </div>

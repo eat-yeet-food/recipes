@@ -6,6 +6,9 @@ import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
 import { SignInLink } from '@eat-yeet/l6-ui-shell/account/account-nav'
 import { useAccount } from '@eat-yeet/l6-ui-shell/account/account'
 import { Textarea } from '@eat-yeet/l5-ui-primitives/primitives/textarea'
+import { Callout } from '@eat-yeet/l5-ui-primitives/primitives/callout'
+import { Surface } from '@eat-yeet/l5-ui-primitives/primitives/surface'
+import { SectionTitle } from '@eat-yeet/l5-ui-primitives/primitives/typography'
 
 export type RatingReply = { id: string; name: string; body: string; own: boolean }
 export type RatingReview = {
@@ -33,13 +36,14 @@ export type RatingClient = {
   removeReply: (replyId: string) => Promise<RatingSummary>
 }
 
-function RatingStar({ filled, className, onBrand = false }: { filled: boolean; className?: string; onBrand?: boolean }) {
+/** Filled stars are the star orange; empty picker stars are plum outlines, empty display stars muted. */
+function RatingStar({ filled, className, picker = false }: { filled: boolean; className?: string; picker?: boolean }) {
   return <Star
     aria-hidden="true"
     strokeWidth={1.5}
     className={cn(
       'size-6',
-      onBrand ? filled ? 'fill-ink text-ink' : 'fill-transparent text-ink' : filled ? 'fill-brand-alt text-brand-alt' : 'fill-transparent text-muted-foreground',
+      filled ? 'fill-star text-star' : picker ? 'fill-transparent text-ink' : 'fill-transparent text-muted-foreground',
       className,
     )}
   />
@@ -91,12 +95,12 @@ function ReviewSummary({ summary, signedIn, onReply, onDeleteReply }: {
         <strong className="text-2xl font-bold">{summary.average!.toFixed(1)}</strong>
         <RatingDisplay value={summary.average!} />
       </div>
-      <span className="rounded-control bg-brand px-3 py-1 font-action text-xs font-bold text-ink">
+      <span className="rounded-control bg-brand-soft px-3 py-1 font-action text-xs font-bold text-ink">
         {summary.eatPercentage! >= 50 ? `${summary.eatPercentage}% EAT` : `${100 - summary.eatPercentage!}% YEET`}
       </span>
       <span className="text-sm text-muted-foreground">{summary.count} {summary.count === 1 ? 'rating' : 'ratings'}</span>
     </div>
-    {error && !replyingTo ? <div role="alert" className="mb-4 rounded-lg bg-danger-soft px-4 py-3 text-sm text-danger">{error}</div> : null}
+    {error && !replyingTo ? <Callout tone="danger" className="mb-4">{error}</Callout> : null}
 
     <div className="space-y-5">
       {summary.reviews.map((review) => <article key={review.id} className="flex gap-4 border-b border-border pb-5 last:border-0">
@@ -140,7 +144,7 @@ function ReviewSummary({ summary, signedIn, onReply, onDeleteReply }: {
           </Button> : <SignInLink className="mt-3 inline-flex min-h-6 text-sm font-bold underline decoration-1 underline-offset-4 hover:decoration-2">Sign in to reply</SignInLink>}
 
           {replyingTo === review.id ? <form
-            className="mt-4 flex flex-col gap-4 rounded-lg bg-brand-soft p-4"
+            className="mt-4 flex flex-col gap-4"
             onSubmit={(event) => { event.preventDefault(); void submitReply(review.id) }}
           >
             <div>
@@ -158,7 +162,7 @@ function ReviewSummary({ summary, signedIn, onReply, onDeleteReply }: {
               />
             </div>
             {error ? <div role="alert" className="text-sm text-danger">{error}</div> : null}
-            <Button variant="on-ink" className="self-start" type="submit" disabled={saving || !body.trim()}>
+            <Button className="self-start" type="submit" disabled={saving || !body.trim()}>
               {saving ? 'Posting...' : 'Post Reply'}
             </Button>
           </form> : null}
@@ -233,20 +237,17 @@ export function RecipeRating({ title: _title, client }: { title: string; client:
 
   const rated = Boolean(summary?.ownRating)
   return <section aria-label="Ratings & Reviews" className="text-ink print:hidden">
-    <h2 className="mb-6 flex items-center gap-4 font-display text-[28px] font-extrabold leading-tight text-ink">
-      Ratings &amp; Reviews
-      <span className="h-px flex-1 bg-border" aria-hidden="true" />
-    </h2>
+    <SectionTitle size="title" rule="trailing" className="mb-6">Ratings &amp; Reviews</SectionTitle>
 
-    <div className="mb-8 rounded-surface bg-brand p-6 max-[360px]:p-4">
-      <h3 className="mb-5 text-lg font-semibold text-ink">{rated ? 'Update your rating' : 'Rate this recipe'}</h3>
+    <Surface as="div" action className="mb-8">
+      <h3 className="mb-5 font-display text-title font-extrabold leading-tight text-ink">{rated ? 'Update your rating' : 'Rate this recipe'}</h3>
       {status !== 'unknown' && !signedIn ? <div className="flex flex-col gap-4">
         <p className="text-sm text-ink">Sign in to rate this recipe, write a review, or reply to other cooks.</p>
         <Button asChild className="w-full"><SignInLink>Sign in to rate</SignInLink></Button>
-        {error ? <div role="alert" className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg bg-danger-soft px-4 py-3 text-sm text-danger">
+        {error ? <Callout tone="danger" className="flex flex-wrap items-center gap-x-2 gap-y-1">
           <span>{error}</span>
-          {!summary && <Button variant="link" onClick={() => void refresh()} disabled={loading}>Try again</Button>}
-        </div> : null}
+          {!summary && <Button variant="link" className="text-danger" onClick={() => void refresh()} disabled={loading}>Try again</Button>}
+        </Callout> : null}
       </div> : <form onSubmit={(event) => { event.preventDefault(); void submit() }} className="flex flex-col gap-5">
         <fieldset disabled={saving || !signedIn} className="m-0 min-w-0 border-0 p-0">
           <legend className="mb-2 text-sm font-medium text-muted-foreground">Star rating</legend>
@@ -255,7 +256,7 @@ export function RecipeRating({ title: _title, client }: { title: string; client:
               <input className="peer sr-only" type="radio" name={id} value={star} checked={score === star} onChange={() => { setScore(star); setHover(null); setError(''); setMessage('') }} />
               <span className="sr-only">{star} {star === 1 ? 'star' : 'stars'}</span>
               <span className="flex size-7 items-center justify-center rounded-control transition-transform hover:scale-110 peer-focus-visible:outline-2 peer-focus-visible:outline-ink peer-focus-visible:outline-offset-0 peer-disabled:opacity-50 max-[640px]:size-11">
-                <RatingStar onBrand filled={star <= (hover ?? score ?? 0)} />
+                <RatingStar picker filled={star <= (hover ?? score ?? 0)} />
               </span>
             </label>)}
           </div>
@@ -276,17 +277,17 @@ export function RecipeRating({ title: _title, client }: { title: string; client:
           {member ? <p className="mt-2 text-xs text-muted-foreground">Posting as {member.displayName}.</p> : null}
         </div>
 
-        {error ? <div role="alert" className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg bg-danger-soft px-4 py-3 text-sm text-danger">
+        {error ? <Callout tone="danger" className="flex flex-wrap items-center gap-x-2 gap-y-1">
           <span>{error}</span>
-          {!summary && <Button variant="link" onClick={() => void refresh()} disabled={loading}>Try again</Button>}
-        </div> : null}
+          {!summary && <Button variant="link" className="text-danger" onClick={() => void refresh()} disabled={loading}>Try again</Button>}
+        </Callout> : null}
         <Button className="w-full" type="submit" disabled={!score || !summary || loading || saving || !signedIn}>
           {saving ? 'Submitting...' : rated ? 'Update Rating' : 'Submit Rating'}
         </Button>
         {rated ? <Button variant="link" className="self-start" disabled={saving} onClick={() => void remove()}>Delete my rating</Button> : null}
         {message ? <div className="text-sm text-muted-foreground" role="status">{message}</div> : null}
       </form>}
-    </div>
+    </Surface>
 
     {summary ? <ReviewSummary summary={summary} signedIn={signedIn}
       onReply={async (reviewId, body) => applySummary(await client.reply({ reviewId, body }))}

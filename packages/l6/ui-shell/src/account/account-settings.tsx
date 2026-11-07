@@ -2,6 +2,8 @@
 import { useEffect, useId, useState, type FormEvent, type ReactNode } from 'react'
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
 import { Input } from '@eat-yeet/l5-ui-primitives/primitives/input'
+import { Callout } from '@eat-yeet/l5-ui-primitives/primitives/callout'
+import { PageTitle } from '@eat-yeet/l5-ui-primitives/primitives/typography'
 import { useNavigate } from '@eat-yeet/l5-ui-primitives/primitives/navigation'
 import { useAccount } from './account'
 import { SignInLink } from './account-nav'
@@ -11,7 +13,7 @@ const message = (cause: unknown, fallback: string) => cause instanceof Error && 
 /** White settings page: one heading, then labeled rows separated by rules. */
 function SettingsLayout({ description, children }: { description?: ReactNode; children: ReactNode }) {
   return <div className="mx-auto w-full max-w-[880px] px-4 py-12 text-ink md:px-6">
-    <h1 className="font-display text-[36px] font-extrabold leading-tight">Account settings</h1>
+    <PageTitle>Account settings</PageTitle>
     {description ? <p className="mt-2 text-sm text-muted-foreground">{description}</p> : null}
     <div className="mt-8">{children}</div>
   </div>
@@ -36,7 +38,7 @@ function Field({ label, ...props }: { label: string } & React.ComponentProps<typ
 
 /** Feedback line: an alert for errors, a polite status for success. */
 function Result({ error, success }: { error: string; success: string }) {
-  if (error) return <div role="alert" className="rounded-field bg-danger-soft px-4 py-3 text-sm text-danger">{error}</div>
+  if (error) return <Callout tone="danger">{error}</Callout>
   return <p role="status" className="text-sm empty:hidden">{success}</p>
 }
 

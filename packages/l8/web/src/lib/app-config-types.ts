@@ -10,8 +10,8 @@ export interface AppCopy {
   hero: {
     image: string
     imageAlt: string
-    imageCaption?: string
     headline?: string
+    headlineSticker?: string
     kicker?: string
     tagline: string
     motto?: string

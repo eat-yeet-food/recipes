@@ -1,6 +1,8 @@
 'use client'
 import { useEffect, useState, type ReactNode } from 'react'
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
+import { Callout } from '@eat-yeet/l5-ui-primitives/primitives/callout'
+import { PageTitle } from '@eat-yeet/l5-ui-primitives/primitives/typography'
 import { Link, useNavigate } from '@eat-yeet/l5-ui-primitives/primitives/navigation'
 import { markSignedIn, safeReturnTo, useAccount, type AccountProviders } from './account'
 
@@ -8,7 +10,7 @@ import { markSignedIn, safeReturnTo, useAccount, type AccountProviders } from '.
 export function AccountPanel({ title, description, children }: { title: string; description?: ReactNode; children: ReactNode }) {
   return <div className="mx-auto w-full max-w-[440px] px-4 py-12 max-[360px]:py-8">
     <section aria-labelledby="account-title" className="text-ink">
-      <h1 id="account-title" className="font-display text-[36px] font-extrabold leading-tight">{title}</h1>
+      <PageTitle id="account-title">{title}</PageTitle>
       {description ? <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{description}</p> : null}
       <div className="mt-6">{children}</div>
     </section>
@@ -16,7 +18,7 @@ export function AccountPanel({ title, description, children }: { title: string; 
 }
 
 function Alert({ children }: { children: ReactNode }) {
-  return <div role="alert" className="rounded-field bg-danger-soft px-4 py-3 text-sm text-danger">{children}</div>
+  return <Callout tone="danger">{children}</Callout>
 }
 
 /** Sign-in and sign-up are one Google step; the first sign-in creates the account. */

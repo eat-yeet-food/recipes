@@ -6,7 +6,7 @@ import type { KitchenRevision } from './kitchen-client'
 import { ChangeStrip, CountStepper, FormulaTitle, HistorySheet, KitchenNotice, SaveStatus, type KitchenNoticeValue } from './kitchen-ui'
 
 const meta = {
-  title: 'Kitchen/Controls',
+  title: 'Features/Notebook/Controls',
   parameters: { docs: { description: { component: 'Owned Notebook controls. Formulas save automatically, so the Saved label, the changes strip, History with Restore, names renamed in place and Undo notices replace any Save / Save as choice.' } } },
 } satisfies Meta
 

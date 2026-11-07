@@ -11,7 +11,7 @@ function Example({ integer = false, initialValue = 1, decimalPlaces = 1, max, su
   </div>
 }
 
-const meta = { title: 'Controls/Number field', component: Example, parameters: { docs: { description: { component: 'Text editing with a numeric or decimal mobile keypad. Empty and partial entries remain editable; valid values update live without moving the caret or reformatting the text. Decimal commas are accepted. Invalid entries stay visible on blur and are reported to the owner; Enter finishes editing. The shared Input supplies a 16px font and 44px minimum target.' } } } } satisfies Meta<typeof Example>
+const meta = { title: 'Primitives/Number Field', component: Example, parameters: { docs: { description: { component: 'Text editing with a numeric or decimal mobile keypad. Empty and partial entries remain editable; valid values update live without moving the caret or reformatting the text. Decimal commas are accepted. Invalid entries stay visible on blur and are reported to the owner; Enter finishes editing. The shared Input supplies a 16px font and 44px minimum target.' } } } } satisfies Meta<typeof Example>
 export default meta
 type Story = StoryObj<typeof meta>
 export const Decimal: Story = {}

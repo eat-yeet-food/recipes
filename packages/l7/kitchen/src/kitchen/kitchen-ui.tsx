@@ -4,20 +4,24 @@ import { ChevronDown, ChevronUp, CloudCheck, CloudOff, History, Minus, Pencil, P
 import { cn } from '@eat-yeet/l0-foundation/utils'
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@eat-yeet/l5-ui-primitives/primitives/dialog'
+import { Breadcrumbs } from '@eat-yeet/l5-ui-primitives/primitives/breadcrumbs'
+import { Callout } from '@eat-yeet/l5-ui-primitives/primitives/callout'
+import { AccentRule } from '@eat-yeet/l5-ui-primitives/primitives/surface'
+import { Eyebrow, PageTitle, pageTitleClasses } from '@eat-yeet/l5-ui-primitives/primitives/typography'
 import { cleanFormulaName, type KitchenRevision } from './kitchen-client'
 import type { KitchenChange } from './kitchen-plugin'
 
-const eyebrow = 'font-action text-[11px] font-bold uppercase tracking-[0.14em]'
 export const kitchenPageClass = 'mx-auto w-full max-w-[var(--max-width)] px-6 max-[640px]:px-4'
 
-/** The section's one yellow brand moment: eyebrow, Bowlby title, copy and actions. */
+/** The collection header: white, no fill. Eyebrow, Bowlby title, the accent rule, copy and actions. */
 export function KitchenBand({ eyebrow: label, title, children, actions }: { eyebrow: string; title: string; children: ReactNode; actions?: ReactNode }) {
-  return <section aria-labelledby="kitchen-title" className="bg-brand text-ink">
+  return <section aria-labelledby="kitchen-title" className="border-b border-border bg-white text-ink">
     <div className={cn(kitchenPageClass, 'flex flex-wrap items-end justify-between gap-x-10 gap-y-5 py-11 max-[640px]:py-7')}>
       <div className="grid max-w-[640px] gap-3">
-        <p className={eyebrow}>{label}</p>
-        <h1 id="kitchen-title" className="font-hero text-[64px] leading-[0.92] font-normal max-[640px]:text-[44px]">{title}</h1>
-        <div className="text-[17px] leading-relaxed max-[640px]:text-[15px]">{children}</div>
+        <Eyebrow size="small">{label}</Eyebrow>
+        <PageTitle id="kitchen-title" size="display">{title}</PageTitle>
+        <AccentRule size="band" className="mt-1" />
+        <div className="text-lg leading-relaxed max-[640px]:text-body-sm">{children}</div>
       </div>
       {actions && <div className="flex flex-wrap items-center gap-5">{actions}</div>}
     </div>
@@ -26,21 +30,16 @@ export function KitchenBand({ eyebrow: label, title, children, actions }: { eyeb
 
 export type KitchenCrumb = { label: string; href?: string }
 
-export const kitchenTitleClass = 'font-display text-[44px] leading-[1.05] font-bold max-[640px]:text-[34px]'
+export const kitchenTitleClass = pageTitleClasses.standard
 
 /** Formula and scratch pages: the formula's name is the page heading, usually a `FormulaTitle`. */
 export function KitchenHeader({ crumbs, title, meta, actions }: { crumbs: KitchenCrumb[]; title: ReactNode; meta: ReactNode; actions: ReactNode }) {
   return <header className="grid gap-4">
-    <nav aria-label="Breadcrumb" className="flex flex-wrap gap-1.5 text-xs leading-[1.6] uppercase text-ink">
-      {crumbs.map((crumb, index) => <Fragment key={`${crumb.label}-${index}`}>
-        {index > 0 && <span aria-hidden="true">&gt;</span>}
-        {crumb.href ? <a href={crumb.href}>{crumb.label}</a> : <span aria-current="page">{crumb.label}</span>}
-      </Fragment>)}
-    </nav>
+    <Breadcrumbs crumbs={crumbs} />
     <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
       <div className="grid min-w-0 gap-2">
         {typeof title === 'string' ? <h1 className={cn('min-w-0 break-words', kitchenTitleClass)}>{title}</h1> : title}
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-[15px]">{meta}</div>
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-body-sm">{meta}</div>
       </div>
       <div className="flex flex-wrap items-center gap-3 max-[640px]:w-full max-[640px]:[&>*]:flex-1">{actions}</div>
     </div>
@@ -84,27 +83,27 @@ export function SaveStatus({ state, local = false }: { state: SaveState; local?:
     : state.message
   const failed = state.kind === 'error' || state.kind === 'invalid'
   const Icon = failed ? CloudOff : CloudCheck
-  return <span role="status" data-save-status={state.kind} className={cn('inline-flex flex-wrap items-center gap-x-1.5 font-action text-[13px] font-bold', failed ? 'text-danger' : 'text-muted-foreground')}>
+  return <span role="status" data-save-status={state.kind} className={cn('inline-flex flex-wrap items-center gap-x-1.5 font-action text-caption font-bold', failed ? 'text-danger' : 'text-muted-foreground')}>
     <Icon aria-hidden="true" className={failed ? 'size-3.5' : 'size-3.5 text-ink'} />
     {text}
-    {state.kind === 'error' && state.retry && <Button variant="link" className="ml-1 text-[13px] text-danger" onClick={state.retry}>Try again</Button>}
+    {state.kind === 'error' && state.retry && <Button variant="link" className="ml-1 text-caption text-danger" onClick={state.retry}>Try again</Button>}
   </span>
 }
 
 /** What differs from the recipe as written, with a way back to it. On ink, it sits with the dough results. */
 export function ChangeStrip({ changes, onReset, tone = 'page' }: { changes: KitchenChange[]; onReset?: () => void; tone?: 'page' | 'ink' }) {
   const ink = tone === 'ink'
-  return <section aria-label="Changed from the recipe" className={cn('flex flex-wrap items-center gap-2.5', ink ? 'rounded-field bg-ink p-5 text-action-label' : 'border-y border-border py-3.5')}>
-    <h2 className={cn(eyebrow, 'mr-1.5', ink && 'w-full text-brand')}>Changed from the recipe</h2>
+  return <section aria-label="Changed from the recipe" className={cn('flex flex-wrap items-center gap-2.5', ink ? 'rounded-field bg-ink p-5 text-on-dark-label' : 'border-y border-border py-3.5')}>
+    <Eyebrow as="h2" size="small" tone={ink ? 'brand' : 'ink'} className={cn('mr-1.5', ink && 'w-full')}>Changed from the recipe</Eyebrow>
     {changes.length
       ? <ul className="contents">{changes.map((change) => <ChangeChip key={change.label} change={change} />)}</ul>
       : <p className={cn('text-sm', !ink && 'text-muted-foreground')}>Nothing yet. This matches the recipe.</p>}
-    {changes.length > 0 && onReset && <Button variant={ink ? 'quiet-on-ink' : 'link'} className={cn('gap-1.5', ink ? 'w-full' : 'ml-auto max-[640px]:ml-0')} onClick={onReset}><Undo2 aria-hidden="true" className="size-3.5" />Reset to recipe</Button>}
+    {changes.length > 0 && onReset && <Button variant={ink ? 'quiet-on-dark' : 'link'} className={cn('gap-1.5', ink ? 'w-full' : 'ml-auto max-[640px]:ml-0')} onClick={onReset}><Undo2 aria-hidden="true" className="size-3.5" />Reset to recipe</Button>}
   </section>
 }
 
 export function ChangeChip({ change, as: Tag = 'li' }: { change: KitchenChange; as?: 'li' | 'span' }) {
-  return <Tag className="inline-flex max-w-full flex-wrap items-baseline gap-x-1.5 rounded-control border border-border bg-white px-3 py-1 text-[13.5px] text-ink leading-snug">
+  return <Tag className="inline-flex max-w-full flex-wrap items-baseline gap-x-1.5 rounded-control border border-border bg-white px-3 py-1 text-caption text-ink leading-snug">
     <span>{change.label}</span>
     <s className="text-muted-foreground decoration-1"><span className="sr-only">was </span>{change.from}</s>
     <strong className="font-action font-bold"><span className="sr-only">now </span>{change.to}</strong>
@@ -183,7 +182,7 @@ export function FormulaTitle({ name, onRename, className, autoEdit = false }: {
     </div>
     {editing && (error
       ? <p id={`${id}-error`} role="alert" className="text-sm text-danger">{error} Press Escape to keep “{name}”.</p>
-      : <p id={`${id}-hint`} className="text-[13px] text-muted-foreground">{busy ? 'Saving the name…' : 'Enter to save · Escape to cancel'}</p>)}
+      : <p id={`${id}-hint`} className="text-caption text-muted-foreground">{busy ? 'Saving the name…' : 'Enter to save · Escape to cancel'}</p>)}
   </div>
 }
 
@@ -194,10 +193,10 @@ export function KitchenNotice({ notice, onDismiss, raised = false }: { notice: K
   const failure = notice?.tone === 'error'
   return <div className={cn('pointer-events-none fixed inset-x-0 z-[var(--z-dialog)] flex justify-center px-4 print:hidden', raised ? 'bottom-[calc(7rem+env(safe-area-inset-bottom))] lg:bottom-6' : 'bottom-[max(1.5rem,env(safe-area-inset-bottom))]')}>
     <div role="status" aria-live="polite" className="contents">
-      {notice && <div className={cn('pointer-events-auto flex w-full max-w-[480px] items-center gap-4 rounded-field px-4 py-3 text-[15px] leading-snug shadow-card-hover', failure ? 'bg-danger text-white' : 'bg-ink text-action-label')}>
+      {notice && <div className={cn('pointer-events-auto flex w-full max-w-[480px] items-center gap-4 rounded-field px-4 py-3 text-body-sm leading-snug shadow-raised', failure ? 'bg-danger text-white' : 'bg-ink text-on-dark-label')}>
         <p className="min-w-0 flex-1">{notice.message}</p>
-        {notice.action && <Button variant="quiet-on-ink" className={failure ? 'text-white' : undefined} onClick={() => { notice.action!.run(); onDismiss() }}>{notice.action.label}</Button>}
-        <Button variant="quiet-on-ink" size="icon-xs" aria-label="Dismiss" className={failure ? 'text-white' : undefined} onClick={onDismiss}><X className="size-4" /></Button>
+        {notice.action && <Button variant="quiet-on-dark" className={failure ? 'text-white' : undefined} onClick={() => { notice.action!.run(); onDismiss() }}>{notice.action.label}</Button>}
+        <Button variant="quiet-on-dark" size="icon-xs" aria-label="Dismiss" className={failure ? 'text-white' : undefined} onClick={onDismiss}><X className="size-4" /></Button>
       </div>}
     </div>
   </div>
@@ -252,23 +251,23 @@ export function HistorySheet({ open, onOpenChange, title, revisions, describe, o
       </header>
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
         {groups.map((group) => <section key={group.day} aria-label={group.day}>
-          <h3 className="px-6 pt-4 pb-1.5 font-action text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">{group.day}</h3>
+          <Eyebrow as="h3" size="small" tone="muted" className="px-6 pt-4 pb-1.5">{group.day}</Eyebrow>
           <ol>
             {group.items.map(({ revision, index }) => {
               const previous = revisions[index + 1] ?? null
               const current = index === 0
               return <li key={revision.id} className={cn('grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 border-t border-border px-6 py-3 first:border-t-0', current && 'bg-tint')}>
-                <p className="text-[15px] leading-snug">{previous || !complete ? describe(revision, previous) : 'Created'}</p>
+                <p className="text-body-sm leading-snug">{previous || !complete ? describe(revision, previous) : 'Created'}</p>
                 {current
                   ? <span className="row-span-2 font-action text-xs font-bold">Current</span>
-                  : <Button variant="link" className="row-span-2 text-[13px]" disabled={restoring !== null} aria-label={`Restore the version from ${dayLabel(revision.createdAt)} at ${clockLabel(revision.createdAt)}`} onClick={() => onRestore(revision)}>{restoring === revision.id ? 'Restoring…' : 'Restore'}</Button>}
-                <p className="text-[12.5px] text-muted-foreground">{clockLabel(revision.createdAt)}</p>
+                  : <Button variant="link" className="row-span-2 text-caption" disabled={restoring !== null} aria-label={`Restore the version from ${dayLabel(revision.createdAt)} at ${clockLabel(revision.createdAt)}`} onClick={() => onRestore(revision)}>{restoring === revision.id ? 'Restoring…' : 'Restore'}</Button>}
+                <p className="text-caption text-muted-foreground">{clockLabel(revision.createdAt)}</p>
               </li>
             })}
           </ol>
         </section>)}
       </div>
-      <p className="shrink-0 border-t border-border px-6 py-4 text-[13.5px] leading-relaxed text-muted-foreground">Restoring adds a new version on top, so a restore can be undone too.</p>
+      <p className="shrink-0 border-t border-border px-6 py-4 text-caption leading-relaxed text-muted-foreground">Restoring adds a new version on top, so a restore can be undone too.</p>
     </DialogContent>
   </Dialog>
 }
@@ -281,12 +280,12 @@ export function DoughDock({ total, detail, changeCount = 0, children, action }: 
   const [open, setOpen] = useState(false)
   const id = useId()
   return <div data-dough-dock="" className="fixed inset-x-0 bottom-0 z-[var(--z-recipe-actions)] lg:hidden print:hidden">
-    <div id={`${id}-panel`} hidden={!open} className="max-h-[65dvh] overflow-y-auto rounded-t-[22px] bg-ink px-4 pt-4">{children}</div>
-    <div className={`flex items-center gap-3 bg-ink px-4 ${open ? '' : 'rounded-t-[22px]'} pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] text-action-label`}>
+    <div id={`${id}-panel`} hidden={!open} className="max-h-[65dvh] overflow-y-auto rounded-t-surface bg-ink px-4 pt-4">{children}</div>
+    <div className={`flex items-center gap-3 bg-ink px-4 ${open ? '' : 'rounded-t-surface'} pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] text-on-dark-label`}>
       <button type="button" aria-expanded={open} aria-controls={`${id}-panel`} onClick={() => setOpen((value) => !value)}
-        className="grid min-h-11 min-w-0 flex-1 justify-items-start rounded-field text-left focus-visible:outline-2 focus-visible:outline-action-label focus-visible:outline-offset-2">
-        <span className="flex items-center gap-1.5 font-action text-xs font-bold uppercase tracking-[0.12em] text-brand">Your dough {open ? <ChevronDown aria-hidden="true" className="size-3.5" /> : <ChevronUp aria-hidden="true" className="size-3.5" />}</span>
-        <span className="flex min-w-0 items-baseline gap-2"><strong className="font-action text-2xl font-bold tabular-nums text-brand">{total}</strong><span className="truncate text-[13px]">{detail}{changeCount > 0 && ` · ${changeCount} ${changeCount === 1 ? 'change' : 'changes'}`}</span></span>
+        className="grid min-h-11 min-w-0 flex-1 justify-items-start rounded-field text-left focus-visible:outline-2 focus-visible:outline-on-dark-label focus-visible:outline-offset-2">
+        <span className="flex items-center gap-1.5 font-action text-xs font-bold uppercase tracking-eyebrow text-brand">Your dough {open ? <ChevronDown aria-hidden="true" className="size-3.5" /> : <ChevronUp aria-hidden="true" className="size-3.5" />}</span>
+        <span className="flex min-w-0 items-baseline gap-2"><strong className="font-action text-2xl font-bold tabular-nums text-brand">{total}</strong><span className="truncate text-caption">{detail}{changeCount > 0 && ` · ${changeCount} ${changeCount === 1 ? 'change' : 'changes'}`}</span></span>
       </button>
       {action}
     </div>
