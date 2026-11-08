@@ -36,9 +36,6 @@ workbench:
       mozzarella:
         quantity: 6
         unit: oz
-      pecorino:
-        quantity: 28
-        unit: g
       oregano:
         quantity: 0.125
         unit: tsp
@@ -207,8 +204,6 @@ methodOptions:
                 text: >-
                   shredded [Trader Joe's whole milk low moisture
                   mozzarella](https://www.traderjoes.com/home/search?q=whole%20milk%20low%20moisture%20mozzarella&section=products)
-              - id: pecorino
-                text: optional pecorino romano
               - id: pizza-toppings-item-4
                 text: >-
                   [Olive
@@ -259,7 +254,7 @@ methodOptions:
                   freeze / refrigerate for a bit, but always bring to room temperature immediately before use to avoid
                   gummy pizza.
               - id: steps-2-item-2
-                text: 'Cheese: Grate the mozzarella and, if using, finely grate the romano.'
+                text: 'Cheese: Grate the mozzarella.'
               - id: steps-2-item-3
                 text: 'Bench flour: Mix 50/50 semolina + all purpose flour in a small bowl and set aside.'
             id: steps-2
@@ -285,8 +280,6 @@ methodOptions:
                   that will become your crust.
               - id: steps-3-item-8
                 text: (Optional) Pinch dried oregano in your fingers to oxidize and spread over the top of the sauce.
-              - id: steps-3-item-9
-                text: '(Optional) Spread Romano cheese evenly over the entire pizza, covering as much of the sauce as possible.'
               - id: steps-3-item-10
                 text: Scatter the shredded mozzarella evenly over the top.
             id: steps-3
@@ -413,8 +406,6 @@ blocks:
             text: >-
               shredded [Trader Joe's whole milk low moisture
               mozzarella](https://www.traderjoes.com/home/search?q=whole%20milk%20low%20moisture%20mozzarella&section=products)
-          - id: pecorino
-            text: optional pecorino romano
           - id: pizza-toppings-item-4
             text: >-
               [Olive
@@ -461,7 +452,7 @@ blocks:
               easy-to-spread consistency. Place sauce in a small bowl and cover with saran wrap. It's ok to freeze /
               refrigerate for a bit, but always bring to room temperature immediately before use to avoid gummy pizza.
           - id: steps-2-item-2
-            text: 'Cheese: Grate the mozzarella and, if using, finely grate the romano.'
+            text: 'Cheese: Grate the mozzarella.'
           - id: steps-2-item-3
             text: 'Bench flour: Mix 50/50 semolina + all purpose flour in a small bowl and set aside.'
         id: steps-2
@@ -485,8 +476,6 @@ blocks:
               will become your crust.
           - id: steps-3-item-8
             text: (Optional) Pinch dried oregano in your fingers to oxidize and spread over the top of the sauce.
-          - id: steps-3-item-9
-            text: '(Optional) Spread Romano cheese evenly over the entire pizza, covering as much of the sauce as possible.'
           - id: steps-3-item-10
             text: Scatter the shredded mozzarella evenly over the top.
         id: steps-3

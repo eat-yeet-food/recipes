@@ -91,7 +91,7 @@ check('one pizza lists toppings without batch totals', onePizzaText.includes('6 
 await desktop.getByRole('button', { name: 'More pizzas' }).click()
 await desktop.getByRole('button', { name: 'More pizzas' }).click()
 const authoredPizzaText = await desktop.locator('#recipe-card').textContent()
-check('pizza toppings show readable per-pizza and batch totals', authoredPizzaText.includes('6 oz pizza sauce (18 oz total)') && authoredPizzaText.includes('28 g optional pecorino romano (84 g total)') && authoredPizzaText.includes('⅛ tsp optional dried oregano (⅜ tsp total)'))
+check('pizza toppings show readable per-pizza and batch totals', authoredPizzaText.includes('6 oz pizza sauce (18 oz total)') && !/romano/i.test(authoredPizzaText) && authoredPizzaText.includes('⅛ tsp optional dried oregano (⅜ tsp total)'))
 check('outdoor mixing omits unused optional ingredients', authoredPizzaText.includes('Add the water, flour, fine sea salt, and SAF red instant yeast to the spiral mixer'))
 check('recipes always show the authored formula', authoredPizzaText.includes('861g Kirkland Organic All-Purpose Flour') && authoredPizzaText.includes('560g water') && authoredPizzaText.includes('¾ tsp (2.15g) SAF red instant yeast') && authoredPizzaText.includes('17.2g fine sea salt'))
 await desktop.getByRole('button', { name: 'More pizzas' }).click()
