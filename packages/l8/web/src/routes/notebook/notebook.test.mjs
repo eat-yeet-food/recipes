@@ -235,7 +235,7 @@ try {
     // A pill keeps the total in view; it hands off to the Vaul drawer one at a time.
     const pill = page.locator('[data-dough-pill]')
     const drawer = page.locator('[data-dough-drawer]')
-    check(`dough total is in the pill at ${width}px`, await pill.isVisible() && (await pill.textContent()).includes('1,440g'))
+    check(`the Review pill names the dough total at ${width}px`, await pill.isVisible() && (await pill.textContent()).includes('Review') && (await pill.getAttribute('aria-label')).includes('1,440g'))
     const reserved = await page.evaluate(() => parseFloat(getComputedStyle(document.body).paddingBottom))
     const pillBox = await pill.boundingBox()
     check(`the page reserves room for the pill at ${width}px`, reserved >= height - pillBox.y - 1, `${reserved} vs ${height - pillBox.y}`)

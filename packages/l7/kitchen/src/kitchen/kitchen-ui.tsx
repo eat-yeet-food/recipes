@@ -276,7 +276,7 @@ export function HistorySheet({ open, onOpenChange, title, revisions, describe, o
 const PILL_MS = 180
 
 /**
- * Phones: a small plum pill keeps the total in view; tapping or swiping it up
+ * Phones: a small plum Review pill; tapping or swiping it up
  * hands off to a Vaul drawer with the full results and Save. The handoff is
  * staggered: the pill drops away, then the drawer rises; closing reverses it.
  */
@@ -302,15 +302,15 @@ export function DoughDock({ total, detail, changeCount = 0, children, action }: 
   const changes = changeCount > 0 ? ` · ${changeCount} ${changeCount === 1 ? 'change' : 'changes'}` : ''
   return <>
     <div data-dough-dock="" data-open={open || undefined} className="pointer-events-none fixed inset-x-0 bottom-0 z-[var(--z-nav)] flex justify-end px-4 pb-[max(1rem,env(safe-area-inset-bottom))] lg:hidden print:hidden">
-      <button ref={pillRef} type="button" data-dough-pill="" aria-haspopup="dialog" aria-expanded={open} aria-label={`Your dough: ${total}, ${detail}${changes}`}
+      <button ref={pillRef} type="button" data-dough-pill="" aria-haspopup="dialog" aria-expanded={open} aria-label={`Review your dough: ${total}, ${detail}${changes}`}
         tabIndex={pillAway ? -1 : undefined} aria-hidden={pillAway || undefined}
         onClick={present}
         onPointerDown={(event) => { swipe.current = { pointer: event.pointerId, y: event.clientY } }}
         onPointerMove={(event) => { const g = swipe.current; if (g && g.pointer === event.pointerId && g.y - event.clientY > 16) { swipe.current = null; present() } }}
         onPointerUp={() => { swipe.current = null }} onPointerCancel={() => { swipe.current = null }}
-        className={cn('pointer-events-auto flex min-h-12 touch-none items-center gap-2 rounded-full bg-ink px-5 font-action text-lg font-bold tabular-nums text-brand shadow-overlay transition-transform duration-[180ms] ease-out motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink',
+        className={cn('pointer-events-auto flex min-h-12 touch-none items-center gap-2 rounded-full bg-ink px-5 font-action text-base font-bold text-white shadow-overlay transition-transform duration-[180ms] ease-out motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink',
           pillAway && 'translate-y-[calc(100%+2rem)]')}>
-        {total}<ChevronUp aria-hidden="true" className="size-4 text-on-dark-label" />
+        Review<ChevronUp aria-hidden="true" className="size-4" />
       </button>
     </div>
     <Drawer.Root open={open} onOpenChange={onOpenChange} onAnimationEnd={(isOpen) => { if (!isOpen) returnPill() }}>

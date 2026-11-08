@@ -95,7 +95,7 @@ export const Library: Story = {
 }
 /** The changes strip sits with the dough results: in the drawer behind the dough pill on phones. */
 async function changesRegion(screen: ReturnType<typeof within>) {
-  const pill = screen.queryByRole('button', { name: /Your dough/, expanded: false })
+  const pill = screen.queryByRole('button', { name: /your dough/i, expanded: false })
   if (pill && getComputedStyle(pill).display !== 'none' && pill.getClientRects().length) {
     await userEvent.click(pill)
     // The drawer renders in a portal outside the story root.
