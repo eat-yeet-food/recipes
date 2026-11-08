@@ -6,7 +6,7 @@ import { useNavigate } from '@eat-yeet/l5-ui-primitives/primitives/navigation'
 import { useNotebookClient } from './kitchen-local'
 import { kitchenErrorMessage, type KitchenClient } from './kitchen-client'
 import { decodeKitchenState, kitchenPath, type KitchenRecipe } from './kitchen-plugin'
-import { FormulaTitle, KitchenHeader, KitchenNotice, SaveStatus, type KitchenNoticeValue } from './kitchen-ui'
+import { FormulaTitle, KitchenHeader, KitchenNotice, type KitchenNoticeValue } from './kitchen-ui'
 import { KitchenWorkspace } from './kitchen-workspace'
 import { Callout } from '@eat-yeet/l5-ui-primitives/primitives/callout'
 
@@ -123,10 +123,7 @@ export function KitchenScratchPage({ kitchen, client, sharedConfig, saveOnArriva
         <KitchenHeader
           crumbs={[{ label: 'Remix', href: '/remix' }, { label: recipe.title }]}
           title={<FormulaTitle name={name ?? recipe.title} onRename={rename} />}
-          meta={<>
-            <span>Unsaved remix from <a href={`/recipes/${recipe.slug}`} className="font-action font-bold underline decoration-1 underline-offset-4 hover:decoration-2">the recipe</a></span>
-            <SaveStatus state={errors.length ? { kind: 'invalid' } : { kind: 'local' }} />
-          </>}
+          meta={<span>From <a href={`/recipes/${recipe.slug}`} className="font-action font-bold underline decoration-1 underline-offset-4 hover:decoration-2">{recipe.title}</a></span>}
           actions={<>
             <Button className="max-lg:hidden" disabled={errors.length > 0 || saving || !store} onClick={save}><Save className="size-4" />{saveLabel}</Button>
           </>}

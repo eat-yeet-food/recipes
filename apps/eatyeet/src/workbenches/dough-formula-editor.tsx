@@ -360,8 +360,7 @@ export function DoughFormulaEditor({ recipe, config, state, onChange, onErrorsCh
         <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-2">
           <ChoiceGroup size="compact" label="Mixing method" className="w-[420px] max-w-full" value={pizzaProcess.mixingMethod} onChange={(mixingMethod: PizzaMixingMethod) => updatePizza({ mixingMethod })}
             options={(['spiral', 'food-processor', 'hand'] as const).map((value) => ({ value, label: { spiral: 'Mixer', 'food-processor': 'Processor', hand: 'By hand' }[value] }))} />
-          {/* One reserved hint, so switching methods never moves the page. */}
-          <p className="min-h-[3lh] text-caption leading-normal text-muted-foreground">
+          <p className="text-caption leading-normal text-muted-foreground">
             {pizzaProcess.mixingMethod === 'food-processor' ? 'Use ice-cold water with no ice. Run on high until the dough reaches about 77°F.'
               : pizzaProcess.mixingMethod === 'hand' ? `Mix, rest ${formatDuration(HAND_REST_MINUTES)}, then knead; the rest counts toward bulk.`
               : 'Mix until smooth and about 77°F.'}
@@ -372,7 +371,7 @@ export function DoughFormulaEditor({ recipe, config, state, onChange, onErrorsCh
           <div className="grid grid-cols-2 items-end gap-x-6 gap-y-5 md:grid-cols-4">
             <Field label="Dough temperature" suffix="°F" step="1" decimalPlaces={0} min={PIZZA_TEMPERATURE_RANGE_F[0]} max={PIZZA_TEMPERATURE_RANGE_F[1]} value={pizzaProcess.bulkTemperatureF} onChange={(bulkTemperatureF) => updateFormula({ pizzaProcess: { ...pizzaProcess, bulkTemperatureF } })} />
             <DurationField label="Divide and ball at" min={pizzaProcess.mixingMethod === 'hand' ? HAND_REST_MINUTES + 1 : 1} value={pizzaProcess.bulkMinutes} onChange={(bulkMinutes) => updateFormula({ pizzaProcess: { ...pizzaProcess, bulkMinutes } })} />
-            <div className="col-span-2 grid min-w-0 gap-1">
+            <div className="col-span-2 grid min-w-0 content-start gap-3">
               <span aria-hidden="true" className="font-action text-sm font-bold">Cold ferment</span>
               <ChoiceGroup size="compact" label="Cold ferment days" value={String(pizzaProcess.coldDays) as `${typeof COLD_DAYS[number]}`} onChange={(days) => updatePizza({ coldDays: Number(days), warmUpMinutes: warmUpForColdDays(Number(days)) })}
                 options={COLD_DAYS.map((days) => ({ value: String(days) as `${typeof days}`, label: `${days} days` }))} />
