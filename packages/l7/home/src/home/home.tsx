@@ -71,7 +71,7 @@ function HeroHeadline({ text, sticker }: { text: string; sticker?: string }) {
 /** The "New! Remix" starburst on the hero card; it opens Remix. */
 function RemixSticker() {
   return <Link to="/remix" data-remix-sticker="" aria-label="New: Remix recipes"
-    className="group absolute right-1 top-[206px] z-10 grid size-[116px] rotate-12 place-items-center text-sticker transition-transform hover:rotate-[16deg] hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white motion-reduce:transition-none md:right-6 md:top-8 md:size-[124px]">
+    className="group absolute right-1 top-[206px] z-10 grid size-[116px] rotate-12 place-items-center text-sticker transition-[transform,color] duration-150 ease-out hover:rotate-[16deg] hover:scale-105 active:scale-90 active:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white motion-reduce:transition-none md:right-6 md:top-8 md:size-[124px]">
     <svg aria-hidden="true" viewBox="0 0 120 120" className="absolute inset-0 size-full drop-shadow-md"><polygon fill="currentColor" points="60.0,0.0 69.9,10.0 83.0,4.6 88.3,17.6 102.4,17.6 102.4,31.7 115.4,37.0 110.0,50.1 120.0,60.0 110.0,69.9 115.4,83.0 102.4,88.3 102.4,102.4 88.3,102.4 83.0,115.4 69.9,110.0 60.0,120.0 50.1,110.0 37.0,115.4 31.7,102.4 17.6,102.4 17.6,88.3 4.6,83.0 10.0,69.9 0.0,60.0 10.0,50.1 4.6,37.0 17.6,31.7 17.6,17.6 31.7,17.6 37.0,4.6 50.1,10.0" /></svg>
     <span aria-hidden="true" className="relative -mt-0.5 grid justify-items-center gap-0.5 text-center leading-none text-ink">
       <span className="font-action text-xs font-bold uppercase tracking-label">New</span>
