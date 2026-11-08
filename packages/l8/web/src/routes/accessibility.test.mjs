@@ -84,7 +84,16 @@ try {
       await audit(page, 'Notebook / renaming', width)
       await page.keyboard.press('Enter')
       await page.getByRole('heading', { level: 1, name: `Accessibility ${width}` }).waitFor({ state: 'attached' })
-      await page.getByRole('button', { name: 'Save to Notebook' }).first().click()
+      // Phones save from the dough drawer behind the pill; wider screens from the header.
+      const pill = page.locator('[data-dough-pill]')
+      if (await pill.isVisible()) {
+        await pill.click()
+        const drawer = page.getByRole('dialog', { name: 'Your dough' })
+        await drawer.waitFor()
+        await page.waitForTimeout(600)
+        await audit(page, 'Notebook / dough drawer', width)
+        await drawer.getByRole('button', { name: 'Save' }).click()
+      } else await page.getByRole('button', { name: 'Save to Notebook' }).click()
       await page.waitForURL(/\/notebook\/new-york-style-pizza\/[A-Za-z0-9_-]{16}\/bake(\?saved=1)?$/)
       await page.locator('#recipe-card').waitFor()
       await audit(page, 'Notebook / bake sheet', width)

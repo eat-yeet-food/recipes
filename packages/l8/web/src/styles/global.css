@@ -272,5 +272,5 @@
 /* Phones: the Notebook dough drawer's peek bar covers the page bottom.
    Reserve exactly its measured height so the footer ends right above it. */
 @media (width < 64rem) {
-  body:has([data-dough-dock]) { padding-bottom: var(--dough-dock-peek, 7rem); }
+  body:has([data-dough-dock]) { padding-bottom: 5.5rem; }
 }

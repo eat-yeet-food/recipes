@@ -93,11 +93,22 @@ export const Library: Story = {
     await expect(await screen.findByText('Restored Kids’ 10-inch.')).toBeVisible()
   },
 }
-/** The changes strip sits with the dough results: in the dock on phones. */
+/** The changes strip sits with the dough results: in the drawer behind the dough pill on phones. */
 async function changesRegion(screen: ReturnType<typeof within>) {
-  const dock = screen.queryByRole('button', { name: /Your dough/, expanded: false })
-  if (dock) await userEvent.click(dock)
+  const pill = screen.queryByRole('button', { name: /Your dough/, expanded: false })
+  if (pill && getComputedStyle(pill).display !== 'none' && pill.getClientRects().length) {
+    await userEvent.click(pill)
+    // The drawer renders in a portal outside the story root.
+    return within(document.body).findByRole('region', { name: 'Changed from the recipe' }, { timeout: 3000 })
+  }
   return screen.getByRole('region', { name: 'Changed from the recipe' })
+}
+/** Closes the phone drawer, if open, so the page behind it is reachable again. */
+async function closeDrawer() {
+  const drawer = () => within(document.body).queryByRole('dialog', { name: 'Your dough' })
+  if (!drawer()) return
+  await userEvent.keyboard('{Escape}')
+  await waitFor(() => expect(drawer()).toBeNull(), { timeout: 3000 })
 }
 export const Calculator: Story = {
   args: { view: 'scratch', signedIn: false },
@@ -106,8 +117,10 @@ export const Calculator: Story = {
     const hydration = await screen.findByRole('textbox', { name: 'Hydration' })
     await userEvent.clear(hydration)
     await userEvent.type(hydration, '68')
-    await waitFor(async () => expect(await changesRegion(screen)).toHaveTextContent('now 68%'))
-    await userEvent.click(screen.getByRole('button', { name: 'Reset to recipe' }))
+    const changes = await changesRegion(screen)
+    await waitFor(() => expect(changes).toHaveTextContent('now 68%'))
+    await userEvent.click(within(changes).getByRole('button', { name: 'Reset to recipe' }))
+    await closeDrawer()
     await expect(screen.getByRole('textbox', { name: 'Hydration' })).toHaveValue('65')
   },
 }
@@ -119,7 +132,9 @@ export const SourdoughCalculator: Story = {
     await userEvent.clear(share)
     await userEvent.type(share, '60')
     await expect(await screen.findByText(/must total 100%/)).toBeVisible()
-    await expect(screen.getAllByRole('button', { name: 'Save to Notebook' })[0]).toBeDisabled()
+    // Phones hide the header Save (the drawer holds it), so find it by text rather than by visible role.
+    const save = [...canvasElement.querySelectorAll('button')].find((button) => button.textContent?.trim() === 'Save to Notebook')
+    await expect(save).toBeDisabled()
   },
 }
 export const Formula: Story = {
@@ -128,6 +143,7 @@ export const Formula: Story = {
     const screen = within(canvasElement)
     await screen.findByRole('heading', { level: 1, name: 'Friday pies' })
     await expect(await changesRegion(screen)).toHaveTextContent('Batch')
+    await closeDrawer()
     const yeast = screen.getByRole('textbox', { name: 'SAF red instant yeast' })
     await userEvent.clear(yeast)
     await userEvent.type(yeast, '0.15')

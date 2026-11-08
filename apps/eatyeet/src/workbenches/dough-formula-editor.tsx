@@ -280,6 +280,14 @@ export function DoughFormulaEditor({ recipe, config, state, onChange, onErrorsCh
 
   return <NumericFields.Provider value={numericFields}>
     <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-10" data-dough-editor={formula.family}>
+      {/* The oven or method comes first: it sets the recommended formula and process. */}
+      {recipe.methodOptions.length > 1 && <Section title={pizza ? 'Oven' : 'Method'}>
+        {recipe.methodOptions.length <= 3
+          ? <ChoiceGroup size="compact" label={pizza ? 'Oven method' : 'Baking method'} className="w-[380px] max-w-full" value={state.methodId} onChange={(methodId) => onChange({ ...state, methodId })} options={recipe.methodOptions.map((option) => ({ value: option.id, label: option.label }))} />
+          : <div className="grid max-w-[380px] gap-1"><label htmlFor={`${prefix}-method`} className="font-action text-sm font-bold">{pizza ? 'Oven method' : 'Baking method'}</label><Select surface="underline" id={`${prefix}-method`} value={state.methodId} onChange={(event) => onChange({ ...state, methodId: event.target.value })}>{recipe.methodOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}</Select></div>}
+        {recommended && !formulasMatch(recommended, formula) && <Button variant="link" type="button" className="justify-self-start" onClick={() => { setLocalReset((key) => key + 1); updateFormula(clone(recommended)) }}>Use the recommended formula for {method?.label ?? 'this method'}</Button>}
+      </Section>}
+
       <Section title="Size" description="Choose how many to make on the bake sheet.">
         <div className="grid grid-cols-2 gap-x-6 gap-y-5 md:grid-cols-4">
           {pizza && config.pizzaSizing && <div className="grid min-w-0 content-start gap-1">
@@ -347,12 +355,6 @@ export function DoughFormulaEditor({ recipe, config, state, onChange, onErrorsCh
         </div>
       </Section>}
 
-      {recipe.methodOptions.length > 1 && <Section title={pizza ? 'Oven' : 'Method'}>
-        {recipe.methodOptions.length <= 3
-          ? <ChoiceGroup size="compact" label={pizza ? 'Oven method' : 'Baking method'} className="w-[380px] max-w-full" value={state.methodId} onChange={(methodId) => onChange({ ...state, methodId })} options={recipe.methodOptions.map((option) => ({ value: option.id, label: option.label }))} />
-          : <div className="grid max-w-[380px] gap-1"><label htmlFor={`${prefix}-method`} className="font-action text-sm font-bold">{pizza ? 'Oven method' : 'Baking method'}</label><Select surface="underline" id={`${prefix}-method`} value={state.methodId} onChange={(event) => onChange({ ...state, methodId: event.target.value })}>{recipe.methodOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}</Select></div>}
-        {recommended && !formulasMatch(recommended, formula) && <Button variant="link" type="button" className="justify-self-start" onClick={() => { setLocalReset((key) => key + 1); updateFormula(clone(recommended)) }}>Use the recommended formula for {method?.label ?? 'this method'}</Button>}
-      </Section>}
 
       {pizzaProcess && <Section title="Mixing and fermentation" description="Times count from when you start mixing.">
         <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-2">
