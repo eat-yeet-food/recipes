@@ -315,6 +315,15 @@ export async function undeleteKitchenFormula(payload: Payload, memberId: string,
   return { ok: await fullFormula(payload, updated) }
 }
 
+/** Removes a formula from Recently deleted at once, with its history. Only deleted formulas can be purged. */
+export async function purgeKitchenFormula(payload: Payload, memberId: string, formulaId: string): Promise<KitchenResult<{ id: string }>> {
+  const doc = await ownFormula(payload, memberId, formulaId)
+  if (!doc || !doc.deletedAt) return fail('not-found')
+  await deleteWhere(payload, revisions, { formula: { equals: doc.id } })
+  await payload.delete({ ...formulas, id: doc.id })
+  return { ok: { id: formulaId } }
+}
+
 /** Account deletion removes every formula and its history. */
 export async function deleteMemberKitchen(payload: Payload, memberId: string) {
   const member = memberRef(memberId)

@@ -13,7 +13,8 @@ export interface SourdoughProcess {
   benchMinutes?: number
   /** Of the bench time, the rest after dividing and preshaping, before final shaping. Absent means not split. */
   preshapeMinutes?: number
-  folds: Array<{ id: string; atMinutes: number; method?: SourdoughFoldMethod }>
+  /** `group` marks a fold that starts a new editor row with the previous row's technique, so the rows never merge. */
+  folds: Array<{ id: string; atMinutes: number; method?: SourdoughFoldMethod; group?: true }>
 }
 
 /** Backward-compatible process for formulas shared before process controls existed. */
@@ -33,7 +34,8 @@ export function isSourdoughProcess(value: unknown): value is SourdoughProcess {
     (process.preshapeMinutes == null || Number.isSafeInteger(process.preshapeMinutes)) &&
     [process.autolyseMinutes, process.saltDelayMinutes, process.bulkMinutes].every(Number.isSafeInteger) &&
     Array.isArray(process.folds) && process.folds.every((fold) => fold && typeof fold.id === 'string' && Number.isSafeInteger(fold.atMinutes) &&
-      (fold.method === undefined || fold.method === 'stretch-and-fold' || fold.method === 'coil-fold' || fold.method === 'lamination'))
+      (fold.method === undefined || fold.method === 'stretch-and-fold' || fold.method === 'coil-fold' || fold.method === 'lamination') &&
+      (fold.group === undefined || fold.group === true))
 }
 
 export function sourdoughProcessErrors(process: SourdoughProcess): string[] {
@@ -156,7 +158,7 @@ export function foldGroups(process: SourdoughProcess): FoldPlan {
     const current = groups.at(-1)
     if (index === 0 || !current) { groups.push({ method, count: 1, everyMinutes: null, ids: [fold.id] }); return }
     const gap = fold.atMinutes - folds[index - 1].atMinutes
-    if (current.method === method && (current.everyMinutes === null || current.everyMinutes === gap)) {
+    if (!fold.group && current.method === method && (current.everyMinutes === null || current.everyMinutes === gap)) {
       current.everyMinutes = gap
       current.count++
       current.ids.push(fold.id)
@@ -168,6 +170,13 @@ export function foldGroups(process: SourdoughProcess): FoldPlan {
   }
 }
 
+/** Whether `foldGroups` would read this row's first fold into the row before it. */
+function wouldMerge(groups: FoldGroup[], index: number) {
+  const previous = groups[index - 1]
+  if (!previous || previous.method !== groups[index].method) return false
+  return groups[index].everyMinutes === previous.everyMinutes || (index === 1 && previous.count === 1)
+}
+
 /** Expands groups into stored folds, keeping each group's existing fold identities. */
 export function foldsFromGroups(saltDelayMinutes: number, plan: FoldPlan, newId: () => string): SourdoughProcess['folds'] {
   const folds: SourdoughProcess['folds'] = []
@@ -175,7 +184,7 @@ export function foldsFromGroups(saltDelayMinutes: number, plan: FoldPlan, newId:
   plan.groups.forEach((group, groupIndex) => {
     for (let index = 0; index < group.count; index++) {
       if (groupIndex > 0 || index > 0) at += group.everyMinutes
-      folds.push({ id: group.ids[index] ?? newId(), atMinutes: at, method: group.method })
+      folds.push({ id: group.ids[index] ?? newId(), atMinutes: at, method: group.method, ...(index === 0 && wouldMerge(plan.groups, groupIndex) ? { group: true as const } : {}) })
     }
   })
   return folds

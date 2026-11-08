@@ -1,7 +1,6 @@
 'use client'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Check, Save } from 'lucide-react'
-import { RecipeIconAction } from '@eat-yeet/l7-recipes/recipes/recipe-actions'
+import { Save } from 'lucide-react'
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
 import { useNavigate } from '@eat-yeet/l5-ui-primitives/primitives/navigation'
 import { useNotebookClient } from './kitchen-local'
@@ -111,7 +110,6 @@ export function KitchenScratchPage({ kitchen, client, sharedConfig, saveOnArriva
     return null
   }
   const saveLabel = saving ? 'Saving…' : 'Save to Notebook'
-  const bakeHref = kitchenPath(recipe.slug, undefined, true)
 
   return <>
     <KitchenWorkspace
@@ -130,7 +128,6 @@ export function KitchenScratchPage({ kitchen, client, sharedConfig, saveOnArriva
             <SaveStatus state={errors.length ? { kind: 'invalid' } : { kind: 'local' }} />
           </>}
           actions={<>
-            <RecipeIconAction label="Done" tone="done" href={bakeHref}><Check /></RecipeIconAction>
             <Button disabled={errors.length > 0 || saving || !store} onClick={save}><Save className="size-4" />{saveLabel}</Button>
           </>}
         />

@@ -115,5 +115,11 @@ export function kitchenStoreClient({ formulas = [], onChange, newId, delay = 0, 
       changed()
       return copy(formula)
     },
+    purge: async (id) => {
+      await wait()
+      if (!own(id).deletedAt) throw new KitchenError('This formula could not be found.', 404, 'not-found')
+      store.delete(id)
+      changed()
+    },
   }
 }

@@ -33,6 +33,8 @@ export type KitchenClient = {
   duplicate: (id: string, name: string) => Promise<KitchenFormula>
   remove: (id: string) => Promise<KitchenFormulaSummary>
   undelete: (id: string) => Promise<KitchenFormula>
+  /** Deletes a formula from Recently deleted for good. */
+  purge: (id: string) => Promise<void>
 }
 
 export const cleanFormulaName = (value: string) => value.normalize('NFKC').trim().replace(/\s+/g, ' ')

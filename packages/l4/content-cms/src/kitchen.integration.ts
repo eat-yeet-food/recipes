@@ -123,6 +123,18 @@ export async function verifyKitchen(payload: Payload, origin: string, slug: stri
   assert.equal(library.deleted.length, 0)
   assert.equal((await payload.count({ collection: 'kitchen-formulas', overrideAccess: true, where: { formulaId: { equals: reused.body.id } } })).totalDocs, 0)
 
+  // Delete from Recently deleted is permanent, removes History, and refuses live formulas.
+  assert.equal((await call(`/${copy.body.id}/purge`, 'POST', undefined, dana.cookie)).status, 404)
+  await call(`/${copy.body.id}`, 'DELETE', undefined, dana.cookie)
+  const copyId = (await payload.find({ collection: 'kitchen-formulas', overrideAccess: true, where: { formulaId: { equals: copy.body.id } } })).docs[0]!.id
+  assert((await payload.count({ collection: 'kitchen-revisions', overrideAccess: true, where: { formula: { equals: copyId } } })).totalDocs > 0)
+  const purged = await call(`/${copy.body.id}/purge`, 'POST', undefined, dana.cookie)
+  assert.equal(purged.status, 200)
+  const copyDoc = await payload.count({ collection: 'kitchen-formulas', overrideAccess: true, where: { formulaId: { equals: copy.body.id } } })
+  assert.equal(copyDoc.totalDocs, 0)
+  assert.equal((await payload.count({ collection: 'kitchen-revisions', overrideAccess: true, where: { formula: { equals: copyId } } })).totalDocs, 0)
+  assert.equal((await call(`/${copy.body.id}/undelete`, 'POST', undefined, dana.cookie)).status, 404)
+
   // Kitchen collections are unreachable through Payload REST.
   for (const collection of ['kitchen-formulas', 'kitchen-revisions'])
     for (const [method, path] of [['GET', ''], ['POST', ''], ['GET', `/${formulaDoc.id}`]]) {

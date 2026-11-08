@@ -35,7 +35,7 @@ export const ChangesFromTheRecipe: Story = {
   </div>,
   play: async ({ canvasElement }) => {
     const screen = within(canvasElement)
-    await expect(screen.getAllByRole('region', { name: 'Changed from the recipe' })[0]).toHaveTextContent('Hydrationwas 65%now 68%')
+    await expect(screen.getAllByRole('region', { name: 'Changed from the recipe' })[0]).toHaveTextContent('Hydrationnow 68%was 65%')
     await expect(screen.getByText('Nothing yet. This matches the recipe.')).toBeVisible()
   },
 }

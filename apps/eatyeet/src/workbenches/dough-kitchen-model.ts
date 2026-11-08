@@ -90,6 +90,13 @@ const foldNames = { 'stretch-and-fold': 'stretch and fold', 'coil-fold': 'coil f
 const schedule = (process: SourdoughProcess) => process.folds.length
   ? process.folds.map((fold) => `${foldNames[fold.method ?? process.foldMethod]} at ${duration(fold.atMinutes)}`).join(', ')
   : 'No folds'
+/** One line for the change list: the fold count and when they run. */
+const foldSpan = (process: SourdoughProcess) => {
+  const folds = process.folds
+  if (!folds.length) return 'No folds'
+  if (folds.length === 1) return `1 fold at ${duration(folds[0].atMinutes)}`
+  return `${folds.length} folds, ${duration(folds[0].atMinutes)} to ${duration(folds.at(-1)!.atMinutes)}`
+}
 const temperature = (value?: number) => value == null ? 'Not set' : `${value}°F`
 const starterText = (starter?: StarterProfile) => starter ? `${formatPercent(starter.hydrationPercent)} hydration, ${blend(starter.flour)}` : 'None'
 
@@ -138,7 +145,10 @@ export function formulaChanges(from: DoughFormulaState, to: DoughFormulaState, m
     add('Preshape rest', duration(a.process.preshapeMinutes ?? 0), duration(b.process.preshapeMinutes ?? 0))
     add('Shaping rest', duration((a.process.benchMinutes ?? 0) - (a.process.preshapeMinutes ?? 0)), duration((b.process.benchMinutes ?? 0) - (b.process.preshapeMinutes ?? 0)))
     add('Dough temperature', temperature(a.process.bulkTemperatureF), temperature(b.process.bulkTemperatureF))
-    add('Folds', schedule(a.process), schedule(b.process))
+    if (schedule(a.process) !== schedule(b.process)) {
+      const from = foldSpan(a.process), to = foldSpan(b.process)
+      changes.push({ label: 'Folds', from, to: from === to ? `${to}, retimed` : to })
+    }
   }
   return changes
 }

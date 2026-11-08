@@ -43,6 +43,7 @@ export const localKitchenClient: KitchenClient = {
   duplicate: (id, name) => browserStore().duplicate(id, name),
   remove: (id) => browserStore().remove(id),
   undelete: (id) => browserStore().undelete(id),
+  purge: (id) => browserStore().purge(id),
 }
 
 /** Signed-in calls accept the local IDs of formulas that moved to the account. */
@@ -56,6 +57,7 @@ const movedAware = (remote: KitchenClient): KitchenClient => {
     duplicate: (formulaId, name) => remote.duplicate(id(formulaId), name),
     remove: (formulaId) => remote.remove(id(formulaId)),
     undelete: (formulaId) => remote.undelete(id(formulaId)),
+    purge: (formulaId) => remote.purge(id(formulaId)),
   }
 }
 

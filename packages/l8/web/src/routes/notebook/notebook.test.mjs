@@ -44,7 +44,7 @@ try {
   check('scratch starts from the recipe as written', (await dough(page).textContent()).includes('861g') && (await page.getByRole('region', { name: 'Changed from the recipe' }).textContent()).includes('matches the recipe'))
   await page.getByRole('textbox', { name: 'Hydration' }).fill('68')
   check('weights update while typing', (await dough(page).textContent()).includes('846g'), await dough(page).textContent())
-  check('the change is listed against the recipe', /Hydration\s*was\s*65%\s*now\s*68%/.test(await page.getByRole('region', { name: 'Changed from the recipe' }).textContent()))
+  check('the change is listed against the recipe', /Hydration\s*now\s*68%\s*was 65%/.test(await page.getByRole('region', { name: 'Changed from the recipe' }).textContent()))
   await page.reload({ waitUntil: 'networkidle' })
   check('unsaved work survives a reload in this browser', await page.getByRole('textbox', { name: 'Hydration' }).inputValue() === '68')
   check('anonymous visitors make no account requests', sessionReads.length === 0, sessionReads.join(', '))
@@ -124,7 +124,7 @@ try {
   check('edits save automatically', (await yeastSaved).ok())
   await page.locator('[data-save-status="saved"]').first().waitFor()
   check('the page confirms the save', (await page.locator('[data-save-status]').first().textContent()).includes('Saved'))
-  check('changes from the recipe are listed', /Yeast\s*was\s*0\.25%\s*now\s*0\.2%/.test(await page.getByRole('region', { name: 'Changed from the recipe' }).textContent()))
+  check('changes from the recipe are listed', /Yeast\s*now\s*0\.2%\s*was 0\.25%/.test(await page.getByRole('region', { name: 'Changed from the recipe' }).textContent()))
 
   // The method's recommended formula writes oil and baking steel into the bake sheet.
   const ovenSaved = savedAfter(page)
@@ -189,6 +189,7 @@ try {
   check('the copy opens as its own formula', await page.getByRole('textbox', { name: 'Hydration' }).inputValue() === '63')
 
   // Delete moves to Recently deleted with Undo.
+  const wetterUrl = page.url()
   await page.getByRole('button', { name: 'Delete formula' }).click()
   await page.waitForURL('**/notebook?deleted=*')
   await page.getByRole('status').filter({ hasText: 'Deleted Friday pies, wetter' }).waitFor()
@@ -198,6 +199,24 @@ try {
   check('undo restores the deleted formula', await page.locator('[data-kitchen-formula]').count() === 2)
   check('library groups formulas by dough', await page.getByRole('heading', { level: 2, name: /^Pizza/ }).isVisible())
   check('library cards open bake sheets', (await page.locator('[data-kitchen-formula]').first().getAttribute('href')).endsWith('/bake'))
+
+  // Recently deleted rows: fixed height, Restore and Delete; Delete confirms inline and is permanent.
+  await page.goto(wetterUrl, { waitUntil: 'networkidle' })
+  await page.getByRole('button', { name: 'Delete formula' }).click()
+  await page.waitForURL('**/notebook?deleted=*')
+  await page.getByRole('button', { name: /^Recently deleted/ }).click()
+  const row = page.locator('[data-deleted-formula]').filter({ hasText: 'Friday pies, wetter' })
+  await row.waitFor()
+  check('deleted rows are 104px tall', Math.round((await row.boundingBox()).height) === 104)
+  check('deleted rows offer Restore and Delete', await row.getByRole('button', { name: 'Restore' }).isVisible() && await row.getByRole('button', { name: 'Delete' }).isVisible())
+  await row.getByRole('button', { name: 'Delete' }).click()
+  check('Delete asks inline first', (await row.textContent()).includes('Delete Friday pies, wetter?') && (await row.textContent()).includes('This can’t be undone.') && Math.round((await row.boundingBox()).height) === 104)
+  await row.getByRole('button', { name: 'Cancel' }).click()
+  check('Cancel keeps the formula', (await row.textContent()).includes('Restore'))
+  await row.getByRole('button', { name: 'Delete' }).click()
+  await row.getByRole('button', { name: 'Delete' }).click()
+  await page.locator('[data-deleted-formula]').filter({ hasText: 'Friday pies, wetter' }).waitFor({ state: 'detached' })
+  check('confirmed Delete removes it for good', await page.locator('[data-deleted-formula]').filter({ hasText: 'Friday pies, wetter' }).count() === 0)
 
   await page.goto(`${BASE}/recipes/new-york-style-pizza`, { waitUntil: 'networkidle' })
   await page.locator('[data-recipe-kitchen] a[href^="/notebook/new-york-style-pizza/"]').first().waitFor()

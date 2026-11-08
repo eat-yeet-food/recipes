@@ -90,6 +90,13 @@ describe('fold groups', () => {
       assert.deepEqual(foldsFromGroups(process.saltDelayMinutes, foldGroups(process), () => 'new'), expected)
     }
   })
+  it('keeps an added row with the same technique and spacing as its own row', () => {
+    const plan = foldGroups(authored)
+    plan.groups.push({ method: 'coil-fold', count: 1, everyMinutes: 30, ids: [] })
+    const folds = foldsFromGroups(10, plan, () => 'fold-new')
+    assert.equal(folds.at(-1)!.group, true)
+    assert.deepEqual(foldGroups({ ...authored, folds }).groups.map(({ count }) => count), [3, 3, 1])
+  })
   it('moves folds with salt and mints identities only for added sets', () => {
     const plan = foldGroups(authored)
     plan.groups[1].count = 4

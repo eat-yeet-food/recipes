@@ -34,6 +34,34 @@ function StartCards({ recipes, headingId }: { recipes: KitchenRecipe[]; headingI
   </ul>
 }
 
+/**
+ * A fixed-height Recently deleted row: name and meta on one line each, text
+ * actions below. Delete swaps the row to an inline confirm, since it is permanent.
+ */
+function DeletedRow({ formula, recipeTitle, busy, confirming, onConfirm, onRestore, onPurge }: {
+  formula: KitchenFormulaSummary; recipeTitle: string; busy: string | null; confirming: boolean
+  onConfirm: (open: boolean) => void; onRestore: () => void; onPurge: () => void
+}) {
+  const working = busy === formula.id
+  const action = 'min-h-11 text-body-sm'
+  return <li data-deleted-formula={formula.id} data-confirming={confirming || undefined}
+    className={cn('grid h-[104px] content-center gap-0.5 border-b border-border px-3 last:border-b-0', confirming && 'bg-brand-soft/50')}>
+    <p className="truncate font-action font-bold">{confirming ? `Delete ${formula.name}?` : formula.name}</p>
+    <p className="truncate text-sm text-muted-foreground">{confirming ? 'This can’t be undone.' : `${recipeTitle} · ${timeAgo(formula.deletedAt!)}`}</p>
+    <div className="-mb-2 flex items-center gap-6">
+      {confirming
+        ? <>
+          <Button variant="link" className={action} disabled={working} onClick={() => onConfirm(false)}>Cancel</Button>
+          <Button variant="link" className={cn(action, 'text-danger')} disabled={busy !== null} onClick={onPurge}>{working ? 'Deleting…' : 'Delete'}</Button>
+        </>
+        : <>
+          <Button variant="link" className={action} disabled={busy !== null} onClick={onRestore}>{working ? 'Restoring…' : 'Restore'}</Button>
+          <Button variant="link" className={cn(action, 'text-danger')} disabled={busy !== null} onClick={() => onConfirm(true)}>Delete</Button>
+        </>}
+    </div>
+  </li>
+}
+
 function GroupHeading({ id, title, count }: { id: string; title: string; count?: number }) {
   return <SectionTitle id={id} size="title" rule="trailing">
     {title}{count !== undefined && <span className="font-body text-body-sm font-normal text-muted-foreground">{count}</span>}
@@ -48,6 +76,7 @@ export function KitchenLibraryPage({ recipes, client: remote, deletedId }: { rec
   const [notice, setNotice] = useState<KitchenNoticeValue | null>(null)
   const [deletedOpen, setDeletedOpen] = useState(false)
   const [restoring, setRestoring] = useState<string | null>(null)
+  const [confirming, setConfirming] = useState<string | null>(null)
   const startId = useId()
   const bySlug = useMemo(() => new Map(recipes.map((kitchen) => [kitchen.recipe.slug, kitchen])), [recipes])
 
@@ -73,6 +102,19 @@ export function KitchenLibraryPage({ recipes, client: remote, deletedId }: { rec
       setNotice({ message: restored.name === formula.name ? `Restored ${restored.name}.` : `Restored as ${restored.name}, since the name is in use.` })
     } catch (reason) {
       setNotice({ tone: 'error', message: kitchenErrorMessage(reason, 'The formula could not be restored. Please try again.') })
+    } finally { setRestoring(null) }
+  }, [client, load])
+
+  const purge = useCallback(async (formula: KitchenFormulaSummary) => {
+    if (!client) return
+    setRestoring(formula.id)
+    try {
+      await client.purge(formula.id)
+      setConfirming(null)
+      await load()
+      setNotice({ message: `Deleted ${formula.name}.` })
+    } catch (reason) {
+      setNotice({ tone: 'error', message: kitchenErrorMessage(reason, 'The formula could not be deleted. Please try again.') })
     } finally { setRestoring(null) }
   }, [client, load])
 
@@ -130,10 +172,9 @@ export function KitchenLibraryPage({ recipes, client: remote, deletedId }: { rec
       {deleted.length > 0 && <section aria-label="Recently deleted" className="grid gap-4 border-t border-border pt-6">
         <Disclosure label={`Recently deleted (${deleted.length})`} open={deletedOpen} onOpenChange={setDeletedOpen} triggerClassName="w-auto justify-start">
         <ul className="grid">
-          {deleted.map((formula) => <li key={formula.id} className="flex flex-wrap items-center justify-between gap-3 border-b border-border py-3 last:border-b-0">
-            <div className="min-w-0"><p className="break-words font-action font-bold">{formula.name}</p><p className="text-sm text-muted-foreground">From {bySlug.get(formula.recipeSlug)!.recipe.title} · deleted {timeAgo(formula.deletedAt!)}</p></div>
-            <Button variant="utility" size="sm" disabled={restoring !== null} onClick={() => void restore(formula)}>{restoring === formula.id ? 'Restoring…' : 'Restore'}</Button>
-          </li>)}
+          {deleted.map((formula) => <DeletedRow key={formula.id} formula={formula} recipeTitle={bySlug.get(formula.recipeSlug)!.recipe.title}
+            busy={restoring} confirming={confirming === formula.id} onConfirm={(open) => setConfirming(open ? formula.id : null)}
+            onRestore={() => void restore(formula)} onPurge={() => void purge(formula)} />)}
         </ul>
         </Disclosure>
       </section>}

@@ -30,4 +30,5 @@ export const kitchenClient: KitchenClient = {
   duplicate: (id, name) => kitchenRequest<KitchenFormula>(formula(id, '/duplicate'), 'POST', { name }, 'The copy could not be created.'),
   remove: (id) => kitchenRequest<KitchenFormulaSummary>(formula(id), 'DELETE', undefined, 'The formula could not be deleted.'),
   undelete: (id) => kitchenRequest<KitchenFormula>(formula(id, '/undelete'), 'POST', undefined, 'The formula could not be restored.'),
+  purge: async (id) => { await kitchenRequest<{ id: string }>(formula(id, '/purge'), 'POST', undefined, 'The formula could not be deleted.') },
 }

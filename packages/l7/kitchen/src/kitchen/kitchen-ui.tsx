@@ -88,24 +88,21 @@ export function SaveStatus({ state, local = false }: { state: SaveState; local?:
   </span>
 }
 
-/** What differs from the recipe as written, with a way back to it. On ink, it sits with the dough results. */
+/** What differs from the recipe as written, one row per change with the new value first, and a way back to it. On ink, it sits with the dough results. */
 export function ChangeStrip({ changes, onReset, tone = 'page' }: { changes: KitchenChange[]; onReset?: () => void; tone?: 'page' | 'ink' }) {
   const ink = tone === 'ink'
-  return <section aria-label="Changed from the recipe" className={cn('flex flex-wrap items-center gap-2.5', ink ? 'rounded-field bg-ink p-5 text-on-dark-label' : 'border-y border-border py-3.5')}>
-    <Eyebrow as="h2" size="small" tone={ink ? 'brand' : 'ink'} className={cn('mr-1.5', ink && 'w-full')}>Changed from the recipe</Eyebrow>
+  const heading = changes.length === 1 ? '1 change from the recipe' : changes.length ? `${changes.length} changes from the recipe` : 'Changed from the recipe'
+  return <section aria-label="Changed from the recipe" className={cn('grid gap-1', ink ? 'rounded-field bg-ink p-5 text-on-dark-label' : 'border-y border-border py-3.5')}>
+    <Eyebrow as="h2" size="small" tone={ink ? 'brand' : 'ink'}>{heading}</Eyebrow>
     {changes.length
-      ? <ul className="contents">{changes.map((change) => <ChangeChip key={change.label} change={change} />)}</ul>
+      ? <ul className="grid">{changes.map((change) => <li key={change.label} data-change={change.label} className={cn('grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 border-b py-3 last:border-b-0', ink ? 'border-white/15' : 'border-border')}>
+          <span className="min-w-0 text-body-sm">{change.label}</span>
+          <strong className={cn('max-w-[60vw] text-right font-action text-body-sm font-bold', ink && 'text-white')}><span className="sr-only">now </span>{change.to}</strong>
+          <span className={cn('col-span-2 truncate text-caption', ink ? 'text-on-dark-label/70' : 'text-muted-foreground')}>was {change.from}</span>
+        </li>)}</ul>
       : <p className={cn('text-sm', !ink && 'text-muted-foreground')}>Nothing yet. This matches the recipe.</p>}
-    {changes.length > 0 && onReset && <Button variant={ink ? 'quiet-on-dark' : 'link'} className={cn('gap-1.5', ink ? 'w-full' : 'ml-auto max-[640px]:ml-0')} onClick={onReset}><Undo2 aria-hidden="true" className="size-3.5" />Reset to recipe</Button>}
+    {changes.length > 0 && onReset && <Button variant={ink ? 'quiet-on-dark' : 'link'} className="mt-2 gap-1.5 justify-self-start" onClick={onReset}><Undo2 aria-hidden="true" className="size-3.5" />Reset to recipe</Button>}
   </section>
-}
-
-export function ChangeChip({ change, as: Tag = 'li' }: { change: KitchenChange; as?: 'li' | 'span' }) {
-  return <Tag className="inline-flex max-w-full flex-wrap items-baseline gap-x-1.5 rounded-control border border-border bg-white px-3 py-1 text-caption text-ink leading-snug">
-    <span>{change.label}</span>
-    <s className="text-muted-foreground decoration-1"><span className="sr-only">was </span>{change.from}</s>
-    <strong className="font-action font-bold"><span className="sr-only">now </span>{change.to}</strong>
-  </Tag>
 }
 
 /** One change summary for a History entry or Recent changes row. */

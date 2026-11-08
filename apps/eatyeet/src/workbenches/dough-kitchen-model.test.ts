@@ -63,7 +63,7 @@ describe('Notebook dough model', () => {
     const changed = { ...loaf, formula: { ...loaf.formula, process: { ...process, mixingMethod: 'hand' as const, folds: [...process.folds, { id: 'f2', atMinutes: 90, method: 'lamination' as const }] } } }
     assert.deepEqual(formulaChanges(loaf, changed, () => 'Dutch oven'), [
       { label: 'Mixing', from: 'Spiral mixer', to: 'By hand' },
-      { label: 'Folds', from: 'coil fold at 1 hr', to: 'coil fold at 1 hr, lamination at 1 hr 30 min' },
+      { label: 'Folds', from: '1 fold at 1 hr', to: '2 folds, 1 hr to 1 hr 30 min' },
     ])
     assert.equal(formulaFacts(loaf), '2 loaves · 77% hydration · Spiral mixer')
   })
