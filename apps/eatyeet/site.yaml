@@ -169,10 +169,10 @@ navigation:
   - label: Browse
     href: /browse
     desktop: false
-  - label: Learn
-    href: /learn
   - label: Notebook
     href: /notebook
+  - label: Learn
+    href: /learn
   - label: Privacy
     href: /privacy
     desktop: false
