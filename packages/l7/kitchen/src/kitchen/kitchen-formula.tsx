@@ -1,4 +1,5 @@
 'use client'
+import { haptic } from '@eat-yeet/l5-ui-primitives/primitives/haptics'
 import { useCallback, useEffect, useRef, useState, type MouseEvent } from 'react'
 import { Check, Copy, History, Trash2 } from 'lucide-react'
 import { RecipeIconAction } from '@eat-yeet/l7-recipes/recipes/recipe-actions'
@@ -271,7 +272,7 @@ function KitchenFormulaEditor({ kitchen, formulaId, client, local }: { kitchen: 
       changes={changes} onReset={() => editor.resetTo(defaultState)}
       notes={<KitchenNotes value={draft.notes} onChange={(notes) => editor.update({ notes })} />}
       footer={<div className="border-t border-border pt-6">
-        <Button variant="danger" size="sm" disabled={deleting} onClick={() => void remove()}><Trash2 className="size-4" />{deleting ? 'Deleting…' : 'Delete remix'}</Button>
+        <Button variant="danger" size="sm" disabled={deleting} onClick={() => { haptic('strong'); void remove() }}><Trash2 className="size-4" />{deleting ? 'Deleting…' : 'Delete remix'}</Button>
         <p className="mt-2 text-xs text-muted-foreground">Deleted remixes stay in Recently deleted for 30 days.</p>
       </div>}
       aside={<>{local && <KeepEverywhere />}<section aria-labelledby="recent-changes" className="grid gap-1">

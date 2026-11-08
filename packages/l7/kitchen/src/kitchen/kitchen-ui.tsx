@@ -1,4 +1,5 @@
 'use client'
+import { haptic } from '@eat-yeet/l5-ui-primitives/primitives/haptics'
 import { Fragment, useEffect, useId, useLayoutEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
 import { ChevronUp, CloudCheck, CloudOff, History, Minus, Plus, Undo2, X } from 'lucide-react'
 import { Drawer } from 'vaul'
@@ -196,9 +197,9 @@ export function CountStepper({ label, value, min = 1, max = 99, unit, onChange }
   const id = useId()
   return <div role="group" aria-labelledby={`${id}-label`} className="inline-flex items-center rounded-control border border-ink bg-white">
     <span id={`${id}-label`} className="sr-only">{label}</span>
-    <Button variant="ghost" size="icon" aria-label={`Fewer ${unit}`} disabled={value <= min} onClick={() => onChange(value - 1)}><Minus className="size-4" /></Button>
+    <Button variant="ghost" size="icon" aria-label={`Fewer ${unit}`} disabled={value <= min} onClick={() => { haptic(); onChange(value - 1) }}><Minus className="size-4" /></Button>
     <output aria-live="polite" className="min-w-10 border-x border-border px-2 text-center font-action text-base font-bold tabular-nums">{value}</output>
-    <Button variant="ghost" size="icon" aria-label={`More ${unit}`} disabled={value >= max} onClick={() => onChange(value + 1)}><Plus className="size-4" /></Button>
+    <Button variant="ghost" size="icon" aria-label={`More ${unit}`} disabled={value >= max} onClick={() => { haptic(); onChange(value + 1) }}><Plus className="size-4" /></Button>
   </div>
 }
 
@@ -289,6 +290,7 @@ export function DoughDock({ total, detail, changeCount = 0, children, action }: 
   useEffect(() => () => clearTimeout(timer.current), [])
   const present = () => {
     if (pillAway) return
+    haptic()
     setPillAway(true)
     clearTimeout(timer.current)
     timer.current = setTimeout(() => setOpen(true), PILL_MS)

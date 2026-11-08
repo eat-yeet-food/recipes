@@ -1,4 +1,5 @@
 'use client'
+import { haptic } from '@eat-yeet/l5-ui-primitives/primitives/haptics'
 import { useCallback, useEffect, useId, useMemo, useState } from 'react'
 import { ArrowRight, Clock, Plus } from 'lucide-react'
 import { cn } from '@eat-yeet/l0-foundation/utils'
@@ -52,7 +53,7 @@ function DeletedRow({ formula, recipeTitle, busy, confirming, onConfirm, onResto
       {confirming
         ? <>
           <Button variant="link" className={action} disabled={working} onClick={() => onConfirm(false)}>Cancel</Button>
-          <Button variant="link" className={cn(action, 'text-danger')} disabled={busy !== null} onClick={onPurge}>{working ? 'Deleting…' : 'Delete'}</Button>
+          <Button variant="link" className={cn(action, 'text-danger')} disabled={busy !== null} onClick={() => { haptic('strong'); onPurge() }}>{working ? 'Deleting…' : 'Delete'}</Button>
         </>
         : <>
           <Button variant="link" className={action} disabled={busy !== null} onClick={onRestore}>{working ? 'Restoring…' : 'Restore'}</Button>

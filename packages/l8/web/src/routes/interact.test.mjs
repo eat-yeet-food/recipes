@@ -166,7 +166,10 @@ for (const [path, want] of [
 
 // --- the hero's Remix sticker opens Remix ------------------------------------
 await page.goto(BASE + '/', { waitUntil: 'networkidle' })
+// Taps that change something give a haptic tick (Vibration API where available).
+await page.evaluate(() => { window.__buzz = []; navigator.vibrate = (pattern) => { window.__buzz.push(pattern); return true } })
 await page.locator('[data-remix-sticker]').click()
+check('the Remix sticker gives a haptic tick', await page.evaluate(() => window.__buzz?.length === 1))
 await page.waitForURL(/\/remix$/, { timeout: 10000 }).catch(() => {})
 check('the hero Remix sticker opens Remix', new URL(page.url()).pathname === '/remix', page.url())
 

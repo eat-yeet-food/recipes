@@ -1,4 +1,5 @@
 'use client'
+import { haptic } from '@eat-yeet/l5-ui-primitives/primitives/haptics'
 import { useEffect, useId, useState, type FormEvent, type ReactNode } from 'react'
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
 import { Input } from '@eat-yeet/l5-ui-primitives/primitives/input'
@@ -111,14 +112,14 @@ export function AccountSettingsPage() {
           <Result error={deleteAction.error} success="" />
           <div className="flex flex-wrap justify-end gap-3">
             <DialogClose asChild><Button variant="utility" disabled={deleteAction.saving}>Cancel</Button></DialogClose>
-            <Button variant="danger" disabled={deleteAction.saving} onClick={() => void deleteAction.run(async () => {
+            <Button variant="danger" disabled={deleteAction.saving} onClick={() => { haptic('strong'); void deleteAction.run(async () => {
               // The server still requires the account email, so a forged request cannot delete by accident.
               await client.deleteAccount(member.email)
               accept({ member: null, providers: providers ?? { google: false } })
               setConfirming(false)
               navigate({ to: '/', replace: true })
               return ''
-            }, 'Your account could not be deleted. Please try again.')}>{deleteAction.saving ? 'Deleting…' : 'Delete account'}</Button>
+            }, 'Your account could not be deleted. Please try again.') }}>{deleteAction.saving ? 'Deleting…' : 'Delete account'}</Button>
           </div>
         </DialogContent>
       </Dialog>

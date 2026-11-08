@@ -4,6 +4,7 @@
   "type": "module",
   "exports": {
     "./primitives/number-field-format": "./src/primitives/number-field-format.ts",
+    "./primitives/haptics": "./src/primitives/haptics.ts",
     "./primitives/*": "./src/primitives/*.tsx"
   },
   "dependencies": {

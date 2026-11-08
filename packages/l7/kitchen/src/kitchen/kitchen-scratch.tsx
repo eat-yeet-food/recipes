@@ -1,4 +1,5 @@
 'use client'
+import { haptic } from '@eat-yeet/l5-ui-primitives/primitives/haptics'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Save } from 'lucide-react'
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
@@ -125,7 +126,7 @@ export function KitchenScratchPage({ kitchen, client, sharedConfig, saveOnArriva
           title={<FormulaTitle name={name ?? recipe.title} onRename={rename} />}
           meta={<span>From <a href={`/recipes/${recipe.slug}`} className="font-action font-bold underline decoration-1 underline-offset-4 hover:decoration-2">{recipe.title}</a></span>}
           actions={<>
-            <Button className="max-lg:hidden" disabled={errors.length > 0 || saving || !store} onClick={save}><Save className="size-4" />{saveLabel}</Button>
+            <Button className="max-lg:hidden" disabled={errors.length > 0 || saving || !store} onClick={() => { haptic(); void save() }}><Save className="size-4" />{saveLabel}</Button>
           </>}
         />
       </>}
@@ -134,7 +135,7 @@ export function KitchenScratchPage({ kitchen, client, sharedConfig, saveOnArriva
         <h2 id="keep-it" className="font-action text-lg font-bold">Want to keep it?</h2>
         <p className="text-sm leading-relaxed">Saving keeps every change in History. Change the name above, now or later. {notebook.local ? 'Without an account it stays in this browser; sign in any time to move it to your account and open it anywhere.' : 'It opens on any device you sign in on.'}</p>
       </Callout>}
-      dockAction={<Button variant="on-dark" size="sm" disabled={errors.length > 0 || saving || !store} onClick={save}>{saving ? 'Saving…' : 'Save'}</Button>}
+      dockAction={<Button variant="on-dark" size="sm" disabled={errors.length > 0 || saving || !store} onClick={() => { haptic(); void save() }}>{saving ? 'Saving…' : 'Save'}</Button>}
     />
     <KitchenNotice notice={notice} onDismiss={() => setNotice(null)} raised />
   </>
