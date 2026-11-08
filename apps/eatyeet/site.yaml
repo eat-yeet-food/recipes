@@ -166,13 +166,8 @@ navigation:
     mobile: false
   - label: Recipes
     href: /search
-  - label: Browse
-    href: /browse
-    desktop: false
   - label: Remix
     href: /remix
-  - label: Learn
-    href: /learn
   - label: Privacy
     href: /privacy
     desktop: false

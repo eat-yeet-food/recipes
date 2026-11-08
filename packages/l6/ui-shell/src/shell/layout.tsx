@@ -33,7 +33,7 @@ export function Nav({
   siteName,
   wordmark,
   onOpenPalette,
-  navigation = [{label:"Recipes",href:"/search"},{label:"Learn",href:"/learn"}],
+  navigation = [{label:"Recipes",href:"/search"},{label:"Remix",href:"/remix"}],
 }: {
   pathname: string
   siteName: string
@@ -150,7 +150,7 @@ export function Nav({
 }
 
 /** footer.tsx */
-export function Footer({ siteName, wordmark, navigation = [{label:"Home",href:"/"},{label:"Recipes",href:"/search"},{label:"Browse",href:"/browse"},{label:"Learn",href:"/learn"}] }: { siteName: string; wordmark: WordmarkCopy; navigation?:{label:string;href:string}[] }) {
+export function Footer({ siteName, wordmark, navigation = [{label:"Home",href:"/"},{label:"Recipes",href:"/search"},{label:"Remix",href:"/remix"}] }: { siteName: string; wordmark: WordmarkCopy; navigation?:{label:string;href:string}[] }) {
   const linkClass =
     'inline-flex min-h-11 items-center text-sm font-bold text-ink transition-colors hover:text-action-hover'
   const [year, setYear] = useState('2026')

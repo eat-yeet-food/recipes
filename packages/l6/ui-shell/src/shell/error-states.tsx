@@ -48,9 +48,6 @@ export function NotFound() {
         All Recipes
         <ArrowRight className="size-4" />
       </Link></Button>
-      <Button asChild variant="link"><Link to="/browse">
-        Browse by Category
-      </Link></Button>
     </DeadEnd>
   )
 }

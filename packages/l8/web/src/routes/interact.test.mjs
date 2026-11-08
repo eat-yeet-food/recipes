@@ -164,15 +164,12 @@ for (const [path, want] of [
   check(`${path} has one h1`, h1s.length === 1 && h1s[0] === want, JSON.stringify(h1s))
 }
 
-// --- "View all categories" goes to /browse ------------------------------
-await page.goto(BASE + '/', { waitUntil: 'networkidle' })
-const catsHref = await page.evaluate(
-  () =>
-    Array.from(document.querySelectorAll('a'))
-      .find((a) => a.textContent.includes('View all categories'))
-      ?.getAttribute('href'),
-)
-check('View all categories -> /browse', catsHref === '/browse', String(catsHref))
+// --- Learn and Browse are hidden: nothing visible links to them ------------
+for (const path of ['/', '/search', '/recipes/new-york-style-pizza', '/remix']) {
+  await page.goto(BASE + path, { waitUntil: 'networkidle' })
+  const hidden = await page.evaluate(() => Array.from(document.querySelectorAll('a[href^="/learn"], a[href^="/browse"]'), (a) => a.getAttribute('href')))
+  check(`${path} links to neither Learn nor Browse`, hidden.length === 0, hidden.join(', '))
+}
 
 // --- recipe pages use normal white chrome -------------------------------
 // Recipe pages use normal white chrome. The header should start and stay

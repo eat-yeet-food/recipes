@@ -160,7 +160,6 @@ export function HomePage({
             />
           ))}
         </div>
-        <ViewAll to="/browse" label="View all categories" className="mt-8" />
       </section>
     </>
   )
