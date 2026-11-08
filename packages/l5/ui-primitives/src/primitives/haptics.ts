@@ -1,26 +1,23 @@
 /**
  * A short haptic tick for taps that change something. Android browsers use
- * the Vibration API. iOS Safari (17.4+) has none, but plays the system haptic
+ * the Vibration API. iOS Safari has none, but iOS 18+ plays the system haptic
  * when a native switch toggles, so a hidden switch is toggled instead; that is
  * unofficial and may stop working, in which case taps are simply silent.
  * Call it from the click handler: both paths need the user's gesture.
  * `strong` is for destructive confirmations.
  */
-let iosSwitch: HTMLLabelElement | null = null
-
+/** Mirrors the widely used ios-haptics approach: a fresh, hidden switch in <head>, clicked through its label, then removed. */
 function iosTick() {
-  if (!iosSwitch) {
-    const input = document.createElement('input')
-    input.type = 'checkbox'
-    input.setAttribute('switch', '')
-    input.tabIndex = -1
-    iosSwitch = document.createElement('label')
-    iosSwitch.setAttribute('aria-hidden', 'true')
-    iosSwitch.style.cssText = 'position:fixed;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none;clip-path:inset(50%)'
-    iosSwitch.append(input)
-    document.body.append(iosSwitch)
-  }
-  iosSwitch.click()
+  const label = document.createElement('label')
+  label.setAttribute('aria-hidden', 'true')
+  label.style.display = 'none'
+  const input = document.createElement('input')
+  input.type = 'checkbox'
+  input.setAttribute('switch', '')
+  label.append(input)
+  document.head.append(label)
+  label.click()
+  label.remove()
 }
 
 export function haptic(kind: 'tick' | 'strong' = 'tick') {
