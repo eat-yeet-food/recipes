@@ -128,7 +128,7 @@ export function KitchenScratchPage({ kitchen, client, sharedConfig, saveOnArriva
             <SaveStatus state={errors.length ? { kind: 'invalid' } : { kind: 'local' }} />
           </>}
           actions={<>
-            <Button disabled={errors.length > 0 || saving || !store} onClick={save}><Save className="size-4" />{saveLabel}</Button>
+            <Button className="max-lg:hidden" disabled={errors.length > 0 || saving || !store} onClick={save}><Save className="size-4" />{saveLabel}</Button>
           </>}
         />
       </>}
