@@ -49,7 +49,7 @@ check('palette starts hidden', await dialog().isHidden())
 check('search index is not fetched during initial page load', searchIndexRequests === 0)
 
 await navPaletteTrigger().click()
-await page.waitForTimeout(200)
+await dialog().waitFor({ state: 'visible', timeout: 5000 }).catch(() => {})
 check('palette opens on nav click', await dialog().isVisible())
 check(
   'palette input focused',
@@ -67,23 +67,24 @@ await page.screenshot({ path: join(SHOTS, 'palette.png') })
 
 // --- keyboard navigation ------------------------------------------------
 await page.keyboard.press('Enter')
-await page.waitForTimeout(400)
+await page.waitForURL(/\/recipes\//, { timeout: 10000 }).catch(() => {})
+await dialog().waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {})
 check('enter opens recipe', page.url().includes('/recipes/'), page.url())
 check('palette closed after nav', await dialog().isHidden())
 check('recipe body rendered', await page.locator('h1').first().isVisible())
 
 // --- cmd+k toggles ------------------------------------------------------
 await page.keyboard.press('Meta+k')
-await page.waitForTimeout(200)
+await dialog().waitFor({ state: 'visible', timeout: 5000 }).catch(() => {})
 check('cmd+k opens palette', await dialog().isVisible())
 await page.keyboard.press('Escape')
-await page.waitForTimeout(200)
+await dialog().waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {})
 check('escape closes palette', await dialog().isHidden())
 
 // --- no results state ---------------------------------------------------
 await navPaletteTrigger().click()
 await page.keyboard.type('zzzznope')
-await page.waitForTimeout(250)
+await page.locator('text=No recipes found for').waitFor({ timeout: 5000 }).catch(() => {})
 check('no-results message', await page.locator('text=No recipes found for').isVisible())
 await page.keyboard.press('Escape')
 
@@ -117,7 +118,8 @@ check('category toggle filters', page.url().includes('category=savory'), page.ur
 
 // --- clear all ----------------------------------------------------------
 await page.locator('#clear-filters').click()
-await page.waitForTimeout(300)
+// Wait for the URL itself; a fixed pause raced the router under parallel load.
+await page.waitForURL((url) => !url.search.includes('methods=') && !url.search.includes('category='), { timeout: 10000 }).catch(() => {})
 check('clear all resets', !page.url().includes('methods='), page.url())
 
 // --- browse links carry readable search params --------------------------
