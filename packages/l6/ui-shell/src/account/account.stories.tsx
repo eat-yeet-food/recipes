@@ -104,8 +104,11 @@ export const Settings: Story = { render: () => <Account member={fixtureMember}><
     await userEvent.type(name, 'Jordan B.')
     await userEvent.click(canvas.getByRole('button', { name: 'Save name' }))
     await expect(await canvas.findByText('Public name saved.')).toBeVisible()
-    await expect(canvas.getByRole('button', { name: 'Delete my account' })).toBeDisabled()
-    await userEvent.type(canvas.getByRole('textbox', { name: /to confirm/ }), 'jordan@example.com')
-    await expect(canvas.getByRole('button', { name: 'Delete my account' })).toBeEnabled()
+    // Delete asks in a modal; Cancel leaves the account alone.
+    await userEvent.click(canvas.getByRole('button', { name: 'Delete my account' }))
+    const dialog = await within(document.body).findByRole('dialog', { name: 'Delete your account?' })
+    await expect(within(dialog).getByRole('button', { name: 'Delete account' })).toBeEnabled()
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }))
+    await waitFor(() => expect(within(document.body).queryByRole('dialog')).toBeNull())
   } }
 export const SettingsSignedOut: Story = { render: () => <Account><AccountSettingsPage /></Account> }

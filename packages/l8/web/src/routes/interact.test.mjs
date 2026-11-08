@@ -164,6 +164,12 @@ for (const [path, want] of [
   check(`${path} has one h1`, h1s.length === 1 && h1s[0] === want, JSON.stringify(h1s))
 }
 
+// --- the hero's Remix sticker opens Remix ------------------------------------
+await page.goto(BASE + '/', { waitUntil: 'networkidle' })
+await page.locator('[data-remix-sticker]').click()
+await page.waitForURL(/\/remix$/, { timeout: 10000 }).catch(() => {})
+check('the hero Remix sticker opens Remix', new URL(page.url()).pathname === '/remix', page.url())
+
 // --- Learn and Browse are hidden: nothing visible links to them ------------
 for (const path of ['/', '/search', '/recipes/new-york-style-pizza', '/remix']) {
   await page.goto(BASE + path, { waitUntil: 'networkidle' })

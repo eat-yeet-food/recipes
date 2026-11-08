@@ -68,6 +68,19 @@ function HeroHeadline({ text, sticker }: { text: string; sticker?: string }) {
  * orange blob anchored to the section's right edge. Phone (M3): a full-bleed
  * photo with the headline card overlapping it. One <img> serves both.
  */
+/** The "New! Remix" starburst on the hero card; it opens Remix. */
+function RemixSticker() {
+  return <Link to="/remix" data-remix-sticker="" aria-label="New: Remix any recipe"
+    className="group absolute right-1 top-[206px] z-10 grid size-[116px] rotate-12 place-items-center text-sticker transition-transform hover:rotate-[16deg] hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white motion-reduce:transition-none md:right-6 md:top-8 md:size-[124px]">
+    <svg aria-hidden="true" viewBox="0 0 120 120" className="absolute inset-0 size-full drop-shadow-md"><polygon fill="currentColor" points="60,0 71,22 95,12 90,37 116,42 97,60 116,78 90,83 95,108 71,98 60,120 49,98 25,108 30,83 4,78 23,60 4,42 30,37 25,12 49,22" /></svg>
+    <span aria-hidden="true" className="relative grid text-center leading-none text-ink">
+      <span className="font-hero text-sm md:text-base">New!</span>
+      <span className="font-hero text-sm md:text-base">Remix</span>
+      <span className="mt-0.5 font-action text-xs font-bold">any recipe</span>
+    </span>
+  </Link>
+}
+
 export function HomeHero({ copy }: { copy: HomeCopy }) {
   const { hero, wordmark } = copy
 
@@ -78,8 +91,8 @@ export function HomeHero({ copy }: { copy: HomeCopy }) {
         <figure className="m-0 min-w-0 md:flex md:flex-col md:py-10 md:pl-10">
           <ResponsiveImage src={hero.image} alt={hero.imageAlt} sizes="(max-width: 767px) 100vw, (max-width: 1500px) calc(50vw - 40px), 710px" className="h-[330px] w-full object-cover object-[50%_30%] md:aspect-[4/3] md:h-auto md:flex-1 md:object-[50%_40%] md:[clip-path:polygon(0_0,100%_0,100%_90%,0_100%)]" loading="eager" fetchPriority="high" />
         </figure>
+        <RemixSticker />
         <div className="relative isolate mx-3.5 -mt-16 overflow-hidden rounded-[28px_28px_28px_8px] bg-gradient-hero px-[22px] pt-7 pb-[26px] shadow-glow md:m-0 md:overflow-visible md:rounded-none md:bg-none md:p-12 md:shadow-none lg:p-14">
-          <div aria-hidden="true" className="brand-dots absolute right-4 top-[18px] -z-10 size-12 rotate-6 md:right-5 md:top-6" />
           <span aria-hidden="true" className="absolute -bottom-[170px] -right-[170px] -z-10 h-72 w-80 -rotate-12 rounded-full bg-brand-alt md:hidden" />
           {hero.kicker && <Eyebrow tone="brand" className="mb-3.5 max-w-[80%] md:mb-7">{hero.kicker}</Eyebrow>}
           <h1 className="m-0 whitespace-pre-line font-hero text-hero leading-none tracking-tight text-white"><HeroHeadline text={hero.headline ?? `${wordmark.first} / ${wordmark.second}`} sticker={hero.headlineSticker} /></h1>

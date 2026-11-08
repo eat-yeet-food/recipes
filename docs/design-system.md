@@ -23,6 +23,7 @@ Run `pnpm storybook` for the interactive handbook; its **Foundations / Start Her
 | `brand` | `#ff7ac0` | Logo and headline stickers, the selected state, the CTA on plum, pink numbers on plum, small brand fills (avatar, Remix disc), the reply-thread rule | Text on white (2.39:1); solid fills behind controls |
 | `brand-alt` | `#ff8a3d` | Hero blob, gradient end | Text |
 | `star` | `#e06414` | Filled rating stars (3.50:1 on white) | Anything else |
+| `sticker` | `#ffe14d` | The home hero's “New! Remix” starburst only (plum text) | Text, fills elsewhere |
 | `brand-soft` | `#ffe0ef` | Chips (EAT, 91% EAT) and review avatars | Surfaces holding controls |
 | `tint` | `#fff0f7` | Informational asides (Callout `aside`) and History’s current row | Controls, facts, batch rows, placeholders |
 | `on-dark-label` | `#ffe3f1` | Light text on plum (14.69:1) | Text on white |

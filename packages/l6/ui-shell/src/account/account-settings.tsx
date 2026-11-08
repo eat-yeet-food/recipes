@@ -3,6 +3,7 @@ import { useEffect, useId, useState, type FormEvent, type ReactNode } from 'reac
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
 import { Input } from '@eat-yeet/l5-ui-primitives/primitives/input'
 import { Callout } from '@eat-yeet/l5-ui-primitives/primitives/callout'
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from '@eat-yeet/l5-ui-primitives/primitives/dialog'
 import { PageTitle } from '@eat-yeet/l5-ui-primitives/primitives/typography'
 import { useNavigate } from '@eat-yeet/l5-ui-primitives/primitives/navigation'
 import { useAccount } from './account'
@@ -60,7 +61,7 @@ export function AccountSettingsPage() {
   const { status, member, client, accept, refresh, providers } = useAccount()
   const navigate = useNavigate()
   const [name, setName] = useState('')
-  const [confirmEmail, setConfirmEmail] = useState('')
+  const [confirming, setConfirming] = useState(false)
   const nameAction = useAction(), sessionAction = useAction(), deleteAction = useAction()
 
   useEffect(() => { if (status === 'unknown') void refresh() }, [status, refresh])
@@ -100,21 +101,27 @@ export function AccountSettingsPage() {
         </div>
       </Section>
 
-      <Section title="Delete account" description="Permanently deletes your account, ratings, reviews, replies, and remixes with their history, including replies other cooks left on your reviews. This cannot be undone.">
-        <form noValidate className="grid gap-4" onSubmit={(event) => { event.preventDefault(); void deleteAction.run(async () => {
-          await client.deleteAccount(confirmEmail.trim())
-          accept({ member: null, providers: providers ?? { google: false } })
-          navigate({ to: '/', replace: true })
-          return ''
-        }, 'Your account could not be deleted. Please try again.') }}>
-          <Field label={`Type ${member.email} to confirm`} type="email" autoComplete="off" value={confirmEmail} disabled={deleteAction.saving}
-            onChange={(event) => { setConfirmEmail(event.target.value); deleteAction.reset() }} />
-          <Result error={deleteAction.error} success="" />
-          <Button type="submit" variant="danger" className="justify-self-start" disabled={deleteAction.saving || confirmEmail.trim().toLowerCase() !== member.email}>
-            {deleteAction.saving ? 'Deleting...' : 'Delete my account'}
-          </Button>
-        </form>
+      <Section title="Delete account" description="Permanently deletes your account, ratings, reviews, replies and remixes.">
+        <Button variant="danger" className="justify-self-start" onClick={() => { deleteAction.reset(); setConfirming(true) }}>Delete my account</Button>
       </Section>
+      <Dialog open={confirming} onOpenChange={(open) => { if (!deleteAction.saving) setConfirming(open) }}>
+        <DialogContent stripe className="p-6 text-ink sm:max-w-md">
+          <DialogTitle className="font-display text-2xl font-extrabold leading-tight">Delete your account?</DialogTitle>
+          <DialogDescription className="text-sm leading-relaxed text-ink">This permanently deletes your account, ratings, reviews, replies and remixes with their history, including replies other cooks left on your reviews. This can’t be undone.</DialogDescription>
+          <Result error={deleteAction.error} success="" />
+          <div className="flex flex-wrap justify-end gap-3">
+            <DialogClose asChild><Button variant="utility" disabled={deleteAction.saving}>Cancel</Button></DialogClose>
+            <Button variant="danger" disabled={deleteAction.saving} onClick={() => void deleteAction.run(async () => {
+              // The server still requires the account email, so a forged request cannot delete by accident.
+              await client.deleteAccount(member.email)
+              accept({ member: null, providers: providers ?? { google: false } })
+              setConfirming(false)
+              navigate({ to: '/', replace: true })
+              return ''
+            }, 'Your account could not be deleted. Please try again.')}>{deleteAction.saving ? 'Deleting…' : 'Delete account'}</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   </SettingsLayout>
 }
