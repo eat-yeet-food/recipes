@@ -68,12 +68,12 @@ function Page({ view, signedIn = true }: { view: 'library' | 'scratch' | 'formul
     {(view === 'scratch' || view === 'sourdough') && <KitchenScratchPage kitchen={kitchen} client={client} />}
     {view === 'formula' && firstId && <KitchenFormulaPage kitchen={kitchen} formulaId={firstId} client={client} />}
     {view === 'bake' && <KitchenBakeSheet kitchen={kitchen} state={friday} name="Friday pies" siteUrl="https://eatyeet.com" blockRegistry={pageBlockRegistry}
-      heading={{ crumbs: [{ label: 'Notebook', href: '/notebook' }, { label: 'Friday pies' }, { label: 'Bake sheet' }], title: 'Friday pies', byline: 'Bake sheet · New York Style Pizza' }} />}
+      heading={{ crumbs: [{ label: 'Remix', href: '/remix' }, { label: 'Friday pies' }, { label: 'Bake sheet' }], title: 'Friday pies', byline: 'Bake sheet · New York Style Pizza' }} />}
   </Account>
 }
 
 const meta = {
-  title: 'Features/Notebook/Pages',
+  title: 'Features/Remix/Pages',
   component: Page,
   parameters: { layout: 'fullscreen', docs: { description: { component: 'Notebook pages composed with the app’s dough calculator and in-memory account and kitchen transports. Recipes stay as written; each formula has its own page, saves automatically and keeps History.' } } },
 } satisfies Meta<typeof Page>
@@ -133,7 +133,7 @@ export const SourdoughCalculator: Story = {
     await userEvent.type(share, '60')
     await expect(await screen.findByText(/must total 100%/)).toBeVisible()
     // Phones hide the header Save (the drawer holds it), so find it by text rather than by visible role.
-    const save = [...canvasElement.querySelectorAll('button')].find((button) => button.textContent?.trim() === 'Save to Notebook')
+    const save = [...canvasElement.querySelectorAll('button')].find((button) => button.textContent?.trim() === 'Save remix')
     await expect(save).toBeDisabled()
   },
 }

@@ -5,7 +5,7 @@ type RouteProps = { params: Promise<{ recipe: string }>; searchParams: KitchenSe
 
 export async function generateMetadata({ params }: RouteProps) {
   const recipe = await kitchenRecipeContent((await params).recipe)
-  return kitchenMetadata(`${recipe.title} · Notebook`)()
+  return kitchenMetadata(`${recipe.title} · Remix`)()
 }
 
 export default async function Page({ params, searchParams }: RouteProps) {

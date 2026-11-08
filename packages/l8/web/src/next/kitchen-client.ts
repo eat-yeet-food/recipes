@@ -5,7 +5,7 @@ import { ACCOUNT_API } from './account-client'
 const KITCHEN_API = `${ACCOUNT_API}/kitchen/formulas`
 
 /** Same-origin JSON request; failures keep the server's message and code. */
-async function kitchenRequest<T>(path: string, method = 'GET', body?: unknown, fallback = 'Notebook is unavailable. Please try again.'): Promise<T> {
+async function kitchenRequest<T>(path: string, method = 'GET', body?: unknown, fallback = 'Remix is unavailable. Please try again.'): Promise<T> {
   let response: Response
   try {
     response = await fetch(`${KITCHEN_API}${path}`, {
@@ -22,13 +22,13 @@ async function kitchenRequest<T>(path: string, method = 'GET', body?: unknown, f
 const formula = (id: string, action = '') => `/${encodeURIComponent(id)}${action}`
 
 export const kitchenClient: KitchenClient = {
-  list: () => kitchenRequest<KitchenList>('', 'GET', undefined, 'Your formulas could not be loaded.'),
-  read: (id) => kitchenRequest<KitchenFormula>(formula(id), 'GET', undefined, 'This formula could not be loaded.'),
-  create: (input) => kitchenRequest<KitchenFormula>('', 'POST', input, 'Your formula could not be saved. Please try again.'),
+  list: () => kitchenRequest<KitchenList>('', 'GET', undefined, 'Your remixes could not be loaded.'),
+  read: (id) => kitchenRequest<KitchenFormula>(formula(id), 'GET', undefined, 'This remix could not be loaded.'),
+  create: (input) => kitchenRequest<KitchenFormula>('', 'POST', input, 'Your remix could not be saved. Please try again.'),
   save: (id, input) => kitchenRequest<KitchenFormula>(formula(id), 'PATCH', input, 'Your changes could not be saved. They are kept on this page.'),
   restore: (id, revisionId) => kitchenRequest<KitchenFormula>(formula(id, '/restore'), 'POST', { revisionId }, 'That version could not be restored.'),
   duplicate: (id, name) => kitchenRequest<KitchenFormula>(formula(id, '/duplicate'), 'POST', { name }, 'The copy could not be created.'),
-  remove: (id) => kitchenRequest<KitchenFormulaSummary>(formula(id), 'DELETE', undefined, 'The formula could not be deleted.'),
-  undelete: (id) => kitchenRequest<KitchenFormula>(formula(id, '/undelete'), 'POST', undefined, 'The formula could not be restored.'),
-  purge: async (id) => { await kitchenRequest<{ id: string }>(formula(id, '/purge'), 'POST', undefined, 'The formula could not be deleted.') },
+  remove: (id) => kitchenRequest<KitchenFormulaSummary>(formula(id), 'DELETE', undefined, 'The remix could not be deleted.'),
+  undelete: (id) => kitchenRequest<KitchenFormula>(formula(id, '/undelete'), 'POST', undefined, 'The remix could not be restored.'),
+  purge: async (id) => { await kitchenRequest<{ id: string }>(formula(id, '/purge'), 'POST', undefined, 'The remix could not be deleted.') },
 }

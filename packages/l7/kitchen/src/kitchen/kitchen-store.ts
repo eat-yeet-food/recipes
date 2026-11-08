@@ -28,11 +28,11 @@ export function kitchenStoreClient({ formulas = [], onChange, newId, delay = 0, 
   const revision = (name: string, state: unknown, notes: string, at = now()): KitchenRevision => ({ id: `${Date.now().toString(36)}${(revisionCount++).toString(36)}`, name, state: copy(state), notes, createdAt: at, updatedAt: at })
   const wait = async () => {
     if (delay) await new Promise((resolve) => setTimeout(resolve, delay))
-    if (fail) throw new KitchenError('Notebook is unavailable. Please try again.', 503)
+    if (fail) throw new KitchenError('Remix is unavailable. Please try again.', 503)
   }
   const own = (id: string) => {
     const formula = store.get(id)
-    if (!formula) throw new KitchenError('This formula could not be found.', 404, 'not-found')
+    if (!formula) throw new KitchenError('This remix could not be found.', 404, 'not-found')
     return formula
   }
   const nameTaken = (name: string, except?: string) => [...store.values()].some((formula) => !formula.deletedAt && formula.id !== except && formula.name.toLowerCase() === cleanFormulaName(name).toLowerCase())
@@ -84,8 +84,8 @@ export function kitchenStoreClient({ formulas = [], onChange, newId, delay = 0, 
     save: async (id, { baseRevision, ...values }) => {
       await wait()
       const formula = own(id)
-      if (formula.revision !== baseRevision) throw new KitchenError('This formula changed in another tab. Reload to see the latest version.', 409, 'conflict')
-      if (nameTaken(values.name, id)) throw new KitchenError('You already have a formula with this name. Choose a different name.', 409, 'name-taken')
+      if (formula.revision !== baseRevision) throw new KitchenError('This remix changed in another tab. Reload to see the latest version.', 409, 'conflict')
+      if (nameTaken(values.name, id)) throw new KitchenError('You already have a remix with this name. Choose a different name.', 409, 'name-taken')
       return write(formula, values)
     },
     restore: async (id, revisionId) => {
@@ -117,7 +117,7 @@ export function kitchenStoreClient({ formulas = [], onChange, newId, delay = 0, 
     },
     purge: async (id) => {
       await wait()
-      if (!own(id).deletedAt) throw new KitchenError('This formula could not be found.', 404, 'not-found')
+      if (!own(id).deletedAt) throw new KitchenError('This remix could not be found.', 404, 'not-found')
       store.delete(id)
       changed()
     },

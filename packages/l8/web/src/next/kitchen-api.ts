@@ -11,11 +11,11 @@ import { currentMember, failure, reply, sameOrigin } from './account'
 export const KITCHEN_BODY_BYTES = 24 * 1024
 
 const failures: Record<KitchenFailure['error'], [string, number]> = {
-  'not-found': ['This formula could not be found.', 404],
-  invalid: ['Check the formula name, values and notes, then try again.', 400],
-  'name-taken': ['You already have a formula with this name. Choose a different name.', 409],
-  conflict: ['This formula changed in another tab. Reload to see the latest version.', 409],
-  limit: ['You can keep up to 200 formulas. Delete one to add another.', 409],
+  'not-found': ['This remix could not be found.', 404],
+  invalid: ['Check the remix name, values and notes, then try again.', 400],
+  'name-taken': ['You already have a remix with this name. Choose a different name.', 409],
+  conflict: ['This remix changed in another tab. Reload to see the latest version.', 409],
+  limit: ['You can keep up to 200 remixes. Delete one to add another.', 409],
 }
 
 export function kitchenReply<T>(result: KitchenResult<T>, status = 200) {
@@ -31,14 +31,14 @@ type Handler = (payload: Payload, member: Member) => Promise<Response>
  * member, and a generic failure that never leaks internals.
  */
 export async function kitchenRequest(request: NextRequest, handler: Handler, { write = true } = {}) {
-  if (write && !sameOrigin(request)) return failure('Please use Notebook on this site.', 403)
+  if (write && !sameOrigin(request)) return failure('Please use Remix on this site.', 403)
   const member = await currentMember(request)
-  if (!member) return failure('Sign in to use your Notebook formulas.', 401)
+  if (!member) return failure('Sign in to use your remixes.', 401)
   try {
     return await handler(await cms(), member)
   } catch (error) {
-    console.error('Notebook request failed', error)
-    return failure('Notebook is unavailable. Your edits are still on this page; please try again.', 503)
+    console.error('Remix request failed', error)
+    return failure('Remix is unavailable. Your edits are still on this page; please try again.', 503)
   }
 }
 
@@ -47,4 +47,4 @@ export async function formulaParam(route: { params: Promise<{ id: string }> }) {
   return validFormulaId(id) ? id : null
 }
 
-export const invalidBody = () => failure('Check the formula name, values and notes, then try again.', 400)
+export const invalidBody = () => failure('Check the remix name, values and notes, then try again.', 400)

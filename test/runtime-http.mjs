@@ -78,29 +78,31 @@ try {
   )
   const search = await (await fetch(origin + '/search?q=pizza')).text()
   assert(search.includes('noindex'))
-  // Notebook renders public recipe data only, is never indexed, and old shared formula links open there.
-  for (const path of ['/notebook', '/notebook/new-york-style-pizza', '/notebook/new-york-style-pizza/bake']) {
+  // Remix renders public recipe data only, is never indexed, and old shared formula links open there.
+  for (const path of ['/remix', '/remix/new-york-style-pizza', '/remix/new-york-style-pizza/bake']) {
     const response = await fetch(origin + path)
     assert.equal(response.status, 200, path)
     assert((await response.text()).includes('noindex'), path)
   }
-  for (const path of ['/notebook/not-real', '/notebook/american-buttercream', '/notebook/new-york-style-pizza/short'])
+  for (const path of ['/remix/not-real', '/remix/american-buttercream', '/remix/new-york-style-pizza/short'])
     assert.equal((await fetch(origin + path)).status, 404, path)
   const shared = await fetch(origin + '/recipes/new-york-style-pizza?config=%7B%7D', { redirect: 'manual' })
   assert([307, 308].includes(shared.status))
-  assert.match(shared.headers.get('location'), /\/notebook\/new-york-style-pizza\?config=%7B%7D$/)
-  assert((await (await fetch(origin + '/robots.txt')).text()).includes('Disallow: /notebook'))
-  // Notebook used to be Test Kitchen at /kitchen.
-  for (const [from, to] of [['/kitchen', '/notebook'], ['/kitchen/new-york-style-pizza/bake?count=4', '/notebook/new-york-style-pizza/bake?count=4']]) {
+  assert.match(shared.headers.get('location'), /\/remix\/new-york-style-pizza\?config=%7B%7D$/)
+  const robots = await (await fetch(origin + '/robots.txt')).text()
+  for (const path of ['/remix', '/notebook', '/kitchen']) assert(robots.includes(`Disallow: ${path}`), path)
+  // Remix was Test Kitchen at /kitchen, then Notebook at /notebook: old links redirect with their path and query.
+  for (const [from, to] of [['/kitchen', '/remix'], ['/kitchen/new-york-style-pizza/bake?count=4', '/remix/new-york-style-pizza/bake?count=4'],
+    ['/notebook', '/remix'], ['/notebook/new-york-style-pizza', '/remix/new-york-style-pizza'], ['/notebook/new-york-style-pizza/abcdefghijklmnop/bake?count=4', '/remix/new-york-style-pizza/abcdefghijklmnop/bake?count=4'], ['/notebook?deleted=x', '/remix?deleted=x']]) {
     const moved = await fetch(origin + from, { redirect: 'manual' })
-    assert([307, 308].includes(moved.status), from)
+    assert.equal(moved.status, 308, from)
     assert.equal(new URL(moved.headers.get('location'), origin).pathname + new URL(moved.headers.get('location'), origin).search, to, from)
   }
   const sitemap = await (await fetch(origin + '/sitemap.xml')).text()
   for (const item of [...recipes, ...articles])
     assert(sitemap.includes(item.slug))
   assert(!sitemap.includes('/search'))
-  assert(!sitemap.includes('/notebook'))
+  assert(!sitemap.includes('/remix') && !sitemap.includes('/notebook'))
   const media = await json('/api/media?limit=100')
   const file = media.docs[0].manifest.variants[0]
   const image = await fetch(origin + file.url)

@@ -19,7 +19,7 @@ function FormulaCard({ kitchen, formula }: { kitchen: KitchenRecipe; formula: Ki
   return <CatalogCard to={kitchenPath(formula.recipeSlug, formula.id, true)} image={imageUrl(kitchen.recipe)} title={formula.name} data-kitchen-formula={formula.id}
     meta={<span className="flex items-center gap-1.5"><Clock aria-hidden="true" className="size-3.5" />Edited {timeAgo(formula.updatedAt)}</span>}>
     <p className="text-sm text-muted-foreground">From {kitchen.recipe.title}</p>
-    <p className="mt-2 text-sm leading-normal">{state ? kitchen.plugin.facts(kitchen.recipe, kitchen.config, state) : 'Open to update this formula for the current recipe.'}</p>
+    <p className="mt-2 text-sm leading-normal">{state ? kitchen.plugin.facts(kitchen.recipe, kitchen.config, state) : 'Open to update this remix for the current recipe.'}</p>
   </CatalogCard>
 }
 
@@ -88,7 +88,7 @@ export function KitchenLibraryPage({ recipes, client: remote, deletedId }: { rec
       setList(next)
       return next
     } catch (reason) {
-      setError(kitchenErrorMessage(reason, 'Your formulas could not be loaded.'))
+      setError(kitchenErrorMessage(reason, 'Your remixes could not be loaded.'))
       return null
     }
   }, [client])
@@ -101,7 +101,7 @@ export function KitchenLibraryPage({ recipes, client: remote, deletedId }: { rec
       await load()
       setNotice({ message: restored.name === formula.name ? `Restored ${restored.name}.` : `Restored as ${restored.name}, since the name is in use.` })
     } catch (reason) {
-      setNotice({ tone: 'error', message: kitchenErrorMessage(reason, 'The formula could not be restored. Please try again.') })
+      setNotice({ tone: 'error', message: kitchenErrorMessage(reason, 'The remix could not be restored. Please try again.') })
     } finally { setRestoring(null) }
   }, [client, load])
 
@@ -114,7 +114,7 @@ export function KitchenLibraryPage({ recipes, client: remote, deletedId }: { rec
       await load()
       setNotice({ message: `Deleted ${formula.name}.` })
     } catch (reason) {
-      setNotice({ tone: 'error', message: kitchenErrorMessage(reason, 'The formula could not be deleted. Please try again.') })
+      setNotice({ tone: 'error', message: kitchenErrorMessage(reason, 'The remix could not be deleted. Please try again.') })
     } finally { setRestoring(null) }
   }, [client, load])
 
@@ -122,10 +122,10 @@ export function KitchenLibraryPage({ recipes, client: remote, deletedId }: { rec
     if (!client) return
     setList(null)
     void load().then((next) => {
-      if (notebook.moved) setNotice({ message: notebook.moved === 1 ? 'Moved 1 formula from this browser to your account.' : `Moved ${notebook.moved} formulas from this browser to your account.` })
+      if (notebook.moved) setNotice({ message: notebook.moved === 1 ? 'Moved 1 remix from this browser to your account.' : `Moved ${notebook.moved} remixes from this browser to your account.` })
       const deleted = deletedId ? next?.deleted.find((formula) => formula.id === deletedId) : undefined
       if (!deleted) return
-      window.history.replaceState(window.history.state, '', '/notebook')
+      window.history.replaceState(window.history.state, '', '/remix')
       setNotice({ message: `Deleted ${deleted.name}. It stays in Recently deleted for 30 days.`, action: { label: 'Undo', run: () => { void restore(deleted) } } })
     })
   }, [client, load, deletedId, restore, notebook.moved])
@@ -148,17 +148,17 @@ export function KitchenLibraryPage({ recipes, client: remote, deletedId }: { rec
 
   return <>
     <KitchenBand
-      title="Notebook"
-      actions={ready ? <>{local && <SignInLink className="font-action font-bold underline decoration-1 underline-offset-4 hover:decoration-2">Sign in</SignInLink>}<Button asChild><a href={`#${startId}`}><Plus className="size-4" />New formula</a></Button></> : undefined}
+      title="Remix"
+      actions={ready ? <>{local && <SignInLink className="font-action font-bold underline decoration-1 underline-offset-4 hover:decoration-2">Sign in</SignInLink>}<Button asChild><a href={`#${startId}`}><Plus className="size-4" />New remix</a></Button></> : undefined}
     >
-      <p>Your versions of the dough recipes. Saves as you go.</p>
+      <p>Tweak any dough recipe, get the numbers, and save your versions.</p>
     </KitchenBand>
     <div className={cn(kitchenPageClass, 'grid gap-12 py-11 max-[640px]:py-8')}>
-      {ready && !list && !error && <p role="status" className="text-muted-foreground">Loading your formulas…</p>}
+      {ready && !list && !error && <p role="status" className="text-muted-foreground">Loading your remixes…</p>}
       {error && <Callout tone="danger" className="flex flex-wrap items-center gap-4">
         <span>{error}</span><Button variant="link" className="text-danger" onClick={() => void load()}>Try again</Button>
       </Callout>}
-      {ready && list && count === 0 && <p className="text-base leading-relaxed">No formulas yet. Start from a recipe below, change anything, then save it here.</p>}
+      {ready && list && count === 0 && <p className="text-base leading-relaxed">No remixes yet. Start from a recipe below, change anything, then save it here.</p>}
       {groups.map(([id, group]) => <section key={id} aria-labelledby={`group-${id}`} className="grid gap-6">
         <GroupHeading id={`group-${id}`} title={group.label} count={group.items.length} />
         <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

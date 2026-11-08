@@ -2,7 +2,7 @@ import { publicDocument, services } from '../../../next/cms'
 import { KitchenLibraryClient } from '../../../next/kitchen'
 import { first, kitchenMetadata, type KitchenSearch } from './shared'
 
-export const generateMetadata = kitchenMetadata('Notebook')
+export const generateMetadata = kitchenMetadata('Remix')
 
 export default async function Page({ searchParams }: { searchParams: KitchenSearch }) {
   const [{ recipes }, params] = await Promise.all([(await services()).recipes.listRecipes(), searchParams])

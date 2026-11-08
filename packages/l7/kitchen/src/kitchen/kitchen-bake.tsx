@@ -50,11 +50,11 @@ export function KitchenScratchBakePage(props: BakeSheetProps) {
   }, [kitchen])
   if (state === null) return <KitchenMessage title="Opening the bake sheet…" busy>Loading your numbers from this browser.</KitchenMessage>
   const title = name ?? kitchen.recipe.title
-  return <KitchenBakeSheet {...props} state={state} name="This formula" heading={{
-    crumbs: [{ label: 'Notebook', href: '/notebook' }, { label: title }],
+  return <KitchenBakeSheet {...props} state={state} name="This remix" heading={{
+    crumbs: [{ label: 'Remix', href: '/remix' }, { label: title }],
     title,
-    byline: 'Bake sheet · unsaved formula from this browser',
-    edit: { href: kitchenPath(kitchen.recipe.slug), label: 'Edit formula' },
+    byline: 'Bake sheet · unsaved remix from this browser',
+    edit: { href: kitchenPath(kitchen.recipe.slug), label: 'Edit remix' },
   }} />
 }
 
@@ -74,7 +74,7 @@ function FormulaBakeSheet({ formulaId, client, local, ...props }: BakeSheetProps
     if (!url.searchParams.has('saved')) return
     url.searchParams.delete('saved')
     window.history.replaceState(window.history.state, '', url)
-    setNotice({ message: local ? 'Saved in this browser.' : 'Saved to Notebook.' })
+    setNotice({ message: local ? 'Saved in this browser.' : 'Saved.' })
   }, [local])
   useEffect(() => {
     let active = true
@@ -88,15 +88,15 @@ function FormulaBakeSheet({ formulaId, client, local, ...props }: BakeSheetProps
     })
     return () => { active = false }
   }, [client, formulaId, kitchen.recipe.slug])
-  if (failure) return <KitchenMessage title={failure.missing ? 'Formula not found' : 'Notebook is unavailable'}
-    action={<Button asChild><a href="/notebook">Back to Notebook</a></Button>}>{failure.message}</KitchenMessage>
-  if (!formula) return <KitchenMessage title="Opening the bake sheet…" busy>Loading your formula.</KitchenMessage>
+  if (failure) return <KitchenMessage title={failure.missing ? 'Remix not found' : 'Remix is unavailable'}
+    action={<Button asChild><a href="/remix">Back to Remix</a></Button>}>{failure.message}</KitchenMessage>
+  if (!formula) return <KitchenMessage title="Opening the bake sheet…" busy>Loading your remix.</KitchenMessage>
   const state = decodeKitchenState(kitchen, formula.state) ?? kitchen.defaultState
   return <><KitchenBakeSheet {...props} state={state} name={formula.name} heading={{
-    crumbs: [{ label: 'Notebook', href: '/notebook' }, { label: formula.name }],
+    crumbs: [{ label: 'Remix', href: '/remix' }, { label: formula.name }],
     title: formula.name,
     byline: byline(kitchen),
-    edit: { href: kitchenPath(kitchen.recipe.slug, formula.id), label: 'Edit formula' },
+    edit: { href: kitchenPath(kitchen.recipe.slug, formula.id), label: 'Edit remix' },
   }} />
   <KitchenNotice notice={notice} onDismiss={() => setNotice(null)} /></>
 }

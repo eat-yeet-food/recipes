@@ -59,4 +59,4 @@ export function kitchenRecipe(recipe: RecipeContent, registry: KitchenRegistry):
 export const decodeKitchenState = (kitchen: KitchenRecipe, value: unknown) => kitchen.plugin.decodeState(value, kitchen.config, kitchen.recipe)
 
 export const kitchenPath = (slug: string, formulaId?: string, bake = false) =>
-  `/notebook/${slug}${formulaId ? `/${formulaId}` : ''}${bake ? '/bake' : ''}`
+  `/remix/${slug}${formulaId ? `/${formulaId}` : ''}${bake ? '/bake' : ''}`

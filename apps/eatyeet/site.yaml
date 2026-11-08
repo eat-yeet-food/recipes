@@ -169,8 +169,8 @@ navigation:
   - label: Browse
     href: /browse
     desktop: false
-  - label: Notebook
-    href: /notebook
+  - label: Remix
+    href: /remix
   - label: Learn
     href: /learn
   - label: Privacy

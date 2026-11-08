@@ -51,7 +51,7 @@ export function useKitchenFormula(client: KitchenClient, id: string, kitchen: Ki
     setLoadError(null)
     try { accept(await client.read(id), true) }
     catch (error) {
-      setLoadError({ message: kitchenErrorMessage(error, 'This formula could not be loaded.'), missing: kitchenErrorCode(error) === 'not-found' })
+      setLoadError({ message: kitchenErrorMessage(error, 'This remix could not be loaded.'), missing: kitchenErrorCode(error) === 'not-found' })
     }
   }, [client, id, accept])
 
@@ -152,7 +152,7 @@ export function describeRevision(kitchen: KitchenRecipe, revision: KitchenRevisi
 export function KeepEverywhere() {
   return <Callout as="section" aria-labelledby="keep-everywhere" className="grid gap-2 p-5">
     <h2 id="keep-everywhere" className="font-action text-lg font-bold">Saved in this browser</h2>
-    <p className="text-sm leading-relaxed">Your formulas and their History stay on this device. <SignInLink className="font-action font-bold underline decoration-1 underline-offset-4 hover:decoration-2">Sign in with Google</SignInLink> to keep them in your account and open them anywhere; everything here moves over.</p>
+    <p className="text-sm leading-relaxed">Your remixes and their History stay on this device. <SignInLink className="font-action font-bold underline decoration-1 underline-offset-4 hover:decoration-2">Sign in with Google</SignInLink> to keep them in your account and open them anywhere; everything here moves over.</p>
   </Callout>
 }
 
@@ -186,11 +186,11 @@ function KitchenFormulaEditor({ kitchen, formulaId, client, local }: { kitchen: 
     if (formula && formula.id !== formulaId) window.location.replace(kitchenPath(recipe.slug, formula.id))
   }, [formula, formulaId, recipe.slug])
 
-  if (editor.loadError) return <KitchenMessage title={editor.loadError.missing ? 'Formula not found' : 'Notebook is unavailable'}
-    action={editor.loadError.missing ? <Button asChild><a href="/notebook">Back to Notebook</a></Button> : <Button onClick={() => void editor.reload()}>Try again</Button>}>
+  if (editor.loadError) return <KitchenMessage title={editor.loadError.missing ? 'Remix not found' : 'Remix is unavailable'}
+    action={editor.loadError.missing ? <Button asChild><a href="/remix">Back to Remix</a></Button> : <Button onClick={() => void editor.reload()}>Try again</Button>}>
     {editor.loadError.missing ? 'It may have been deleted, or it belongs to another account.' : editor.loadError.message}
   </KitchenMessage>
-  if (!formula || !draft) return <KitchenMessage title="Loading your formula…" busy>Your formula and its history are on their way.</KitchenMessage>
+  if (!formula || !draft) return <KitchenMessage title="Loading your remix…" busy>Your remix and its history are on their way.</KitchenMessage>
 
   const changes = plugin.changes(recipe, config, defaultState, draft.state)
   const revisions = formula.revisions
@@ -211,7 +211,7 @@ function KitchenFormulaEditor({ kitchen, formulaId, client, local }: { kitchen: 
     try {
       editor.accept(await client.save(formulaId, { baseRevision: editor.baseRef.current, ...editor.draftRef.current!, name }), true)
       return null
-    } catch (error) { return kitchenErrorMessage(error, 'The formula could not be renamed. Please try again.') }
+    } catch (error) { return kitchenErrorMessage(error, 'The remix could not be renamed. Please try again.') }
   }
   /** The copy takes the next free "<name> copy" name and opens ready to rename. */
   const duplicate = async () => {
@@ -231,10 +231,10 @@ function KitchenFormulaEditor({ kitchen, formulaId, client, local }: { kitchen: 
     try {
       await editor.flush()
       await client.remove(formulaId)
-      navigate({ to: '/notebook', search: { deleted: formulaId } })
+      navigate({ to: '/remix', search: { deleted: formulaId } })
     } catch (error) {
       setDeleting(false)
-      setNotice({ tone: 'error', message: kitchenErrorMessage(error, 'The formula could not be deleted. Please try again.') })
+      setNotice({ tone: 'error', message: kitchenErrorMessage(error, 'The remix could not be deleted. Please try again.') })
     }
   }
   const bakeHref = kitchenPath(recipe.slug, formulaId, true)
@@ -254,7 +254,7 @@ function KitchenFormulaEditor({ kitchen, formulaId, client, local }: { kitchen: 
       onErrorsChange={editor.reportErrors}
       header={<>
         <KitchenHeader
-          crumbs={[{ label: 'Notebook', href: '/notebook' }, { label: draft.name, href: bakeHref }, { label: 'Edit' }]}
+          crumbs={[{ label: 'Remix', href: '/remix' }, { label: draft.name, href: bakeHref }, { label: 'Edit' }]}
           title={<FormulaTitle key={formulaId} name={draft.name} onRename={rename} autoEdit={copied} />}
           meta={<>
             <span>From <a href={`/recipes/${recipe.slug}`} className="font-action font-bold underline decoration-1 underline-offset-4 hover:decoration-2">{recipe.title}</a></span>
@@ -266,13 +266,13 @@ function KitchenFormulaEditor({ kitchen, formulaId, client, local }: { kitchen: 
             <RecipeIconAction label="Done" tone="done" href={bakeHref} onClick={(event) => void openBakeSheet(event)}><Check /></RecipeIconAction>
           </>}
         />
-        {editor.mismatch && <Callout role="status" className="mt-4">This formula no longer matches the recipe’s options, so it opens with the recipe’s values. Your earlier versions are still in History.</Callout>}
+        {editor.mismatch && <Callout role="status" className="mt-4">This remix no longer matches the recipe’s options, so it opens with the recipe’s values. Your earlier versions are still in History.</Callout>}
       </>}
       changes={changes} onReset={() => editor.resetTo(defaultState)}
       notes={<KitchenNotes value={draft.notes} onChange={(notes) => editor.update({ notes })} />}
       footer={<div className="border-t border-border pt-6">
-        <Button variant="danger" size="sm" disabled={deleting} onClick={() => void remove()}><Trash2 className="size-4" />{deleting ? 'Deleting…' : 'Delete formula'}</Button>
-        <p className="mt-2 text-xs text-muted-foreground">Deleted formulas stay in Recently deleted for 30 days.</p>
+        <Button variant="danger" size="sm" disabled={deleting} onClick={() => void remove()}><Trash2 className="size-4" />{deleting ? 'Deleting…' : 'Delete remix'}</Button>
+        <p className="mt-2 text-xs text-muted-foreground">Deleted remixes stay in Recently deleted for 30 days.</p>
       </div>}
       aside={<>{local && <KeepEverywhere />}<section aria-labelledby="recent-changes" className="grid gap-1">
         <div className="flex items-baseline justify-between gap-3">

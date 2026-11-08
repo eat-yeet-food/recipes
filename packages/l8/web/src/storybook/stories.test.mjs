@@ -23,9 +23,9 @@ try {
       try {
         await page.goto(`${server.url}iframe.html?id=${story.id}&viewMode=story`, { waitUntil:'load' })
         await page.waitForFunction(id => document.documentElement.dataset.storyReady === id, story.id, { timeout:20000 })
-        if (story.id === 'features-notebook-pages--formula') await page.getByText(/^Saved ·/).waitFor()
-        if (story.id === 'features-notebook-pages--library') await page.getByText('Restored Kids’ 10-inch.').waitFor()
-        if (story.id === 'features-notebook-controls--history') await page.getByRole('status').filter({ hasText: 'Restored version 3' }).waitFor()
+        if (story.id === 'features-remix-pages--formula') await page.getByText(/^Saved ·/).waitFor()
+        if (story.id === 'features-remix-pages--library') await page.getByText('Restored Kids’ 10-inch.').waitFor()
+        if (story.id === 'features-remix-controls--history') await page.getByRole('status').filter({ hasText: 'Restored version 3' }).waitFor()
         await page.evaluate(()=>document.fonts.ready)
         if (story.id === 'features-search-palette--results') await page.getByRole('option', { name: /New York Style Pizza/ }).waitFor()
         if (story.id === 'features-search-palette--keyboard-selection') await page.locator('[data-palette-all][data-selected=true]').waitFor()

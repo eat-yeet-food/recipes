@@ -4,4 +4,4 @@ const meta = { title: 'Patterns/Breadcrumbs', component: Breadcrumbs, parameters
   args: { crumbs: [{ label: 'Home', href: '/' }, { label: 'Recipes', href: '/recipes' }, { label: 'New York Style Pizza' }] } } satisfies Meta<typeof Breadcrumbs>
 export default meta
 export const Default: StoryObj<typeof meta> = {}
-export const LongTrail: StoryObj<typeof meta> = { args: { crumbs: [{ label: 'Home', href: '/' }, { label: 'Notebook', href: '/notebook' }, { label: 'Slow-Fermented New York Style Pizza with Roasted Garlic', href: '/notebook/x' }, { label: 'Bake sheet' }] } }
+export const LongTrail: StoryObj<typeof meta> = { args: { crumbs: [{ label: 'Home', href: '/' }, { label: 'Remix', href: '/remix' }, { label: 'Slow-Fermented New York Style Pizza with Roasted Garlic', href: '/remix/x' }, { label: 'Bake sheet' }] } }

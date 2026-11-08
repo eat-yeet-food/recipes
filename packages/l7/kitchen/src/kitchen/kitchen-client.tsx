@@ -41,7 +41,7 @@ export const cleanFormulaName = (value: string) => value.normalize('NFKC').trim(
 /** Mirrors the server's rules so the dialog can explain problems before submitting. */
 export function formulaNameError(value: string) {
   const name = cleanFormulaName(value)
-  if (!name) return 'Enter a name for this formula.'
+  if (!name) return 'Enter a name for this remix.'
   if (name.length > 80) return 'Use 80 characters or fewer.'
   return ''
 }

@@ -163,7 +163,7 @@ export function FormulaTitle({ name, onRename, autoEdit = false }: {
   }
   return <div className="grid min-w-0 gap-1" data-formula-title="">
     <h1 className="sr-only">{name}</h1>
-    <label htmlFor={`${id}-name`} className="font-action text-caption font-bold text-muted-foreground"><span className="sr-only">Formula </span>Name</label>
+    <label htmlFor={`${id}-name`} className="font-action text-caption font-bold text-muted-foreground"><span className="sr-only">Remix </span>Name</label>
     <textarea ref={field} id={`${id}-name`} rows={1} autoComplete="off" spellCheck={false} maxLength={80} value={value} readOnly={busy}
       aria-invalid={Boolean(error)} aria-describedby={error ? `${id}-error` : undefined}
       onChange={(event) => { setValue(event.target.value.replace(/\s*\n\s*/g, ' ')); setError('') }}

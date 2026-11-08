@@ -20,6 +20,6 @@ export function KitchenMessage({ title, children, action, busy = false }: { titl
 /** Waits for the account check (and any move of browser formulas to the account), then hands over the store. */
 export function KitchenGate({ client, children }: { client: KitchenClient; children: (client: KitchenClient, local: boolean) => ReactNode }) {
   const notebook = useNotebookClient(client)
-  if (!notebook.client) return <KitchenMessage title="Opening Notebook…" busy>Checking your account.</KitchenMessage>
+  if (!notebook.client) return <KitchenMessage title="Opening Remix…" busy>Checking your account.</KitchenMessage>
   return <>{children(notebook.client, notebook.local)}</>
 }

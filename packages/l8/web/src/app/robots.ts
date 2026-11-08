@@ -7,7 +7,7 @@ export default function robots() {
       ? {
           userAgent: '*',
           allow: '/',
-          disallow: ['/admin', '/api', '/preview', '/search', '/notebook', '/kitchen'],
+          disallow: ['/admin', '/api', '/preview', '/search', '/remix', '/notebook', '/kitchen'],
         }
       : { userAgent: '*', disallow: '/' },
     sitemap: new URL('/sitemap.xml', settings.siteUrl).href,

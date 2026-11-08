@@ -82,7 +82,7 @@ check('pizza recommends the selected mozzarella', (await desktop.locator('#recip
 check('jump to recipe is removed', await desktop.getByRole('link', { name: 'Jump to Recipe' }).count() === 0)
 check('recipes have no Adjust recipe control', await desktop.getByRole('button', { name: /Adjust recipe/i }).count() === 0 && await desktop.locator('[data-recipe-adjustment]').count() === 0)
 await desktop.locator('[data-recipe-kitchen]').getByRole('link').first().waitFor()
-check('the calculator lives in your Notebook', await desktop.locator('[data-recipe-kitchen] a[href="/notebook/new-york-style-pizza"]').count() === 1, await desktop.locator('[data-recipe-kitchen]').textContent())
+check('the calculator lives in your Notebook', await desktop.locator('[data-recipe-kitchen] a[href="/remix/new-york-style-pizza"]').count() === 1, await desktop.locator('[data-recipe-kitchen]').textContent())
 check('recipe title and byline use their type scale', await desktop.evaluate(() => { const h = document.querySelector('h1'); const b = document.querySelector('[data-slot="eyebrow"]'); return parseFloat(getComputedStyle(h).fontSize) >= 38 && parseFloat(getComputedStyle(b).fontSize) <= 13 }))
 check('recipe controls appear once in the header', await desktop.getByRole('button', { name: 'Cooking view' }).count() === 1 && await desktop.getByRole('button', { name: 'Print Recipe' }).count() === 1 && await desktop.getByRole('link', { name: 'Pin Recipe' }).count() === 0 && await desktop.getByRole('switch', { name: 'Cook Mode' }).count() === 0)
 check('recipes start with one pizza today', (await desktop.locator('[data-today-batch]').textContent()).includes('Making 1 pizza today') && !desktop.url().includes('count='))
@@ -107,7 +107,7 @@ await desktop.getByRole('button', { name: 'Fewer pizzas' }).click()
 check('returning to one pizza clears the URL', !desktop.url().includes('count='), desktop.url())
 // Formulas shared before Notebook open there as an unsaved copy.
 await desktop.goto(`${BASE}/recipes/new-york-style-pizza?config=${encodeURIComponent('{"version":1}')}`, { waitUntil: 'networkidle' })
-check('shared formula links open in your Notebook', new URL(desktop.url()).pathname === '/notebook/new-york-style-pizza' && desktop.url().includes('config='), desktop.url())
+check('shared formula links open in your Notebook', new URL(desktop.url()).pathname === '/remix/new-york-style-pizza' && desktop.url().includes('config='), desktop.url())
 await desktop.goto(`${BASE}/recipes/new-york-style-pizza`, { waitUntil: 'networkidle' })
 const readingLayout = await desktop.evaluate(() => ['.yeet > header', '.yeet main', '.yeet main > article'].map((selector) => {
   const rect = document.querySelector(selector).getBoundingClientRect()

@@ -58,7 +58,7 @@ export function KitchenScratchPage({ kitchen, client, sharedConfig, saveOnArriva
     const stored = shared ?? readScratch(kitchen)
     if (shared) {
       writeScratch(recipe.slug, shared)
-      setNotice({ message: 'Loaded the formula from a shared link. Save it to keep your own copy.' })
+      setNotice({ message: 'Loaded the remix from a shared link. Save it to keep your own copy.' })
     }
     if (stored) {
       setState(stored)
@@ -77,7 +77,7 @@ export function KitchenScratchPage({ kitchen, client, sharedConfig, saveOnArriva
       navigate({ to: kitchenPath(recipe.slug, formula.id, true), search: { saved: '1' } })
     } catch (error) {
       setSaving(false)
-      setNotice({ tone: 'error', message: kitchenErrorMessage(error, 'Your formula could not be saved. Please try again.') })
+      setNotice({ tone: 'error', message: kitchenErrorMessage(error, 'Your remix could not be saved. Please try again.') })
     }
   }, [store, navigate, recipe.slug, recipe.title])
 
@@ -109,7 +109,7 @@ export function KitchenScratchPage({ kitchen, client, sharedConfig, saveOnArriva
     writeScratchName(recipe.slug, kept)
     return null
   }
-  const saveLabel = saving ? 'Saving…' : 'Save to Notebook'
+  const saveLabel = saving ? 'Saving…' : 'Save remix'
 
   return <>
     <KitchenWorkspace
@@ -121,10 +121,10 @@ export function KitchenScratchPage({ kitchen, client, sharedConfig, saveOnArriva
       onErrorsChange={setErrors}
       header={<>
         <KitchenHeader
-          crumbs={[{ label: 'Notebook', href: '/notebook' }, { label: recipe.title }]}
+          crumbs={[{ label: 'Remix', href: '/remix' }, { label: recipe.title }]}
           title={<FormulaTitle name={name ?? recipe.title} onRename={rename} />}
           meta={<>
-            <span>Unsaved formula from <a href={`/recipes/${recipe.slug}`} className="font-action font-bold underline decoration-1 underline-offset-4 hover:decoration-2">the recipe</a></span>
+            <span>Unsaved remix from <a href={`/recipes/${recipe.slug}`} className="font-action font-bold underline decoration-1 underline-offset-4 hover:decoration-2">the recipe</a></span>
             <SaveStatus state={errors.length ? { kind: 'invalid' } : { kind: 'local' }} />
           </>}
           actions={<>

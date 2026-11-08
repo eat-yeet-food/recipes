@@ -20,7 +20,7 @@ function Browse() {
     </section>
   </div>
 }
-const meta = { title: 'Pages', component: RecipesIndex, parameters: { layout: 'fullscreen', docs: { description: { component: 'Full page compositions from shared parts. The full recipe page renders in Features/Notebook/Pages (Bake Sheet), which composes the production RecipeArticle with the app’s block registry.' } } } } satisfies Meta<typeof RecipesIndex>
+const meta = { title: 'Pages', component: RecipesIndex, parameters: { layout: 'fullscreen', docs: { description: { component: 'Full page compositions from shared parts. The full recipe page renders in Features/Remix/Pages (Bake Sheet), which composes the production RecipeArticle with the app’s block registry.' } } } } satisfies Meta<typeof RecipesIndex>
 export default meta
 export const RecipesIndexPage: StoryObj<typeof meta> = { name: 'Recipes Index' }
 export const BrowsePage: StoryObj<typeof meta> = { name: 'Browse', render: () => <Browse /> }

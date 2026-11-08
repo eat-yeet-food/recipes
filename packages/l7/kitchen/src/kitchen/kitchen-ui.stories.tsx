@@ -6,7 +6,7 @@ import type { KitchenRevision } from './kitchen-client'
 import { ChangeStrip, CountStepper, FormulaTitle, HistorySheet, KitchenNotice, SaveStatus, type KitchenNoticeValue } from './kitchen-ui'
 
 const meta = {
-  title: 'Features/Notebook/Controls',
+  title: 'Features/Remix/Controls',
   parameters: { docs: { description: { component: 'Owned Notebook controls. Formulas save automatically, so the Saved label, the changes strip, History with Restore, names renamed in place and Undo notices replace any Save / Save as choice.' } } },
 } satisfies Meta
 
@@ -43,7 +43,7 @@ export const ChangesFromTheRecipe: Story = {
 function FormulaTitleExample({ taken = 'Friday pies' }: { taken?: string }) {
   const [name, setName] = useState('Friday pies copy')
   return <div className="p-6">
-    <FormulaTitle name={name} onRename={(next) => next.toLowerCase() === taken.toLowerCase() ? 'You already have a formula with this name. Choose a different name.' : (setName(next), null)} />
+    <FormulaTitle name={name} onRename={(next) => next.toLowerCase() === taken.toLowerCase() ? 'You already have a remix with this name. Choose a different name.' : (setName(next), null)} />
   </div>
 }
 
@@ -52,11 +52,11 @@ export const NameField: Story = {
   play: async ({ canvasElement }) => {
     const screen = within(canvasElement)
     await expect(screen.getByRole('heading', { level: 1, name: 'Friday pies copy' })).toBeInTheDocument()
-    const field = screen.getByRole('textbox', { name: /^formula name$/i })
+    const field = screen.getByRole('textbox', { name: /^remix name$/i })
     await expect(field).toHaveValue('Friday pies copy')
     await userEvent.clear(field)
     await userEvent.type(field, 'FRIDAY pies{Enter}')
-    await expect(await screen.findByRole('alert')).toHaveTextContent('already have a formula')
+    await expect(await screen.findByRole('alert')).toHaveTextContent('already have a remix')
     await expect(field).toHaveFocus()
     await userEvent.keyboard('{Escape}')
     await expect(field).toHaveValue('Friday pies copy')

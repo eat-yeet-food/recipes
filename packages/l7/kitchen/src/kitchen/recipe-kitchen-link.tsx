@@ -27,8 +27,8 @@ export function RecipeKitchenLink({ recipeSlug, client }: { recipeSlug: string; 
       {mine.length
         ? <>Your versions in Notebook: {mine.slice(0, 3).map((formula, index) => <Fragment key={formula.id}>
             {index > 0 && ', '}<a className={textLink} href={kitchenPath(recipeSlug, formula.id, true)}>{formula.name}</a>
-          </Fragment>)}{mine.length > 3 && <>, <a className={textLink} href="/notebook">{mine.length - 3} more</a></>} · <a className={textLink} href={kitchenPath(recipeSlug)}>Start another</a></>
-        : <>Change the batch, hydration or anything else: <a className={textLink} href={kitchenPath(recipeSlug)}>make this dough your own in your Notebook</a>.</>}
+          </Fragment>)}{mine.length > 3 && <>, <a className={textLink} href="/remix">{mine.length - 3} more</a></>} · <a className={textLink} href={kitchenPath(recipeSlug)}>Start another</a></>
+        : <>Change the batch, hydration or anything else: <a className={textLink} href={kitchenPath(recipeSlug)}>remix this dough</a>.</>}
     </p>
   </div>
 }

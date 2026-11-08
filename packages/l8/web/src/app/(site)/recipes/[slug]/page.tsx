@@ -23,7 +23,7 @@ export default async function RecipePage({ params, searchParams }: RouteProps) {
     siteData(), recipeFor(slug), (await services()).recipes.listRecipes(), searchParams,
   ])
   // Formulas shared before Notebook open there as an unsaved copy.
-  if (typeof query.config === 'string' && doc.content.workbench) redirect(`/notebook/${slug}?config=${encodeURIComponent(query.config)}`)
+  if (typeof query.config === 'string' && doc.content.workbench) redirect(`/remix/${slug}?config=${encodeURIComponent(query.config)}`)
   return <>
     <JsonLd site={site} path={`/recipes/${slug}`} content={doc.content} modified={doc.updatedAt} />
     <RecipeClient recipe={{ ...doc.content, searchText: '' }} recipes={recipes.filter((recipe) => recipe.slug !== slug).slice(0, 4).map((recipe) => ({ ...recipe, searchText: '' }))} siteUrl={site.siteUrl} />

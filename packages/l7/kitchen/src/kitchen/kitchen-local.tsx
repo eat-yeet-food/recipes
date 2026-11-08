@@ -20,7 +20,7 @@ const writeFormulas = (formulas: KitchenFormula[]) => {
   try {
     if (formulas.length) localStorage.setItem(FORMULAS_KEY, JSON.stringify(formulas))
     else localStorage.removeItem(FORMULAS_KEY)
-  } catch { throw new KitchenError('This browser could not keep your formula. Sign in to save it to your account.', 507) }
+  } catch { throw new KitchenError('This browser could not keep your remix. Sign in to save it to your account.', 507) }
 }
 const readMoved = () => readJson<Record<string, string>>(MOVED_KEY, {})
 const newLocalId = () => {

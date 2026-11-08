@@ -13,7 +13,7 @@ const usage = `**When to use:** any action. Filled \`default\` (plum, light labe
 
 const meta = {
   title: 'Primitives/Button', component: Button,
-  args: { children: 'Save to Notebook' },
+  args: { children: 'Save remix' },
   parameters: { layout: 'padded', docs: { description: { component: usage } } },
   argTypes: { variant: { control: 'select', options: ['default', 'utility', 'ghost', 'link', 'on-dark', 'quiet-on-dark', 'danger'] }, size: { control: 'select', options: ['default', 'sm', 'lg', 'icon'] } },
 } satisfies Meta<typeof Button>
@@ -23,13 +23,13 @@ const OnDark = (Story: () => React.ReactNode) => <div className="rounded-field b
 export const Primary: Story = {}
 export const Utility: Story = { args: { variant: 'utility', size: 'sm', children: 'Print Recipe' } }
 export const TextAction: Story = { args: { variant: 'link', children: 'Cancel' } }
-export const Ghost: Story = { args: { variant: 'ghost', children: 'New formula' } }
+export const Ghost: Story = { args: { variant: 'ghost', children: 'New remix' } }
 export const DisabledTextAction: Story = { args: { variant: 'link', disabled: true, children: 'Make default' } }
-export const IconAction: Story = { args: { variant: 'ghost', size: 'icon', 'aria-label': 'Delete formula', children: <Trash2 /> } }
+export const IconAction: Story = { args: { variant: 'ghost', size: 'icon', 'aria-label': 'Delete remix', children: <Trash2 /> } }
 export const OnDarkSurface: Story = { decorators: [OnDark], args: { variant: 'on-dark', children: 'Save formula' } }
 export const DisabledOnDarkSurface: Story = { decorators: [OnDark], args: { variant: 'on-dark', disabled: true, children: 'Save new' } }
 export const QuietOnDarkSurface: Story = { decorators: [OnDark], args: { variant: 'quiet-on-dark', children: 'Undo' } }
-export const Destructive: Story = { args: { variant: 'danger', children: 'Delete formula' } }
+export const Destructive: Story = { args: { variant: 'danger', children: 'Delete remix' } }
 export const Disabled: Story = { args: { disabled: true, children: 'Apply recipe' } }
 export const LongLabel: Story = { decorators: [(Story) => <div className="max-w-56"><Story /></div>], args: { children: 'Use the recommended formula for this oven' } }
 export const KeyboardFocus: Story = { play: async ({ canvasElement }) => { const button = within(canvasElement).getByRole('button'); button.focus(); await userEvent.tab(); await userEvent.tab({ shift: true }); await expect(button).toHaveFocus() } }

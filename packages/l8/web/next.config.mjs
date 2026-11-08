@@ -39,11 +39,13 @@ const payloadConfig = withPayload({
     )
     return config
   },
-  // Notebook was called Test Kitchen and lived at /kitchen; keep old links working.
+  // Remix was called Test Kitchen (/kitchen), then Notebook (/notebook); keep old links working.
   async redirects() {
     return [
-      { source: '/kitchen', destination: '/notebook', permanent: true },
-      { source: '/kitchen/:path*', destination: '/notebook/:path*', permanent: true },
+      { source: '/kitchen', destination: '/remix', permanent: true },
+      { source: '/kitchen/:path*', destination: '/remix/:path*', permanent: true },
+      { source: '/notebook', destination: '/remix', permanent: true },
+      { source: '/notebook/:path*', destination: '/remix/:path*', permanent: true },
     ]
   },
   async headers() {
