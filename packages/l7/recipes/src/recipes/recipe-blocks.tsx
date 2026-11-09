@@ -103,7 +103,7 @@ function NumberedList({ section }: { section: Section }) {
       return <li key={id} data-step-state={active ? 'active' : steps?.done(id) ? 'done' : undefined} aria-current={active ? 'step' : undefined} onClick={stepRowClick(toggle)}
         className={cn(stepRowClasses(active, Boolean(steps?.done(id))), 'block text-base leading-[1.72]')}>
         <Eyebrow as="button" type="button" onClick={toggle} aria-pressed={active} aria-label={`Step ${index + 1}: mark as the step you're on`}
-          tone={active ? 'ink' : 'muted'} className="block focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink print:text-ink">
+          tone="ink" className="block text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink print:text-ink">
           Step {index + 1}
         </Eyebrow>
         <Html as="span" html={item} className="block min-w-0" />
