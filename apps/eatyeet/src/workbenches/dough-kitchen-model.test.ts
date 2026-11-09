@@ -136,7 +136,8 @@ describe('pizza steps', () => {
   it('puts the spiral mixer dough on a rail from the start of mixing', () => {
     const [dough, bake] = resolvePizzaSteps(steps, base)
     assert.deepEqual(dough.itemTimes!.map((time) => [time.label, time.rest]), [['0m', 'Bulk ferment at 76°F for 1h.'], ['1h', undefined]])
-    assert.equal(dough.items[0], 'Chill the water. Add the {{mixingIngredients}} to the spiral mixer. Mix until 72°F. Ball and cover.')
+    assert.equal(dough.items[0], 'Chill the water. Add the {{mixingIngredients}} to the spiral mixer. Mix until 76°F. Ball and cover.')
+    assert.match(resolvePizzaSteps(steps, { ...base, bulkTemperatureF: 74 })[0].items[0], /Mix until 74°F\./)
     assert.equal(dough.items[1], 'Divide into balls. Cover and place in the refrigerator for 2 days.')
     assert.equal(dough.timeOrigin, 'Time since you start mixing')
     assert.match(bake.items[0], /room temperature for 4h\.$/)
@@ -145,13 +146,14 @@ describe('pizza steps', () => {
   it('rests by hand within bulk and matches the warm-up to the cold ferment', () => {
     const [dough, bake] = resolvePizzaSteps(steps, { ...base, mixingMethod: 'hand', coldDays: 4, warmUpMinutes: 120 })
     assert.deepEqual(dough.itemTimes!.map((time) => [time.label, time.rest]), [['0m', 'Cover and rest for 20m.'], ['20m', 'Bulk ferment at 76°F for 40m.'], ['1h', undefined]])
+    assert.match(dough.items[1], /until smooth and about 76°F\./)
     assert.match(dough.items[2], /refrigerator for 4 days\.$/)
     assert.match(bake.items[0], /for 2h\.$/)
   })
 
-  it('mixes in a food processor to about 77°F', () => {
+  it('mixes in a food processor to about the bulk temperature', () => {
     const [dough] = resolvePizzaSteps(steps, { ...base, mixingMethod: 'food-processor' })
-    assert.match(dough.items[0], /food processor fitted with the dough blade and run on high until the dough reaches about 77°F/)
+    assert.match(dough.items[0], /food processor fitted with the dough blade and run on high until the dough reaches about 76°F/)
     assert.equal(dough.items.length, 2)
   })
 

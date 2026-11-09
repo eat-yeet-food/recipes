@@ -18,8 +18,8 @@ const BALL = 'Transfer the dough to your bench, knead a couple of times and form
 
 /**
  * Rewrites the dough steps onto a time rail counted from the start of
- * mixing, for the chosen mixing method, and the bake-day warm-up to match the
- * cold ferment.
+ * mixing, for the chosen mixing method (mixing to the bulk temperature), and
+ * the bake-day warm-up to match the cold ferment.
  */
 export function resolvePizzaSteps(steps: Section[], process: PizzaProcess): Section[] {
   const find = (id: string) => {
@@ -41,15 +41,15 @@ export function resolvePizzaSteps(steps: Section[], process: PizzaProcess): Sect
 
   const timed: { id: string; text: string; time: { label: string; minutes: number; emphasis?: boolean; rest?: string } }[] = []
   if (process.mixingMethod === 'spiral') {
-    timed.push({ id: ITEMS.combine, text: [text(ITEMS.chill), text(ITEMS.combine), text(ITEMS.mix), text(ITEMS.ball).replace(/\s*Bulk ferment[^.]*\./, '')].filter(Boolean).join(' '),
+    timed.push({ id: ITEMS.combine, text: [text(ITEMS.chill), text(ITEMS.combine), text(ITEMS.mix).replace(/\b\d+\s*°?F\b/, temperature), text(ITEMS.ball).replace(/\s*Bulk ferment[^.]*\./, '')].filter(Boolean).join(' '),
       time: { label: '0m', minutes: 0, emphasis: true, rest: `Bulk ferment at ${temperature} for ${bulk}.` } })
   } else if (process.mixingMethod === 'food-processor') {
-    timed.push({ id: ITEMS.combine, text: `Use ice-cold water with no ice in it. Add the {{mixingIngredients}} to a food processor fitted with the dough blade and run on high until the dough reaches about 77°F. ${BALL}`,
+    timed.push({ id: ITEMS.combine, text: `Use ice-cold water with no ice in it. Add the {{mixingIngredients}} to a food processor fitted with the dough blade and run on high until the dough reaches about ${temperature}. ${BALL}`,
       time: { label: '0m', minutes: 0, emphasis: true, rest: `Bulk ferment at ${temperature} for ${bulk}.` } })
   } else {
     timed.push({ id: ITEMS.combine, text: `${CHILL} Stir the {{mixingIngredients}} together in a large bowl until no dry flour remains.`,
       time: { label: '0m', minutes: 0, emphasis: true, rest: `Cover and rest for ${formatDuration(HAND_REST_MINUTES)}.` } })
-    timed.push({ id: ITEMS.mix, text: 'Knead on an unfloured bench for 8–10 minutes, until smooth and about 77°F. Form a ball, place it in a bowl and cover with saran wrap.',
+    timed.push({ id: ITEMS.mix, text: `Knead on an unfloured bench for 8–10 minutes, until smooth and about ${temperature}. Form a ball, place it in a bowl and cover with saran wrap.`,
       time: { label: formatDuration(HAND_REST_MINUTES), minutes: HAND_REST_MINUTES, rest: `Bulk ferment at ${temperature} for ${formatDuration(process.bulkMinutes - HAND_REST_MINUTES)}.` } })
   }
   timed.push({ id: ITEMS.divide, text: `${divide.text} ${fridge}`, time: { label: bulk, minutes: process.bulkMinutes, emphasis: true } })
