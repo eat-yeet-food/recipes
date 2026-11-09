@@ -228,7 +228,7 @@ methodOptions:
                 text: 'Add the {{mixingIngredients}} to the spiral mixer all at once.'
               - id: steps-1-item-3
                 text: >-
-                  Mix at 40% speed until the dough reads 72F on your IR thermometer. Scrape the bowl and hook down with
+                  Mix at 40% speed until the dough reads 76°F on your IR thermometer. Scrape the bowl and hook down with
                   your bench scraper if dough climbs.
               - id: steps-1-item-4
                 text: >-
@@ -430,7 +430,7 @@ blocks:
             text: 'Add the {{mixingIngredients}} to the spiral mixer all at once.'
           - id: steps-1-item-3
             text: >-
-              Mix at 40% speed until the dough reads 72°F on your IR thermometer. Scrape the bowl and hook down with
+              Mix at 40% speed until the dough reads 76°F on your IR thermometer. Scrape the bowl and hook down with
               your bench scraper if dough climbs.
           - id: steps-1-item-4
             text: >-
