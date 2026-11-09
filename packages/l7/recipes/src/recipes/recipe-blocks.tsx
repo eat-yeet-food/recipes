@@ -20,28 +20,21 @@ export type RecipePageBlockContext = {
 }
 
 /** Browser key for the step a reader marked as where they are, per recipe. */
-export const activeStepKey = (slug: string) => `eatyeet:step:${slug}`
-
 const stepId = (section: Section, index: number) => section.itemIds[index] ?? `${section.id}:${index}`
 
 type StepState = { active: string | null; done: (id: string) => boolean; toggle: (id: string) => void }
 const StepContext = createContext<StepState | null>(null)
 
-/** The marked step, remembered in this browser; steps before it read as done. */
-function useActiveStep(slug: string, order: string[]): StepState {
+/** The marked step, for this visit only; steps before it read as done. */
+function useActiveStep(order: string[]): StepState {
   const [active, setActive] = useState<string | null>(null)
-  useEffect(() => {
-    try { setActive(localStorage.getItem(activeStepKey(slug))) } catch { /* storage blocked */ }
-  }, [slug])
   const activeIndex = active ? order.indexOf(active) : -1
   return {
     active: activeIndex >= 0 ? active : null,
     done: (id) => activeIndex >= 0 && order.indexOf(id) < activeIndex,
     toggle: (id) => {
       haptic()
-      const next = id === active ? null : id
-      setActive(next)
-      try { if (next) localStorage.setItem(activeStepKey(slug), next); else localStorage.removeItem(activeStepKey(slug)) } catch { /* ignore */ }
+      setActive(id === active ? null : id)
     },
   }
 }
@@ -192,7 +185,7 @@ function RecipeBlockView({
 }) {
   const id = index === context.firstRecipeBlockIndex ? 'recipe-card' : undefined
   const order = block.steps.flatMap((section) => section.items.map((_, itemIndex) => stepId(section, itemIndex)))
-  const steps = useActiveStep(`${context.page.slug}:${index}`, order)
+  const steps = useActiveStep(order)
 
   return (
     <section id={id} className="scroll-mt-20">
