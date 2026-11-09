@@ -60,6 +60,11 @@ const stepRowClasses = (active: boolean, done: boolean) => cn(
   done && 'opacity-45',
 )
 
+/** A line joining the step badges through their centres. */
+const STEP_RAIL = '[&:not(:last-child)]:before:absolute [&:not(:last-child)]:before:top-[46px] [&:not(:last-child)]:before:-bottom-[18px] [&:not(:last-child)]:before:left-[27px] [&:not(:last-child)]:before:w-0.5 [&:not(:last-child)]:before:bg-ink'
+/** The plum step badge (time or number); pink when it is the step you're on. */
+const STEP_BADGE = 'relative z-[1] flex h-10 min-w-10 items-center justify-center self-start justify-self-center rounded-full px-1 font-action font-bold tabular-nums transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink print:bg-white print:text-ink print:shadow-[inset_0_0_0_1px_currentColor]'
+
 /**
  * Steps of a timed process on a time rail: plum badges carrying the time,
  * joined by a line through their centres, with rests in muted text.
@@ -78,9 +83,9 @@ function TimedList({ section }: { section: Section }) {
         const toggle = () => steps?.toggle(id)
         return (
           <li key={id} data-step-state={active ? 'active' : steps?.done(id) ? 'done' : undefined} aria-current={active ? 'step' : undefined} onClick={stepRowClick(toggle)}
-            className={cn(stepRowClasses(active, Boolean(steps?.done(id))), 'grid grid-cols-[40px_minmax(0,1fr)] gap-3.5 text-base leading-[1.72] [&:not(:last-child)]:before:absolute [&:not(:last-child)]:before:top-[46px] [&:not(:last-child)]:before:-bottom-[18px] [&:not(:last-child)]:before:left-[27px] [&:not(:last-child)]:before:w-0.5 [&:not(:last-child)]:before:bg-ink')}>
+            className={cn(stepRowClasses(active, Boolean(steps?.done(id))), 'grid grid-cols-[40px_minmax(0,1fr)] gap-3.5 text-base leading-[1.72]', STEP_RAIL)}>
             <button type="button" onClick={toggle} aria-pressed={active} aria-label={`${time.label}: mark as the step you're on`}
-              className={cn('relative z-[1] flex h-10 min-w-10 items-center justify-center self-start justify-self-center rounded-full px-1 font-action text-xs font-bold tabular-nums transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink print:bg-white print:text-ink print:shadow-[inset_0_0_0_1px_currentColor]', active ? 'bg-brand text-ink' : 'bg-ink text-brand')}>
+              className={cn(STEP_BADGE, 'text-xs', active ? 'bg-brand text-ink' : 'bg-ink text-brand')}>
               <time dateTime={`PT${time.minutes}M`}>{time.label}</time>
             </button>
             <div className="min-w-0 pt-1.5">
@@ -94,7 +99,7 @@ function TimedList({ section }: { section: Section }) {
   </>)
 }
 
-/** Numbered steps: big pink serif numerals, distinct from the timeline's plum badges. */
+/** Numbered steps: the timeline's plum badges carrying the step number, with no connecting line (that marks time). */
 function NumberedList({ section }: { section: Section }) {
   const steps = useContext(StepContext)
   return <ol className="m-0 grid list-none gap-2 p-0">
@@ -103,12 +108,12 @@ function NumberedList({ section }: { section: Section }) {
       const active = steps?.active === id
       const toggle = () => steps?.toggle(id)
       return <li key={id} data-step-state={active ? 'active' : steps?.done(id) ? 'done' : undefined} aria-current={active ? 'step' : undefined} onClick={stepRowClick(toggle)}
-        className={cn(stepRowClasses(active, Boolean(steps?.done(id))), 'grid grid-cols-[36px_minmax(0,1fr)] items-baseline gap-3.5 text-base leading-[1.72]')}>
+        className={cn(stepRowClasses(active, Boolean(steps?.done(id))), 'grid grid-cols-[40px_minmax(0,1fr)] gap-3.5 text-base leading-[1.72]')}>
         <button type="button" onClick={toggle} aria-pressed={active} aria-label={`Step ${index + 1}: mark as the step you're on`}
-          className={cn('justify-self-center font-display text-title font-extrabold leading-none tabular-nums focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink print:text-base print:text-ink', active ? 'text-ink' : 'text-brand')}>
+          className={cn(STEP_BADGE, 'text-base', active ? 'bg-brand text-ink' : 'bg-ink text-brand')}>
           {index + 1}
         </button>
-        <Html as="span" html={item} className="min-w-0" />
+        <Html as="span" html={item} className="min-w-0 pt-1.5" />
       </li>
     })}
   </ol>

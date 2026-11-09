@@ -437,12 +437,11 @@ blocks:
               Transfer the dough to your bench. Knead shortly, guide dough with bench scraper into the form of a ball,
               place in a bowl, and cover with saran wrap. Bulk ferment at 76°F for 1h.
           - id: divide-dough
-            text: "Divide and shape dough into {{pieceCount}} {{pieceLabelPlural}}, shooting for {{pieceWeightGrams}} each ({{totalDoughGrams}} total dough). Pull four times in gentle circles on your unfloured bench until smooth on the top. Pinch any bottom seam that remains. Circular dough balls make circular pizzas \U0001F642 ([video](https://www.youtube.com/watch?v=Vo5OW8Xkah4&t=9s))."
+            text: "Divide and shape dough into {{pieceCount}} {{pieceLabelPlural}}, shooting for {{pieceWeightGrams}} each ({{totalDoughGrams}} total dough). Pull each in gentle circles on your unfloured bench until the top is smooth, then pinch the bottom seam closed ([video](https://www.youtube.com/watch?v=Vo5OW8Xkah4&t=9s))."
           - id: steps-1-item-6
             text: >-
-              Grease your proofing container with canola oil. Transfer the dough to the container with your bench
-              scraper. After placing in a proofing container, lightly oil your hands and gently rub the top of the dough
-              to make it less sticky and retain moisture. Cover and place in the refrigerator for 2–4 days.
+              Move the dough to a container greased with canola oil and rub the top with lightly oiled hands. Cover and
+              place in the refrigerator for 2–4 days.
         id: steps-1
       - title: Pre-Assembly
         items:
@@ -520,6 +519,7 @@ blocks:
         I recommend making a couple more balls than you plan to eat to start. It will take 5 bakes to settle in and
         making more each time will shorten the learning curve.
     tips:
+      - 'Round dough balls stretch into round pizzas, so take the time to get each ball smooth and even.'
       - 'For one or two dough balls, use a food processor with the dough blade instead of the spiral mixer. Use ice-cold water (no ice in it) and run on high until the dough reaches about 76°F, then knead a couple of times by hand. Rest it for 1h before you divide and ball.'
       - >-
         If launching is tricky, build the pizza on parchment on your peel. Launch with the parchment, then slide it out
