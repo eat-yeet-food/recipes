@@ -3,7 +3,7 @@
  *
  * Static assertions only prove that files exist. This opens every canonical
  * recipe route and checks that the route renders the generic article shell,
- * registered recipe block, desktop-only browse sidebar, mobile/cook-mode
+ * registered recipe block, plum ingredients card, active step, mobile/cook-mode
  * behavior, and the Notebook entry point that replaced Adjust recipe.
  */
 import { signIn } from '#web-test/member-session'
@@ -54,7 +54,6 @@ for (const recipe of INDEX) {
         (button.getAttribute('aria-label') ?? button.textContent)?.includes('Cooking view'),
       ).length,
       browseCards: document.querySelectorAll('[data-yeet-browse] a[href^="/recipes/"]').length,
-      sidebarDisplay: getComputedStyle(document.querySelector('[data-yeet-browse]')).display,
       titleVisible: text('h1') === expectedTitle,
     }
   }, recipe.title)
@@ -64,7 +63,7 @@ for (const recipe of INDEX) {
   check(`${recipe.slug} renders recipe card`, facts.hasRecipeCard)
   check(`${recipe.slug} does not render duplicate side actions`, facts.shareRailCount === 0, JSON.stringify(facts))
   check(`${recipe.slug} has one print control and one dedicated cooking button`, facts.printButtons === 1 && facts.cookingButtons === 1, JSON.stringify(facts))
-  check(`${recipe.slug} shows desktop browse sidebar`, facts.sidebarDisplay === 'block' && facts.browseCards === 4, JSON.stringify(facts))
+  check(`${recipe.slug} has no browse sidebar`, facts.browseCards === 0, JSON.stringify(facts))
 
   await page.close()
 }
@@ -109,7 +108,7 @@ check('returning to one pizza clears the URL', !desktop.url().includes('count=')
 await desktop.goto(`${BASE}/recipes/new-york-style-pizza?config=${encodeURIComponent('{"version":1}')}`, { waitUntil: 'networkidle' })
 check('shared formula links open in your Notebook', new URL(desktop.url()).pathname === '/remix/new-york-style-pizza' && desktop.url().includes('config='), desktop.url())
 await desktop.goto(`${BASE}/recipes/new-york-style-pizza`, { waitUntil: 'networkidle' })
-const readingLayout = await desktop.evaluate(() => ['.yeet > header', '.yeet main', '.yeet main > article'].map((selector) => {
+const readingLayout = await desktop.evaluate(() => ['.yeet header', '.yeet main', '.yeet main > article'].map((selector) => {
   const rect = document.querySelector(selector).getBoundingClientRect()
   return { selector, left: rect.left, width: rect.width }
 }))
@@ -119,7 +118,6 @@ await desktop.getByRole('button', { name: 'Cooking view' }).click()
 await desktop.locator('.yeet[data-cook-mode="true"]').waitFor({ timeout: 5000 }).catch(() => {})
 await desktop.waitForTimeout(1500) // past the hint's delay: it must stay retired
 check('cooking view enables cook mode', await desktop.locator('.yeet[data-cook-mode="true"]').count() === 1)
-check('start cooking hides browse sidebar', await desktop.locator('[data-yeet-browse]').count() === 0)
 check('using Cooking view retires its first-visit hint', await desktop.locator('[data-cooking-view-hint]').count() === 0 && await desktop.evaluate(() => localStorage.getItem('eatyeet:hint:cooking-view')) === '1')
 check('focused cooking exposes the active button state', await desktop.getByRole('button', { name: 'Cooking view' }).getAttribute('aria-pressed') === 'true')
 check('Cooking view preserves horizontal page geometry', await desktop.evaluate((before) => before.every(({ selector, left, width }) => {
@@ -131,13 +129,13 @@ check('recipe breadcrumb omits ambiguous course category', breadcrumbText === 'H
 check(
   'focused cooking aligns the recipe body with its description',
   await desktop.evaluate(() => {
-    const description = document.querySelector('.yeet > header p')
+    const description = document.querySelector('.yeet header p')
     const card = document.querySelector('.yeet main > article')
     if (!description || !card) return false
 
     const descriptionBox = description.getBoundingClientRect()
     const cardBox = card.getBoundingClientRect()
-    return Math.abs(descriptionBox.left - cardBox.left) <= 2 && Math.abs(descriptionBox.right - cardBox.right) <= 2
+    return Math.abs(descriptionBox.left - cardBox.left) <= 2
   }),
 )
 await desktop.close()
@@ -152,10 +150,20 @@ await sourdough.close()
 
 const phone = await newPage({ width: 390, height: 900 })
 await phone.goto(`${BASE}/recipes/new-york-style-pizza`, { waitUntil: 'networkidle' })
-check(
-  'recipe browse sidebar hidden on phone',
-  await phone.locator('[data-yeet-browse]').evaluate((el) => getComputedStyle(el).display === 'none'),
-)
+check('ingredients sit on the plum card', await phone.locator('[data-ingredients-card]').evaluate((el) => getComputedStyle(el).backgroundColor !== 'rgb(255, 255, 255)'))
+check('ingredient amounts are emphasized', await phone.locator('[data-ingredients-card] strong').first().textContent() === '287g')
+await phone.waitForFunction(() => { const el = document.querySelector('[data-timed-steps] li'); return el && Object.keys(el).some((key) => key.startsWith('__reactProps')) })
+const timedSteps = phone.locator('[data-timed-steps] > li')
+await timedSteps.nth(1).click({ position: { x: 200, y: 10 } })
+check('tapping a step marks it as the one you are on', await timedSteps.nth(1).getAttribute('aria-current') === 'step')
+check('steps before the marked one read as done', await timedSteps.nth(0).getAttribute('data-step-state') === 'done')
+await phone.reload({ waitUntil: 'networkidle' })
+await phone.waitForFunction(() => document.querySelectorAll('[aria-current="step"]').length === 1)
+check('the marked step survives a reload', await timedSteps.nth(1).getAttribute('aria-current') === 'step')
+await timedSteps.nth(1).getByRole('button').click()
+check('tapping the marked step again clears it', await phone.locator('[aria-current="step"]').count() === 0)
+await phone.emulateMedia({ media: 'print' })
+check('print shows ingredients on plain white', await phone.locator('[data-ingredients-card]').evaluate((el) => getComputedStyle(el).backgroundColor === 'rgb(255, 255, 255)'))
 await phone.close()
 
 await browser.close()

@@ -36,22 +36,22 @@ export type RatingClient = {
   removeReply: (replyId: string) => Promise<RatingSummary>
 }
 
-/** Filled stars are the star orange; empty picker stars are plum outlines, empty display stars muted. */
-function RatingStar({ filled, className, picker = false }: { filled: boolean; className?: string; picker?: boolean }) {
+/** Filled stars are the star orange (pink on the plum summary); empty picker stars are plum outlines, empty display stars muted. */
+function RatingStar({ filled, className, picker = false, onDark = false }: { filled: boolean; className?: string; picker?: boolean; onDark?: boolean }) {
   return <Star
     aria-hidden="true"
     strokeWidth={1.5}
     className={cn(
       'size-6',
-      filled ? 'fill-star text-star' : picker ? 'fill-transparent text-ink' : 'fill-transparent text-muted-foreground',
+      filled ? (onDark ? 'fill-brand text-brand' : 'fill-star text-star') : onDark ? 'fill-transparent text-on-dark-label' : picker ? 'fill-transparent text-ink' : 'fill-transparent text-muted-foreground',
       className,
     )}
   />
 }
 
-function RatingDisplay({ value }: { value: number }) {
+function RatingDisplay({ value, tone }: { value: number; tone?: 'on-dark' }) {
   return <span role="img" aria-label={`${value.toFixed(1)} out of 5 stars`} className="inline-flex gap-0.5">
-    {[1, 2, 3, 4, 5].map((star) => <RatingStar key={star} filled={star <= Math.round(value)} className="size-4.5" />)}
+    {[1, 2, 3, 4, 5].map((star) => <RatingStar key={star} filled={star <= Math.round(value)} onDark={tone === 'on-dark'} className="size-4.5" />)}
   </span>
 }
 
@@ -90,15 +90,17 @@ function ReviewSummary({ summary, signedIn, onReply, onDeleteReply }: {
   }
 
   return <div>
-    <div className="mb-6 flex flex-wrap items-center gap-4">
-      <div className="flex items-center gap-2">
-        <strong className="text-2xl font-bold">{summary.average!.toFixed(1)}</strong>
-        <RatingDisplay value={summary.average!} />
+    <div data-rating-summary="" className="mb-6 flex flex-wrap items-center gap-x-5 gap-y-2 rounded-surface bg-ink p-5 text-on-dark-label">
+      <strong className="font-action text-section font-bold leading-none tabular-nums text-brand">{summary.average!.toFixed(1)}</strong>
+      <div className="grid gap-1">
+        <RatingDisplay value={summary.average!} tone="on-dark" />
+        <div className="flex flex-wrap items-center gap-2 text-sm">
+          <span>{summary.count} {summary.count === 1 ? 'rating' : 'ratings'}</span>
+          <span className="rounded-control bg-brand px-2.5 py-0.5 font-action text-xs font-bold text-ink">
+            {summary.eatPercentage! >= 50 ? `${summary.eatPercentage}% EAT` : `${100 - summary.eatPercentage!}% YEET`}
+          </span>
+        </div>
       </div>
-      <span className="rounded-control bg-brand-soft px-3 py-1 font-action text-xs font-bold text-ink">
-        {summary.eatPercentage! >= 50 ? `${summary.eatPercentage}% EAT` : `${100 - summary.eatPercentage!}% YEET`}
-      </span>
-      <span className="text-sm text-muted-foreground">{summary.count} {summary.count === 1 ? 'rating' : 'ratings'}</span>
     </div>
     {error && !replyingTo ? <Callout tone="danger" className="mb-4">{error}</Callout> : null}
 

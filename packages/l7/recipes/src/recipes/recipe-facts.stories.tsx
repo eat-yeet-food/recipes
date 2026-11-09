@@ -7,4 +7,5 @@ const meta = {
 } satisfies Meta<typeof RecipeFacts>
 export default meta
 export const Default: StoryObj<typeof meta> = {}
+export const OnDark: StoryObj<typeof meta> = { args: { tone: 'on-dark' }, decorators: [(Story) => <div className="bg-ink p-6"><Story /></div>] }
 export const LongValues: StoryObj<typeof meta> = { args: { items: [['Prep time', '3 days 4 hr 30 min'], ['Cook time', '6 min'], ['Total time', '3 days 4 hr 36 min'], ['Yield', '3 16-inch pizzas']] } }

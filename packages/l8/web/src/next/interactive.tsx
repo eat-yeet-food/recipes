@@ -11,11 +11,9 @@ import { kitchenClient } from './kitchen-client'
 import { RecipeRating, type RatingClient } from '@eat-yeet/l7-recipes/recipes/recipe-rating'
 export function RecipeClient({
   recipe,
-  recipes,
   siteUrl,
 }: {
   recipe: any
-  recipes: any[]
   siteUrl: string
 }) {
   const ratingClient = useMemo<RatingClient>(() => {
@@ -39,7 +37,6 @@ export function RecipeClient({
   return (
     <RecipeDetail
       recipe={page}
-      browseRecipes={recipes}
       siteUrl={siteUrl}
       blockRegistry={pageBlockRegistry}
       beforeIngredients={plugin && authored !== null ? <>

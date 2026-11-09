@@ -15,6 +15,8 @@ export type ContentPageArticleProps<TContext> = {
   articleLabel?: string
   rootAttributes?: Record<`data-${string}`, string | undefined>
   className?: string
+  /** Wraps the header and media, e.g. for a colored band behind them. */
+  heroClassName?: string
   headerClassName?: string
   mediaClassName?: string
   mainClassName?: string
@@ -31,6 +33,7 @@ export function ContentPageArticle<TContext>({
   articleLabel,
   rootAttributes,
   className,
+  heroClassName,
   headerClassName,
   mediaClassName,
   mainClassName,
@@ -43,6 +46,7 @@ export function ContentPageArticle<TContext>({
       {...rootAttributes}
       className={cn('yeet bg-white text-ink text-base leading-[1.6]', className)}
     >
+      <div className={heroClassName}>
       {header && (
         <header
           className={cn(
@@ -61,6 +65,7 @@ export function ContentPageArticle<TContext>({
           {media}
         </figure>
       )}
+      </div>
 
       <main
         className={cn(

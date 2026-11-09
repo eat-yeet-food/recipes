@@ -12,6 +12,7 @@ import type { PageBlockRegistry } from '@eat-yeet/l6-ui-content-blocks/page-bloc
 import type { RecipeContent } from '@eat-yeet/l4-content-model/recipes'
 import { RecipeAction, RecipeIconAction, CookingViewHint } from './recipe-actions'
 import type { RecipePageBlockContext } from './recipe-blocks'
+import { RecipeFacts, recipeFactItems, type RecipeFactsSource } from './recipe-facts'
 
 type ScreenWakeLockSentinel = {
   released?: boolean
@@ -22,11 +23,6 @@ type WakeLockNavigator = Navigator & {
   wakeLock?: {
     request: (type: 'screen') => Promise<ScreenWakeLockSentinel>
   }
-}
-
-type RecipeArticleAsideProps = {
-  page: RecipeContent
-  focusedCooking: boolean
 }
 
 export const recipeTitleClass = cn(pageTitleClasses.standard, 'max-w-[var(--layout-recipe-copy)]')
@@ -47,7 +43,7 @@ export function RecipeArticleHeader({
   focusedCooking,
   toggleFocusedCooking,
 }: {
-  page: Pick<RecipeContent, 'title' | 'description'>
+  page: Pick<RecipeContent, 'title' | 'description'> & RecipeFactsSource
   heading?: RecipeArticleHeading
   printPage: () => void
   focusedCooking: boolean
@@ -56,19 +52,20 @@ export function RecipeArticleHeader({
   const crumbs = heading?.crumbs ?? [{ label: 'Home', href: '/' }, { label: 'Recipes', href: '/recipes' }, { label: page.title }]
   return (
     <div className="@container">
-      <Breadcrumbs crumbs={crumbs} className="mb-5" />
-      <h1 className={`m-0 min-w-0 ${recipeTitleClass}`}>{heading?.title ?? page.title}</h1>
+      <Breadcrumbs crumbs={crumbs} className="mb-5 text-brand [&_a]:text-brand [&_a:hover]:text-white" />
+      <h1 className={cn('m-0 min-w-0', recipeTitleClass, 'text-white print:text-ink')}>{heading?.title ?? page.title}</h1>
       <div className="mb-6 mt-1.5 flex items-center justify-between gap-4">
-        <Eyebrow as="div" size="small" tone="muted">{heading?.byline ?? 'By Patrick Hogan'}</Eyebrow>
+        <Eyebrow as="div" size="small" tone="brand" className="print:text-ink">{heading?.byline ?? 'By Patrick Hogan'}</Eyebrow>
         <div className="relative flex shrink-0 gap-2 print:hidden" role="group" aria-label="Page actions">
-          <RecipeIconAction label="Print Recipe" onClick={printPage}><Printer /></RecipeIconAction>
-          <RecipeIconAction label="Cooking view" onClick={toggleFocusedCooking} pressed={focusedCooking}><ChefHat /></RecipeIconAction>
-          {heading?.edit && <RecipeIconAction label={heading.edit.label} href={heading.edit.href}><Pencil /></RecipeIconAction>}
+          <RecipeIconAction label="Print Recipe" tone="on-dark" onClick={printPage}><Printer /></RecipeIconAction>
+          <RecipeIconAction label="Cooking view" tone="on-dark" onClick={toggleFocusedCooking} pressed={focusedCooking}><ChefHat /></RecipeIconAction>
+          {heading?.edit && <RecipeIconAction label={heading.edit.label} tone="on-dark" href={heading.edit.href}><Pencil /></RecipeIconAction>}
           {/* The hint points at the last circle, so pages with an Edit circle skip it. */}
           {!heading?.edit && <CookingViewHint used={focusedCooking} />}
         </div>
       </div>
-      {page.description && <p className="max-w-[var(--layout-recipe-copy)] m-0 text-base leading-[1.625]">{page.description}</p>}
+      {page.description && <p className="max-w-[var(--layout-recipe-copy)] m-0 text-base leading-[1.625] text-on-dark-label print:text-ink">{page.description}</p>}
+      <RecipeFacts items={recipeFactItems(page)} tone="on-dark" className="mt-6" />
     </div>
   )
 }
@@ -77,7 +74,6 @@ export function RecipeArticle({
   page,
   siteUrl,
   blockRegistry,
-  aside,
   heading,
   beforeIngredients,
   rating,
@@ -85,7 +81,6 @@ export function RecipeArticle({
   page: RecipeContent
   siteUrl: string
   blockRegistry: PageBlockRegistry<RecipePageBlockContext>
-  aside?: (props: RecipeArticleAsideProps) => ReactNode
   heading?: RecipeArticleHeading
   /** Shown between the recipe facts and Ingredients, such as the Notebook link. */
   beforeIngredients?: ReactNode
@@ -168,6 +163,12 @@ export function RecipeArticle({
         'data-cook-mode': cookMode ? 'true' : undefined,
         'data-focused-cooking': focusedCooking ? 'true' : undefined,
       }}
+      heroClassName={cn(
+        'print:bg-none',
+        photo && !focusedCooking
+          ? 'bg-[linear-gradient(var(--color-ink)_calc(100%-min(32vw,300px)),transparent_0)]'
+          : 'bg-ink',
+      )}
       headerClassName={cn(focusedCooking && 'pb-0 max-[640px]:pb-0', 'print:block print:px-0 print:pt-0 print:pb-6')}
       header={(
         <RecipeArticleHeader
@@ -178,19 +179,17 @@ export function RecipeArticle({
           toggleFocusedCooking={toggleFocusedCooking}
         />
       )}
-      media={photo ? <ResponsiveImage src={photo} sizes="(max-width: 640px) calc(100vw - 36px), (max-width: 1120px) calc(100vw - 56px), 1064px" loading="eager" fetchPriority="high" alt={heroAlt} className="w-full max-h-[690px] rounded-surface object-cover" /> : undefined}
+      media={photo ? <ResponsiveImage src={photo} sizes="(max-width: 640px) calc(100vw - 36px), (max-width: 1120px) calc(100vw - 56px), 1064px" loading="eager" fetchPriority="high" alt={heroAlt} className="w-full max-h-[690px] rounded-surface object-cover shadow-overlay print:shadow-none" /> : undefined}
       mediaClassName={focusedCooking ? 'hidden' : undefined}
       mainClassName={cn(
-        'pt-8 max-[640px]:pt-6 max-[1080px]:max-w-[1120px]',
-        aside && 'grid-cols-[minmax(0,760px)_300px] gap-14 max-[1080px]:block',
+        'pt-8 max-[640px]:pt-6',
         focusedCooking && 'pt-3 max-[640px]:pt-3',
       )}
       articleClassName={cn(
-        'mt-0 max-w-[var(--layout-recipe-copy)] bg-white pt-0 pb-[38px] max-[640px]:pb-[30px]',
+        'mt-0 max-w-none bg-white pt-0 pb-[38px] max-[640px]:pb-[30px]',
       )}
-      aside={aside?.({ page, focusedCooking })}
     />
-    {rating && <div className="mx-auto -mt-8 max-w-[960px] px-8 pb-12 max-[640px]:px-4 print:hidden">{rating}</div>}
+    {rating && <div className="mx-auto -mt-8 max-w-[1120px] px-7 pb-12 max-[640px]:px-[18px] print:hidden"><div className="max-w-[var(--layout-recipe-copy)]">{rating}</div></div>}
     </>
   )
 }

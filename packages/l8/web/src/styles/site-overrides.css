@@ -75,5 +75,8 @@
 /* Content HTML is generated from Markdown; owned controls use components. */
 [data-prose] a { color: var(--color-ink); font-weight: 700; text-decoration: underline; text-decoration-color: currentColor; text-underline-offset: 3px; }
 [data-prose] a:hover { text-decoration-thickness: 2px; }
+/* The plum ingredients card: links take the card's text color (pale on plum, ink in print). */
+[data-ingredients-card] [data-prose] a { color: inherit; }
+[data-ingredients-card] [data-prose] a:focus-visible { outline-color: var(--color-brand); }
 [data-prose] a:focus-visible { outline: 2px solid var(--color-ink); outline-offset: 3px; }
 [data-hero-scrim] { background: linear-gradient(180deg, color-mix(in srgb, var(--color-ink) 70%, transparent), color-mix(in srgb, var(--color-ink) 65%, transparent)); }

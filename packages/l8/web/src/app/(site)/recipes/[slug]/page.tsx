@@ -1,6 +1,6 @@
 import { cache } from 'react'
 import { notFound, redirect } from 'next/navigation'
-import { publicDocument, siteData, services } from '../../../../next/cms'
+import { publicDocument, siteData } from '../../../../next/cms'
 import { metadataFor, JsonLd } from '../../../../next/seo'
 import { RecipeClient } from '../../../../next/interactive'
 
@@ -19,13 +19,11 @@ export async function generateMetadata({ params }: RouteProps) {
 }
 export default async function RecipePage({ params, searchParams }: RouteProps) {
   const { slug } = await params
-  const [site, doc, { recipes }, query] = await Promise.all([
-    siteData(), recipeFor(slug), (await services()).recipes.listRecipes(), searchParams,
-  ])
+  const [site, doc, query] = await Promise.all([siteData(), recipeFor(slug), searchParams])
   // Formulas shared before Notebook open there as an unsaved copy.
   if (typeof query.config === 'string' && doc.content.workbench) redirect(`/remix/${slug}?config=${encodeURIComponent(query.config)}`)
   return <>
     <JsonLd site={site} path={`/recipes/${slug}`} content={doc.content} modified={doc.updatedAt} />
-    <RecipeClient recipe={{ ...doc.content, searchText: '' }} recipes={recipes.filter((recipe) => recipe.slug !== slug).slice(0, 4).map((recipe) => ({ ...recipe, searchText: '' }))} siteUrl={site.siteUrl} />
+    <RecipeClient recipe={{ ...doc.content, searchText: '' }} siteUrl={site.siteUrl} />
   </>
 }

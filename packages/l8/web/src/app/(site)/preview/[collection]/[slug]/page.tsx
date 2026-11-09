@@ -47,9 +47,7 @@ export default async function Preview({
         media['/images/' + name] = m
     }
   }
-  const api = await services(),
-    { recipes } = await api.recipes.listRecipes(),
-    { articles } = await api.articles.listArticles()
+  const { articles } = await (await services()).articles.listArticles()
   return (
     <MediaProvider media={deliveryMedia(media)}>
       <p
@@ -62,7 +60,6 @@ export default async function Preview({
         <Suspense>
           <RecipeClient
             recipe={storedContent(docs[0])}
-            recipes={recipes}
             siteUrl={site.siteUrl}
           />
         </Suspense>

@@ -39,7 +39,8 @@ export function RecipeAction({
 
 /**
  * Page header action: a 44px plum circle; pink with a plum icon when pressed
- * or when it is the page's finishing step (`tone="done"`). Links when given
+ * or when it is the page's finishing step (`tone="done"`); translucent white
+ * on a plum band (`tone="on-dark"`). Links when given
  * an href.
  */
 export function RecipeIconAction({ label, onClick, href, pressed, disabled, tone, children }: {
@@ -48,10 +49,10 @@ export function RecipeIconAction({ label, onClick, href, pressed, disabled, tone
   href?: string
   pressed?: boolean
   disabled?: boolean
-  tone?: 'done'
+  tone?: 'done' | 'on-dark'
   children: ReactNode
 }) {
-  const className = cn('[&_svg]:size-5 aria-pressed:bg-brand aria-pressed:text-ink aria-pressed:hover:bg-brand-soft', tone && 'bg-brand text-ink hover:bg-brand-soft')
+  const className = cn('[&_svg]:size-5 aria-pressed:bg-brand aria-pressed:text-ink aria-pressed:hover:bg-brand-soft', tone === 'done' && 'bg-brand text-ink hover:bg-brand-soft', tone === 'on-dark' && 'bg-white/15 text-white hover:bg-white/25')
   if (href) return <Button asChild size="icon" className={className}>
     <a href={href} aria-label={label} title={label} data-recipe-action={label} onClick={onClick}>{children}</a>
   </Button>
