@@ -36,14 +36,14 @@ export type RatingClient = {
   removeReply: (replyId: string) => Promise<RatingSummary>
 }
 
-/** Filled stars are the star orange (pink on the plum summary); empty picker stars are plum outlines, empty display stars muted. */
+/** Filled stars are plum on white (pink on the plum summary); empty picker stars are plum outlines, empty display stars muted. */
 function RatingStar({ filled, className, picker = false, onDark = false }: { filled: boolean; className?: string; picker?: boolean; onDark?: boolean }) {
   return <Star
     aria-hidden="true"
     strokeWidth={1.5}
     className={cn(
       'size-6',
-      filled ? (onDark ? 'fill-brand text-brand' : 'fill-star text-star') : onDark ? 'fill-transparent text-on-dark-label' : picker ? 'fill-transparent text-ink' : 'fill-transparent text-muted-foreground',
+      filled ? (onDark ? 'fill-brand text-brand' : 'fill-ink text-ink') : onDark ? 'fill-transparent text-on-dark-label' : picker ? 'fill-transparent text-ink' : 'fill-transparent text-muted-foreground',
       className,
     )}
   />

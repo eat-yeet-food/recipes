@@ -22,7 +22,6 @@ Run `pnpm storybook` for the interactive handbook; its **Foundations / Start Her
 | `ink` (= `primary`, plum 900) | `#2a0e28` | All reading text, filled primary buttons, dark panels (Your dough, phone dough pill, notices), Choice Group tracks, toggle outlines | Opacity-tinted secondary text |
 | `brand` | `#ff7ac0` | Logo and headline stickers, the selected state, the CTA on plum, pink numbers on plum, small brand fills (avatar, Remix disc), the reply-thread rule | Text on white (2.39:1); solid fills behind controls |
 | `brand-alt` | `#ff8a3d` | Hero blob, gradient end | Text |
-| `star` | `#e06414` | Filled rating stars (3.50:1 on white) | Anything else |
 | `sticker` | `#ffe14d` | The home hero's “New! Remix” starburst only (plum text) | Text, fills elsewhere |
 | `brand-soft` | `#ffe0ef` | Chips (EAT, 91% EAT) and review avatars | Surfaces holding controls |
 | `tint` | `#fff0f7` | Informational asides (Callout `aside`) and History’s current row | Controls, facts, batch rows, placeholders |
@@ -124,7 +123,7 @@ Recipes always render as written. `RecipeKitchenLink` in `packages/l7/kitchen` i
 
 ## Recipe ratings
 
-`RecipeRating` sits below the recipe: a SectionTitle (`title`, trailing rule), then the rating card, a white action `Surface` with the brand stripe, a Geller extrabold title (“Rate this recipe” / “Update your rating”), five native radio stars (filled `star`, empty plum outlines; 44px targets on phones), a light review Textarea, “Posting as <name>” and a full-width plum submit. The aggregate shows the average with `star` stars and a `brand-soft` “91% EAT” chip. Reviews use `brand-soft` initials avatars and EAT/YEET chips; replies sit behind a pink left rule. The inline reply form has a light Textarea and a plum Post Reply and no second stripe. Errors use `Callout tone="danger"`.
+`RecipeRating` sits below the recipe: a SectionTitle (`title`, trailing rule), then the rating card, a white action `Surface` with the brand stripe, a Geller extrabold title (“Rate this recipe” / “Update your rating”), five native radio stars (filled plum, empty plum outlines; 44px targets on phones), a light review Textarea, “Posting as <name>” and a full-width plum submit. The aggregate is a plum card: a large pink average, pink stars, the rating count and a pink “91% EAT” chip. Reviews show filled plum stars. Reviews use `brand-soft` initials avatars and EAT/YEET chips; replies sit behind a pink left rule. The inline reply form has a light Textarea and a plum Post Reply and no second stripe. Errors use `Callout tone="danger"`.
 
 Keyboard: Tab enters and leaves the star group, arrows change the score, Space selects; hover previews. Submission is explicit and disabled without a score or while loading or saving; save errors keep the draft; success is announced. Signed-out readers see the same striped card with a short explanation and a plum “Sign in to rate”, and each review offers “Sign in to reply”.
 
