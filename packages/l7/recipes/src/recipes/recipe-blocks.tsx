@@ -99,7 +99,7 @@ function TimedList({ section }: { section: Section }) {
   </>)
 }
 
-/** Numbered steps: the timeline's plum badges carrying the step number, with no connecting line (that marks time). */
+/** Numbered steps: a small "Step 1" eyebrow above each step, so order never looks like the timeline's badges. */
 function NumberedList({ section }: { section: Section }) {
   const steps = useContext(StepContext)
   return <ol className="m-0 grid list-none gap-2 p-0">
@@ -108,12 +108,12 @@ function NumberedList({ section }: { section: Section }) {
       const active = steps?.active === id
       const toggle = () => steps?.toggle(id)
       return <li key={id} data-step-state={active ? 'active' : steps?.done(id) ? 'done' : undefined} aria-current={active ? 'step' : undefined} onClick={stepRowClick(toggle)}
-        className={cn(stepRowClasses(active, Boolean(steps?.done(id))), 'grid grid-cols-[40px_minmax(0,1fr)] gap-3.5 text-base leading-[1.72]')}>
-        <button type="button" onClick={toggle} aria-pressed={active} aria-label={`Step ${index + 1}: mark as the step you're on`}
-          className={cn(STEP_BADGE, 'text-base', active ? 'bg-brand text-ink' : 'bg-ink text-brand')}>
-          {index + 1}
-        </button>
-        <Html as="span" html={item} className="min-w-0 pt-1.5" />
+        className={cn(stepRowClasses(active, Boolean(steps?.done(id))), 'block text-base leading-[1.72]')}>
+        <Eyebrow as="button" type="button" onClick={toggle} aria-pressed={active} aria-label={`Step ${index + 1}: mark as the step you're on`}
+          tone={active ? 'ink' : 'muted'} className="block focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink print:text-ink">
+          Step {index + 1}
+        </Eyebrow>
+        <Html as="span" html={item} className="block min-w-0" />
       </li>
     })}
   </ol>
