@@ -1,5 +1,5 @@
 'use client'
-import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { ArrowLeft, ArrowRight, Check, ChevronDown, Timer, X } from 'lucide-react'
 import type { RecipeBlock, Section } from '@eat-yeet/l4-content-model/blocks'
 import { cn } from '@eat-yeet/l0-foundation/utils'
@@ -45,15 +45,16 @@ function clock(ms: number) {
 const reducedMotion = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
 
 /**
- * Full-screen cook mode for phones and tablets: gather ingredients on a
+ * Full-screen cook mode for phones and tablets: an intro explains the two
+ * stages, then gather ingredients on a
  * checklist whose finished groups fold away (tap a folded group to reopen it),
  * then cook one step at a time with tap-to-start timers. Exit keeps your
  * place for this visit; finishing (Back to recipe) resets it. The page keeps the screen awake meanwhile.
  */
-export function CookMode({ title, blocks, open, onClose, onFinish, onClassic }: { title: string; blocks: RecipeBlock[]; open: boolean; onClose: () => void; onFinish?: () => void; onClassic?: () => void }) {
+export function CookMode({ title, blocks, open, onClose, onFinish, onClassic, media, facts }: { title: string; blocks: RecipeBlock[]; open: boolean; media?: ReactNode; facts?: string; onClose: () => void; onFinish?: () => void; onClassic?: () => void }) {
   const groups = useMemo(() => blocks.flatMap((block) => block.ingredients).filter((section) => section.items.length > 0), [blocks])
   const steps = useMemo<Step[]>(() => blocks.flatMap((block) => block.steps.flatMap((section) => section.items.map((html, index) => ({ id: `${section.id}:${section.itemIds[index] ?? index}`, html, section: section.title })))), [blocks])
-  const [stage, setStage] = useState<'gather' | 'cook' | 'done'>(groups.length ? 'gather' : 'cook')
+  const [stage, setStage] = useState<'intro' | 'gather' | 'cook' | 'done'>('intro')
   const [checked, setChecked] = useState<Set<string>>(() => new Set())
   const [folded, setFolded] = useState<Set<string>>(() => new Set())
   const [stepIndex, setStepIndex] = useState(0)
@@ -178,22 +179,41 @@ export function CookMode({ title, blocks, open, onClose, onFinish, onClassic }: 
     className="fixed inset-0 z-50 flex flex-col overflow-hidden bg-white text-ink outline-none print:hidden">
     <header className="flex items-center justify-between gap-4 px-5 pt-[max(env(safe-area-inset-top),16px)] md:px-10">
       <Eyebrow as="p" tone="ink" className="m-0 min-w-0 truncate">
-        {stage === 'gather' ? 'Gather' : stage === 'cook' ? `Step ${stepIndex + 1} of ${steps.length}${sectionTitle ? ` · ${sectionTitle}` : ''}` : 'Done'}
+        {stage === 'intro' ? '' : stage === 'gather' ? '1 of 2 · Gather' : stage === 'cook' ? `${groups.length ? '2 of 2 · ' : ''}Step ${stepIndex + 1} of ${steps.length}${sectionTitle ? ` · ${sectionTitle}` : ''}` : 'Done'}
       </Eyebrow>
       <div className="flex items-center gap-3">
-        {onClassic && <Button variant="link" size="xs" onClick={onClassic}>Classic view</Button>}
+        {onClassic && stage !== 'intro' && <Button variant="link" size="xs" onClick={onClassic}>Classic view</Button>}
         {stage === 'gather' && <span className="text-caption text-muted-foreground tabular-nums" aria-live="polite">{checkedCount} of {total}</span>}
         <Button variant="ghost" size="icon" aria-label="Exit cook mode" title="Exit cook mode" onClick={onClose}><X /></Button>
       </div>
     </header>
-    <div className="mx-5 mt-2 flex gap-1.5 md:mx-10" aria-hidden="true">
+    {stage !== 'intro' && <div className="mx-5 mt-2 flex gap-1.5 md:mx-10" aria-hidden="true">
       {stage === 'gather'
         ? <div className="h-1 flex-1 overflow-hidden rounded-control bg-muted"><div className="h-full rounded-control bg-brand transition-[width] duration-300" style={{ width: `${total ? (checkedCount / total) * 100 : 0}%` }} /></div>
         : steps.map((s, index) => <div key={s.id} className={cn('h-1 flex-1 rounded-control transition-colors', finished || index <= stepIndex ? 'bg-brand' : 'bg-muted')} />)}
-    </div>
+    </div>}
+
+    {stage === 'intro' && <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-5 pt-4 pb-[max(env(safe-area-inset-bottom),20px)] md:mx-auto md:w-full md:max-w-2xl md:px-10 landscape:md:max-w-none landscape:md:flex-row landscape:md:items-center landscape:md:gap-12">
+      {media && <div className="mb-6 shrink-0 overflow-hidden rounded-surface [&_img]:h-60 [&_img]:w-full [&_img]:object-cover md:[&_img]:h-80 landscape:md:mb-0 landscape:md:w-[45%]">{media}</div>}
+      <div className="flex flex-1 flex-col landscape:md:justify-center">
+        <Eyebrow as="p" tone="muted" className="m-0">{title} · Cook mode</Eyebrow>
+        <h2 className="mt-2 mb-6 font-display text-display leading-none">Let’s get cooking</h2>
+        <ol className="m-0 grid list-none gap-4 p-0">
+          {[groups.length > 0 && ['Gather', 'Lay out and measure every ingredient, checking each one off.'], ['Cook', 'Follow one step at a time, with timers when you need them.']].filter(Boolean).map((item, index) => {
+            const [name, text] = item as string[]
+            return <li key={name} className="flex gap-4"><span aria-hidden="true" className="grid size-8 shrink-0 place-items-center rounded-full bg-brand-soft font-bold">{index + 1}</span><span><strong className="block text-lg">{name}</strong><span className="text-muted-foreground">{text}</span></span></li>
+          })}
+        </ol>
+        <p className="mt-auto border-t border-border pt-4 text-body-sm text-muted-foreground landscape:md:mt-8">{[`${total} ingredients`, `${steps.length} steps`, facts].filter(Boolean).join(' · ')}</p>
+        <Button size="lg" className="mt-4 w-full" onClick={() => { haptic(); setStage(groups.length ? 'gather' : 'cook') }}>{groups.length ? 'Gather ingredients' : 'Start cooking'}<ArrowRight /></Button>
+        {onClassic && <Button variant="link" size="xs" className="mx-auto mt-4" onClick={onClassic}>Classic view</Button>}
+      </div>
+    </div>}
 
     {stage === 'gather' && <>
       <div ref={list} className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pt-4 pb-6 md:px-10">
+        <h2 className="m-0 font-display text-title leading-none">Gather your ingredients</h2>
+        <p className="mt-2 mb-6 text-muted-foreground">Measure everything out before you start. Check each item as it’s ready.</p>
         <div className="grid items-start gap-x-14 gap-y-4 md:grid-cols-2">
           {groups.map((section) => {
             const isFolded = folded.has(section.id)
