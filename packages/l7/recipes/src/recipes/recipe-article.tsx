@@ -103,11 +103,12 @@ export function RecipeArticle({
   const printPage = () => {
     window.print()
   }
-  // Phones and tablets open full-screen cook mode; it stays mounted after the
-  // first open so checks, the current step and timers survive closing it.
+  // Phones and tablets open full-screen cook mode. Exit hides it and keeps your
+  // place; finishing the recipe unmounts it so the next open starts fresh.
   const [cookSheet, setCookSheet] = useState<'closed' | 'open' | 'hidden'>('closed')
   const recipeBlocks = page.blocks.filter((block): block is RecipeBlock => block.type === 'recipe')
   const closeCookSheet = () => { setCookSheet('hidden'); setCookMode(false) }
+  const finishCookSheet = () => { setCookSheet('closed'); setCookMode(false) }
   const [touch, setTouch] = useState(false)
   useEffect(() => { setTouch(Boolean(recipeBlocks.length && window.matchMedia?.(COOK_MODE_QUERY).matches)) }, [recipeBlocks.length])
   const prefersClassic = () => { try { return localStorage.getItem(COOK_MODE_CLASSIC_KEY) === '1' } catch { return false } }
@@ -115,7 +116,7 @@ export function RecipeArticle({
   // Classic opt-out from inside cook mode: remembered in this browser.
   const chooseClassic = () => {
     try { localStorage.setItem(COOK_MODE_CLASSIC_KEY, '1') } catch { /* storage blocked: this visit only */ }
-    setCookSheet('hidden')
+    setCookSheet('closed')
     setFocusedCooking(true)
     setCookMode(true)
   }
@@ -221,7 +222,7 @@ export function RecipeArticle({
         'mt-0 max-w-none bg-white pt-0 pb-[38px] max-[640px]:pb-[30px]',
       )}
     />
-    {cookSheet !== 'closed' && <CookMode title={page.title} blocks={recipeBlocks} open={cookSheet === 'open'} onClose={closeCookSheet} onClassic={chooseClassic} />}
+    {cookSheet !== 'closed' && <CookMode title={page.title} blocks={recipeBlocks} open={cookSheet === 'open'} onClose={closeCookSheet} onFinish={finishCookSheet} onClassic={chooseClassic} />}
     {rating && <div className="mx-auto -mt-8 max-w-[1120px] px-7 pb-12 max-[640px]:px-[18px] print:hidden"><div className="max-w-[var(--layout-recipe-copy)]">{rating}</div></div>}
     </>
   )

@@ -47,10 +47,10 @@ const reducedMotion = () => typeof window !== 'undefined' && window.matchMedia?.
 /**
  * Full-screen cook mode for phones and tablets: gather ingredients on a
  * checklist whose finished groups fold away (tap a folded group to reopen it),
- * then cook one step at a time with tap-to-start timers. Checks, step and
- * timers last for this visit only. The page keeps the screen awake meanwhile.
+ * then cook one step at a time with tap-to-start timers. Exit keeps your
+ * place for this visit; finishing (Back to recipe) resets it. The page keeps the screen awake meanwhile.
  */
-export function CookMode({ title, blocks, open, onClose, onClassic }: { title: string; blocks: RecipeBlock[]; open: boolean; onClose: () => void; onClassic?: () => void }) {
+export function CookMode({ title, blocks, open, onClose, onFinish, onClassic }: { title: string; blocks: RecipeBlock[]; open: boolean; onClose: () => void; onFinish?: () => void; onClassic?: () => void }) {
   const groups = useMemo(() => blocks.flatMap((block) => block.ingredients).filter((section) => section.items.length > 0), [blocks])
   const steps = useMemo<Step[]>(() => blocks.flatMap((block) => block.steps.flatMap((section) => section.items.map((html, index) => ({ id: `${section.id}:${section.itemIds[index] ?? index}`, html, section: section.title })))), [blocks])
   const [stage, setStage] = useState<'gather' | 'cook' | 'done'>(groups.length ? 'gather' : 'cook')
@@ -270,7 +270,7 @@ export function CookMode({ title, blocks, open, onClose, onClassic }: { title: s
       <p className="m-0 text-lg">Enjoy your {title}.</p>
       <div className="flex gap-3">
         <Button variant="utility" size="lg" onClick={previous}><ArrowLeft />Back</Button>
-        <Button size="lg" onClick={onClose}>Back to recipe</Button>
+        <Button size="lg" onClick={onFinish ?? onClose}>Back to recipe</Button>
       </div>
     </div>}
   </div>
