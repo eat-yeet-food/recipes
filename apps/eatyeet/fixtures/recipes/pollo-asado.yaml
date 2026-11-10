@@ -47,9 +47,7 @@ blocks:
           - id: adobo-onion
             text: ½ medium onion (about 75g), finely minced
           - id: adobo-vinegar
-            text: 75g white vinegar
-          - id: ingredients-1-item-8
-            text: 2 tbsp white wine vinegar
+            text: 105g white wine vinegar
           - id: adobo-tomato-paste
             text: 5 oz (142g) tomato paste
           - id: ingredients-1-item-5
@@ -79,7 +77,7 @@ blocks:
             text: '**Soften the onion:** Sauté the onion in a spoonful of the oil for 3–4 minutes, until soft.'
           - id: adobo-combine
             text: >-
-              **Combine:** Add the chipotles, fresh water, both vinegars, tomato paste, the rest of the oil, and both
+              **Combine:** Add the chipotles, fresh water, the vinegar, tomato paste, the rest of the oil, and both
               salts.
           - id: adobo-simmer
             text: '**Simmer:** Cover and gently simmer 20–30 minutes, adding a tablespoon of water if needed.'
