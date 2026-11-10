@@ -6,8 +6,8 @@ order: 11
 description: 'Big, soft, chilled sugar cookies with a thick layer of pink almond frosting, inspired by the Crumbl classic.'
 category: sweet
 prepMinutes: 30
-cookMinutes: 15
-totalMinutes: 210
+cookMinutes: 14
+totalMinutes: 209
 yieldAmount: 8
 yieldUnit: large cookies
 image: classic-pink-sugar-cookies.jpg
@@ -94,7 +94,7 @@ blocks:
               Chill for 30–45 minutes.
           - id: bake
             text: >-
-              Bake for 13–15 minutes, until the edges are just set and the tops and bottoms are still pale. Pull them
+              Bake for 12–14 minutes, until the edges are just set and the tops and bottoms are still pale. Pull them
               when they look very slightly underbaked; the centers finish setting on the hot sheet. Cool on the baking sheet for 10 minutes, then move to a rack and cool completely.
         id: steps
       - title: Frosting and assembly
