@@ -1,0 +1,97 @@
+sourceId: 'recipes:classic-pink-sugar-cookies'
+status: published
+slug: classic-pink-sugar-cookies
+title: Classic Pink Sugar Cookies
+order: 18
+description: 'Big, soft, chilled sugar cookies with a thick layer of pink almond frosting, inspired by the Crumbl classic.'
+category: sweet
+prepMinutes: 25
+cookMinutes: 15
+totalMinutes: 160
+yieldAmount: 8
+yieldUnit: large cookies
+image: classic-pink-sugar-cookies.jpg
+courses:
+  - desserts
+cuisines:
+  - north_american
+methods:
+  - baking
+restrictions:
+  - vegetarian
+occasions:
+  - entertaining
+  - everyday
+ingredientTypes:
+  - flour
+  - fats_and_oils
+created: '2026-11-09'
+blocks:
+  - type: recipe
+    equipment: []
+    ingredients:
+      - title: Cookie dough
+        items:
+          - id: dough-flour
+            text: 410g all-purpose flour (about 3⅓ cups)
+          - id: dough-powdered-sugar
+            text: 170g powdered sugar (about 1½ cups)
+          - id: dough-granulated-sugar
+            text: 110g granulated sugar (½ cup + 1 tbsp)
+          - id: dough-butter
+            text: 115g unsalted butter, softened (½ cup)
+          - id: dough-oil
+            text: 125g canola oil (about ½ cup + 1 tbsp)
+          - id: dough-egg
+            text: 1 large egg
+          - id: dough-baking-soda
+            text: ½ tsp baking soda
+          - id: dough-cream-of-tartar
+            text: ½ tsp cream of tartar
+          - id: dough-salt
+            text: ⅓ tsp fine salt
+          - id: dough-almond
+            text: ⅛ tsp almond extract
+        id: dough
+      - title: Pink almond frosting
+        items:
+          - id: frosting-powdered-sugar
+            text: 275g powdered sugar (about 2¼ cups)
+          - id: frosting-butter
+            text: 60g unsalted butter, softened (4 tbsp)
+          - id: frosting-cream
+            text: 60g heavy cream (¼ cup)
+          - id: frosting-almond
+            text: ⅛ tsp almond extract
+          - id: frosting-color
+            text: A few drops pink food coloring
+        id: frosting
+    steps:
+      - title: ''
+        items:
+          - id: cream
+            text: Cream the butter, powdered sugar and granulated sugar until smooth, about 2 minutes.
+          - id: oil-egg
+            text: Slowly mix in the canola oil, followed by the egg and almond extract.
+          - id: dry
+            text: >-
+              Whisk the flour, baking soda, cream of tartar and salt in a separate bowl. Add to the wet ingredients and
+              mix just until combined.
+          - id: shape
+            text: Divide into 8 portions (about 135g each). Shape into thick disks, about 3½–4 inches wide.
+          - id: chill
+            text: Chill the dough for 30 minutes. Preheat the oven to 350°F (175°C).
+          - id: bake
+            text: >-
+              Bake on parchment-lined baking sheets for 11–15 minutes, until set but still pale. Cool completely.
+          - id: frosting
+            text: >-
+              Beat the frosting butter until creamy. Gradually add the powdered sugar, then the heavy cream, almond
+              extract and pink coloring. Beat until smooth.
+          - id: frost
+            text: Frost the cooled cookies generously. Refrigerate at least 1 hour before serving.
+        id: steps
+    notes:
+      - 'Estimated per cookie: 790 calories, 37g fat, 109g carbs, 69g sugar.'
+      - An experimental reverse-engineered recipe, not an official Crumbl formula.
+    tips: []
