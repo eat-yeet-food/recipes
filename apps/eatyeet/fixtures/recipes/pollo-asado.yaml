@@ -35,7 +35,7 @@ blocks:
             text: Blender
         id: equipment-1
     ingredients:
-      - title: Chipotles in adobo
+      - title: Marinade (makes enough for 2 batches)
         items:
           - id: adobo-chipotles
             text: 56g dried chipotle morita peppers (about 16)
@@ -47,53 +47,54 @@ blocks:
             text: ½ medium onion (about 75g), finely minced
           - id: adobo-vinegar
             text: 75g white vinegar
+          - id: ingredients-1-item-8
+            text: 2 tbsp white wine vinegar
           - id: adobo-tomato-paste
             text: 5 oz (142g) tomato paste
+          - id: ingredients-1-item-5
+            text: 120g rice bran oil (or any neutral oil)
           - id: adobo-salt
             text: 1 tsp kosher salt
-          - id: adobo-oil
-            text: 1 tsp neutral oil
+          - id: ingredients-1-item-6
+            text: 4g salt
         id: ingredients-adobo
       - title: Chicken
         items:
           - id: ingredients-1-item-1
-            text: '200g chipotles in adobo (from above, about a third of the batch), peppers and sauce'
-          - id: ingredients-1-item-8
-            text: 1 tbsp white wine vinegar
-          - id: ingredients-1-item-5
-            text: 60g rice bran oil (or any neutral oil)
-          - id: ingredients-1-item-6
-            text: '2g salt, plus more for dusting after grilling'
+            text: Half the marinade
           - id: ingredients-1-item-7
             text: 3 lb boneless skinless chicken thighs
+          - id: dusting-salt
+            text: Flaky or kosher salt, for dusting after grilling
         id: ingredients-1
     steps:
-      - title: Chipotles in adobo
+      - title: Marinade
         items:
           - id: adobo-soak
             text: '**Soak:** Cover the chipotles with boiling water and soak 30–45 minutes.'
           - id: adobo-drain
             text: '**Drain:** Drain, discard the soaking water, and remove the stems.'
           - id: adobo-onion-step
-            text: '**Soften the onion:** Sauté the onion in the oil for 3–4 minutes, until soft.'
+            text: '**Soften the onion:** Sauté the onion in a spoonful of the oil for 3–4 minutes, until soft.'
           - id: adobo-combine
-            text: '**Combine:** Add the chipotles, fresh water, vinegar, tomato paste, and salt.'
+            text: >-
+              **Combine:** Add the chipotles, fresh water, both vinegars, tomato paste, the rest of the oil, and both
+              salts.
           - id: adobo-simmer
             text: '**Simmer:** Cover and gently simmer 20–30 minutes, adding a tablespoon of water if needed.'
           - id: adobo-reduce
-            text: '**Reduce:** Simmer uncovered briefly until thick and saucy. Cool before blending the marinade.'
+            text: '**Reduce:** Simmer uncovered briefly until thick and saucy, then cool slightly.'
+          - id: steps-1-item-1
+            text: >-
+              **Blend:** Blend until smooth, about 30 seconds, scraping down as needed. The sauce should be thick,
+              smoky, and glossy. Set aside half for this batch and refrigerate or freeze the rest for the next one.
         id: steps-adobo
       - title: Chicken
         items:
-          - id: steps-1-item-1
-            text: >-
-              Blend the marinade: Add the chipotles in adobo, white wine vinegar, rice bran oil, and salt to
-              a blender. Blend until smooth, about 30 seconds, scraping down as needed. The sauce should be thick,
-              smoky, and glossy.
           - id: steps-1-item-2
             text: >-
-              Marinate the chicken: Place the chicken thighs in a zip-top bag or shallow dish. Pour the marinade over
-              and massage to coat every piece. Refrigerate overnight (8-24 hours).
+              Marinate the chicken: Place the chicken thighs in a zip-top bag or shallow dish. Pour half the marinade
+              over and massage to coat every piece. Refrigerate overnight (8-24 hours).
           - id: steps-1-item-3
             text: 'Bring to room temp: Pull the chicken from the fridge 20-30 minutes before cooking so it cooks evenly.'
           - id: steps-1-item-4
@@ -106,7 +107,6 @@ blocks:
               Rest, dust, and serve: Let the thighs rest 5 minutes, then dust with flaky or kosher salt while still hot
               so it sticks to the char. Slice and serve with rice, charred tortillas, slaw, or pickled onions.
         id: steps-1
-    notes:
-      - 'The chipotles in adobo make about 575g, about three 7 oz cans. Actual yield may vary.'
+    notes: []
     tips:
-      - 'Make the chipotles in adobo up to a week ahead. Refrigerate the extra promptly, or freeze it in portions for longer storage.'
+      - 'The saved half keeps up to a week in the fridge or a few months frozen. Next time, skip straight to marinating.'
