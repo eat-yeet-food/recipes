@@ -5,9 +5,9 @@ title: Classic Pink Sugar Cookies
 order: 11
 description: 'Big, soft, chilled sugar cookies with a thick layer of pink almond frosting, inspired by the Crumbl classic.'
 category: sweet
-prepMinutes: 25
+prepMinutes: 30
 cookMinutes: 15
-totalMinutes: 250
+totalMinutes: 210
 yieldAmount: 8
 yieldUnit: large cookies
 image: classic-pink-sugar-cookies.jpg
@@ -33,66 +33,94 @@ blocks:
       - title: Cookie dough
         items:
           - id: dough-flour
-            text: 425g all-purpose flour (about 3½ cups)
+            text: 390g all-purpose flour
           - id: dough-powdered-sugar
-            text: 180g powdered sugar (about 1½ cups)
+            text: 279g powdered sugar
           - id: dough-granulated-sugar
-            text: 116g granulated sugar (about ½ cup + 1½ tbsp)
+            text: 20g granulated sugar
           - id: dough-butter
-            text: 180g unsalted butter, softened (about ¾ cup + 1 tbsp)
+            text: 130g unsalted butter, softened
           - id: dough-oil
-            text: 65g canola oil (about ¼ cup + 1 tsp)
+            text: 53g canola oil
           - id: dough-egg
-            text: 45g beaten whole egg (slightly less than 1 large egg)
+            text: 45g beaten whole egg
+          - id: dough-salt
+            text: ½ tsp fine salt
           - id: dough-baking-soda
-            text: ½ tsp baking soda
+            text: ¼ tsp baking soda
           - id: dough-cream-of-tartar
             text: ½ tsp cream of tartar
-          - id: dough-salt
-            text: ⅓ tsp fine salt
           - id: dough-almond
             text: ⅛ tsp almond extract
         id: dough
-      - title: Pink almond frosting
+      - title: Pink almond-vanilla buttercream
         items:
-          - id: frosting-powdered-sugar
-            text: 276g powdered sugar (about 2¼ cups)
           - id: frosting-butter
-            text: 55g unsalted butter, softened (about 4 tbsp)
+            text: 138g unsalted butter (65–68°F)
+          - id: frosting-powdered-sugar
+            text: 276g powdered sugar, sifted
           - id: frosting-cream
-            text: 45g heavy cream (3 tbsp)
+            text: 18g heavy whipping cream (about 1 tbsp + ½ tsp)
+          - id: frosting-vanilla
+            text: 1¾ tsp pure vanilla extract
           - id: frosting-almond
             text: ⅛ tsp almond extract
+          - id: frosting-salt
+            text: Tiny pinch of fine sea salt
           - id: frosting-color
-            text: A few drops pink food coloring
+            text: Pink gel food coloring, as needed
         id: frosting
     steps:
-      - title: ''
+      - title: Cookies
         items:
+          - id: preheat
+            text: Preheat the oven to 350°F (175°C). Line two baking sheets with parchment paper.
           - id: cream
-            text: Cream the softened butter, powdered sugar and granulated sugar until smooth and fluffy, about 2 minutes.
+            text: >-
+              In a stand mixer fitted with the paddle attachment, beat the softened butter, powdered sugar and
+              granulated sugar on low-medium speed for 1–2 minutes, until smooth and creamy. Avoid whipping excess air
+              into the dough.
           - id: oil-egg
-            text: Slowly blend in the canola oil. Add the beaten egg and almond extract; mix until incorporated.
+            text: >-
+              Add the canola oil, beaten egg and almond extract. Mix on low until fully combined, scraping the bowl as
+              needed.
           - id: dry
             text: >-
-              In a separate bowl, whisk the flour, baking soda, cream of tartar and salt. Mix into the wet ingredients
-              just until a soft dough forms.
+              In a separate bowl, whisk together the flour, salt, baking soda and cream of tartar. Add to the wet
+              ingredients in two additions, mixing on low just until no dry flour remains.
           - id: shape
-            text: Divide into 8 equal portions (about 125g each). Shape into thick, flat disks, about 3½–4 inches wide.
-          - id: chill
-            text: Refrigerate the shaped dough for 2–4 hours (up to overnight). If it chilled longer than 4 hours, let it sit out for 10 minutes before baking. Preheat the oven to 350°F (175°C).
+            text: >-
+              Divide the dough into 8 equal portions, about 115g each. Shape into thick disks about 3½ inches wide.
+              Chill for 30–45 minutes.
           - id: bake
             text: >-
-              Bake on parchment-lined sheets for 11–15 minutes, until the tops look set but the cookies remain pale.
-              Cool completely.
-          - id: frosting
-            text: >-
-              For the frosting, beat the softened butter for 2–3 minutes until pale and creamy. Gradually add the
-              powdered sugar and beat for another 2–3 minutes until light and fluffy. Mix in the almond extract and pink
-              coloring, then finally beat in the heavy cream until smooth.
-          - id: frost
-            text: Spread the frosting generously over the cooled cookies. Chill at least 1 hour before serving.
+              Bake for 11–15 minutes, until the edges are set and the tops are pale. The centers should stay soft but
+              not raw. Cool on the baking sheet for 10 minutes, then move to a rack and cool completely.
         id: steps
+      - title: Frosting and assembly
+        items:
+          - id: whip-butter
+            text: >-
+              Fit a stand mixer with the paddle attachment and add the butter at 65–68°F. Start on low, then increase
+              to medium-high and whip for about 3 minutes until light, smooth and fluffy. Scrape down the sides and
+              bottom of the bowl.
+          - id: add-sugar
+            text: >-
+              Reduce the mixer to low. Add the sifted powdered sugar in three additions, mixing until incorporated
+              after each. Scrape down the bowl each time.
+          - id: flavor
+            text: >-
+              Add the heavy cream, vanilla, almond extract, salt and a small amount of pink gel coloring. Mix on low
+              until combined.
+          - id: final-whip
+            text: >-
+              Increase to high speed and whip for 1 minute until smooth, fluffy and fully combined. The frosting should
+              spread easily while holding a thick swirl.
+          - id: frost
+            text: >-
+              Once the cookies are completely cool, spread about 55g of frosting on each, leaving a narrow border
+              around the edges. Refrigerate the finished cookies for at least 1 hour before serving.
+        id: frosting-steps
     notes:
       - An experimental copycat, not an official Crumbl recipe.
     tips: []
