@@ -211,8 +211,8 @@ function RecipeBlockView({
 
       <div className="max-w-[var(--layout-recipe-copy)]">
         {block.equipment.length > 0 && (
-          <section className="mt-12">
-            <SectionTitle rule="top" className="pb-3">
+          <section className="mt-14">
+            <SectionTitle className="pb-3">
               Equipment
             </SectionTitle>
             <RecipeList sections={block.equipment} />
@@ -220,8 +220,8 @@ function RecipeBlockView({
         )}
 
         {(block.notes.length > 0 || block.tips.length > 0) && (
-          <section>
-            <SectionTitle rule="top" className="pb-3">
+          <section className="mt-14">
+            <SectionTitle className="pb-3">
               Notes
             </SectionTitle>
             <FlatList items={[...block.notes, ...block.tips]} />

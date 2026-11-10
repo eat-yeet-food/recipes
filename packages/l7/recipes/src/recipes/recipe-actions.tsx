@@ -4,6 +4,7 @@ import { cn } from '@eat-yeet/l0-foundation/utils'
 import { X } from 'lucide-react'
 
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
+import { COOK_MODE_QUERY } from './cook-mode'
 
 type RecipeActionProps = {
   variant: 'hero' | 'card'
@@ -77,10 +78,12 @@ export const COOKING_VIEW_HINT_KEY = 'eatyeet:hint:cooking-view'
  */
 export function CookingViewHint({ used }: { used: boolean }) {
   const [open, setOpen] = useState(false)
+  const [touch, setTouch] = useState(false)
   useEffect(() => {
     let unseen = false
     try { unseen = !localStorage.getItem(COOKING_VIEW_HINT_KEY) } catch { /* storage blocked: never show */ }
     if (!unseen) return
+    setTouch(Boolean(window.matchMedia?.(COOK_MODE_QUERY).matches))
     // Wait until the page has loaded and settled so the hint never competes
     // with the hero image for first paint (it cost ~400ms of mobile LCP).
     let timer: ReturnType<typeof setTimeout> | undefined
@@ -97,14 +100,19 @@ export function CookingViewHint({ used }: { used: boolean }) {
     try { localStorage.setItem(COOKING_VIEW_HINT_KEY, '1') } catch { /* ignore */ }
   }
   if (!open) return null
-  return <div
-    role="note"
-    data-cooking-view-hint=""
-    className="absolute right-0 top-full z-20 mt-3 w-64 rounded-surface bg-ink p-4 pr-10 text-left text-body-sm leading-snug text-white shadow-overlay before:absolute before:-top-2 before:right-4 before:size-4 before:rotate-45 before:bg-ink"
-  >
-    <p className="m-0 font-action font-bold">Cooking view</p>
-    <p className="m-0 mt-1">Keeps your screen awake and trims the page to the recipe while you cook.</p>
-    <Button variant="link" className="mt-2 text-on-dark-label" onClick={dismiss}>Got it</Button>
-    <button type="button" aria-label="Dismiss hint" onClick={dismiss} className="absolute right-1 top-1 flex size-11 items-center justify-center text-on-dark-label hover:text-white"><X className="size-4" /></button>
-  </div>
+  // Floating hints are always a white card with a pointer, so they read as
+  // floating on plum, white or photos alike; a ring marks the button they explain.
+  return <>
+    <span aria-hidden="true" data-cooking-view-hint-ring="" className="pointer-events-none absolute right-0 top-0 size-11 rounded-full ring-[3px] ring-brand ring-offset-[3px] ring-offset-ink" />
+    <div
+      role="note"
+      data-cooking-view-hint=""
+      className="absolute right-0 top-full z-20 mt-4 w-72 max-w-[calc(100vw-36px)] rounded-surface bg-white p-6 text-left text-body-sm leading-snug text-ink shadow-overlay before:absolute before:-top-1.5 before:right-4 before:size-3.5 before:rotate-45 before:rounded-[2px] before:bg-white"
+    >
+      <p className="m-0 pr-7 font-action text-base font-bold">{touch ? 'Cook mode' : 'Cooking view'}</p>
+      <p className="m-0 mt-1.5">{touch ? 'Check off your ingredients, then cook one step at a time. Keeps your screen awake.' : 'Keeps your screen awake and trims the page to the recipe while you cook.'}</p>
+      <Button variant="link" className="mt-3.5" onClick={dismiss}>Got it</Button>
+      <button type="button" aria-label="Dismiss hint" onClick={dismiss} className="absolute right-2.5 top-2.5 flex size-11 items-center justify-center text-muted-foreground hover:text-ink control-focus"><X className="size-4" /></button>
+    </div>
+  </>
 }

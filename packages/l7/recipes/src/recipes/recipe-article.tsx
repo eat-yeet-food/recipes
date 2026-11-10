@@ -72,7 +72,7 @@ export function RecipeArticleHeader({
       </div>
       {page.description && <p className="max-w-[var(--layout-recipe-copy)] m-0 text-base leading-[1.625] text-on-dark-label print:text-ink">{page.description}</p>}
       <RecipeFacts items={recipeFactItems(page)} tone="on-dark" className="mt-6" />
-      {stepByStep && <Button variant="quiet-on-dark" className="mt-5 mb-2 print:hidden" onClick={stepByStep}>Switch to step-by-step cook mode</Button>}
+      {stepByStep && <Button variant="quiet-on-dark" className="mt-5 print:hidden" onClick={stepByStep}>Switch to step-by-step cook mode</Button>}
     </div>
   )
 }
@@ -201,7 +201,7 @@ export function RecipeArticle({
           ? 'bg-[linear-gradient(var(--color-ink)_calc(100%-min(32vw,300px)),transparent_0)]'
           : 'bg-ink',
       )}
-      headerClassName={cn(focusedCooking && 'pb-0 max-[640px]:pb-0', 'print:block print:px-0 print:pt-0 print:pb-6')}
+      headerClassName={cn(focusedCooking && 'pb-10 max-[640px]:pb-8', 'print:block print:px-0 print:pt-0 print:pb-6')}
       header={(
         <RecipeArticleHeader
           page={page}
@@ -216,7 +216,7 @@ export function RecipeArticle({
       mediaClassName={focusedCooking ? 'hidden' : undefined}
       mainClassName={cn(
         'pt-8 max-[640px]:pt-6',
-        focusedCooking && 'pt-3 max-[640px]:pt-3',
+        focusedCooking && 'pt-10 max-[640px]:pt-8',
       )}
       articleClassName={cn(
         'mt-0 max-w-none bg-white pt-0 pb-[38px] max-[640px]:pb-[30px]',
