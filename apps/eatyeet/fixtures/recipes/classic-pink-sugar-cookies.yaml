@@ -7,7 +7,7 @@ description: 'Big, soft, chilled sugar cookies with a thick layer of pink almond
 category: sweet
 prepMinutes: 25
 cookMinutes: 15
-totalMinutes: 160
+totalMinutes: 250
 yieldAmount: 8
 yieldUnit: large cookies
 image: classic-pink-sugar-cookies.jpg
@@ -80,15 +80,16 @@ blocks:
           - id: shape
             text: Divide into 8 equal portions (about 125g each). Shape into thick, flat disks, about 3½–4 inches wide.
           - id: chill
-            text: Refrigerate the shaped dough for 30 minutes. Preheat the oven to 350°F (175°C).
+            text: Refrigerate the shaped dough for 2–4 hours (up to overnight). If it chilled longer than 4 hours, let it sit out for 10 minutes before baking. Preheat the oven to 350°F (175°C).
           - id: bake
             text: >-
               Bake on parchment-lined sheets for 11–15 minutes, until the tops look set but the cookies remain pale.
               Cool completely.
           - id: frosting
             text: >-
-              For the frosting, beat the softened butter until creamy. Gradually beat in the powdered sugar, heavy
-              cream, almond extract and pink coloring until smooth.
+              For the frosting, beat the softened butter for 2–3 minutes until pale and creamy. Gradually add the
+              powdered sugar and beat for another 2–3 minutes until light and fluffy. Mix in the almond extract and pink
+              coloring, then finally beat in the heavy cream until smooth.
           - id: frost
             text: Spread the frosting generously over the cooled cookies. Chill at least 1 hour before serving.
         id: steps
