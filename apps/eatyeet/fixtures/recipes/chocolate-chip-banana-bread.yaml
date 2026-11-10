@@ -28,7 +28,7 @@ ingredientTypes:
   - eggs
   - milk
   - fats_and_oils
-created: '2026-06-21'
+created: '2026-03-11'
 blocks:
   - type: recipe
     equipment: []

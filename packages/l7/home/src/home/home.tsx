@@ -23,12 +23,6 @@ const WHATS_NEW_SIZE = 6
 export const newestRecipes = (recipes: RecipeSummary[], count = WHATS_NEW_SIZE) =>
   [...recipes].sort((a, b) => b.created.localeCompare(a.created) || a.title.localeCompare(b.title)).slice(0, count)
 
-const shortDate = (iso: string) => new Date(`${iso.slice(0, 10)}T12:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })
-
-/** "Added Nov 9" over the photo. */
-export function AddedBadge({ created }: { created: string }) {
-  return <Eyebrow as="span" size="small" className="block rounded-full bg-brand px-2.5 py-1.5 leading-none">Added {shortDate(created)}</Eyebrow>
-}
 
 /** Copy required by the home hero and catalog sections. */
 type WordmarkCopy = {
@@ -165,7 +159,7 @@ export function HomePage({
         <SectionHeading eyebrow={home.eyebrow} title={home.latestTitle} />
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {newestRecipes(latestRecipes).map((recipe) => (
-            <RecipeCard key={recipe.slug} recipe={recipe} badge={recipe.created ? <AddedBadge created={recipe.created} /> : undefined} />
+            <RecipeCard key={recipe.slug} recipe={recipe} />
           ))}
         </div>
         <ViewAll to="/search" label="View all recipes" className="mt-10" />

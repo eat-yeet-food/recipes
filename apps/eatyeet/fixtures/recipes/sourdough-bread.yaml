@@ -21,7 +21,7 @@ restrictions: []
 occasions:
   - everyday
 ingredientTypes: []
-created: '2025-02-10'
+created: '2025-08-24'
 defaultMethod: dutch-oven
 methodOptions:
   - id: dutch-oven
