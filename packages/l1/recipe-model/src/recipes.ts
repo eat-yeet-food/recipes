@@ -10,6 +10,10 @@ export interface RecipeMethodSummary {
   prepMinutes: number | null
   cookMinutes: number | null
   totalMinutes: number | null
+  /** Optional authored text shown instead of the formatted minutes, e.g. "Overnight". */
+  prepLabel?: string
+  cookLabel?: string
+  totalLabel?: string
   yieldAmount: number | string | null
   yieldUnit: string
 }
@@ -32,6 +36,10 @@ export interface RecipeSummary {
   prepMinutes: number | null
   cookMinutes: number | null
   totalMinutes: number | null
+  /** Optional authored text shown instead of the formatted minutes, e.g. "Overnight". */
+  prepLabel?: string
+  cookLabel?: string
+  totalLabel?: string
   yieldAmount: number | string | null
   yieldUnit: string
   image: string

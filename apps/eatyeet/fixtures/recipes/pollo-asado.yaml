@@ -5,9 +5,10 @@ title: Pollo Asado
 order: 1
 description: 'Juicy, smoky pollo asado with charred edges and a bold, savory finish.'
 category: savory
-prepMinutes: 75
-cookMinutes: 50
-totalMinutes: 605
+prepMinutes: 30
+cookMinutes: 40
+totalMinutes: 600
+totalLabel: Overnight
 yieldAmount: 4
 yieldUnit: servings
 image: pollo-asado.jpg

@@ -106,7 +106,7 @@ export function CatalogCard({ to, params, image, imageAlt = '', priority = false
 
 /** Recipe summary card. */
 export function RecipeCard({ recipe, headingLevel = 3, priority = false }: { recipe: RecipeSummary; headingLevel?: 2 | 3; priority?:boolean }) {
-  const totalTime = humanizeMinutes(recipe.totalMinutes)
+  const totalTime = recipe.totalLabel || humanizeMinutes(recipe.totalMinutes)
   const yields = formatYield(recipe.yieldAmount, recipe.yieldUnit)
   return (
     <CatalogCard

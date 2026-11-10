@@ -5,9 +5,9 @@ title: Vanilla Cupcakes
 order: 12
 description: 'Tender vanilla cupcakes with a soft, even crumb and rich bakery-style flavor.'
 category: sweet
-prepMinutes: 22
+prepMinutes: 20
 cookMinutes: 20
-totalMinutes: 72
+totalMinutes: 75
 yieldAmount: 12
 yieldUnit: cupcakes
 image: vanilla-cupcakes.jpg

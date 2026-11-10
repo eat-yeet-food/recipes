@@ -5,9 +5,10 @@ title: Vanilla Bean Ice Cream
 order: 14
 description: 'Dense, ultra-creamy ice cream packed with real vanilla bean.'
 category: sweet
-prepMinutes: 15
+prepMinutes: 20
 cookMinutes: 15
 totalMinutes: 555
+totalLabel: Overnight
 yieldAmount: 1
 yieldUnit: quart
 image: vanilla-bean-ice-cream.jpg

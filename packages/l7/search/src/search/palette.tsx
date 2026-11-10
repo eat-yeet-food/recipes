@@ -146,7 +146,7 @@ export function SearchPalette({
           {hits.length > 0 && (
             <CommandGroup>
               {hits.map((recipe) => {
-                const time = humanizeMinutes(recipe.totalMinutes)
+                const time = recipe.totalLabel || humanizeMinutes(recipe.totalMinutes)
                 const kind = recipe.category ? labelize(recipe.category) : ''
                 return (
                   <CommandItem

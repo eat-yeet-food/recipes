@@ -6,8 +6,8 @@ order: 3
 description: 'Creamy, deeply cheesy macaroni beneath a crisp, golden breadcrumb crust.'
 category: savory
 prepMinutes: 25
-cookMinutes: 12
-totalMinutes: 40
+cookMinutes: 30
+totalMinutes: 45
 yieldAmount: 4
 yieldUnit: servings
 image: classic-baked-mac-and-cheese.jpg

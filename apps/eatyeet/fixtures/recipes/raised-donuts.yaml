@@ -5,8 +5,8 @@ title: Raised Donuts
 order: 16
 description: 'Pillowy golden donuts with a delicate chew and a thin, glossy glaze.'
 category: sweet
-prepMinutes: 120
-cookMinutes: 120
+prepMinutes: 60
+cookMinutes: 30
 totalMinutes: 240
 yieldAmount: 12
 yieldUnit: donuts

@@ -150,7 +150,8 @@ export function resolveWorkbenchRecipe(recipe: RecipeContent, selection: DoughWo
       learning: selected.learning?.mixing ? { ...selected.learning, mixing: { ...selected.learning.mixing, defaultMethod: process.mixingMethod } } : selected.learning,
     } : {}),
     ...(pizzaProcess ? {
-      ...(['prepMinutes', 'totalMinutes'] as const).reduce((times, key) => ({ ...times, [key]: selected[key] === null ? null : Math.max(0, selected[key]! + pizzaMinutes(pizzaProcess) - pizzaMinutes(config.defaultSelection.formula.pizzaProcess ?? DEFAULT_PIZZA_PROCESS)) }), {}),
+      // Fermentation is waiting, not active time: only the total follows the process.
+      totalMinutes: selected.totalMinutes === null ? null : Math.max(0, selected.totalMinutes + pizzaMinutes(pizzaProcess) - pizzaMinutes(config.defaultSelection.formula.pizzaProcess ?? DEFAULT_PIZZA_PROCESS)),
       learning: selected.learning?.mixing && pizzaProcess.mixingMethod !== 'food-processor' ? { ...selected.learning, mixing: { ...selected.learning.mixing, defaultMethod: pizzaProcess.mixingMethod } } : selected.learning,
     } : {}),
     yieldAmount: selection.batch.count,

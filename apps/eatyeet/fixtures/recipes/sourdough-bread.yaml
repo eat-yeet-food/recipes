@@ -6,7 +6,7 @@ order: 5
 description: 'Crackling, deeply browned loaves with an open crumb, gentle tang, and satisfying chew.'
 category: savory
 prepMinutes: 60
-cookMinutes: 39
+cookMinutes: 40
 totalMinutes: 1899
 yieldAmount: 2
 yieldUnit: loaves
@@ -28,7 +28,7 @@ methodOptions:
     label: Dutch Oven
     description: 'Crackling, deeply browned loaves with an open crumb, gentle tang, and satisfying chew.'
     prepMinutes: 60
-    cookMinutes: 39
+    cookMinutes: 40
     totalMinutes: 1899
     yieldAmount: 2
     yieldUnit: loaves

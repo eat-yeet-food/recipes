@@ -5,9 +5,9 @@ title: New York Style Pizza
 order: 4
 description: 'A crisp, foldable New York-style pizza with a chewy crust, bright tomato sauce, and bubbling cheese.'
 category: savory
-prepMinutes: 4680
-cookMinutes: 6
-totalMinutes: 4686
+prepMinutes: 45
+cookMinutes: 20
+totalMinutes: 4320
 yieldAmount: 3
 yieldUnit: 16-inch pizzas
 image: charred-crust-pizza.jpg
@@ -111,17 +111,17 @@ methodOptions:
   - id: outdoor-oven
     label: Outdoor Oven
     description: 'A crisp, foldable New York-style pizza with a blistered, chewy crust and bubbling cheese.'
-    prepMinutes: 4680
-    cookMinutes: 6
-    totalMinutes: 4686
+    prepMinutes: 45
+    cookMinutes: 20
+    totalMinutes: 4320
     yieldAmount: 3
     yieldUnit: 16-inch pizzas
   - id: indoor-steel
     label: Indoor Steel
     description: 'A crisp, foldable New York-style pizza with a deeply browned crust and bubbling cheese, adapted for a home oven.'
-    prepMinutes: 4680
-    cookMinutes: 7
-    totalMinutes: 4687
+    prepMinutes: 45
+    cookMinutes: 25
+    totalMinutes: 4320
     yieldAmount: 3
     yieldUnit: 16-inch pizzas
     blocks:

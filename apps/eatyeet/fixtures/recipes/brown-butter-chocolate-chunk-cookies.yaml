@@ -5,9 +5,9 @@ title: Brown Butter Chocolate Chunk Cookies
 order: 10
 description: 'Big bakery-style cookies with crisp edges, rippled centers, and pools of chocolate.'
 category: sweet
-prepMinutes: 20
-cookMinutes: 254
-totalMinutes: 274
+prepMinutes: 25
+cookMinutes: 20
+totalMinutes: 300
 yieldAmount: 14
 yieldUnit: cookies
 image: brown-butter-chocolate-chip-cookies.jpg

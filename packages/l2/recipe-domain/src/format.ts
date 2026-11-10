@@ -15,16 +15,21 @@ export function labelize(value: string): string {
     .join(' ')
 }
 
-/** Minutes are kept even when days are present. */
+/**
+ * Display times: a day or more shows whole days; shorter times round to the nearest 5 minutes.
+ * Times under 5 minutes stay exact so short steps never read as zero.
+ */
 export function humanizeMinutes(minutes: number | null | undefined): string {
   if (minutes == null || minutes <= 0) return ''
-  const days = Math.floor(minutes / 1440)
-  const hrs = Math.floor((minutes % 1440) / 60)
-  const mins = minutes % 60
-
+  if (minutes >= 1440) {
+    const days = Math.round(minutes / 1440)
+    return days === 1 ? '1 day' : `${days} days`
+  }
+  const rounded = minutes < 5 ? minutes : Math.round(minutes / 5) * 5
+  const hrs = Math.floor(rounded / 60)
+  const mins = rounded % 60
   const parts: string[] = []
-  if (days > 0) parts.push(days === 1 ? '1 day' : `${days} days`)
-  if (hrs > 0) parts.push(hrs === 1 ? '1 hr' : `${hrs} hr`)
+  if (hrs > 0) parts.push(`${hrs} hr`)
   if (mins > 0) parts.push(`${mins} min`)
   return parts.join(' ')
 }

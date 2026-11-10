@@ -113,6 +113,9 @@ export const timingFields = {
   prepMinutes: number,
   cookMinutes: number,
   totalMinutes: number,
+  prepLabel: { ...text, label: 'Active time display text' } as Shape,
+  cookLabel: { ...text, label: 'Cook time display text' } as Shape,
+  totalLabel: { ...text, label: 'Total time display text' } as Shape,
   yieldAmount: { kind: 'amount', label: 'Yield amount' } as Shape,
   yieldUnit: text,
 }
