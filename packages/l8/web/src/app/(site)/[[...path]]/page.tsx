@@ -66,7 +66,7 @@ export default async function Page({
       <HomePage
         copy={copy}
         categories={site.categories}
-        latestRecipes={recipes.slice(0, 6)}
+        latestRecipes={recipes}
       />
     )
   if (path === '/recipes')

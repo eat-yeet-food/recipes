@@ -21,8 +21,8 @@ copy:
     motto: 'Eat the best, yeet the rest'
     cta: Let’s eat
   home:
-    eyebrow: Top Eats
-    latestTitle: Latest Recipes
+    eyebrow: Fresh from the kitchen
+    latestTitle: What’s New
     browseEyebrow: Explore
     browseTitle: Browse by Category
   pages:

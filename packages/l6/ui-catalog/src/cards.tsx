@@ -53,7 +53,7 @@ const CardFallback = ({ icon = 'recipe' }: { icon?: 'recipe' | 'article' }) => (
  * placeholder), an optional eyebrow, a Geller title, body and an optional meta
  * row under a rule. Recipe, article and Notebook formula cards all use it.
  */
-export function CatalogCard({ to, params, image, imageAlt = '', priority = false, fallbackIcon = 'recipe', eyebrow, title, headingLevel = 3, description, children, meta, className, ...data }: {
+export function CatalogCard({ to, params, image, imageAlt = '', priority = false, fallbackIcon = 'recipe', eyebrow, badge, title, headingLevel = 3, description, children, meta, className, ...data }: {
   to: string
   params?: Record<string, string>
   image?: string | null
@@ -61,6 +61,8 @@ export function CatalogCard({ to, params, image, imageAlt = '', priority = false
   priority?: boolean
   fallbackIcon?: 'recipe' | 'article'
   eyebrow?: ReactNode
+  /** A small tag over the photo's top-left corner. */
+  badge?: ReactNode
   title: ReactNode
   headingLevel?: 2 | 3
   description?: ReactNode
@@ -72,6 +74,7 @@ export function CatalogCard({ to, params, image, imageAlt = '', priority = false
   return (
     <Link to={to} params={params} className={cn(CATALOG_CARD_LINK_CLASS, className)} {...data}>
       <div className="relative aspect-[3/2] w-full overflow-hidden">
+        {badge && <span className="absolute top-3 left-3 z-[1]">{badge}</span>}
         {image ? (
           <div className="absolute inset-0 bg-muted">
             <ResponsiveImage
@@ -105,7 +108,7 @@ export function CatalogCard({ to, params, image, imageAlt = '', priority = false
 }
 
 /** Recipe summary card. */
-export function RecipeCard({ recipe, headingLevel = 3, priority = false }: { recipe: RecipeSummary; headingLevel?: 2 | 3; priority?:boolean }) {
+export function RecipeCard({ recipe, headingLevel = 3, priority = false, badge }: { recipe: RecipeSummary; headingLevel?: 2 | 3; priority?:boolean; badge?: ReactNode }) {
   const totalTime = humanizeMinutes(recipe.totalMinutes)
   const yields = formatYield(recipe.yieldAmount, recipe.yieldUnit)
   return (
@@ -115,6 +118,7 @@ export function RecipeCard({ recipe, headingLevel = 3, priority = false }: { rec
       image={imageUrl(recipe)}
       imageAlt={recipe.title}
       priority={priority}
+      badge={badge}
       title={recipe.title}
       headingLevel={headingLevel}
       description={recipe.description}

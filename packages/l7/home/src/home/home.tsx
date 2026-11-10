@@ -17,7 +17,18 @@ import { BrowseCard, RecipeCard, SectionHeading } from '@eat-yeet/l6-ui-catalog/
 import type { FacetKey, SearchParams } from '@eat-yeet/l2-recipe-domain/search'
 import type { RecipeSummary } from '@eat-yeet/l1-recipe-model/recipes'
 
-const MAX_SECTION_SIZE = 6
+const WHATS_NEW_SIZE = 6
+
+/** The newest recipes, by the authored published date. */
+export const newestRecipes = (recipes: RecipeSummary[], count = WHATS_NEW_SIZE) =>
+  [...recipes].sort((a, b) => b.created.localeCompare(a.created) || a.title.localeCompare(b.title)).slice(0, count)
+
+const shortDate = (iso: string) => new Date(`${iso.slice(0, 10)}T12:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })
+
+/** "Added Nov 9" over the photo. */
+export function AddedBadge({ created }: { created: string }) {
+  return <Eyebrow as="span" size="small" className="block rounded-full bg-brand px-2.5 py-1.5 leading-none">Added {shortDate(created)}</Eyebrow>
+}
 
 /** Copy required by the home hero and catalog sections. */
 type WordmarkCopy = {
@@ -140,6 +151,7 @@ export function HomePage({
 }: {
   copy: HomeCopy
   categories: Category[]
+  /** Every published recipe; the section shows the newest few. */
   latestRecipes: RecipeSummary[]
 }) {
   const featured = categories.filter((c) => c.featured)
@@ -152,8 +164,8 @@ export function HomePage({
       <section className="mx-auto max-w-[var(--max-width)] px-8 pb-8 pt-20">
         <SectionHeading eyebrow={home.eyebrow} title={home.latestTitle} />
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {latestRecipes.slice(0, MAX_SECTION_SIZE).map((recipe) => (
-            <RecipeCard key={recipe.slug} recipe={recipe} />
+          {newestRecipes(latestRecipes).map((recipe) => (
+            <RecipeCard key={recipe.slug} recipe={recipe} badge={recipe.created ? <AddedBadge created={recipe.created} /> : undefined} />
           ))}
         </div>
         <ViewAll to="/search" label="View all recipes" className="mt-10" />

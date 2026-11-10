@@ -17,9 +17,13 @@ export const parseRecipe = (source, fallbackSlug) => parse(source, fallbackSlug,
 export const parseArticle = (source, fallbackSlug) => parse(source, fallbackSlug, normalizeArticle)
 
 function loadCollection(dir, parseContent, collection) {
-  const records = readdirSync(dir).filter((file) => /\.ya?ml$/.test(file)).sort().map((file) => {
+  // Generated fixtures mirror the public site: draft and archived sources stay out.
+  const records = readdirSync(dir).filter((file) => /\.ya?ml$/.test(file)).sort().flatMap((file) => {
     try {
-      return parseContent(readFileSync(join(dir, file), 'utf8'), file.replace(/\.ya?ml$/, ''))
+      const source = readFileSync(join(dir, file), 'utf8')
+      const status = yaml.safeLoad(source)?.status
+      if (status !== undefined && status !== 'published') return []
+      return [parseContent(source, file.replace(/\.ya?ml$/, ''))]
     } catch (error) {
       throw new Error(`${join(dir, file)}: ${error.message}`, { cause: error })
     }
