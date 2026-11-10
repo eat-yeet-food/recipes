@@ -26,8 +26,8 @@ const errors = []
 
 const check = (name, ok, detail = '') => results.push({ name, ok: !!ok, detail: ok ? '' : detail })
 
-async function newPage(viewport = { width: 1440, height: 1000 }) {
-  const page = await browser.newPage({ viewport, deviceScaleFactor: viewport.width < 700 ? 2 : 1 })
+async function newPage(viewport = { width: 1440, height: 1000 }, touch = false) {
+  const page = await browser.newPage({ viewport, deviceScaleFactor: viewport.width < 700 ? 2 : 1, ...(touch ? { hasTouch: true, isMobile: true } : {}) })
   // Members see their Notebook versions beside the recipe.
   await signIn(page.context(), BASE)
   page.on('pageerror', (e) => errors.push(e.message))
@@ -166,6 +166,52 @@ check('a marked step is forgotten when you come back', await phone.locator('[ari
 await phone.emulateMedia({ media: 'print' })
 check('print shows ingredients on plain white', await phone.locator('[data-ingredients-card]').evaluate((el) => getComputedStyle(el).backgroundColor === 'rgb(255, 255, 255)'))
 await phone.close()
+
+// Cook mode: touch phones and tablets open a full-screen gather-then-cook flow from the chef's hat.
+for (const [device, viewport] of [['phone', { width: 390, height: 844 }], ['tablet', { width: 1180, height: 820 }]]) {
+  const cook = await newPage(viewport, true)
+  await cook.goto(`${BASE}/recipes/classic-pink-sugar-cookies`, { waitUntil: 'networkidle' })
+  await cook.waitForFunction(() => { const el = document.querySelector('[data-recipe-action="Cooking view"]'); return el && Object.keys(el).some((key) => key.startsWith('__reactProps')) })
+  await cook.getByRole('button', { name: 'Cooking view' }).click()
+  const sheet = cook.getByRole('dialog', { name: /Cook mode/ })
+  check(`${device}: the chef's hat opens cook mode on gather`, await sheet.isVisible() && await sheet.getAttribute('data-cook-stage') === 'gather')
+  const group = sheet.locator('[data-cook-group]').first()
+  const items = group.getByRole('checkbox')
+  const count = await items.count()
+  for (let i = 0; i < count; i++) await items.nth(i).click()
+  check(`${device}: checking an item marks it`, await items.first().getAttribute('aria-checked') === 'true')
+  await items.first().click()
+  await cook.waitForTimeout(1300)
+  check(`${device}: unchecking within the pause keeps a group open`, await group.getByRole('checkbox').count() === count)
+  await items.first().click()
+  await cook.waitForTimeout(1300)
+  const header = group.getByRole('button', { expanded: false })
+  check(`${device}: a finished group folds away`, await header.count() === 1 && await group.getByRole('checkbox').count() === 0)
+  await header.click()
+  check(`${device}: tapping a folded group reopens it with checks kept`, await group.getByRole('checkbox').count() === count && await group.getByRole('checkbox', { checked: true }).count() === count)
+  const fits = await sheet.evaluate((el) => el.scrollWidth <= innerWidth && el.getBoundingClientRect().height <= innerHeight)
+  check(`${device}: cook mode fits the screen`, fits)
+  await sheet.getByRole('button', { name: /Start cooking/ }).click()
+  check(`${device}: Start cooking shows the first step`, await sheet.getAttribute('data-cook-stage') === 'cook' && /Step 1 of/.test(await sheet.locator('header').textContent()))
+  await sheet.getByRole('button', { name: 'Next' }).click()
+  check(`${device}: Next advances a step`, /Step 2 of/.test(await sheet.locator('header').textContent()))
+  let timer = sheet.getByRole('button', { name: /^Start .* timer$/ })
+  while (!(await timer.count())) { await sheet.getByRole('button', { name: 'Next' }).click(); timer = sheet.getByRole('button', { name: /^Start .* timer$/ }) }
+  await timer.first().click()
+  check(`${device}: a step time starts a docked timer`, await sheet.getByRole('list', { name: 'Timers' }).getByRole('button').count() === 1)
+  await sheet.getByRole('button', { name: 'Exit cook mode' }).click()
+  check(`${device}: Exit returns to the recipe`, !(await sheet.isVisible()))
+  await cook.getByRole('button', { name: 'Cooking view' }).click()
+  check(`${device}: reopening resumes the step and timers`, await sheet.getAttribute('data-cook-stage') === 'cook' && await sheet.getByRole('list', { name: 'Timers' }).count() === 1)
+  await sheet.getByRole('button', { name: 'Classic view' }).click()
+  check(`${device}: Classic view opts out to the focused page`, !(await sheet.isVisible()) && await cook.locator('[data-focused-cooking="true"]').count() === 1)
+  await cook.getByRole('button', { name: 'Cooking view' }).click()
+  await cook.getByRole('button', { name: 'Cooking view' }).click()
+  check(`${device}: the opt-out is remembered`, !(await sheet.isVisible()) && await cook.locator('[data-focused-cooking="true"]').count() === 1)
+  await cook.getByRole('button', { name: 'Switch to step-by-step cook mode' }).click()
+  check(`${device}: classic view switches back to step-by-step`, await sheet.isVisible() && await cook.evaluate(() => localStorage.getItem('eatyeet:cook-mode:classic')) === null)
+  await cook.close()
+}
 
 await browser.close()
 await server.close()

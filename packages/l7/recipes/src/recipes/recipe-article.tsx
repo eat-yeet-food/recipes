@@ -10,7 +10,10 @@ import { imageUrl } from '@eat-yeet/l1-recipe-model/recipes'
 import { ContentPageArticle } from '@eat-yeet/l6-ui-content-blocks/page-article'
 import type { PageBlockRegistry } from '@eat-yeet/l6-ui-content-blocks/page-blocks'
 import type { RecipeContent } from '@eat-yeet/l4-content-model/recipes'
+import type { RecipeBlock } from '@eat-yeet/l4-content-model/blocks'
 import { RecipeAction, RecipeIconAction, CookingViewHint } from './recipe-actions'
+import { CookMode, COOK_MODE_QUERY, COOK_MODE_CLASSIC_KEY } from './cook-mode'
+import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
 import type { RecipePageBlockContext } from './recipe-blocks'
 import { RecipeFacts, recipeFactItems, type RecipeFactsSource } from './recipe-facts'
 
@@ -42,12 +45,15 @@ export function RecipeArticleHeader({
   printPage,
   focusedCooking,
   toggleFocusedCooking,
+  stepByStep,
 }: {
   page: Pick<RecipeContent, 'title' | 'description'> & RecipeFactsSource
   heading?: RecipeArticleHeading
   printPage: () => void
   focusedCooking: boolean
   toggleFocusedCooking: () => void
+  /** On touch devices using the classic Cooking view: switches back to step-by-step cook mode. */
+  stepByStep?: () => void
 }) {
   const crumbs = heading?.crumbs ?? [{ label: 'Home', href: '/' }, { label: 'Recipes', href: '/recipes' }, { label: page.title }]
   return (
@@ -66,6 +72,7 @@ export function RecipeArticleHeader({
       </div>
       {page.description && <p className="max-w-[var(--layout-recipe-copy)] m-0 text-base leading-[1.625] text-on-dark-label print:text-ink">{page.description}</p>}
       <RecipeFacts items={recipeFactItems(page)} tone="on-dark" className="mt-6" />
+      {stepByStep && <Button variant="quiet-on-dark" className="mt-5 mb-2 print:hidden" onClick={stepByStep}>Switch to step-by-step cook mode</Button>}
     </div>
   )
 }
@@ -96,7 +103,31 @@ export function RecipeArticle({
   const printPage = () => {
     window.print()
   }
+  // Phones and tablets open full-screen cook mode; it stays mounted after the
+  // first open so checks, the current step and timers survive closing it.
+  const [cookSheet, setCookSheet] = useState<'closed' | 'open' | 'hidden'>('closed')
+  const recipeBlocks = page.blocks.filter((block): block is RecipeBlock => block.type === 'recipe')
+  const closeCookSheet = () => { setCookSheet('hidden'); setCookMode(false) }
+  const [touch, setTouch] = useState(false)
+  useEffect(() => { setTouch(Boolean(recipeBlocks.length && window.matchMedia?.(COOK_MODE_QUERY).matches)) }, [recipeBlocks.length])
+  const prefersClassic = () => { try { return localStorage.getItem(COOK_MODE_CLASSIC_KEY) === '1' } catch { return false } }
+  const openCookSheet = () => { setFocusedCooking(false); setCookSheet('open'); setCookMode(true) }
+  // Classic opt-out from inside cook mode: remembered in this browser.
+  const chooseClassic = () => {
+    try { localStorage.setItem(COOK_MODE_CLASSIC_KEY, '1') } catch { /* storage blocked: this visit only */ }
+    setCookSheet('hidden')
+    setFocusedCooking(true)
+    setCookMode(true)
+  }
+  const chooseStepByStep = () => {
+    try { localStorage.removeItem(COOK_MODE_CLASSIC_KEY) } catch { /* ignore */ }
+    openCookSheet()
+  }
   const toggleFocusedCooking = () => {
+    if (touch && !focusedCooking && !prefersClassic()) {
+      openCookSheet()
+      return
+    }
     setFocusedCooking((active) => {
       setCookMode(!active)
       return !active
@@ -177,6 +208,7 @@ export function RecipeArticle({
           printPage={printPage}
           focusedCooking={focusedCooking}
           toggleFocusedCooking={toggleFocusedCooking}
+          stepByStep={touch && focusedCooking ? chooseStepByStep : undefined}
         />
       )}
       media={photo ? <ResponsiveImage src={photo} sizes="(max-width: 640px) calc(100vw - 36px), (max-width: 1120px) calc(100vw - 56px), 1064px" loading="eager" fetchPriority="high" alt={heroAlt} className="w-full max-h-[690px] rounded-surface object-cover shadow-overlay print:shadow-none" /> : undefined}
@@ -189,6 +221,7 @@ export function RecipeArticle({
         'mt-0 max-w-none bg-white pt-0 pb-[38px] max-[640px]:pb-[30px]',
       )}
     />
+    {cookSheet !== 'closed' && <CookMode title={page.title} blocks={recipeBlocks} open={cookSheet === 'open'} onClose={closeCookSheet} onClassic={chooseClassic} />}
     {rating && <div className="mx-auto -mt-8 max-w-[1120px] px-7 pb-12 max-[640px]:px-[18px] print:hidden"><div className="max-w-[var(--layout-recipe-copy)]">{rating}</div></div>}
     </>
   )
