@@ -193,7 +193,7 @@ function RecipeBlockView({
 
       <div className="lg:grid lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)] lg:items-start lg:gap-14">
         {block.ingredients.length > 0 && (
-          <section data-ingredients-card="" className="rounded-surface bg-ink p-5 text-on-dark-label md:p-6 lg:sticky lg:top-24 lg:max-h-[calc(100dvh-7rem)] lg:overflow-y-auto print:static print:max-h-none print:rounded-none print:bg-white print:p-0 print:text-ink">
+          <section data-ingredients-card="" className="rounded-surface bg-ink p-5 text-on-dark-label md:p-6 print:rounded-none print:bg-white print:p-0 print:text-ink">
             <SectionTitle className="pb-1 text-white print:text-ink">Ingredients</SectionTitle>
             <RecipeList sections={block.ingredients} tone="on-dark" />
           </section>
