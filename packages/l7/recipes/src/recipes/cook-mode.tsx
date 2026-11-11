@@ -179,13 +179,9 @@ export function CookMode({ title, blocks, open, onClose, onFinish, onClassic, me
     className="fixed inset-0 z-50 flex flex-col overflow-hidden bg-white text-ink outline-none print:hidden">
     <header className="flex items-center justify-between gap-4 px-5 pt-[max(env(safe-area-inset-top),16px)] md:px-10">
       <Eyebrow as="p" tone="ink" className="m-0 min-w-0 truncate">
-        {stage === 'intro' ? '' : stage === 'gather' ? '1 of 2 · Gather' : stage === 'cook' ? `${groups.length ? '2 of 2 · ' : ''}Step ${stepIndex + 1} of ${steps.length}${sectionTitle ? ` · ${sectionTitle}` : ''}` : 'Done'}
+        {stage === 'gather' ? <>Gather · <span className="tabular-nums" aria-live="polite">{checkedCount} of {total}</span></> : stage === 'cook' ? `Step ${stepIndex + 1} of ${steps.length}` : stage === 'done' ? 'Done' : ''}
       </Eyebrow>
-      <div className="flex items-center gap-3">
-        {onClassic && stage !== 'intro' && <Button variant="link" size="xs" onClick={onClassic}>Classic view</Button>}
-        {stage === 'gather' && <span className="text-caption text-muted-foreground tabular-nums" aria-live="polite">{checkedCount} of {total}</span>}
-        <Button variant="ghost" size="icon" aria-label="Exit cook mode" title="Exit cook mode" onClick={onClose}><X /></Button>
-      </div>
+      <Button variant="ghost" size="icon" aria-label="Exit cook mode" title="Exit cook mode" onClick={onClose}><X /></Button>
     </header>
     {stage !== 'intro' && <div className="mx-5 mt-2 flex gap-1.5 md:mx-10" aria-hidden="true">
       {stage === 'gather'
@@ -248,14 +244,16 @@ export function CookMode({ title, blocks, open, onClose, onFinish, onClassic, me
         </div>
         {allFolded && <p className="mt-6 text-lg font-semibold">Everything’s ready.</p>}
       </div>
-      <footer className="flex justify-end px-5 pt-3 pb-[max(env(safe-area-inset-bottom),20px)] md:px-10">
+      <footer className="flex flex-col items-stretch gap-4 px-5 pt-3 pb-[max(env(safe-area-inset-bottom),20px)] md:items-end md:px-10">
         <Button size="lg" className="w-full md:w-auto" onClick={() => { haptic(); setStage('cook') }}>Start cooking<ArrowRight /></Button>
+        {onClassic && <Button variant="link" size="xs" className="self-center md:self-end" onClick={onClassic}>Classic view</Button>}
       </footer>
     </>}
 
     {stage === 'cook' && step && <>
       <div className="flex min-h-0 flex-1 gap-10 px-5 pt-6 md:px-10 landscape:md:pt-8" onPointerDown={onPointerDown} onPointerUp={onPointerUp} data-cook-step={step.id}>
         <div className="min-h-0 flex-1 overflow-y-auto">
+          {sectionTitle && <Eyebrow as="p" tone="muted" className="mb-2.5">{sectionTitle}</Eyebrow>}
           <Html html={step.html} className="block text-title-sm leading-snug font-semibold md:text-section [&_strong]:font-bold" />
           {stepTimers(step.html).length > 0 && <div className="mt-6 flex flex-wrap gap-3">
             {stepTimers(step.html).map((timer) => <Button key={timer.label} variant="utility" onClick={() => startTimer(timer.label, timer.minutes)}><Timer />Start {timer.label} timer</Button>)}

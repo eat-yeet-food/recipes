@@ -177,7 +177,7 @@ for (const [device, viewport] of [['phone', { width: 390, height: 844 }], ['tabl
   check(`${device}: the chef's hat opens cook mode on the intro`, await sheet.isVisible() && await sheet.getAttribute('data-cook-stage') === 'intro' && await sheet.getByRole('heading', { name: /get cooking/ }).count() === 1)
   check(`${device}: the intro fits the screen`, await sheet.evaluate((el) => el.scrollWidth <= innerWidth && el.getBoundingClientRect().height <= innerHeight))
   await sheet.getByRole('button', { name: /Gather ingredients/ }).click()
-  check(`${device}: Gather ingredients opens the checklist`, await sheet.getAttribute('data-cook-stage') === 'gather' && await sheet.getByRole('heading', { name: 'Gather your ingredients' }).count() === 1 && /1 of 2/.test(await sheet.locator('header').textContent()))
+  check(`${device}: Gather ingredients opens the checklist`, await sheet.getAttribute('data-cook-stage') === 'gather' && await sheet.getByRole('heading', { name: 'Gather your ingredients' }).count() === 1 && /Gather · 0 of \d+/.test(await sheet.locator('header').textContent()))
   const group = sheet.locator('[data-cook-group]').first()
   const items = group.getByRole('checkbox')
   const count = await items.count()
@@ -198,6 +198,7 @@ for (const [device, viewport] of [['phone', { width: 390, height: 844 }], ['tabl
   check(`${device}: Start cooking shows the first step`, await sheet.getAttribute('data-cook-stage') === 'cook' && /Step 1 of/.test(await sheet.locator('header').textContent()))
   await sheet.getByRole('button', { name: 'Next' }).click()
   check(`${device}: Next advances a step`, /Step 2 of/.test(await sheet.locator('header').textContent()))
+  check(`${device}: the step label fits without truncation`, await sheet.locator('header p').evaluate((el) => el.scrollWidth <= el.clientWidth) && await sheet.locator('header').getByRole('button', { name: 'Classic view' }).count() === 0)
   let timer = sheet.getByRole('button', { name: /^Start .* timer$/ })
   while (!(await timer.count())) { await sheet.getByRole('button', { name: 'Next' }).click(); timer = sheet.getByRole('button', { name: /^Start .* timer$/ }) }
   await timer.first().click()
