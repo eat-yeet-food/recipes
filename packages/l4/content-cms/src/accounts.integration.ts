@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import type { Payload } from 'payload'
-import { createSession, upsertGoogleMember } from './members'
+import { createHash, randomBytes } from 'node:crypto'
+import { createNativeGrant, createSession, upsertGoogleMember } from './members'
 
 /**
  * Exercises the member account API against the running app. Google itself is
@@ -37,6 +38,36 @@ export async function verifyAccounts(payload: Payload, origin: string, slug: str
   assert.equal((await upsertGoogleMember(payload, { sub: 'g-alice', email: 'changed@example.com', emailVerified: true, name: 'X' }))?.id, alice.id)
   const bob = (await upsertGoogleMember(payload, { sub: 'g-bob', email: 'bob@example.com', emailVerified: true, name: 'Bob Builder' }))!
   const aliceCookie = await session(alice.id)
+
+  // iPhone app sign-in: a malformed native request is refused before Google is involved.
+  assert.equal((await call('/google?client=ios&challenge=short')).status, 400)
+  assert.equal((await call('/google?client=android&challenge=' + 'a'.repeat(43))).status, 400)
+  // The one-time grant: bound to the PKCE challenge, single use even after a wrong verifier, then a bearer session.
+  const verifier = randomBytes(48).toString('base64url')
+  const challenge = createHash('sha256').update(verifier).digest('base64url')
+  const redeem = (code: string, v: string, extra: Record<string, string> = {}) => fetch(`${api}/native/token`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json', ...extra }, body: JSON.stringify({ code, verifier: v }) })
+  const wrong = await createNativeGrant(payload, alice.id, challenge)
+  assert.equal((await redeem(wrong, randomBytes(48).toString('base64url'))).status, 401)
+  assert.equal((await redeem(wrong, verifier)).status, 401, 'a code is gone after any attempt')
+  const code = await createNativeGrant(payload, alice.id, challenge)
+  const issued = await redeem(code, verifier)
+  assert.equal(issued.status, 200)
+  assert.match(issued.headers.get('cache-control')!, /no-store/)
+  assert.equal(issued.headers.get('set-cookie'), null, 'the app gets a token, never a cookie')
+  const { token } = await issued.json() as { token: string }
+  assert.equal((await redeem(code, verifier)).status, 401, 'a code works once')
+  const bearer = (path: string, method = 'GET') => fetch(api + path, { method, headers: { Authorization: `Bearer ${token}` } })
+  assert.equal(((await (await bearer('/session')).json()) as any).member?.id, alice.id)
+  // Bearer requests carry no Origin and still pass; signing out revokes the token.
+  assert.equal((await bearer('/session', 'DELETE')).status, 200)
+  assert.equal(((await (await bearer('/session')).json()) as any).member, null)
+  // A cookie plus a bearer is a browser request: the same-origin check applies.
+  assert.equal((await fetch(`${api}/sessions`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}`, Cookie: aliceCookie, Origin: 'https://evil.example' } })).status, 403)
+  // Expired grants are refused.
+  const stale = await createNativeGrant(payload, alice.id, challenge)
+  await payload.db.updateMany({ collection: 'member-native-grants', where: {}, data: { expiresAt: new Date(Date.now() - 1000).toISOString() } } as any)
+  assert.equal((await redeem(stale, verifier)).status, 401)
   const bobCookie = await session(bob.id)
 
   const aliceSession = await json(await call('/session', 'GET', undefined, aliceCookie))

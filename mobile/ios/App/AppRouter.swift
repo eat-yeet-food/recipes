@@ -10,6 +10,7 @@ final class AppRouter {
     enum Route: Hashable {
         case recipe(slug: String, cooking: Bool = false)
         case catalog(category: HomeCategory? = nil, search: Bool = false)
+        case account
         case remix(id: String)
     }
 
@@ -27,6 +28,7 @@ final class AppRouter {
         switch link {
         case .home: path = []
         case .catalog: path = [.catalog()]
+        case .account: path = [.account]
         case .dev: path = []; showDevMenu = true
         case .recipe(let slug): path = [.recipe(slug: slug)]
         case .cook(let slug, _): path = [.recipe(slug: slug, cooking: true)]

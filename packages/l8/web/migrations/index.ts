@@ -11,6 +11,7 @@ import * as migration_20261104_202227_sourdough_bench_minutes from './20261104_2
 import * as migration_20261105_123019_sourdough_preshape_and_shape from './20261105_123019_sourdough_preshape_and_shape';
 import * as migration_20261110_133831_recipe_time_labels from './20261110_133831_recipe_time_labels';
 import * as migration_20261111_010506_recipe_step_uses from './20261111_010506_recipe_step_uses';
+import * as migration_20261111_173221_member_native_grants from './20261111_173221_member_native_grants';
 
 export const migrations = [
   {
@@ -76,6 +77,11 @@ export const migrations = [
   {
     up: migration_20261111_010506_recipe_step_uses.up,
     down: migration_20261111_010506_recipe_step_uses.down,
-    name: '20261111_010506_recipe_step_uses'
+    name: '20261111_010506_recipe_step_uses',
+  },
+  {
+    up: migration_20261111_173221_member_native_grants.up,
+    down: migration_20261111_173221_member_native_grants.down,
+    name: '20261111_173221_member_native_grants'
   },
 ];

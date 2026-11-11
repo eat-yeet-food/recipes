@@ -17,7 +17,19 @@ export const reply = (body: unknown, status = 200) => NextResponse.json(body, {
 export const failure = (error: string, status: number) => reply({ error }, status)
 const secure = () => runtimeSettings().origin.startsWith('https:')
 
+/**
+ * The iPhone app sends its session as `Authorization: Bearer`. Browsers never attach
+ * that header on their own (and cross-site scripts can't without a CORS preflight,
+ * which these routes never grant), so a bearer-only request needs no same-origin check.
+ * Requests that also carry the cookie are treated as browser requests.
+ */
+const bearer = (request: NextRequest) => {
+  const match = request.headers.get('authorization')?.match(/^Bearer ([A-Za-z0-9_-]{43})$/)
+  return match && !request.cookies.has(SESSION_COOKIE) ? match[1] : undefined
+}
+
 export function sameOrigin(request: NextRequest) {
+  if (bearer(request)) return true
   return request.headers.get('origin') === runtimeSettings().origin && request.headers.get('sec-fetch-site') !== 'cross-site'
 }
 
@@ -50,7 +62,7 @@ export async function rateLimited(request: NextRequest, action: string) {
   return !(await limiter.limit({ key: `${action}:${client}` })).success
 }
 
-export const sessionToken = (request: NextRequest) => request.cookies.get(SESSION_COOKIE)?.value
+export const sessionToken = (request: NextRequest) => request.cookies.get(SESSION_COOKIE)?.value ?? bearer(request)
 export async function currentMember(request: NextRequest): Promise<Member | null> {
   const token = sessionToken(request)
   return token ? sessionMember(await cms(), token) : null
@@ -75,7 +87,8 @@ export function safeReturnTo(value: unknown) {
 }
 
 const base64url = (bytes: Buffer) => bytes.toString('base64url')
-export function googleAuthorization(returnTo: string) {
+/** `native` carries the iPhone app's PKCE challenge; the callback then hands the app a one-time grant instead of a cookie. */
+export function googleAuthorization(returnTo: string, native?: { challenge: string }) {
   const google = googleSettings()
   if (!google) return null
   const state = base64url(randomBytes(24))
@@ -93,7 +106,7 @@ export function googleAuthorization(returnTo: string) {
     prompt: 'select_account',
   }).toString()
   const response = NextResponse.redirect(url, { headers: { 'Cache-Control': 'private, no-store' } })
-  response.cookies.set(OAUTH_COOKIE, JSON.stringify({ state, verifier, returnTo }), { httpOnly: true, secure: secure(),
+  response.cookies.set(OAUTH_COOKIE, JSON.stringify({ state, verifier, returnTo, ...(native ? { native: native.challenge } : {}) }), { httpOnly: true, secure: secure(),
     sameSite: 'lax', path: OAUTH_PATH, maxAge: 600 })
   return response
 }
@@ -101,7 +114,10 @@ export function googleAuthorization(returnTo: string) {
 export function readOAuthCookie(request: NextRequest) {
   try {
     const value = JSON.parse(request.cookies.get(OAUTH_COOKIE)?.value ?? '')
-    if (typeof value.state === 'string' && typeof value.verifier === 'string') return { state: value.state as string, verifier: value.verifier as string, returnTo: safeReturnTo(value.returnTo) }
+    if (typeof value.state === 'string' && typeof value.verifier === 'string') return {
+      state: value.state as string, verifier: value.verifier as string, returnTo: safeReturnTo(value.returnTo),
+      native: typeof value.native === 'string' ? value.native as string : undefined,
+    }
   } catch {}
   return null
 }
@@ -134,4 +150,11 @@ export async function googleProfile(code: string, verifier: string) {
 
 export function redirectTo(path: string) {
   return NextResponse.redirect(new URL(path, runtimeSettings().origin), { status: 303, headers: { 'Cache-Control': 'private, no-store' } })
+}
+
+/** The app's fixed callback. Hard-coded (never taken from the request), so this cannot become an open redirect. */
+export const NATIVE_CALLBACK = 'eatyeet://auth'
+export function nativeRedirect(params: Record<string, string>) {
+  return new NextResponse(null, { status: 303, headers: {
+    Location: `${NATIVE_CALLBACK}?${new URLSearchParams(params)}`, 'Cache-Control': 'private, no-store' } })
 }

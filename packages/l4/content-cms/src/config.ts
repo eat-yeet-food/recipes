@@ -13,7 +13,7 @@ import { contentDetails, authoredField } from './authored-fields'
 import { seoShape } from '@eat-yeet/l4-content-model/field-shapes'
 import { r2Storage, type R2StorageOptions } from '@payloadcms/storage-r2'
 import { ratingRepliesCollection, ratingsCollection, retiredRatingCollections } from './ratings'
-import { memberSessionsCollection, membersCollection, memberWorkbenchesCollection } from './members'
+import { memberNativeGrantsCollection, memberSessionsCollection, membersCollection, memberWorkbenchesCollection } from './members'
 import { kitchenFormulasCollection, kitchenRevisionsCollection } from './kitchen'
 
 export const deny: Access = () => false
@@ -190,6 +190,7 @@ export function createCMSConfig(
       contentCollection('recipes'),
       membersCollection,
       memberSessionsCollection,
+      memberNativeGrantsCollection,
       memberWorkbenchesCollection,
       kitchenFormulasCollection,
       kitchenRevisionsCollection,

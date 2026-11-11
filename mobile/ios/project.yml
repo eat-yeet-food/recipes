@@ -80,6 +80,8 @@ targets:
         product: Recipe
       - package: Features
         product: FeatureSupport
+      - package: Features
+        product: Account
   EatYeetTests:
     type: bundle.unit-test
     platform: iOS

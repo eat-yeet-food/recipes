@@ -4,6 +4,7 @@ import Foundation
 public enum DeepLink: Equatable, Sendable {
     case home
     case catalog
+    case account
     case recipe(slug: String)
     case cook(slug: String, step: Int)
     case remix(id: String)
@@ -17,6 +18,10 @@ public enum DeepLink: Equatable, Sendable {
             self = .home
         case 1 where parts[0] == "recipes" || parts[0] == "search":
             self = .catalog
+        case 1 where parts[0] == "account":
+            self = .account
+        case 2 where parts[0] == "account":
+            self = .account
         case 1 where parts[0] == "remix":
             self = .remix(id: "")
         case 1 where parts[0] == "dev":

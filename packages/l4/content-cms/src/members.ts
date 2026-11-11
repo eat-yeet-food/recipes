@@ -53,6 +53,58 @@ export const memberSessionsCollection: CollectionConfig = {
   ],
 }
 
+/**
+ * One-time sign-in grants for the iPhone app. The Google callback stores one,
+ * bound to the app's PKCE challenge, and hands the app only the code; the app
+ * trades code + verifier for an ordinary revocable session within a minute.
+ */
+export const memberNativeGrantsCollection: CollectionConfig = {
+  slug: 'member-native-grants',
+  admin: { hidden: true },
+  endpoints: false,
+  access: { create: memberPermitted, read: memberPermitted, update: memberPermitted, delete: memberPermitted },
+  fields: [
+    { name: 'codeHash', type: 'text', required: true, unique: true },
+    { name: 'challenge', type: 'text', required: true },
+    { name: 'member', type: 'relationship', relationTo: 'members', required: true, index: true },
+    { name: 'expiresAt', type: 'date', required: true },
+  ],
+}
+
+export const NATIVE_GRANT_SECONDS = 60
+const tokenPattern = /^[A-Za-z0-9_-]{43}$/
+export const validChallenge = (value: unknown): value is string => typeof value === 'string' && tokenPattern.test(value)
+
+export async function createNativeGrant(payload: Payload, memberId: string | number, challenge: string) {
+  if (!validChallenge(challenge)) throw new Error('invalid challenge')
+  const code = randomBytes(32).toString('base64url')
+  await payload.create({ collection: 'member-native-grants', ...options,
+    data: { codeHash: hashToken(code), challenge, member: memberRef(memberId), expiresAt: new Date(Date.now() + NATIVE_GRANT_SECONDS * 1000).toISOString() } })
+  return code
+}
+
+/**
+ * Consume a grant: it is deleted before anything else, so a code works at most
+ * once even when the verifier is wrong. Returns a new session for the grant's member.
+ */
+export async function redeemNativeGrant(payload: Payload, code: unknown, verifier: unknown) {
+  if (typeof code !== 'string' || !tokenPattern.test(code) || typeof verifier !== 'string' || !/^[A-Za-z0-9._~-]{43,128}$/.test(verifier)) return null
+  const deleted = await payload.delete({ collection: 'member-native-grants', ...options, where: { codeHash: { equals: hashToken(code) } } })
+  const grant = deleted.docs?.[0] as any
+  if (!grant || deleted.docs.length !== 1 || deleted.errors?.length) return null
+  if (Date.parse(grant.expiresAt) <= Date.now()) return null
+  const challenge = createHash('sha256').update(verifier).digest('base64url')
+  if (challenge !== grant.challenge) return null
+  const member = await rawMember(payload, { id: { equals: grant.member } })
+  if (!member || member._verified === false) return null
+  return createSession(payload, grant.member)
+}
+
+/** Expired grants that were never redeemed; removed on the next sign-in. */
+export async function purgeExpiredNativeGrants(payload: Payload) {
+  await payload.delete({ collection: 'member-native-grants', ...options, where: { expiresAt: { less_than: new Date().toISOString() } } })
+}
+
 // Retired with the recipe-page calculator: Notebook formulas replaced the
 // saved-formula store. Declared so the schema stays additive; account deletion
 // still clears any rows written by the earlier release.
@@ -178,5 +230,6 @@ export async function deleteMember(payload: Payload, memberId: string) {
   await deleteMemberKitchen(payload, memberId)
   await payload.delete({ collection: 'member-workbenches', ...options, where: { member: { equals: id } } })
   await payload.delete({ collection: 'member-sessions', ...options, where: { member: { equals: id } } })
+  await payload.delete({ collection: 'member-native-grants', ...options, where: { member: { equals: id } } })
   await payload.delete({ collection: 'members', ...options, id })
 }

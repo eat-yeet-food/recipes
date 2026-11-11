@@ -12,6 +12,8 @@ public enum HomeDestination {
     case catalog(HomeCategory?)
     case search
     case path(String)
+    case account
+    case signOut
 }
 
 /// The site's home page: the plum hero over the donut photo, What's New and Browse by Category.
@@ -80,6 +82,7 @@ public struct HomeScreen: View {
 
 /// The site header as a native bar: the wordmark, then search and the menu.
 struct SiteNavBar: ToolbarContent {
+    @Environment(AccountStore.self) private var account
     let home: Components.Schemas.Home?
     let go: (HomeDestination) -> Void
 
@@ -95,6 +98,15 @@ struct SiteNavBar: ToolbarContent {
             Menu {
                 ForEach(home?.navigation ?? [], id: \.href) { link in
                     Button(link.label) { go(.path(link.href)) }
+                }
+                // The site's phone menu account rows: Sign in, or Settings and Sign out.
+                Section(account.member?.displayName ?? "") {
+                    if account.member == nil {
+                        Button("Sign in") { go(.account) }
+                    } else {
+                        Button("Settings") { go(.account) }
+                        Button("Sign out") { go(.signOut) }
+                    }
                 }
             } label: { SiteIcon.menu.image }
                 .accessibilityLabel("Open menu")

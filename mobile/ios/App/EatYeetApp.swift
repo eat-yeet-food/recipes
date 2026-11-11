@@ -1,3 +1,4 @@
+import Account
 import Catalog
 import EatYeetAPI
 import FeatureSupport
@@ -14,12 +15,14 @@ struct EatYeetApp: App {
     @State private var overrides = DevOverrides()
     @State private var router = AppRouter()
     @State private var store: RecipeStore
+    @State private var account: AccountStore
 
     init() {
         MetricsStore.shared.start()
         let environment = AppEnvironment()
         _environment = State(initialValue: environment)
         _store = State(initialValue: RecipeStore(backend: environment.backend))
+        _account = State(initialValue: AccountStore(backend: environment.backend))
     }
 
     var body: some Scene {
@@ -42,7 +45,9 @@ struct EatYeetApp: App {
                 .environment(overrides)
                 .environment(router)
                 .environment(store)
-                .onChange(of: environment.backend) { _, backend in store.use(backend) }
+                .environment(account)
+                .task { await account.refresh() }
+                .onChange(of: environment.backend) { _, backend in store.use(backend); account.use(backend) }
         }
     }
 }
@@ -56,6 +61,7 @@ private struct DynamicTypeOverride: ViewModifier {
 
 struct RootView: View {
     @Environment(AppRouter.self) private var router
+    @Environment(AccountStore.self) private var account
     @Namespace private var zoom
 
     var body: some View {
@@ -67,6 +73,8 @@ struct RootView: View {
                 case .catalog(let category): router.path.append(.catalog(category: category))
                 case .search: router.path.append(.catalog(search: true))
                 case .path(let href): router.open(href)
+                case .account: router.path.append(.account)
+                case .signOut: Task { await account.signOut() }
                 }
             }
                 .navigationDestination(for: AppRouter.Route.self, destination: destination)
@@ -85,6 +93,8 @@ struct RootView: View {
             CatalogScreen(category: category, search: search, zoom: zoom) { router.path.append(.recipe(slug: $0)) }
                 .navigationTitle(category?.label ?? "")
                 .navigationBarTitleDisplayMode(.inline)
+        case .account:
+            AccountScreen()
         case .remix(let id):
             PendingScreen(title: "Remix", detail: "\(id) — milestone 6")
         }
