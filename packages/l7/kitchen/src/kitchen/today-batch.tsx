@@ -26,7 +26,7 @@ export function useTodayCount(usual: number, initial?: number) {
   return [count, change] as const
 }
 
-/** "Making 6 pizzas today" with a stepper. Changes only this bake, never a saved formula. */
+/** "Makes 6 pizzas" with a stepper. Changes only this bake, never a saved formula. */
 export function TodayBatch({ count, noun, plural, note, onChange }: {
   count: number
   /** Noun for the current count, e.g. "pizza" or "pizzas". */
@@ -37,9 +37,9 @@ export function TodayBatch({ count, noun, plural, note, onChange }: {
 }) {
   return <div data-today-batch="" className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-field border border-border bg-white px-4 py-3">
     <div className="grid">
-      <p className="font-action text-body-sm font-bold">Making {count} {noun} today</p>
+      <p className="font-action text-body-sm font-bold">Makes {count} {noun}</p>
       {note ? <p className="text-caption leading-snug text-muted-foreground">{note}</p> : null}
     </div>
-    <div className="print:hidden"><CountStepper label={`How many ${plural} today`} unit={plural} value={count} onChange={onChange} /></div>
+    <div className="print:hidden"><CountStepper label={`How many ${plural}`} unit={plural} value={count} onChange={onChange} /></div>
   </div>
 }

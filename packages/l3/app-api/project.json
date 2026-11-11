@@ -1,0 +1,18 @@
+{
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "name": "l3-app-api",
+  "projectType": "library",
+  "sourceRoot": "src",
+  "tags": ["layer:l3", "scope:api", "type:lib"],
+  "metadata": {
+    "tsConfig": "tsconfig.json"
+  },
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -b packages/l3/app-api/tsconfig.json --pretty false"
+      }
+    }
+  }
+}

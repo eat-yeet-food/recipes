@@ -1,0 +1,9 @@
+{
+  "name": "@eat-yeet/l3-app-api",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./types": "./src/types.ts",
+    "./openapi.yaml": "./openapi.yaml"
+  }
+}

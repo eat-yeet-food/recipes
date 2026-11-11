@@ -1,4 +1,5 @@
 'use client'
+import { INGREDIENT_AMOUNT } from './step-needs'
 import type { RecipeBlock, Section } from '@eat-yeet/l4-content-model/blocks'
 import type { RecipeContent } from '@eat-yeet/l4-content-model/recipes'
 import { createPageBlockRegistry, registerSharedPageBlocks, type PageBlockRegistry } from '@eat-yeet/l6-ui-content-blocks/page-blocks'
@@ -113,7 +114,6 @@ function NumberedList({ section }: { section: Section }) {
 }
 
 /** A leading amount ("287g", "¼ tsp (0.72g)", "1 can") shown bold pink on the plum card. */
-export const INGREDIENT_AMOUNT = /^([\d¼½¾⅛⅓⅔⅜⅝⅞][\d¼½¾⅛⅓⅔⅜⅝⅞.,/ -]*?(?:\s?(?:g|kg|ml|l|oz|lb|lbs|tsp|tbsp|cups?|cans?|cloves?)\b)?(?:\s*\([^)<]*\))?)(?=\s)/
 export function emphasizeAmount(html: string) {
   return html.replace(INGREDIENT_AMOUNT, '<strong class="font-bold text-brand print:text-ink">$1</strong>')
 }

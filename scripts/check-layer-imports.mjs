@@ -8,6 +8,7 @@ const EXTENSIONS = ['.ts', '.tsx', '.mts', '.cts', '.js', '.jsx', '.mjs', '.cjs'
 const IGNORED = new Set(['node_modules', 'generated', 'dist', '.nx', '.git', '.output', 'storybook-static'])
 const APP_IMPORTS = {
   'packages/l8/web/src/next/interactive.tsx': new Set(['@app/page-blocks', '@app/recipe-workbenches']),
+  'packages/l8/web/src/next/app-api.ts': new Set(['@app/recipe-workbenches']),
   'packages/l8/web/src/lib/api.ts': new Set(['@app/articles', '@app/recipes']),
   'packages/l8/web/src/next/kitchen.tsx': new Set(['@app/page-blocks', '@app/recipe-workbenches']),
   'packages/l8/web/src/stories/kitchen.stories.tsx': new Set(['@app/page-blocks', '@app/recipe-workbenches']),

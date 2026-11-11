@@ -39,6 +39,7 @@ await stage([
   ['design system', pnpm, ['-s', 'test:design-system']],
   ['unit', pnpm, ['-s', 'test:unit']],
   ['boundaries', pnpm, ['-s', 'boundaries']],
+  ['app API schema', pnpm, ['-s', 'app-api:check']],
   ['typecheck', pnpm, ['-s', 'typecheck:ts']],
 ])
 if (failures.length) finish()
@@ -58,6 +59,7 @@ try {
     ['recipe pages', node, ['packages/l8/web/src/routes/recipes/$slug/recipe-pages.test.mjs'], { ...env, ...lanes.recipes }],
     ['notebook', node, ['packages/l8/web/src/routes/notebook/notebook.test.mjs'], { ...env, ...lanes.notebook }],
     ['interaction', node, ['packages/l8/web/src/routes/interact.test.mjs'], { ...env, ...lanes.interaction }],
+    ['app API contract', node, ['test/app-api-contract.mjs'], env],
   ])
 } finally {
   await server.close()

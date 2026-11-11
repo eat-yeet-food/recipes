@@ -27,6 +27,9 @@
       "path": "../../l3/api-contract/tsconfig.json"
     },
     {
+      "path": "../../l3/app-api/tsconfig.json"
+    },
+    {
       "path": "../../l3/api-query/tsconfig.json"
     },
     {

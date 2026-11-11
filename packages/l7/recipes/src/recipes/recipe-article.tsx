@@ -219,7 +219,8 @@ export function RecipeArticle({
         focusedCooking && 'pt-10 max-[640px]:pt-8',
       )}
       articleClassName={cn(
-        'mt-0 max-w-none bg-white pt-0 pb-[38px] max-[640px]:pb-[30px]',
+        // No fill: the page is already white, and a square fill here cut off the photo's shadow behind the first card's rounded corners.
+        'mt-0 max-w-none bg-transparent pt-0 pb-[38px] max-[640px]:pb-[30px]',
       )}
     />
     {cookSheet !== 'closed' && <CookMode title={page.title} blocks={recipeBlocks} open={cookSheet === 'open'} onClose={closeCookSheet} onFinish={finishCookSheet} onClassic={chooseClassic}

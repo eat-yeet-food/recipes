@@ -36,6 +36,9 @@
       "@eat-yeet/l2-recipe-domain/*": [
         "./packages/l2/recipe-domain/src/*"
       ],
+      "@eat-yeet/l3-app-api/*": [
+        "./packages/l3/app-api/src/*"
+      ],
       "@eat-yeet/l3-api-contract/*": [
         "./packages/l3/api-contract/src/*"
       ],

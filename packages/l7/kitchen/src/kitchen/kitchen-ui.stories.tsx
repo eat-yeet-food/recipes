@@ -113,8 +113,8 @@ export const History: Story = {
 function StepperExample() {
   const [count, setCount] = useState(4)
   return <div className="grid justify-items-start gap-3 p-6">
-    <CountStepper label="How many pizzas today" unit="pizzas" value={count} max={6} onChange={setCount} />
-    <p>Making {count} pizzas today</p>
+    <CountStepper label="How many pizzas" unit="pizzas" value={count} max={6} onChange={setCount} />
+    <p>Makes {count} pizzas</p>
   </div>
 }
 
@@ -124,7 +124,7 @@ export const TodayStepper: Story = {
     const screen = within(canvasElement)
     await userEvent.click(screen.getByRole('button', { name: 'More pizzas' }))
     await userEvent.click(screen.getByRole('button', { name: 'More pizzas' }))
-    await expect(screen.getByText('Making 6 pizzas today')).toBeVisible()
+    await expect(screen.getByText('Makes 6 pizzas')).toBeVisible()
     await expect(screen.getByRole('button', { name: 'More pizzas' })).toBeDisabled()
   },
 }

@@ -1,0 +1,186 @@
+openapi: 3.1.0
+info:
+  title: Eat / Yeet app API
+  version: 1.0.0
+  description: >
+    Fully resolved, read-only view models for the iOS app. Mirrors src/types.ts.
+    Add fields freely; renames, removals and meaning changes need /v2.
+servers:
+  - url: https://eatyeet.com/api/public/app/v1
+  - url: http://127.0.0.1:3000/api/public/app/v1
+paths:
+  /recipes:
+    get:
+      operationId: listRecipes
+      responses:
+        '200':
+          description: Published recipes in display order, with their images.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RecipeIndex' }
+  /recipes/{slug}:
+    get:
+      operationId: getRecipe
+      parameters:
+        - { name: slug, in: path, required: true, schema: { type: string } }
+        - name: count
+          in: query
+          required: false
+          description: Today's batch count, clamped to 1–99. Ignored for recipes without a calculator.
+          schema: { type: integer, minimum: 1, maximum: 99 }
+      responses:
+        '200':
+          description: The recipe as written, projected for today's count.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RecipeDetail' }
+        '404':
+          description: Not found or not published.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+components:
+  schemas:
+    Error:
+      type: object
+      required: [error]
+      properties: { error: { type: string } }
+    ImageVariant:
+      type: object
+      required: [url, width, format]
+      properties:
+        url: { type: string }
+        width: { type: integer }
+        format: { type: string }
+    Image:
+      type: object
+      required: [url, width, height, alt, variants]
+      properties:
+        url: { type: string }
+        width: { type: integer }
+        height: { type: integer }
+        alt: { type: string }
+        focalPoint: { type: array, items: { type: number }, minItems: 2, maxItems: 2 }
+        variants: { type: array, items: { $ref: '#/components/schemas/ImageVariant' } }
+    RecipeSummary:
+      type: object
+      required: [slug, title, description, category, image, totalLabel, prepLabel, cookLabel, timeLabel, yieldLabel, courses, methods, searchText, order]
+      properties:
+        slug: { type: string }
+        title: { type: string }
+        description: { type: string }
+        category: { type: string }
+        image: { type: string }
+        totalLabel: { type: string }
+        prepLabel: { type: string }
+        cookLabel: { type: string }
+        timeLabel: { type: string }
+        yieldLabel: { type: string }
+        courses: { type: array, items: { type: string } }
+        methods: { type: array, items: { type: string } }
+        searchText: { type: string }
+        order: { type: number }
+    RecipeIndex:
+      type: object
+      required: [recipes, images]
+      properties:
+        recipes: { type: array, items: { $ref: '#/components/schemas/RecipeSummary' } }
+        images: { type: object, additionalProperties: { $ref: '#/components/schemas/Image' } }
+    Item:
+      type: object
+      required: [id, html]
+      properties:
+        id: { type: string }
+        html: { type: string }
+    Section:
+      type: object
+      required: [id, title, items]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        items: { type: array, items: { $ref: '#/components/schemas/Item' } }
+    Ingredient:
+      type: object
+      required: [id, html, amount]
+      properties:
+        id: { type: string }
+        html: { type: string }
+        amount: { type: string, description: "Leading amount, removed from html; empty when none." }
+    IngredientSection:
+      type: object
+      required: [id, title, items]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        items: { type: array, items: { $ref: '#/components/schemas/Ingredient' } }
+    Need:
+      type: object
+      required: [key, amount, name]
+      properties:
+        key: { type: string }
+        amount: { type: string }
+        name: { type: string }
+    Step:
+      type: object
+      required: [id, html, needs, time, minutes, rest, emphasis]
+      properties:
+        id: { type: string }
+        html: { type: string }
+        needs: { type: array, items: { $ref: '#/components/schemas/Need' } }
+        time: { type: [string, 'null'] }
+        minutes: { type: [number, 'null'] }
+        rest: { type: [string, 'null'] }
+        emphasis: { type: boolean }
+    StepSection:
+      type: object
+      required: [id, title, timeOrigin, timed, items]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        timeOrigin: { type: [string, 'null'] }
+        timed: { type: boolean }
+        items: { type: array, items: { $ref: '#/components/schemas/Step' } }
+    RecipeBlock:
+      type: object
+      required: [ingredients, equipment, steps, notes, tips]
+      properties:
+        ingredients: { type: array, items: { $ref: '#/components/schemas/IngredientSection' } }
+        equipment: { type: array, items: { $ref: '#/components/schemas/Section' } }
+        steps: { type: array, items: { $ref: '#/components/schemas/StepSection' } }
+        notes: { type: array, items: { type: string } }
+        tips: { type: array, items: { type: string } }
+    Recipe:
+      type: object
+      required: [slug, title, description, category, image, totalLabel, prepLabel, cookLabel, timeLabel, yieldLabel, courses, methods, searchText, order, blocks]
+      properties:
+        slug: { type: string }
+        title: { type: string }
+        description: { type: string }
+        category: { type: string }
+        image: { type: string }
+        totalLabel: { type: string }
+        prepLabel: { type: string }
+        cookLabel: { type: string }
+        timeLabel: { type: string }
+        yieldLabel: { type: string }
+        courses: { type: array, items: { type: string } }
+        methods: { type: array, items: { type: string } }
+        searchText: { type: string }
+        order: { type: number }
+        blocks: { type: array, items: { $ref: '#/components/schemas/RecipeBlock' } }
+    Batch:
+      type: object
+      required: [count, noun, plural]
+      properties:
+        count: { type: integer }
+        noun: { type: string }
+        plural: { type: string }
+    RecipeDetail:
+      type: object
+      required: [recipe, images]
+      properties:
+        recipe: { $ref: '#/components/schemas/Recipe' }
+        batch:
+          $ref: '#/components/schemas/Batch'
+          description: Today's count; omitted for recipes without a calculator.
+        images: { type: object, additionalProperties: { $ref: '#/components/schemas/Image' } }

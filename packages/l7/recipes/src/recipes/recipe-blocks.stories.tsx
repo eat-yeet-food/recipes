@@ -8,4 +8,5 @@ const meta = {
 } satisfies Meta<typeof RecipeList>
 export default meta
 export const Ingredients: StoryObj<typeof meta> = {}
-export const Instructions: StoryObj<typeof meta> = { args: { ordered: true, sections: [{ id: 'mixing', title: 'Mix the dough', items: ['Combine the flour and water.', 'Mix until no dry flour remains.'], itemIds: ['combine', 'mix'] }] } }
+// Step rows bleed 8px into the page gutter (-mx-2) for their highlight, so render inside page-like padding.
+export const Instructions: StoryObj<typeof meta> = { args: { ordered: true, sections: [{ id: 'mixing', title: 'Mix the dough', items: ['Combine the flour and water.', 'Mix until no dry flour remains.'], itemIds: ['combine', 'mix'] }] }, decorators: [(Story) => <div className="px-5"><Story /></div>] }

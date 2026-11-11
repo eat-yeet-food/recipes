@@ -68,7 +68,8 @@ function ensureProject() {
 
 function build({ forDevice = false } = {}) {
   ensureProject()
-  const common = ['-project', 'EatYeet.xcodeproj', '-scheme', 'EatYeet', '-derivedDataPath', derived]
+  // The OpenAPI generator is a build plugin; trust it non-interactively.
+  const common = ['-project', 'EatYeet.xcodeproj', '-scheme', 'EatYeet', '-derivedDataPath', derived, '-skipPackagePluginValidation']
   if (forDevice) {
     if (!existsSync(join(ios, 'Config/Signing.local.xcconfig'))) {
       finish(false, { error: 'No signing team. Add your Apple ID in Xcode → Settings → Accounts, then run `pnpm ios team`.' })
@@ -98,7 +99,8 @@ async function screenshot(name = 'ios-shot.png') {
 // Relaunch with the deep link as a launch argument: `simctl openurl` shows an "Open in…?" prompt.
 async function launchSim(url) {
   run('xcrun', ['simctl', 'terminate', simulator, bundleId], { quiet: true, allowFail: true })
-  run('xcrun', ['simctl', 'launch', simulator, bundleId, ...(url ? ['-openURL', url] : [])], { quiet: true })
+  const launchArgs = [...(url ? ['-openURL', url] : []), ...(process.env.IOS_LOCAL_ORIGIN ? ['-localOrigin', process.env.IOS_LOCAL_ORIGIN] : [])]
+  run('xcrun', ['simctl', 'launch', simulator, bundleId, ...launchArgs], { quiet: true })
   await sleep(2000)
 }
 
@@ -158,7 +160,7 @@ switch (command) {
     const bundle = join(out, `test-${Date.now()}.xcresult`)
     const only = flags.has('--ui') ? [] : ['-only-testing:EatYeetTests']
     xcodebuild(['-project', 'EatYeet.xcodeproj', '-scheme', 'EatYeet', '-derivedDataPath', derived,
-      '-destination', `id=${simulator}`, '-resultBundlePath', bundle, 'CODE_SIGNING_ALLOWED=NO', ...only, 'test'])
+      '-destination', `id=${simulator}`, '-resultBundlePath', bundle, '-skipPackagePluginValidation', 'CODE_SIGNING_ALLOWED=NO', ...only, 'test'])
     // Core package tests run through SwiftPM on the Simulator SDK.
     xcodebuild(['-scheme', 'EatYeetCore', '-destination', `id=${simulator}`, '-derivedDataPath', join(ios, 'build/PackageData'), 'test'],
       join(ios, 'Packages/EatYeetCore'))
