@@ -74,18 +74,22 @@ blocks:
               Brown the butter: Melt the butter in a small saucepan over medium heat, stirring often, until the milk
               solids turn golden and it smells nutty — about 5 minutes. Pour into a small bowl and let cool below 140°F
               while you mix the rest. The other ingredients can go in straight from the fridge.
+            uses: [ingredients-1-item-1]
           - id: steps-1-item-3
             text: >-
               Whisk the dry ingredients: In a medium bowl, whisk together the cake flour, baking soda, baking powder,
               and fine sea salt.
+            uses: [ingredients-1-item-9, ingredients-1-item-10, ingredients-1-item-11, ingredients-1-item-12]
           - id: steps-1-item-4
             text: >-
               Start the wet mixture: In a large bowl, whisk the sour cream, egg, canola oil, milk, and vanilla until
               smooth. Whisk in the brown sugar.
+            uses: [ingredients-1-item-4, ingredients-1-item-5, ingredients-1-item-6, ingredients-1-item-7, ingredients-1-item-8, ingredients-1-item-3]
           - id: steps-1-item-10
             text: >-
               Add the butter and bananas: Once the brown butter is below 140°F, whisk it in. Then mix in the mashed
               bananas until fully combined.
+            uses: [ingredients-1-item-2]
           - id: steps-1-item-11
             text: >-
               Check the temperature: If the batter is below 70°F, microwave it in 10-second bursts, stirring and
@@ -96,6 +100,7 @@ blocks:
               combined. The batter should stay a little lumpy; do not overmix.
           - id: steps-1-item-6
             text: Fold in the chopped dark chocolate just until evenly distributed.
+            uses: [ingredients-1-item-13]
           - id: steps-1-item-7
             text: Transfer the batter to the prepared loaf pan and smooth the top.
           - id: steps-1-item-8

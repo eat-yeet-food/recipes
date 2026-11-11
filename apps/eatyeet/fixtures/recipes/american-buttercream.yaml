@@ -52,12 +52,15 @@ blocks:
               Whip the butter: In a stand mixer fitted with the paddle attachment, beat the butter on low speed, then
               increase to medium-high speed and whip for about 3 minutes until light and smooth. Scrape down the sides
               and bottom of the bowl.
+            uses: [ingredients-1-item-1]
           - id: steps-1-item-2
             text: >-
               Add powdered sugar: Add the powdered sugar in three additions, mixing on low speed between each addition.
               Scrape down the bowl after each addition.
+            uses: [ingredients-1-item-2]
           - id: steps-1-item-3
             text: 'Add remaining ingredients: Add the vanilla extract, fine sea salt, and heavy cream.'
+            uses: [ingredients-1-item-5, ingredients-1-item-4, ingredients-1-item-3]
           - id: steps-1-item-4
             text: 'Final whip: Beat on high speed for 1 minute until smooth, fluffy, and fully combined.'
         id: steps-1

@@ -73,15 +73,18 @@ blocks:
             text: >-
               Whisk dry ingredients: In the bowl of a stand mixer, whisk together flour, baking powder, baking soda,
               milk powder, fine sea salt, and sugar until evenly distributed. Scrape the bottom corners of the bowl.
+            uses: [ingredients-1-item-1, ingredients-1-item-2, ingredients-1-item-3, ingredients-1-item-4, ingredients-1-item-5, ingredients-1-item-6]
           - id: steps-1-item-3
             text: >-
               Reverse cream the butter and oil: Add butter to the dry ingredients. Fit the mixer with the paddle
               attachment and beat on medium speed until the mixture looks coarse and sandy. Add the oil and beat until
               it resembles streusel with no large chunks remaining — about 2-3 minutes.
+            uses: [ingredients-1-item-7, ingredients-1-item-8]
           - id: steps-1-item-4
             text: >-
               Combine liquids: In a 2 cup measuring cup, whisk together the water and sour cream until smooth. Then
               whisk in the eggs and vanilla.
+            uses: [ingredients-1-item-10, ingredients-1-item-9, ingredients-1-item-11, ingredients-1-item-12, ingredients-1-item-13, ingredients-1-item-14]
           - id: steps-1-item-5
             text: >-
               Mix in liquid mixture: With the mixer on low speed, slowly stream in the liquid mixture. After about half

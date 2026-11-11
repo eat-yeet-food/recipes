@@ -83,6 +83,7 @@ blocks:
             text: >-
               Whisk the ¼ cup canola oil, lemon juice, garlic, salt, and pepper together in a bowl or zip-top bag. Add
               the chicken and turn to coat.
+            uses: [ingredients-1-item-2, ingredients-1-item-3, ingredients-1-item-4, ingredients-1-item-5, ingredients-1-item-6, ingredients-1-item-1]
           - id: steps-1-item-2
             text: >-
               Refrigerate 3–24 hours. Pull it out about 30 min before cooking so it is not going onto the grill straight
@@ -109,6 +110,7 @@ blocks:
             text: >-
               Boil the fettuccine in well-salted water and pull it 1 minute short of the package's al dente. Reserve ½
               cup of the pasta water plus a mug more, then drain.
+            uses: [ingredients-3-item-1, ingredients-3-item-2]
         id: steps-3
       - title: Sauce
         items:
@@ -116,12 +118,15 @@ blocks:
             text: >-
               In a large straight-sided skillet over medium heat, melt the butter. Add the shallots and cook until
               tender, about 2 min.
+            uses: [ingredients-2-item-1, ingredients-2-item-2]
           - id: steps-4-item-2
             text: 'Pour in the cream, bring to a boil, then drop to medium-low and simmer 3 min.'
+            uses: [ingredients-2-item-3]
           - id: steps-4-item-3
             text: >-
               Off the heat, stir in the Parmigiano, salt, and pepper until smooth. Keeping it off direct heat is what
               stops the cheese from breaking.
+            uses: [ingredients-2-item-4, ingredients-2-item-5, ingredients-2-item-6]
         id: steps-4
       - title: Finish
         items:
@@ -134,6 +139,7 @@ blocks:
             text: >-
               Off the heat immediately. Plate, top with the sliced chicken, and finish with parsley, extra Parmigiano,
               and more pepper.
+            uses: [ingredients-4-item-1, ingredients-4-item-2]
         id: steps-5
     notes:
       - >-

@@ -48,16 +48,19 @@ blocks:
         items:
           - id: steps-1-item-1
             text: Blend granulated sugar in a blender for a few minutes into 10x powder.
+            uses: [ingredients-1-item-1]
           - id: steps-1-item-2
             text: >-
               Boil water in a kettle. Pour over the second division of granulated sugar in a heat tolerant measuring
               glass and stir to dissolve.
+            uses: [ingredients-1-item-2]
           - id: steps-1-item-3
             text: >-
               In a mixing bowl add powdered sugar, and fine sea salt. Add and stir in ⅓ of the simple syrup mix with a
               large spoon. Once a thick ball forms, add in the rest of the syrup in three more additions. Stir until the
               consistency of honey. Stir in corn syrup and melted butter. Scrape down the bowl on all sides and cover
               with cling wrap.
+            uses: [ingredients-1-item-6, ingredients-1-item-2, ingredients-1-item-3, ingredients-1-item-4]
           - id: steps-1-item-4
             text: >-
               Maintain temp on double burner at 110°F. Remove from heat as needed to maintain temperature very close to

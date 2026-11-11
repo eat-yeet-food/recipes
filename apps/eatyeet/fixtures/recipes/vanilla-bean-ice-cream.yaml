@@ -66,12 +66,14 @@ blocks:
               **Combine:** In a saucepan, whisk the egg yolks with 30g of the skim milk until smooth, then whisk in
               another 50g of skim milk. This keeps the yolks from clumping. Add the cream, the remaining skim milk, the
               sugar, and the scraped vanilla seeds, and whisk thoroughly.
+            uses: [ingredients-1-item-4, ingredients-1-item-2, ingredients-1-item-1, ingredients-1-item-3, ingredients-1-item-8]
           - id: steps-1-item-3
             text: >-
               **Cook to 168°F:** Heat gently, stirring constantly. Remove from heat at 168°F (76°C). Do not boil or
               reduce.
           - id: steps-1-item-4
             text: '**Add the vanilla:** Stir in the vanilla bean paste immediately after removing from the heat.'
+            uses: [ingredients-1-item-7]
           - id: steps-1-item-5
             text: '**Chill:** Cool quickly in an ice-water bath. Cover and refrigerate 4–24 hours.'
           - id: steps-1-item-6

@@ -91,18 +91,22 @@ blocks:
               Mix the dry ingredients: Reserve 120g of the flour. Add the remaining 330g flour, light brown sugar,
               instant yeast, and fine sea salt to the bowl of a stand mixer. Mix briefly by hand or on low speed so the
               yeast and fine sea salt are evenly distributed.
+            uses: [{ id: ingredients-1-item-1, amount: 330g }, ingredients-1-item-2, ingredients-1-item-3, ingredients-1-item-4]
           - id: steps-1-item-2
             text: >-
               Add the room-temperature liquids: Add the milk, eggs, and vanilla. Mix with the dough hook on low speed
               until the dough starts to come together.
+            uses: [ingredients-1-item-5, ingredients-1-item-6, ingredients-1-item-7]
           - id: steps-1-item-3
             text: >-
               Mix in the butter: With the mixer on low to medium-low, add the softened butter in roughly 1 tablespoon
               chunks. Wait for each addition to mix in before adding the next.
+            uses: [ingredients-1-item-8]
           - id: steps-1-item-4
             text: >-
               Add the reserved flour and develop: Add the reserved 120g flour and mix on low until incorporated.
               Increase to medium and mix for 5 minutes.
+            uses: [{ id: ingredients-1-item-1, amount: 120g }]
           - id: steps-1-item-5
             text: >-
               Bulk ferment: Transfer the dough to a lightly greased bowl or proofing bin. Cover and hold at 76°F for 1.5
@@ -111,6 +115,7 @@ blocks:
             text: >-
               Add pearl sugar and portion: Gently mix or fold in the pearl sugar just until evenly distributed. Divide
               into 12 pieces, about 104g each, and place them in a lightly greased proofing bin with room to expand.
+            uses: [ingredients-1-item-9]
           - id: steps-1-item-7
             text: >-
               Final proof: Cover and proof at 72°F for 1 hour. The portions should look slightly expanded and airy, not
@@ -122,6 +127,7 @@ blocks:
             text: >-
               Preheat the waffle iron to about 360°F. On the linked Hamilton Beach waffle maker, use setting 2. Lightly
               oil the plates only if they tend to stick.
+            uses: [ingredients-2-item-1]
           - id: steps-2-item-2
             text: >-
               Cook one dough portion at a time until deeply golden brown and caramelized at the edges, usually 3-5
@@ -130,6 +136,7 @@ blocks:
             text: >-
               Transfer cooked waffles to a wire rack so steam can escape. Serve warm with honey, maple syrup, powdered
               sugar, or nothing at all.
+            uses: [ingredients-2-item-2]
         id: steps-2
     notes:
       - 'This is a dough, not a pourable batter. After mixing it should be soft, enriched, and a little shaggy.'

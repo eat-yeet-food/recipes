@@ -94,6 +94,7 @@ blocks:
             text: >-
               Choose the water temperature so the finished dough will be 72°F. Add the water, egg, and canola oil to a
               large bowl or the mixer bowl, then add the flour, dough improver, fine sea salt, and instant yeast.
+            uses: [ingredients-1-item-2, ingredients-1-item-3, ingredients-1-item-6, ingredients-1-item-1, ingredients-1-item-5, ingredients-1-item-4, ingredients-1-item-7]
           - id: steps-1-item-2
             text: >-
               Planetary mixer: Mix with the dough hook on low until no dry flour remains, about 3 minutes. Increase to
@@ -127,6 +128,7 @@ blocks:
               Lightly dust a clean towel or baker's couche with rice flour. Arrange the rolls seam-side up in folds of
               the towel, cover, and proof at room temperature until noticeably puffy and a light press springs back
               slowly, about 45-75 minutes.
+            uses: [ingredients-1-item-8]
         id: steps-2
       - title: Score and bake
         items:
@@ -136,6 +138,7 @@ blocks:
               45 minutes. Make sure the deep stainless-steel pan will cover the rolls without touching them.
           - id: steps-3-item-2
             text: Lightly dust a wooden peel with rice flour. Gently turn the proofed rolls seam-side down onto the peel.
+            uses: [ingredients-1-item-8]
           - id: steps-3-item-3
             text: 'Score each roll once lengthwise, holding the blade at a shallow angle and cutting about 1/4 inch deep.'
           - id: steps-3-item-4

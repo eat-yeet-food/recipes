@@ -103,11 +103,13 @@ blocks:
               Place cold butter between two pieces of parchment paper and roll out with a rolling pin until pliable.
               Should still be cold and should peel from parchment. If it doesn't peel cleanly, put it in the
               refrigerator for 5m.
+            uses: [ingredients-1-item-8]
           - id: steps-1-item-2
             text: >-
               Combine and mix all ingredients except butter in the bowl of a spiral mixer. Mix for about 4 minutes until
               combined. Dough should be about 69°F. Use a bench scraper a couple times throughout to scrape down the
               sides of the mixer. Cover and allow to rest for 20 minutes to further develop gluten.
+            uses: [ingredients-1-item-1, ingredients-1-item-2, ingredients-1-item-3, ingredients-1-item-4, ingredients-1-item-5, ingredients-1-item-6, ingredients-1-item-7]
           - id: steps-1-item-3
             text: >-
               Place a medium saucepan with a small amount of boiling water and place in the oven with the heat off. Try
@@ -139,6 +141,7 @@ blocks:
               earlier. Place donuts three at a time in the oil, presentation side up. Cook for 60 seconds on each side.
               Remove with a spider strainer, place on paper towels for a moment, and transfer to a wire rack in your
               proofing tray.
+            uses: [ingredients-1-item-9]
           - id: steps-1-item-8
             text: >-
               Allow donuts to cool for 5 minutes then dip in

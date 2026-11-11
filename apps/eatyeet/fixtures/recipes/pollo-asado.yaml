@@ -71,14 +71,17 @@ blocks:
         items:
           - id: adobo-soak
             text: '**Soak:** Cover the chipotles with boiling water and soak 30–45 minutes.'
+            uses: [adobo-chipotles, adobo-boiling-water]
           - id: adobo-drain
             text: '**Drain:** Drain, discard the soaking water, and remove the stems.'
           - id: adobo-onion-step
             text: '**Soften the onion:** Sauté the onion in a spoonful of the oil for 3–4 minutes, until soft.'
+            uses: [adobo-onion, ingredients-1-item-5]
           - id: adobo-combine
             text: >-
               **Combine:** Add the chipotles, fresh water, the vinegar, tomato paste, the rest of the oil, and both
               salts.
+            uses: [adobo-water, adobo-vinegar, adobo-tomato-paste, adobo-salt, ingredients-1-item-6]
           - id: adobo-simmer
             text: '**Simmer:** Cover and gently simmer 20–30 minutes, adding a tablespoon of water if needed.'
           - id: adobo-reduce
@@ -94,6 +97,7 @@ blocks:
             text: >-
               Marinate the chicken: Place the chicken thighs in a zip-top bag or shallow dish. Pour half the marinade
               over and massage to coat every piece. Refrigerate overnight (8-24 hours).
+            uses: [ingredients-1-item-1, ingredients-1-item-7]
           - id: steps-1-item-3
             text: 'Bring to room temp: Pull the chicken from the fridge 20-30 minutes before cooking so it cooks evenly.'
           - id: steps-1-item-4
@@ -105,6 +109,7 @@ blocks:
             text: >-
               Rest, dust, and serve: Let the thighs rest 5 minutes, then dust with flaky or kosher salt while still hot
               so it sticks to the char. Slice and serve with rice, charred tortillas, slaw, or pickled onions.
+            uses: [dusting-salt]
         id: steps-1
     notes: []
     tips:

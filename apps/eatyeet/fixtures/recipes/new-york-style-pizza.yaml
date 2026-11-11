@@ -224,8 +224,10 @@ methodOptions:
                 text: >-
                   Fill a pitcher with water and ice and let it chill down. Weigh out the water only; keep the ice out of
                   the mixer bowl.
+                uses: [dough-item-2]
               - id: combine-dough
                 text: 'Add the {{mixingIngredients}} to the spiral mixer all at once.'
+                uses: [dough-item-1, dough-item-2, dough-item-3, dough-item-4, dough-item-5]
               - id: steps-1-item-3
                 text: >-
                   Mix at 40% speed until the dough reads 76°F on your IR thermometer. Scrape the bowl and hook down with
@@ -253,10 +255,13 @@ methodOptions:
                   smooth, easy-to-spread consistency. Place sauce in a small bowl and cover with saran wrap. It is ok to
                   freeze / refrigerate for a bit, but always bring to room temperature immediately before use to avoid
                   gummy pizza.
+                uses: [sauce-batch-item-1]
               - id: steps-2-item-2
                 text: 'Cheese: Grate the mozzarella.'
+                uses: [mozzarella]
               - id: steps-2-item-3
                 text: 'Bench flour: Mix 50/50 semolina + all purpose flour in a small bowl and set aside.'
+                uses: [pizza-toppings-item-5]
             id: steps-2
           - title: Pizza Assembly
             items:
@@ -278,10 +283,13 @@ methodOptions:
                 text: >-
                   Apply sauce to the pizza in a circular motion with a large spoon all the way to the raised portion
                   that will become your crust.
+                uses: [pizza-sauce]
               - id: steps-3-item-8
                 text: (Optional) Pinch dried oregano in your fingers to oxidize and spread over the top of the sauce.
+                uses: [oregano]
               - id: steps-3-item-10
                 text: Scatter the shredded mozzarella evenly over the top.
+                uses: [mozzarella]
             id: steps-3
           - title: Launch / Bake
             items:
@@ -426,8 +434,10 @@ blocks:
             text: >-
               Fill a pitcher with water and ice and let it chill down. Weigh out the water only — keep the ice out of
               the mixer bowl.
+            uses: [dough-item-2]
           - id: combine-dough
             text: 'Add the {{mixingIngredients}} to the spiral mixer all at once.'
+            uses: [dough-item-1, dough-item-2, dough-item-3, dough-item-4]
           - id: steps-1-item-3
             text: >-
               Mix at 40% speed until the dough reads 76°F on your IR thermometer. Scrape the bowl and hook down with
@@ -450,10 +460,13 @@ blocks:
               Pizza sauce: Drain off ¼ cup of water from the can, then hand crush or mill the tomatoes to a smooth,
               easy-to-spread consistency. Place sauce in a small bowl and cover with saran wrap. It's ok to freeze /
               refrigerate for a bit, but always bring to room temperature immediately before use to avoid gummy pizza.
+            uses: [sauce-batch-item-1]
           - id: steps-2-item-2
             text: 'Cheese: Grate the mozzarella.'
+            uses: [mozzarella]
           - id: steps-2-item-3
             text: 'Bench flour: Mix 50/50 semolina + all purpose flour in a small bowl and set aside.'
+            uses: [pizza-toppings-item-5]
         id: steps-2
       - title: Pizza Assembly
         items:
@@ -473,10 +486,13 @@ blocks:
             text: >-
               Apply sauce to the pizza in a circular motion with a large spoon all the way to the raised portion that
               will become your crust.
+            uses: [pizza-sauce]
           - id: steps-3-item-8
             text: (Optional) Pinch dried oregano in your fingers to oxidize and spread over the top of the sauce.
+            uses: [oregano]
           - id: steps-3-item-10
             text: Scatter the shredded mozzarella evenly over the top.
+            uses: [mozzarella]
         id: steps-3
       - title: Launch / Bake
         items:

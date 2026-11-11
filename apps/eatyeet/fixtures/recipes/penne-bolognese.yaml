@@ -74,15 +74,19 @@ blocks:
         items:
           - id: steps-1-item-1
             text: 'Dice onion, carrot, and celery and place in a bowl to make the soffritto.'
+            uses: [ingredients-1-item-3, ingredients-1-item-4, ingredients-1-item-5]
           - id: steps-1-item-2
             text: Mince garlic and set aside in a small ramekin.
+            uses: [ingredients-1-item-6]
           - id: steps-1-item-3
             text: >-
               Open tomatoes and pour into a medium bowl, mashing thoroughly with a [tomato
               masher](https://www.amazon.com/Stainless-Professional-Integrated-Potatoes-Dishwasher/dp/B09SYC49D4) and
               set aside.
+            uses: [ingredients-1-item-12]
           - id: steps-1-item-4
             text: Heat oil and pancetta in a dutch oven on medium high heat until well browned.
+            uses: [ingredients-1-item-1, ingredients-1-item-2]
           - id: steps-1-item-5
             text: >-
               Place the soffritto in the dutch oven, heating and stirring with a wooden spoon for about 7 minutes. Add
@@ -91,13 +95,16 @@ blocks:
             text: >-
               Deglaze the pan with 1 cup of white wine and stir with a wooden spoon until almost no liquid remains and
               the smell of alcohol is gone, about 7-10 minutes.
+            uses: [ingredients-1-item-7]
           - id: steps-1-item-7
             text: >-
               Push soffritto and pancetta to the side of the dutch oven and add tomato paste to the empty region. Allow
               the tomato paste to mingle with a little of the remaining liquid, stir, and simmer for 2 minutes and add
               the salt.
+            uses: [ingredients-1-item-8, ingredients-1-item-9]
           - id: steps-1-item-8
             text: Pour in milk and add ground beef mince.
+            uses: [ingredients-1-item-10, ingredients-1-item-11]
           - id: steps-1-item-9
             text: >-
               Quickly stir ground beef mince and integrate thoroughly with the other ingredients, stirring until the
@@ -106,6 +113,7 @@ blocks:
             text: >-
               Add mashed tomatoes to the mixture, rinsing the can with 4 oz of water and adding to the mixture. Stir
               until the mixture starts to bubble and reduce heat to the lightest simmer setting.
+            uses: [ingredients-1-item-13]
           - id: steps-1-item-11
             text: >-
               Allow to simmer uncovered for 3.5-4 hours until all water has evaporated, stirring every 20-30 minutes.
@@ -118,12 +126,14 @@ blocks:
             text: >-
               Boil pasta in heavily salted water according to its package timing until al dente. Strain pasta. Reserve 1
               cup of pasta water.
+            uses: [ingredients-1-item-14]
           - id: steps-1-item-14
             text: >-
               Add 1 cup of pasta water back to the large pot that you used to boil the pasta in and reduce on high heat
               to ¼ cup. Once reduced add the pasta and bolognese and cook on high for one minute.
           - id: steps-1-item-15
             text: Serve 4 portions and top each with 1/4 of the grated Parmigiano Reggiano.
+            uses: [ingredients-1-item-15]
         id: steps-1
     notes:
       - >-

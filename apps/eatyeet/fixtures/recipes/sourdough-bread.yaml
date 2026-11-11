@@ -200,6 +200,7 @@ blocks:
         items:
           - id: levain-item-1
             text: Mix starter with water and flour
+            uses: [levain-build-item-1, levain-build-item-2, levain-build-item-3, levain-build-item-4]
           - id: levain-item-2
             text: 'Cover and rest at 70°F until peaked, 6h'
       - id: autolyse
@@ -209,6 +210,7 @@ blocks:
             text: >-
               Mix flour and the first portion of water ({{initialWaterGrams}}) using cool water in the Ooni Halo Pro at
               165 RPM for about 4-5m until the dough reaches 70°F. Cover and rest at 70°F for 3h.
+            uses: [dough-item-1, dough-item-2, dough-item-3]
       - id: bulk-fermentation
         title: Bulk Fermentation
         items:
@@ -216,11 +218,13 @@ blocks:
             text: >-
               **[0m elapsed]** Mix in levain in the Ooni Halo Pro at 165 RPM until evenly incorporated + cover and rest
               at 75°F for 10m (fermentolyse).
+            uses: [dough-item-4]
           - id: add-salt-and-water
             text: >-
               **[10m elapsed]** Mix in fine sea salt + remainder of water ({{remainingWaterGrams}}) at 90 RPM for 1m.
               Increase to 165 RPM and mix for about 4m. Cover and rest at 75°F for about 15m. Internal dough temp
               should be about 72°F; it will warm to 75°F over the first hour.
+            uses: [dough-item-5, dough-item-3]
           - id: bulk-fermentation-item-3
             text: '**[30m elapsed]** Stretch and fold + cover and rest at 75°F for 30m'
           - id: bulk-fermentation-item-4

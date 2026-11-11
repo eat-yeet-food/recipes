@@ -35,34 +35,46 @@ blocks:
       - title: ''
         items:
           - id: ingredients-1-item-1
+            ref: flour
             text: 220g all-purpose flour
           - id: ingredients-1-item-2
+            ref: salt
             text: 1 tsp fine sea salt
           - id: ingredients-1-item-3
+            ref: baking-soda
             text: ¾ tsp baking soda
           - id: ingredients-1-item-4
+            ref: butter
             text: 198g European-style unsalted butter
           - id: ingredients-1-item-5
+            ref: brown-sugar
             text: 155g packed dark brown sugar
           - id: ingredients-1-item-6
+            ref: sugar
             text: 100g granulated sugar
           - id: ingredients-1-item-7
+            ref: vanilla
             text: '1 tbsp [pure vanilla extract](https://www.amazon.com/s?k=nielsen+massey+vanilla+extract)'
           - id: ingredients-1-item-8
+            ref: egg
             text: 1 large whole egg
           - id: ingredients-1-item-9
+            ref: yolk
             text: 1 large egg yolk
           - id: ingredients-1-item-10
+            ref: dark-chocolate
             text: >-
               230g [72% dark
               chocolate](https://www.traderjoes.com/home/search?q=pound+plus+72%25+cacao+dark+chocolate&section=products),
               chopped into medium chunks
           - id: ingredients-1-item-11
+            ref: milk-chocolate
             text: >-
               100g [milk
               chocolate](https://www.traderjoes.com/home/search?q=pound+plus+milk+chocolate&section=products), finely
               chopped
           - id: ingredients-1-item-12
+            ref: flaky-salt
             text: 'Fine sea salt, for topping'
         id: ingredients-1
     steps:
@@ -75,18 +87,22 @@ blocks:
               the butter smells nutty and toffee-like — about 5-8 minutes. Pour directly into a large mixing bowl,
               scraping every browned speck out of the pan. Let the bowl sit at room temperature for 20 minutes — no
               fridge — so the butter cools enough that the sugars and eggs do not melt or scramble when they hit it.
+            uses: [butter]
           - id: steps-1-item-2
             text: >-
               Whisk dry ingredients: In a medium bowl, whisk together the flour, fine sea salt, and baking soda until
               evenly combined. Set aside.
+            uses: [flour, salt, baking-soda]
           - id: steps-1-item-3
             text: >-
               Mix butter and sugars: Add the dark brown sugar and granulated sugar to the bowl with the cooled brown
               butter and whisk vigorously until fully combined and the mixture looks like wet sand, about 1 minute.
+            uses: [brown-sugar, sugar]
           - id: steps-1-item-4
             text: >-
               Add eggs and vanilla: Add the vanilla, whole egg, and egg yolk. Whisk vigorously for about 2 minutes until
               the mixture turns a shade lighter and feels slightly thicker.
+            uses: [vanilla, egg, yolk]
           - id: steps-1-item-5
             text: >-
               Fold in flour: Add the dry ingredients to the bowl. Fold with a rubber spatula until just a few dry
@@ -96,6 +112,7 @@ blocks:
               Add chocolate: Add the chopped dark chocolate chunks and the finely chopped milk chocolate. Fold gently
               until just incorporated and no dry flour remains. Stop the moment it comes together — overmixing toughens
               the crumb.
+            uses: [dark-chocolate, milk-chocolate]
           - id: steps-1-item-7
             text: >-
               Portion and chill: Using a 2 oz cookie scoop (about 70-75g each), portion 14 dough balls onto a
@@ -115,6 +132,7 @@ blocks:
               Shape and finish: The moment they come out of the oven, use a fork or the rim of a round cutter to gently
               nudge any wonky edges into circles — this is also when you get the ripply ring on top by swirling lightly.
               While still hot, sprinkle with fine sea salt so it sticks to the surface.
+            uses: [flaky-salt]
           - id: steps-1-item-11
             text: >-
               Cool and finish: Let the cookies rest on the pan for several minutes to set, then transfer to a wire rack

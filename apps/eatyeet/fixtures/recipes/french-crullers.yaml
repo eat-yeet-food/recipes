@@ -77,6 +77,7 @@ blocks:
               Combine water, butter, sugar, and fine sea salt in a pot. Bring to a light rolling boil over medium heat.
               Once butter melts, add the flour all at once and stir vigorously until the dough comes together, about 1
               minute. Cook and mix until the panade reaches 170°F, about 4-5 minutes. Remove from heat.
+            uses: [ingredients-1-item-1, ingredients-1-item-2, ingredients-1-item-3, ingredients-1-item-4, ingredients-1-item-5]
           - id: steps-1-item-2
             text: >-
               Transfer dough to a stand mixer fitted with the paddle attachment. Beat at medium speed until the dough
@@ -85,12 +86,14 @@ blocks:
             text: >-
               With the mixer on low, add eggs one at a time, ensuring each is fully incorporated before adding the next.
               The dough should form a "V" shape when lifted from the paddle.
+            uses: [ingredients-1-item-6, ingredients-1-item-7]
           - id: steps-1-item-4
             text: >-
               Transfer dough to an XL piping bag fitted with an Ateco 828 tip. Store in an airtight gallon bag and
               refrigerate for 1 hour. Allow to warm slightly if too firm to pipe.
           - id: steps-1-item-5
             text: 'In a deep fryer or large pot, heat oil to 375°F.'
+            uses: [ingredients-1-item-8]
           - id: steps-1-item-6
             text: Pipe four 4" rings of dough onto well-oiled parchment squares just before frying.
           - id: steps-1-item-7

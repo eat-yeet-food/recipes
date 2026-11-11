@@ -69,14 +69,17 @@ blocks:
             text: >-
               Heat oven to 425°F and butter a 2-quart baking dish. Boil the fusilli in well-salted water 2 minutes short
               of al dente — it finishes in the oven. Drain and set aside.
+            uses: [ingredients-1-item-1]
           - id: steps-1-item-2
             text: >-
               Warm the milk to 150°F in a glass measuring cup in the microwave. Add the bay leaf and let it steep while
               you make the roux.
+            uses: [ingredients-2-item-3, ingredients-2-item-4]
           - id: steps-1-item-3
             text: >-
               Melt the butter over medium heat. Whisk in the flour and mustard powder and cook, whisking constantly,
               until it smells nutty but stays pale, 1–2 min.
+            uses: [ingredients-2-item-1, ingredients-2-item-2, ingredients-2-item-6]
           - id: steps-1-item-4
             text: >-
               Remove the bay leaf. Gradually whisk in the warm milk, a splash at a time at first to prevent lumps. Cook,
@@ -85,12 +88,14 @@ blocks:
             text: >-
               Off the heat, whisk in the fine sea salt. Add the cheddar in handfuls, stirring until smooth. Keep the pan
               off direct heat so the cheese doesn't break.
+            uses: [ingredients-2-item-7, ingredients-2-item-5]
           - id: steps-1-item-6
             text: Fold in the drained pasta — it should look loose and saucy. Scrape into the baking dish and level the top.
           - id: steps-1-item-7
             text: >-
               In a skillet over medium heat, melt the butter and toast the panko, stirring, until evenly golden, 3–4
               min. Off the heat, stir in the Parmesan. Scatter evenly over the assembled dish.
+            uses: [ingredients-3-item-3, ingredients-3-item-1, ingredients-3-item-2]
           - id: steps-1-item-8
             text: >-
               Bake at 425°F for 10–15 min, until bubbling at the edges. The panko is already toasted so watch it — pull

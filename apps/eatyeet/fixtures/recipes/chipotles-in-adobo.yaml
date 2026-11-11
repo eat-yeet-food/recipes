@@ -57,12 +57,15 @@ blocks:
         items:
           - id: steps-1-item-1
             text: '**Soak:** Cover the chipotles with boiling water and soak 30–45 minutes.'
+            uses: [ingredients-1-item-1, ingredients-1-item-2]
           - id: steps-1-item-2
             text: '**Drain:** Drain, discard the soaking water, and remove the stems.'
           - id: steps-1-item-3
             text: '**Soften the onion:** Sauté the onion in the oil for 3–4 minutes, until soft.'
+            uses: [ingredients-1-item-4, ingredients-1-item-8]
           - id: steps-1-item-4
             text: '**Combine:** Add the chipotles, fresh water, vinegar, tomato paste, and salt.'
+            uses: [ingredients-1-item-3, ingredients-1-item-5, ingredients-1-item-6, ingredients-1-item-7]
           - id: steps-1-item-5
             text: >-
               **Simmer:** Cover and gently simmer 20–30 minutes, adding a tablespoon of water if needed.
