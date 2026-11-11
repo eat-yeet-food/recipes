@@ -5,8 +5,9 @@ import { recipeFactItems } from '@eat-yeet/l7-recipes/recipes/recipe-fact-items'
 import { INGREDIENT_AMOUNT, stepNeeds } from '@eat-yeet/l7-recipes/recipes/step-needs'
 import { stepTimers } from '@eat-yeet/l7-recipes/recipes/step-timers'
 import type { RecipeBlock, Section } from '@eat-yeet/l4-content-model/blocks'
-import type { AppHome, AppImage, AppRecipeDetail, AppRecipeIndex, AppRecipeSummary } from '@eat-yeet/l3-app-api/types'
+import type { AppHome, AppImage, AppRecipeDetail, AppRecipeIndex, AppRecipeSummary, AppRemixIndex, AppRemixRecipe, AppRemixResolution } from '@eat-yeet/l3-app-api/types'
 import { formatYield, humanizeMinutes } from '@eat-yeet/l2-recipe-domain/format'
+import { pizzaBallWeight } from '@eat-yeet/l2-recipe-domain/pizza-sizing'
 import { deliveryMedia, publicMedia, services, siteData } from './cms'
 
 /**
@@ -90,6 +91,35 @@ export function clampCount(raw: string | null): number {
   return Number.isInteger(n) ? Math.min(99, Math.max(1, n)) : 1
 }
 
+/** A projected recipe page as the app's Recipe view model. */
+function recipeView(page: any) {
+  const blocks = (page.blocks ?? []).filter((b: any) => b.type === 'recipe') as RecipeBlock[]
+  return {
+    ...summary(page),
+    // The site's header facts (Active Time, Cook Time, Total Time, Yield), skipping empty values.
+    facts: recipeFactItems(page).map(([label, value]) => ({ label, value })),
+    blocks: blocks.map((block) => ({
+      ingredients: ingredientSections(block.ingredients),
+      equipment: sections(block.equipment),
+      steps: (block.steps ?? []).map((section) => ({
+        id: section.id, title: section.title, timeOrigin: section.timeOrigin ?? null,
+        // Timed rails only when every step has a time, as on the site.
+        timed: section.itemTimes?.length === section.items.length,
+        items: section.items.map((html, index) => ({
+          id: section.itemIds[index] ?? String(index), html,
+          needs: stepNeeds(section.itemUses?.[index] ?? [], block.ingredients ?? []),
+          time: section.itemTimes?.[index]?.label ?? null,
+          minutes: section.itemTimes?.[index]?.minutes ?? null,
+          rest: section.itemTimes?.[index]?.rest ?? null,
+          emphasis: section.itemTimes?.[index]?.emphasis ?? false,
+          timers: stepTimers(html),
+        })),
+      })),
+      notes: (block as any).notes ?? [], tips: (block as any).tips ?? [],
+    })),
+  }
+}
+
 export async function appRecipe(slug: string, count: number, origin: string): Promise<AppRecipeDetail | null> {
   const { recipe } = await (await services()).recipes.getRecipe({ slug })
   if (!recipe) return null
@@ -100,35 +130,70 @@ export async function appRecipe(slug: string, count: number, origin: string): Pr
   const page = plugin && authored !== null
     ? plugin.resolveRecipe(source, source.workbench.config, plugin.withBatchCount(authored, count))
     : authoredRecipe(source, recipeWorkbenchRegistry)
-  const blocks = (page.blocks ?? []).filter((b: any) => b.type === 'recipe') as RecipeBlock[]
   return {
-    recipe: {
-      ...summary(page),
-      // The site's header facts (Active Time, Cook Time, Total Time, Yield), skipping empty values.
-      facts: recipeFactItems(page).map(([label, value]) => ({ label, value })),
-      blocks: blocks.map((block) => ({
-        ingredients: ingredientSections(block.ingredients),
-        equipment: sections(block.equipment),
-        steps: (block.steps ?? []).map((section) => ({
-          id: section.id, title: section.title, timeOrigin: section.timeOrigin ?? null,
-          // Timed rails only when every step has a time, as on the site.
-          timed: section.itemTimes?.length === section.items.length,
-          items: section.items.map((html, index) => ({
-            id: section.itemIds[index] ?? String(index), html,
-            needs: stepNeeds(section.itemUses?.[index] ?? [], block.ingredients ?? []),
-            time: section.itemTimes?.[index]?.label ?? null,
-            minutes: section.itemTimes?.[index]?.minutes ?? null,
-            rest: section.itemTimes?.[index]?.rest ?? null,
-            emphasis: section.itemTimes?.[index]?.emphasis ?? false,
-            timers: stepTimers(html),
-          })),
-        })),
-        notes: (block as any).notes ?? [], tips: (block as any).tips ?? [],
-      })),
-    },
+    recipe: recipeView(page),
     ...(plugin && authored !== null
       ? { batch: { count, noun: plugin.batchNoun(authored, count), plural: plugin.batchNoun(authored, 2) } }
       : {}),
     images: await imagesFor([page.image], origin),
+  }
+}
+
+// ---- Remix (the site's /remix): editing happens in the app, every calculation here. ----
+
+async function remixSource(slug: string) {
+  const { recipe } = await (await services()).recipes.getRecipe({ slug })
+  const source = recipe as any
+  const plugin = source?.workbench ? (recipeWorkbenchRegistry.get(source.workbench.id) as any) : undefined
+  const defaultState = plugin ? plugin.defaultState(source.workbench.config) : null
+  return plugin && defaultState !== null ? { source, plugin, config: source.workbench.config, defaultState } : null
+}
+
+/** Recipes Remix can start from, with the facts the site's "Start from a recipe" cards show. */
+export async function appRemixIndex(origin: string): Promise<AppRemixIndex> {
+  const { recipes } = await (await services()).recipes.listRecipes()
+  const out: AppRemixIndex['recipes'] = []
+  for (const listed of recipes as any[]) {
+    const remix = await remixSource(listed.slug)
+    if (!remix) continue
+    out.push({ slug: listed.slug, title: listed.title, image: listed.image ?? '', family: remix.plugin.id, label: remix.plugin.label,
+      facts: remix.plugin.facts(remix.source, remix.config, remix.defaultState) })
+  }
+  return { recipes: out, images: await imagesFor(out.map((r) => r.image), origin) }
+}
+
+/** What the editor needs: the recipe as written and the choices its calculator offers. */
+export async function appRemixRecipe(slug: string, origin: string): Promise<AppRemixRecipe | null> {
+  const remix = await remixSource(slug)
+  if (!remix) return null
+  const { source, plugin, config, defaultState } = remix
+  return {
+    slug, title: source.title, image: source.image ?? '', family: plugin.id, label: plugin.label, defaultState,
+    methods: (source.methodOptions ?? []).map((m: any) => ({ id: m.id, label: m.label })),
+    pizzaSizes: (config.pizzaSizing?.diametersInches ?? []).map((inches: number) => ({ inches, ballGrams: pizzaBallWeight(inches, config.pizzaSizing) })),
+    images: await imagesFor([source.image], origin),
+  }
+}
+
+export const REMIX_STATE_BYTES = 32 * 1024
+
+/**
+ * Validates an edited state and returns everything the editor and bake sheet show:
+ * facts, totals, the changes from the recipe as written, and the projected recipe.
+ */
+export async function appRemixResolve(slug: string, state: unknown): Promise<AppRemixResolution | null> {
+  const remix = await remixSource(slug)
+  if (!remix) return null
+  const { source, plugin, config, defaultState } = remix
+  const decoded = plugin.decodeState(state, config, source)
+  if (decoded === null) return { valid: false, errors: ['Some values are out of range. Check the highlighted fields.'], facts: '', total: '', totalDetail: '', changes: [], batchNoun: '' }
+  const totals = plugin.totals(source, config, decoded)
+  return {
+    valid: true, errors: [],
+    facts: plugin.facts(source, config, decoded),
+    total: totals.total, totalDetail: totals.detail,
+    changes: plugin.changes(source, config, defaultState, decoded),
+    batchNoun: plugin.batchNoun(decoded, plugin.batchCount(decoded)),
+    recipe: recipeView(plugin.resolveRecipe(source, config, decoded)),
   }
 }

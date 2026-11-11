@@ -98,8 +98,10 @@ struct RootView: View {
                 .navigationBarTitleDisplayMode(.inline)
         case .account:
             AccountScreen()
-        case .remix(let id):
-            PendingScreen(title: "Remix", detail: "\(id) — milestone 6")
+        case .remixLibrary:
+            RemixLibraryScreen { slug, formulaId in router.path.append(.remix(slug: slug, formulaId: formulaId)) }
+        case .remix(let slug, let formulaId):
+            RemixEditorScreen(slug: slug, formulaId: formulaId)
         }
     }
 }

@@ -33,6 +33,26 @@ check('Home', home.body)
 assert.ok(home.body.hero.headline && home.body.images[home.body.hero.image], 'home has its hero copy and image')
 assert.ok(home.body.latest.recipes.length > 0 && home.body.browse.categories.length > 0, 'home lists recipes and categories')
 
+const remix = await get('/remix')
+assert.equal(remix.status, 200)
+check('RemixIndex', remix.body)
+assert.ok(remix.body.recipes.length > 0, 'Remix lists calculator recipes')
+for (const { slug } of remix.body.recipes) {
+  const editor = await get(`/remix/${slug}`)
+  check('RemixRecipe', editor.body)
+  const post = (state) => fetch(`${origin}/api/public/app/v1/remix/${slug}/resolve`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ state }) })
+  const asWritten = await (await post(editor.body.defaultState)).json()
+  check('RemixResolution', asWritten)
+  assert.ok(asWritten.valid && asWritten.changes.length === 0 && asWritten.recipe, `${slug} resolves as written with no changes`)
+  const wetter = structuredClone(editor.body.defaultState)
+  wetter.formula.hydrationPercent += 2
+  const changed = await (await post(wetter)).json()
+  assert.ok(changed.valid && changed.changes.some((c) => /hydration/i.test(c.label)), `${slug} reports a hydration change`)
+  const broken = await (await post({ nonsense: true })).json()
+  assert.equal(broken.valid, false, `${slug} rejects an invalid state`)
+}
+assert.equal((await fetch(`${origin}/api/public/app/v1/remix/sourdough-bread/resolve`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{"state":{},"x":1}' })).status, 400)
+
 let batches = 0
 for (const { slug } of index.body.recipes) {
   const detail = await get(`/recipes/${slug}?count=2`)

@@ -11,7 +11,8 @@ final class AppRouter {
         case recipe(slug: String, cooking: Bool = false)
         case catalog(category: HomeCategory? = nil, search: Bool = false)
         case account
-        case remix(id: String)
+        case remixLibrary
+        case remix(slug: String, formulaId: String? = nil)
     }
 
     var path: [Route] = []
@@ -33,7 +34,7 @@ final class AppRouter {
         case .dev: path = []; showDevMenu = true
         case .recipe(let slug): path = [.recipe(slug: slug)]
         case .cook(let slug, _): path = [.recipe(slug: slug, cooking: true)]
-        case .remix(let id): path = [.remix(id: id)]
+        case .remix(let id): path = id.isEmpty ? [.remixLibrary] : [.remixLibrary, .remix(slug: id)]
         }
     }
 }

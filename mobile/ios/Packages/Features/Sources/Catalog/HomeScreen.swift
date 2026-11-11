@@ -41,15 +41,19 @@ public struct HomeScreen: View {
         .background(Palette.background)
         .toolbar { SiteNavBar(home: store.home.value, menuOpen: $menuOpen, go: go) }
         .overlay(alignment: .top) {
-            if menuOpen {
-                SiteMenu(links: store.home.value?.navigation ?? []) { destination in
-                    withAnimation(.snappy(duration: 0.2)) { menuOpen = false }
-                    go(destination)
+            // Clipped to the content area, so the panel slides out from under the bar and back.
+            VStack(spacing: 0) {
+                if menuOpen {
+                    SiteMenu(links: store.home.value?.navigation ?? []) { destination in
+                        withAnimation(.snappy(duration: 0.2)) { menuOpen = false }
+                        go(destination)
+                    }
+                    .transition(.move(edge: .top))
                 }
-                .transition(.move(edge: .top).combined(with: .opacity))
             }
+            .frame(maxWidth: .infinity, alignment: .top)
+            .clipped()
         }
-        .navigationBarTitleDisplayMode(.inline)
         .task { await store.loadHome() }
     }
 

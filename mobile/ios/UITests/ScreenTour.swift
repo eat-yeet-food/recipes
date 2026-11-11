@@ -104,4 +104,22 @@ final class ScreenTour: XCTestCase {
         sleep(2)
         save(search, "search-active")
     }
+
+    @MainActor func testRemix() {
+        let app = launch("eatyeet://open/remix")
+        XCTAssertTrue(app.buttons["remix-start-new-york-style-pizza"].waitForExistence(timeout: 20))
+        sleep(2)
+        save(app, "remix-library")
+        app.buttons["remix-start-new-york-style-pizza"].tap()
+        XCTAssertTrue(app.buttons["remix-review"].waitForExistence(timeout: 15))
+        sleep(3)
+        save(app, "remix-editor-1")
+        app.swipeUp(velocity: .slow); sleep(1)
+        save(app, "remix-editor-2")
+        app.swipeUp(velocity: .slow); sleep(1)
+        save(app, "remix-editor-3")
+        app.buttons["remix-review"].tap()
+        sleep(3)
+        save(app, "remix-bake")
+    }
 }

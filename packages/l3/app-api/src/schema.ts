@@ -16,6 +16,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/remix": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listRemixRecipes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/remix/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getRemixRecipe"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/remix/{slug}/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["resolveRemix"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/recipes": {
         parameters: {
             query?: never;
@@ -124,6 +172,59 @@ export interface components {
             images: {
                 [key: string]: components["schemas"]["Image"];
             };
+        };
+        RemixIndex: {
+            recipes: {
+                slug: string;
+                title: string;
+                image: string;
+                family: string;
+                label: string;
+                facts: string;
+            }[];
+            images: {
+                [key: string]: components["schemas"]["Image"];
+            };
+        };
+        RemixRecipe: {
+            slug: string;
+            title: string;
+            image: string;
+            /** @description The calculator: sourdough or pizza. */
+            family: string;
+            label: string;
+            /** @description The calculator's opaque state as written; the app edits known fields and keeps the rest. */
+            defaultState: {
+                [key: string]: unknown;
+            };
+            methods: {
+                id: string;
+                label: string;
+            }[];
+            /** @description Pizza sizes and the ball weight each takes; empty for bread. */
+            pizzaSizes: {
+                inches: number;
+                ballGrams: number;
+            }[];
+            images: {
+                [key: string]: components["schemas"]["Image"];
+            };
+        };
+        RemixChange: {
+            label: string;
+            from: string;
+            to: string;
+        };
+        RemixResolution: {
+            valid: boolean;
+            errors: string[];
+            facts: string;
+            total: string;
+            totalDetail: string;
+            changes: components["schemas"]["RemixChange"][];
+            batchNoun: string;
+            /** @description The projected recipe; absent when the state is invalid. */
+            recipe?: components["schemas"]["Recipe"];
         };
         Category: {
             slug: string;
@@ -255,6 +356,105 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Home"];
+                };
+            };
+        };
+    };
+    listRemixRecipes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Recipes Remix can start from. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RemixIndex"];
+                };
+            };
+        };
+    };
+    getRemixRecipe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The recipe's calculator state as written and its choices. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RemixRecipe"];
+                };
+            };
+            /** @description No remixable recipe with this slug. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    resolveRemix: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    state: {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+        responses: {
+            /** @description Validation, facts, totals, changes and the projected recipe for this state. Computes only; stores nothing. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RemixResolution"];
+                };
+            };
+            /** @description Malformed or oversized request. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No remixable recipe with this slug. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };

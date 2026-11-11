@@ -18,6 +18,60 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Home' }
+  /remix:
+    get:
+      operationId: listRemixRecipes
+      responses:
+        '200':
+          description: Recipes Remix can start from.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RemixIndex' }
+  /remix/{slug}:
+    get:
+      operationId: getRemixRecipe
+      parameters:
+        - { name: slug, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: The recipe's calculator state as written and its choices.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RemixRecipe' }
+        '404':
+          description: No remixable recipe with this slug.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+  /remix/{slug}/resolve:
+    post:
+      operationId: resolveRemix
+      parameters:
+        - { name: slug, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [state]
+              properties: { state: { type: object, additionalProperties: true } }
+      responses:
+        '200':
+          description: Validation, facts, totals, changes and the projected recipe for this state. Computes only; stores nothing.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RemixResolution' }
+        '400':
+          description: Malformed or oversized request.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404':
+          description: No remixable recipe with this slug.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
   /recipes:
     get:
       operationId: listRecipes
@@ -138,6 +192,52 @@ components:
             categories: { type: array, items: { $ref: '#/components/schemas/Category' } }
         navigation: { type: array, items: { $ref: '#/components/schemas/NavLink' } }
         images: { type: object, additionalProperties: { $ref: '#/components/schemas/Image' } }
+    RemixIndex:
+      type: object
+      required: [recipes, images]
+      properties:
+        recipes:
+          type: array
+          items:
+            type: object
+            required: [slug, title, image, family, label, facts]
+            properties:
+              slug: { type: string }
+              title: { type: string }
+              image: { type: string }
+              family: { type: string }
+              label: { type: string }
+              facts: { type: string }
+        images: { type: object, additionalProperties: { $ref: '#/components/schemas/Image' } }
+    RemixRecipe:
+      type: object
+      required: [slug, title, image, family, label, defaultState, methods, pizzaSizes, images]
+      properties:
+        slug: { type: string }
+        title: { type: string }
+        image: { type: string }
+        family: { type: string, description: "The calculator: sourdough or pizza." }
+        label: { type: string }
+        defaultState: { type: object, additionalProperties: true, description: "The calculator's opaque state as written; the app edits known fields and keeps the rest." }
+        methods: { type: array, items: { type: object, required: [id, label], properties: { id: { type: string }, label: { type: string } } } }
+        pizzaSizes: { type: array, items: { type: object, required: [inches, ballGrams], properties: { inches: { type: number }, ballGrams: { type: number } } }, description: "Pizza sizes and the ball weight each takes; empty for bread." }
+        images: { type: object, additionalProperties: { $ref: '#/components/schemas/Image' } }
+    RemixChange:
+      type: object
+      required: [label, from, to]
+      properties: { label: { type: string }, from: { type: string }, to: { type: string } }
+    RemixResolution:
+      type: object
+      required: [valid, errors, facts, total, totalDetail, changes, batchNoun]
+      properties:
+        valid: { type: boolean }
+        errors: { type: array, items: { type: string } }
+        facts: { type: string }
+        total: { type: string }
+        totalDetail: { type: string }
+        changes: { type: array, items: { $ref: '#/components/schemas/RemixChange' } }
+        batchNoun: { type: string }
+        recipe: { $ref: '#/components/schemas/Recipe', description: "The projected recipe; absent when the state is invalid." }
     Category:
       type: object
       required: [slug, label, facet, value, image]
