@@ -4,6 +4,7 @@ import { DEFAULT_PIZZA_PROCESS, type PizzaProcess } from '@eat-yeet/l2-recipe-do
 import { isDoughFormula, isDoughFormulaState, type DoughFormulaState } from '@eat-yeet/l2-recipe-domain/formula-state'
 import { calculateDoughLevainBuild, calculateFormula, formatPercent, type DoughFormula, type StarterProfile } from '@eat-yeet/l2-recipe-domain/formula'
 import { formatNumberFieldValue, type NumberFieldPrecision } from '@eat-yeet/l5-ui-primitives/primitives/number-field-format'
+import type { StepUse } from '@eat-yeet/l4-content-model/blocks'
 import type { RecipeContent } from '@eat-yeet/l4-content-model/recipes'
 import { recipeWithSelectedMethod } from '@eat-yeet/l4-content-model/recipes'
 import { formatYeastGrams, formatYeastTeaspoons, formatEighths, levainYield } from './dough-kitchen-model'
@@ -128,9 +129,35 @@ export function resolveWorkbenchRecipe(recipe: RecipeContent, selection: DoughWo
     })]
     const processSteps = process && config.processSections ? resolveSourdoughSteps(block.steps, config.processSections, process, levainIngredients, config.spiralMixer)
       : pizzaProcess ? resolvePizzaSteps(block.steps, pizzaProcess) : block.steps
+    // Steps name the authored dough lines they use; the calculator replaces those lines
+    // with its own (flour-…, water, salt), so point each use at the line that took its place.
+    const generatedIds = ingredients[0].itemIds
+    const replacedUses = new Map<string, string[]>()
+    for (const section of block.ingredients) {
+      if (!replacedSectionIds.has(section.id)) continue
+      section.items.forEach((item, index) => {
+        const text = item.replace(/<[^>]*>/g, ' ').toLowerCase()
+        const kind = section.id !== doughSectionId ? 'levain'
+          : /levain|starter/.test(text) ? 'levain' : /flour/.test(text) ? 'flour' : /water/.test(text) ? 'water'
+          : /\boil\b/.test(text) ? 'oil' : /sugar|honey/.test(text) ? 'sugar' : /malt/.test(text) ? 'malt'
+          : /yeast/.test(text) ? 'yeast' : /salt/.test(text) ? 'salt' : null
+        const ids = kind === 'flour' ? generatedIds.filter((id) => id.startsWith('flour-')) : generatedIds.filter((id) => id === kind)
+        replacedUses.set(section.itemIds[index], ids)
+      })
+    }
+    const remapUses = (uses: StepUse[]) => {
+      const seen = new Set<string>()
+      return uses.flatMap((use) => {
+        const ids = replacedUses.get(use.id)
+        // The calculator's line carries today's amount, so a replaced use drops any authored share.
+        const next = ids ? ids.map((id) => ({ id, ...(use.label ? { label: use.label } : {}) })) : [use]
+        return next.filter((item) => !seen.has(item.id) && Boolean(seen.add(item.id)))
+      })
+    }
     const steps = processSteps.map((section) => ({
       ...section,
       items: section.items.map((item) => renderFormulaBindings(item, selection, config, result)),
+      ...(section.itemUses ? { itemUses: section.itemUses.map(remapUses) } : {}),
     }))
     const formulaNote = selection.formula.family === 'pizza'
       ? `This dough is ${formatPercent(selection.formula.hydrationPercent)} hydration and makes ${selection.batch.count === 1 ? `one ${formatAppliedGrams(selection.batch.pieceWeightGrams)} ball` : `${selection.batch.count} × ${formatAppliedGrams(selection.batch.pieceWeightGrams)} balls (${formatAppliedGrams(result.totalDoughGrams)} total)`}.`.replace(/^(.*makes) 1 × (\S+) balls \(.*\)\.$/, '$1 one $2 ball.')

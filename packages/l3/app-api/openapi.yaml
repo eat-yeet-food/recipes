@@ -135,7 +135,7 @@ components:
         name: { type: string }
     Step:
       type: object
-      required: [id, html, needs, time, minutes, rest, emphasis]
+      required: [id, html, needs, time, minutes, rest, emphasis, timers]
       properties:
         id: { type: string }
         html: { type: string }
@@ -144,6 +144,16 @@ components:
         minutes: { type: [number, 'null'] }
         rest: { type: [string, 'null'] }
         emphasis: { type: boolean }
+        timers:
+          type: array
+          description: "Durations written in the step (\"bake 13–15 minutes\"), as tap-to-start cook-mode timers set to the shorter end."
+          items: { $ref: '#/components/schemas/StepTimer' }
+    StepTimer:
+      type: object
+      required: [label, minutes]
+      properties:
+        label: { type: string }
+        minutes: { type: number }
     StepSection:
       type: object
       required: [id, title, timeOrigin, timed, items]

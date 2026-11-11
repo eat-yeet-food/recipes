@@ -7,8 +7,7 @@ import SwiftUI
 @Observable
 final class AppRouter {
     enum Route: Hashable {
-        case recipe(slug: String)
-        case cook(slug: String, step: Int)
+        case recipe(slug: String, cooking: Bool = false)
         case remix(id: String)
     }
 
@@ -22,7 +21,7 @@ final class AppRouter {
         case .home: path = []
         case .dev: path = []; showDevMenu = true
         case .recipe(let slug): path = [.recipe(slug: slug)]
-        case .cook(let slug, let step): path = [.recipe(slug: slug), .cook(slug: slug, step: step)]
+        case .cook(let slug, _): path = [.recipe(slug: slug, cooking: true)]
         case .remix(let id): path = [.remix(id: id)]
         }
     }

@@ -116,6 +116,12 @@ export interface components {
             minutes: number | null;
             rest: string | null;
             emphasis: boolean;
+            /** @description Durations written in the step ("bake 13–15 minutes"), as tap-to-start cook-mode timers set to the shorter end. */
+            timers: components["schemas"]["StepTimer"][];
+        };
+        StepTimer: {
+            label: string;
+            minutes: number;
         };
         StepSection: {
             id: string;

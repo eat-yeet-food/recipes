@@ -8,20 +8,25 @@ import SwiftUI
 public struct RecipeScreen: View {
     @Environment(RecipeStore.self) private var store
     let slug: String
-    let cook: (Int) -> Void
     @State private var count = 1
+    @State private var cooking: Bool
+    @State private var session = CookSession()
     /// The last loaded detail stays on screen while a new count loads (no flash).
     @State private var shown: RecipeDetail?
 
-    public init(slug: String, cook: @escaping (Int) -> Void) {
+    /// `cooking` opens cook mode straight away (the eatyeet://open/cook/<slug> link).
+    public init(slug: String, cooking: Bool = false) {
         self.slug = slug
-        self.cook = cook
+        _cooking = State(initialValue: cooking)
     }
 
     public var body: some View {
         Group {
             if let detail = shown ?? store.recipe(slug, count: count).value {
-                RecipeContent(detail: detail, count: $count, cook: cook)
+                RecipeContent(detail: detail, count: $count) { cooking = true }
+                    .fullScreenCover(isPresented: $cooking) {
+                        CookMode(recipe: detail.recipe, image: detail.images.additionalProperties[detail.recipe.image], session: session) { cooking = false }
+                    }
             } else if case .failed(let message) = store.recipe(slug, count: count) {
                 LoadFailure(message: message) { await store.loadRecipe(slug, count: count) }
             } else {
@@ -43,14 +48,14 @@ struct RecipeContent: View {
     @Environment(AppEnvironment.self) private var environment
     let detail: RecipeDetail
     @Binding var count: Int
-    let cook: (Int) -> Void
+    let cook: () -> Void
 
     private var recipe: Components.Schemas.Recipe { detail.recipe }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                RecipeHeader(recipe: recipe, image: detail.images.additionalProperties[recipe.image], cook: { cook(0) }) {
+                RecipeHeader(recipe: recipe, image: detail.images.additionalProperties[recipe.image], cook: cook) {
                     RecipePrinter.print(slug: recipe.slug, title: recipe.title, count: detail.batch?.count, base: environment.backend.baseURL)
                 }
 

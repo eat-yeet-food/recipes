@@ -35,6 +35,10 @@ for (const { slug } of index.body.recipes) {
   if (detail.body.batch) {
     batches++
     assert.equal(detail.body.batch.count, 2, `${slug} applies today's count`)
+    // The calculator replaces the dough lines; steps must still find what they use.
+    const doughNeeds = detail.body.recipe.blocks.flatMap((b) => b.steps.flatMap((s) => s.items.flatMap((i) => i.needs)))
+      .filter((need) => /^(flour-|water$|salt$|yeast$|levain$)/.test(need.key))
+    assert.ok(doughNeeds.length > 0, `${slug} steps list the calculator's dough ingredients`)
   }
   assert.ok(!JSON.stringify(detail.body.recipe.blocks).includes('{{'), `${slug} has no unbound step placeholders`)
 }

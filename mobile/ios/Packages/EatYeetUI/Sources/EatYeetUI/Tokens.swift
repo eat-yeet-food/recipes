@@ -42,13 +42,14 @@ public struct BrandStripe: View {
 
 /// Filled plum pill with a plain label.
 public struct PrimaryButtonStyle: ButtonStyle {
-    public init() {}
+    let large: Bool
+    public init(large: Bool = false) { self.large = large }
     public func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.headline)
+            .font(large ? Typeface.body(17, weight: .semibold) : .headline)
             .foregroundStyle(Palette.onDarkLabel)
             .padding(.horizontal, 24)
-            .frame(minHeight: 48)
+            .frame(minHeight: large ? 52 : 48)
             .background(configuration.isPressed ? Palette.actionHover : Palette.ink, in: .capsule)
     }
 }

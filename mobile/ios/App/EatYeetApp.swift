@@ -71,11 +71,9 @@ struct RootView: View {
     @ViewBuilder
     private func destination(_ route: AppRouter.Route) -> some View {
         switch route {
-        case .recipe(let slug):
-            RecipeScreen(slug: slug) { step in router.path.append(.cook(slug: slug, step: step)) }
+        case .recipe(let slug, let cooking):
+            RecipeScreen(slug: slug, cooking: cooking)
                 .navigationTransition(.zoom(sourceID: slug, in: zoom))
-        case .cook(let slug, let step):
-            PendingScreen(title: "Cook mode", detail: "\(slug), step \(step) — milestone 3")
         case .remix(let id):
             PendingScreen(title: "Remix", detail: "\(id) — milestone 6")
         }

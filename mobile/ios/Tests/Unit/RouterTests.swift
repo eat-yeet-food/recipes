@@ -6,7 +6,7 @@ import Testing
     @Test func cookLinkPushesRecipeThenCook() {
         let router = AppRouter()
         router.open(URL(string: "eatyeet://open/recipes/sourdough-bread/cook/3")!)
-        #expect(router.path == [.recipe(slug: "sourdough-bread"), .cook(slug: "sourdough-bread", step: 3)])
+        #expect(router.path == [.recipe(slug: "sourdough-bread", cooking: true)])
     }
 
     @Test func devLinkOpensMenu() {

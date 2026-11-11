@@ -3,6 +3,7 @@ import { recipeWorkbenchRegistry } from '@app/recipe-workbenches'
 import { authoredRecipe } from '@eat-yeet/l7-recipes/recipes/workbench-registry'
 import { recipeFactItems } from '@eat-yeet/l7-recipes/recipes/recipe-fact-items'
 import { INGREDIENT_AMOUNT, stepNeeds } from '@eat-yeet/l7-recipes/recipes/step-needs'
+import { stepTimers } from '@eat-yeet/l7-recipes/recipes/step-timers'
 import type { RecipeBlock, Section } from '@eat-yeet/l4-content-model/blocks'
 import type { AppImage, AppRecipeDetail, AppRecipeIndex, AppRecipeSummary } from '@eat-yeet/l3-app-api/types'
 import { formatYield, humanizeMinutes } from '@eat-yeet/l2-recipe-domain/format'
@@ -92,6 +93,7 @@ export async function appRecipe(slug: string, count: number, origin: string): Pr
             minutes: section.itemTimes?.[index]?.minutes ?? null,
             rest: section.itemTimes?.[index]?.rest ?? null,
             emphasis: section.itemTimes?.[index]?.emphasis ?? false,
+            timers: stepTimers(html),
           })),
         })),
         notes: (block as any).notes ?? [], tips: (block as any).tips ?? [],

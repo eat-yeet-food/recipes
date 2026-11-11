@@ -12,7 +12,7 @@ final class ScreenTour: XCTestCase {
         return url
     }
 
-    private func launch(_ link: String) -> XCUIApplication {
+    @MainActor private func launch(_ link: String) -> XCUIApplication {
         let app = XCUIApplication()
         var args = ["-openURL", link]
         if let origin = ProcessInfo.processInfo.environment["LOCAL_ORIGIN"] { args += ["-localOrigin", origin] }
@@ -21,7 +21,7 @@ final class ScreenTour: XCTestCase {
         return app
     }
 
-    private func save(_ app: XCUIApplication, _ name: String) {
+    @MainActor private func save(_ app: XCUIApplication, _ name: String) {
         let data = app.screenshot().pngRepresentation
         try? data.write(to: directory.appending(path: "\(name).png"))
         let attachment = XCTAttachment(data: data, uniformTypeIdentifier: "public.png")
@@ -50,5 +50,29 @@ final class ScreenTour: XCTestCase {
             }
             app.terminate()
         }
+    }
+
+    @MainActor func testCookMode() {
+        let app = launch("eatyeet://open/recipes/new-york-style-pizza/cook/1")
+        let begin = app.buttons["cook-begin"]
+        XCTAssertTrue(begin.waitForExistence(timeout: 15))
+        sleep(2)
+        save(app, "cook-intro")
+        begin.tap()
+        sleep(1)
+        save(app, "cook-gather")
+        // Check every item in the first group; it folds a second later.
+        let boxes = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'cook-item-'"))
+        for index in 0..<min(boxes.count, 3) { boxes.element(boundBy: index).tap() }
+        sleep(1)
+        save(app, "cook-gather-checked")
+        app.buttons["cook-start"].tap()
+        XCTAssertTrue(app.staticTexts["cook-step"].waitForExistence(timeout: 5))
+        sleep(1)
+        save(app, "cook-step-1")
+        app.buttons["cook-next"].tap()
+        sleep(1)
+        save(app, "cook-step-2")
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'STEP 2 OF'")).count > 0)
     }
 }

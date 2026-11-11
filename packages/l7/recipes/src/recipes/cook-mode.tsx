@@ -3,6 +3,8 @@ import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState, type
 import { ArrowLeft, ArrowRight, Check, ChevronDown, Timer, X } from 'lucide-react'
 import type { RecipeBlock, Section } from '@eat-yeet/l4-content-model/blocks'
 import { stepNeeds, type Need } from './step-needs'
+import { stepTimers } from './step-timers'
+export { stepTimers }
 import { cn } from '@eat-yeet/l0-foundation/utils'
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
 import { haptic } from '@eat-yeet/l5-ui-primitives/primitives/haptics'
@@ -21,21 +23,6 @@ type Step = { id: string; html: string; section: string; needs: Need[] }
 type CookTimer = { id: string; label: string; endsAt: number; done: boolean }
 
 const Html = ({ html, className }: { html: string; className?: string }) => <span className={className} dangerouslySetInnerHTML={{ __html: html }} />
-const plain = (html: string) => html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&')
-
-const DURATION = /(\d+(?:\.\d+)?)(?:\s*(?:–|-|to)\s*(\d+(?:\.\d+)?))?\s*(minutes?|mins?|hours?|hrs?)\b/gi
-/** Times written in a step ("bake 13–15 minutes") become timers set to the shorter end of the range. */
-export function stepTimers(html: string): { label: string; minutes: number }[] {
-  const seen = new Set<string>()
-  return [...plain(html).matchAll(DURATION)].flatMap((match) => {
-    const hours = /^h/i.test(match[3])
-    const minutes = Number(match[1]) * (hours ? 60 : 1)
-    const label = `${match[1]}${match[2] ? `–${match[2]}` : ''} ${hours ? 'hr' : 'min'}`
-    if (!minutes || seen.has(label)) return []
-    seen.add(label)
-    return [{ label, minutes }]
-  })
-}
 
 function clock(ms: number) {
   const total = Math.max(0, Math.ceil(ms / 1000))
