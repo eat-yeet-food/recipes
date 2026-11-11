@@ -13,6 +13,11 @@ public enum Typeface {
         return .custom(name, size: size, relativeTo: style)
     }
 
+    /// Bowlby One SC (`--font-hero`): the wordmark and the home headline.
+    public static func hero(_ size: CGFloat, relativeTo style: Font.TextStyle = .largeTitle) -> Font {
+        .custom("BowlbyOneSC-Regular", size: size, relativeTo: style)
+    }
+
     public static func body(_ size: CGFloat = 17, weight: Font.Weight = .regular, relativeTo style: Font.TextStyle = .body) -> Font {
         let name = switch weight {
         case .bold, .heavy, .black: "AvenirNext-Bold"

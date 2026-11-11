@@ -8,10 +8,15 @@ import SwiftUI
 public struct CatalogScreen: View {
     @Environment(RecipeStore.self) private var store
     @State private var query = ""
+    @State private var searching: Bool
+    private let category: HomeCategory?
     private let zoom: Namespace.ID?
     private let open: (String) -> Void
 
-    public init(zoom: Namespace.ID? = nil, open: @escaping (String) -> Void) {
+    /// `category` narrows the list to a home Browse tile; `search` opens with the search field focused.
+    public init(category: HomeCategory? = nil, search: Bool = false, zoom: Namespace.ID? = nil, open: @escaping (String) -> Void) {
+        self.category = category
+        _searching = State(initialValue: search)
         self.zoom = zoom
         self.open = open
     }
@@ -32,16 +37,16 @@ public struct CatalogScreen: View {
     }
 
     private func list(_ index: RecipeIndex) -> some View {
-        let recipes = CatalogSearch.filter(index.recipes, query: query)
+        let recipes = CatalogSearch.filter(CatalogSearch.filter(index.recipes, category: category), query: query)
         return ScrollView {
             LazyVStack(alignment: .leading, spacing: 32) {
                 VStack(alignment: .leading, spacing: 10) {
-                    Text(index.heading.title)
+                    Text(category?.label ?? index.heading.title)
                         .font(Typeface.display(38, relativeTo: .largeTitle))
                         .tracking(38 * 0.02)
                         .foregroundStyle(Palette.ink)
                         .accessibilityAddTraits(.isHeader)
-                    if !index.heading.intro.isEmpty {
+                    if category == nil, !index.heading.intro.isEmpty {
                         Text(index.heading.intro)
                             .font(Typeface.body(14, relativeTo: .subheadline))
                             .lineSpacing(14 * 0.625 - 3)
@@ -66,12 +71,26 @@ public struct CatalogScreen: View {
             .padding(.bottom, 56)
         }
         .refreshable { await store.loadIndex() }
-        .searchable(text: $query, prompt: "Search recipes")
+        .searchable(text: $query, isPresented: $searching, prompt: "Search recipes")
         .onAppear { Perf.signposter.emitEvent(Perf.launchContent) }
     }
 }
 
 public enum CatalogSearch {
+    /// A Browse tile is the search it stands for (`?courses=mains`).
+    public static func filter(_ recipes: [RecipeSummary], category: HomeCategory?) -> [RecipeSummary] {
+        guard let category else { return recipes }
+        return recipes.filter { recipe in
+            switch category.facet {
+            case "courses": recipe.courses.contains(category.value)
+            case "methods": recipe.methods.contains(category.value)
+            case "cuisines": recipe.cuisines.contains(category.value)
+            case "restrictions": recipe.restrictions.contains(category.value)
+            default: true
+            }
+        }
+    }
+
     /// Every word must appear in the recipe's search text (the site's searchText field).
     public static func filter(_ recipes: [RecipeSummary], query: String) -> [RecipeSummary] {
         let words = query.lowercased().split(whereSeparator: \.isWhitespace)

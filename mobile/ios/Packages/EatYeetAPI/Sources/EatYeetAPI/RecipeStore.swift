@@ -18,6 +18,7 @@ public enum Loadable<Value: Sendable>: Sendable {
 @MainActor
 @Observable
 public final class RecipeStore {
+    public private(set) var home: Loadable<Components.Schemas.Home> = .loading
     public private(set) var index: Loadable<RecipeIndex> = .loading
     public private(set) var details: [String: Loadable<RecipeDetail>] = [:]
     private var api: AppAPI
@@ -37,7 +38,19 @@ public final class RecipeStore {
         api = AppAPI(base: backend.baseURL)
         cache = JSONDiskCache(backend: backend)
         index = .loading
+        home = .loading
         details = [:]
+    }
+
+    public func loadHome() async {
+        if home.value == nil, let cached = cache.read(Components.Schemas.Home.self, key: "home") { home = .loaded(cached, stale: true) }
+        do {
+            let fresh = try await api.home()
+            cache.write(fresh, key: "home")
+            home = .loaded(fresh, stale: false)
+        } catch {
+            if home.value == nil { home = .failed(Self.describe(error)) }
+        }
     }
 
     public func loadIndex() async {

@@ -5,7 +5,7 @@ import { recipeFactItems } from '@eat-yeet/l7-recipes/recipes/recipe-fact-items'
 import { INGREDIENT_AMOUNT, stepNeeds } from '@eat-yeet/l7-recipes/recipes/step-needs'
 import { stepTimers } from '@eat-yeet/l7-recipes/recipes/step-timers'
 import type { RecipeBlock, Section } from '@eat-yeet/l4-content-model/blocks'
-import type { AppImage, AppRecipeDetail, AppRecipeIndex, AppRecipeSummary } from '@eat-yeet/l3-app-api/types'
+import type { AppHome, AppImage, AppRecipeDetail, AppRecipeIndex, AppRecipeSummary } from '@eat-yeet/l3-app-api/types'
 import { formatYield, humanizeMinutes } from '@eat-yeet/l2-recipe-domain/format'
 import { deliveryMedia, publicMedia, services, siteData } from './cms'
 
@@ -31,7 +31,7 @@ const summary = (recipe: any): AppRecipeSummary => ({
   slug: recipe.slug, title: recipe.title, description: recipe.description ?? '', category: recipe.category ?? '',
   image: recipe.image ?? '', totalLabel: recipe.totalLabel ?? '', prepLabel: recipe.prepLabel ?? '', cookLabel: recipe.cookLabel ?? '',
   timeLabel: recipe.totalLabel || humanizeMinutes(recipe.totalMinutes) || '', yieldLabel: formatYield(recipe.yieldAmount, recipe.yieldUnit) || '',
-  courses: recipe.courses ?? [], methods: recipe.methods ?? [], searchText: recipe.searchText ?? '', order: recipe.order ?? 0,
+  courses: recipe.courses ?? [], methods: recipe.methods ?? [], cuisines: recipe.cuisines ?? [], restrictions: recipe.restrictions ?? [], searchText: recipe.searchText ?? '', order: recipe.order ?? 0,
 })
 
 export async function appRecipeIndex(origin: string): Promise<AppRecipeIndex> {
@@ -41,6 +41,33 @@ export async function appRecipeIndex(origin: string): Promise<AppRecipeIndex> {
   return {
     heading: { title: pages.recipesHeading ?? 'All Recipes', intro: pages.recipesIntro ?? '' },
     recipes: list, images: await imagesFor(list.map((r) => r.image), origin),
+  }
+}
+
+const imageName = (path?: string) => (path ?? '').replace(/^\/images\//, '')
+
+/** The home page: hero, What's New (the newest six, by published date), featured categories and the menu. */
+export async function appHome(origin: string): Promise<AppHome> {
+  const site = await siteData()
+  const copy = site.copy ?? {}
+  const { recipes } = await (await services()).recipes.listRecipes()
+  const latest = [...(recipes as any[])]
+    .sort((a, b) => String(b.created ?? '').localeCompare(String(a.created ?? '')) || a.title.localeCompare(b.title))
+    .slice(0, 6).map(summary)
+  const categories = ((site.categories ?? []) as any[]).filter((c) => c.featured)
+    .map((c) => ({ slug: c.slug, label: c.label, facet: c.facet, value: c.value, image: imageName(c.image) }))
+  const hero = copy.hero ?? {}
+  return {
+    wordmark: { first: copy.wordmark?.first ?? 'Eat', second: copy.wordmark?.second ?? 'Yeet' },
+    hero: {
+      image: imageName(hero.image), imageAlt: hero.imageAlt ?? '', headline: hero.headline ?? '',
+      sticker: hero.headlineSticker ?? '', kicker: hero.kicker ?? '', motto: hero.motto ?? '', cta: hero.cta ?? '',
+    },
+    latest: { eyebrow: copy.home?.eyebrow ?? '', title: copy.home?.latestTitle ?? '', recipes: latest },
+    browse: { eyebrow: copy.home?.browseEyebrow ?? '', title: copy.home?.browseTitle ?? '', categories },
+    // The site's phone menu: entries not marked `mobile: false`.
+    navigation: ((site.navigation ?? []) as any[]).filter((n) => n.mobile !== false).map((n) => ({ label: n.label, href: n.href })),
+    images: await imagesFor([imageName(hero.image), ...latest.map((r) => r.image), ...categories.map((c) => c.image)], origin),
   }
 }
 

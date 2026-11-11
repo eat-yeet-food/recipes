@@ -9,6 +9,15 @@ servers:
   - url: https://eatyeet.com/api/public/app/v1
   - url: http://127.0.0.1:3000/api/public/app/v1
 paths:
+  /home:
+    get:
+      operationId: getHome
+      responses:
+        '200':
+          description: The home page (hero, What's New, featured categories) and the phone menu.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Home' }
   /recipes:
     get:
       operationId: listRecipes
@@ -64,7 +73,7 @@ components:
         variants: { type: array, items: { $ref: '#/components/schemas/ImageVariant' } }
     RecipeSummary:
       type: object
-      required: [slug, title, description, category, image, totalLabel, prepLabel, cookLabel, timeLabel, yieldLabel, courses, methods, searchText, order]
+      required: [slug, title, description, category, image, totalLabel, prepLabel, cookLabel, timeLabel, yieldLabel, courses, methods, cuisines, restrictions, searchText, order]
       properties:
         slug: { type: string }
         title: { type: string }
@@ -78,6 +87,8 @@ components:
         yieldLabel: { type: string }
         courses: { type: array, items: { type: string } }
         methods: { type: array, items: { type: string } }
+        cuisines: { type: array, items: { type: string } }
+        restrictions: { type: array, items: { type: string } }
         searchText: { type: string }
         order: { type: number }
     Heading:
@@ -92,6 +103,54 @@ components:
       properties:
         label: { type: string }
         value: { type: string }
+    Home:
+      type: object
+      required: [wordmark, hero, latest, browse, navigation, images]
+      properties:
+        wordmark:
+          type: object
+          required: [first, second]
+          properties: { first: { type: string }, second: { type: string } }
+        hero:
+          type: object
+          required: [image, imageAlt, headline, sticker, kicker, motto, cta]
+          properties:
+            image: { type: string }
+            imageAlt: { type: string }
+            headline: { type: string, description: "Line breaks are significant." }
+            sticker: { type: string, description: "The headline word set in the pink sticker; empty means the last word." }
+            kicker: { type: string }
+            motto: { type: string }
+            cta: { type: string }
+        latest:
+          type: object
+          required: [eyebrow, title, recipes]
+          properties:
+            eyebrow: { type: string }
+            title: { type: string }
+            recipes: { type: array, items: { $ref: '#/components/schemas/RecipeSummary' } }
+        browse:
+          type: object
+          required: [eyebrow, title, categories]
+          properties:
+            eyebrow: { type: string }
+            title: { type: string }
+            categories: { type: array, items: { $ref: '#/components/schemas/Category' } }
+        navigation: { type: array, items: { $ref: '#/components/schemas/NavLink' } }
+        images: { type: object, additionalProperties: { $ref: '#/components/schemas/Image' } }
+    Category:
+      type: object
+      required: [slug, label, facet, value, image]
+      properties:
+        slug: { type: string }
+        label: { type: string }
+        facet: { type: string }
+        value: { type: string }
+        image: { type: string }
+    NavLink:
+      type: object
+      required: [label, href]
+      properties: { label: { type: string }, href: { type: string } }
     RecipeIndex:
       type: object
       required: [heading, recipes, images]
@@ -174,7 +233,7 @@ components:
         tips: { type: array, items: { type: string } }
     Recipe:
       type: object
-      required: [slug, title, description, category, image, totalLabel, prepLabel, cookLabel, timeLabel, yieldLabel, courses, methods, searchText, order, facts, blocks]
+      required: [slug, title, description, category, image, totalLabel, prepLabel, cookLabel, timeLabel, yieldLabel, courses, methods, cuisines, restrictions, searchText, order, facts, blocks]
       properties:
         slug: { type: string }
         title: { type: string }
@@ -188,6 +247,8 @@ components:
         yieldLabel: { type: string }
         courses: { type: array, items: { type: string } }
         methods: { type: array, items: { type: string } }
+        cuisines: { type: array, items: { type: string } }
+        restrictions: { type: array, items: { type: string } }
         searchText: { type: string }
         order: { type: number }
         facts: { type: array, items: { $ref: '#/components/schemas/Fact' } }

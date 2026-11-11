@@ -40,6 +40,7 @@ targets:
           - gellertest-headlinesemibold.otf
           - gellertest-headlinebold.otf
           - gellertest-headlineblack.otf
+          - BowlbyOneSC-Regular.ttf
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait, UIInterfaceOrientationLandscapeLeft, UIInterfaceOrientationLandscapeRight]
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true

@@ -1,5 +1,21 @@
 // Generated from openapi.yaml by `pnpm app-api:gen`. Do not edit.
 export interface paths {
+    "/home": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getHome"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/recipes": {
         parameters: {
             query?: never;
@@ -65,6 +81,8 @@ export interface components {
             yieldLabel: string;
             courses: string[];
             methods: string[];
+            cuisines: string[];
+            restrictions: string[];
             searchText: string;
             order: number;
         };
@@ -75,6 +93,48 @@ export interface components {
         Fact: {
             label: string;
             value: string;
+        };
+        Home: {
+            wordmark: {
+                first: string;
+                second: string;
+            };
+            hero: {
+                image: string;
+                imageAlt: string;
+                /** @description Line breaks are significant. */
+                headline: string;
+                /** @description The headline word set in the pink sticker; empty means the last word. */
+                sticker: string;
+                kicker: string;
+                motto: string;
+                cta: string;
+            };
+            latest: {
+                eyebrow: string;
+                title: string;
+                recipes: components["schemas"]["RecipeSummary"][];
+            };
+            browse: {
+                eyebrow: string;
+                title: string;
+                categories: components["schemas"]["Category"][];
+            };
+            navigation: components["schemas"]["NavLink"][];
+            images: {
+                [key: string]: components["schemas"]["Image"];
+            };
+        };
+        Category: {
+            slug: string;
+            label: string;
+            facet: string;
+            value: string;
+            image: string;
+        };
+        NavLink: {
+            label: string;
+            href: string;
         };
         RecipeIndex: {
             heading: components["schemas"]["Heading"];
@@ -150,6 +210,8 @@ export interface components {
             yieldLabel: string;
             courses: string[];
             methods: string[];
+            cuisines: string[];
+            restrictions: string[];
             searchText: string;
             order: number;
             facts: components["schemas"]["Fact"][];
@@ -177,6 +239,26 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    getHome: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The home page (hero, What's New, featured categories) and the phone menu. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Home"];
+                };
+            };
+        };
+    };
     listRecipes: {
         parameters: {
             query?: never;

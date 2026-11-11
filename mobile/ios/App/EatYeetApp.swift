@@ -61,7 +61,14 @@ struct RootView: View {
     var body: some View {
         @Bindable var router = router
         NavigationStack(path: $router.path) {
-            CatalogScreen(zoom: zoom) { router.path.append(.recipe(slug: $0)) }
+            HomeScreen(zoom: zoom) { destination in
+                switch destination {
+                case .recipe(let slug): router.path.append(.recipe(slug: slug))
+                case .catalog(let category): router.path.append(.catalog(category: category))
+                case .search: router.path.append(.catalog(search: true))
+                case .path(let href): router.open(href)
+                }
+            }
                 .navigationDestination(for: AppRouter.Route.self, destination: destination)
         }
         .background(ThreeFingerLongPress { router.showDevMenu = true })
@@ -74,6 +81,10 @@ struct RootView: View {
         case .recipe(let slug, let cooking):
             RecipeScreen(slug: slug, cooking: cooking)
                 .navigationTransition(.zoom(sourceID: slug, in: zoom))
+        case .catalog(let category, let search):
+            CatalogScreen(category: category, search: search, zoom: zoom) { router.path.append(.recipe(slug: $0)) }
+                .navigationTitle(category?.label ?? "")
+                .navigationBarTitleDisplayMode(.inline)
         case .remix(let id):
             PendingScreen(title: "Remix", detail: "\(id) — milestone 6")
         }

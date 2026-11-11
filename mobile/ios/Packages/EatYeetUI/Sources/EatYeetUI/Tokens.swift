@@ -58,6 +58,11 @@ public struct PrimaryButtonStyle: ButtonStyle {
 public enum SiteIcon: String {
     case chefHat = "chef-hat"
     case printer
+    case clock
+    case utensilsCrossed = "utensils-crossed"
+    case menu
+    case search
+    case arrowRight = "arrow-right"
 
     public var image: Image { Image(rawValue, bundle: .module) }
 }

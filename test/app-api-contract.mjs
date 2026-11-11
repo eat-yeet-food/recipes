@@ -27,6 +27,12 @@ assert.ok(index.body.recipes.length > 0, 'index lists published recipes')
 for (const url of Object.values(index.body.images).flatMap((image) => [image.url, ...image.variants.map((v) => v.url)]))
   assert.match(url, /^https?:\/\//, 'image URLs are absolute')
 
+const home = await get('/home')
+assert.equal(home.status, 200)
+check('Home', home.body)
+assert.ok(home.body.hero.headline && home.body.images[home.body.hero.image], 'home has its hero copy and image')
+assert.ok(home.body.latest.recipes.length > 0 && home.body.browse.categories.length > 0, 'home lists recipes and categories')
+
 let batches = 0
 for (const { slug } of index.body.recipes) {
   const detail = await get(`/recipes/${slug}?count=2`)

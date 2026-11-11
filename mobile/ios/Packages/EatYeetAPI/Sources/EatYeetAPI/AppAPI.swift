@@ -25,6 +25,13 @@ public struct AppAPI: Sendable {
             middlewares: [NetworkLogMiddleware()])
     }
 
+    public func home() async throws -> Components.Schemas.Home {
+        switch try await client.getHome() {
+        case .ok(let ok): return try ok.body.json
+        case .undocumented(let status, _): throw AppAPIError.unexpected(status: status)
+        }
+    }
+
     public func recipes() async throws -> RecipeIndex {
         switch try await client.listRecipes() {
         case .ok(let ok): return try ok.body.json
