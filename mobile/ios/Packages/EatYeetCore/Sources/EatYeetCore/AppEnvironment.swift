@@ -11,7 +11,9 @@ public enum BackendEnvironment: String, CaseIterable, Sendable, Identifiable {
     public var baseURL: URL {
         switch self {
         case .production: URL(string: "https://eatyeet.com")!
-        case .local: URL(string: "http://127.0.0.1:3000")!
+        // Tooling may pass `-localOrigin http://127.0.0.1:<port>` when 3000 is taken.
+        case .local: UserDefaults.standard.string(forKey: "localOrigin").flatMap(URL.init(string:))
+            ?? URL(string: "http://127.0.0.1:3000")!
         }
     }
 

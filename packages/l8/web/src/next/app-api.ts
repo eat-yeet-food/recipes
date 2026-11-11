@@ -1,11 +1,12 @@
 import 'server-only'
 import { recipeWorkbenchRegistry } from '@app/recipe-workbenches'
 import { authoredRecipe } from '@eat-yeet/l7-recipes/recipes/workbench-registry'
+import { recipeFactItems } from '@eat-yeet/l7-recipes/recipes/recipe-fact-items'
 import { INGREDIENT_AMOUNT, stepNeeds } from '@eat-yeet/l7-recipes/recipes/step-needs'
 import type { RecipeBlock, Section } from '@eat-yeet/l4-content-model/blocks'
 import type { AppImage, AppRecipeDetail, AppRecipeIndex, AppRecipeSummary } from '@eat-yeet/l3-app-api/types'
 import { formatYield, humanizeMinutes } from '@eat-yeet/l2-recipe-domain/format'
-import { deliveryMedia, publicMedia, services } from './cms'
+import { deliveryMedia, publicMedia, services, siteData } from './cms'
 
 /**
  * The iOS app API (`/api/public/app/v1`). It returns fully resolved view models: the
@@ -35,7 +36,11 @@ const summary = (recipe: any): AppRecipeSummary => ({
 export async function appRecipeIndex(origin: string): Promise<AppRecipeIndex> {
   const { recipes } = await (await services()).recipes.listRecipes()
   const list = (recipes as any[]).map(summary).sort((a, b) => a.order - b.order)
-  return { recipes: list, images: await imagesFor(list.map((r) => r.image), origin) }
+  const pages = (await siteData()).copy?.pages ?? {}
+  return {
+    heading: { title: pages.recipesHeading ?? 'All Recipes', intro: pages.recipesIntro ?? '' },
+    recipes: list, images: await imagesFor(list.map((r) => r.image), origin),
+  }
 }
 
 const sections = (list: Section[] = []) => list.map((section) => ({
@@ -71,6 +76,8 @@ export async function appRecipe(slug: string, count: number, origin: string): Pr
   return {
     recipe: {
       ...summary(page),
+      // The site's header facts (Active Time, Cook Time, Total Time, Yield), skipping empty values.
+      facts: recipeFactItems(page).map(([label, value]) => ({ label, value })),
       blocks: blocks.map((block) => ({
         ingredients: ingredientSections(block.ingredients),
         equipment: sections(block.equipment),

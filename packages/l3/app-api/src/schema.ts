@@ -68,7 +68,16 @@ export interface components {
             searchText: string;
             order: number;
         };
+        Heading: {
+            title: string;
+            intro: string;
+        };
+        Fact: {
+            label: string;
+            value: string;
+        };
         RecipeIndex: {
+            heading: components["schemas"]["Heading"];
             recipes: components["schemas"]["RecipeSummary"][];
             images: {
                 [key: string]: components["schemas"]["Image"];
@@ -137,6 +146,7 @@ export interface components {
             methods: string[];
             searchText: string;
             order: number;
+            facts: components["schemas"]["Fact"][];
             blocks: components["schemas"]["RecipeBlock"][];
         };
         Batch: {

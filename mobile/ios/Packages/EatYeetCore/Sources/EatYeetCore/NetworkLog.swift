@@ -9,6 +9,15 @@ public struct NetworkLogEntry: Identifiable, Sendable {
     public let milliseconds: Int
     public let bodyPreview: String
     public let at: Date
+
+    public init(method: String, url: URL, status: Int?, milliseconds: Int, bodyPreview: String, at: Date) {
+        self.method = method
+        self.url = url
+        self.status = status
+        self.milliseconds = milliseconds
+        self.bodyPreview = bodyPreview
+        self.at = at
+    }
 }
 
 /// Ring buffer of recent requests, shown in the dev menu.

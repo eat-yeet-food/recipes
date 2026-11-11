@@ -14,6 +14,8 @@ packages:
     path: Packages/EatYeetUI
   DevTools:
     path: Packages/DevTools
+  EatYeetAPI:
+    path: Packages/EatYeetAPI
   Features:
     path: Packages/Features
 targets:
@@ -31,7 +33,13 @@ targets:
         CFBundleDisplayName: Eat / Yeet
         CFBundleShortVersionString: "0.1"
         CFBundleVersion: "1"
-        UILaunchScreen: {}
+        UILaunchScreen:
+          UIColorName: ""
+        UIAppFonts:
+          - gellertest-headlineregular.otf
+          - gellertest-headlinesemibold.otf
+          - gellertest-headlinebold.otf
+          - gellertest-headlineblack.otf
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait, UIInterfaceOrientationLandscapeLeft, UIInterfaceOrientationLandscapeRight]
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
@@ -64,8 +72,13 @@ targets:
       - package: EatYeetCore
       - package: EatYeetUI
       - package: DevTools
+      - package: EatYeetAPI
       - package: Features
         product: Catalog
+      - package: Features
+        product: Recipe
+      - package: Features
+        product: FeatureSupport
   EatYeetTests:
     type: bundle.unit-test
     platform: iOS

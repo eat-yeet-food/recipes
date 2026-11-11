@@ -6,5 +6,5 @@ let package = Package(
     platforms: [.iOS(.v26)],
     products: [.library(name: "EatYeetUI", targets: ["EatYeetUI"])],
     dependencies: [.package(path: "../EatYeetCore")],
-    targets: [.target(name: "EatYeetUI", dependencies: ["EatYeetCore"])]
+    targets: [.target(name: "EatYeetUI", dependencies: ["EatYeetCore"], resources: [.process("Icons.xcassets")])]
 )

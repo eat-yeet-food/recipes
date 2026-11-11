@@ -36,8 +36,18 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>UIAppFonts</key>
+	<array>
+		<string>gellertest-headlineregular.otf</string>
+		<string>gellertest-headlinesemibold.otf</string>
+		<string>gellertest-headlinebold.otf</string>
+		<string>gellertest-headlineblack.otf</string>
+	</array>
 	<key>UILaunchScreen</key>
-	<dict/>
+	<dict>
+		<key>UIColorName</key>
+		<string></string>
+	</dict>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

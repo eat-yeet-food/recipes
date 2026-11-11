@@ -52,3 +52,34 @@ public struct PrimaryButtonStyle: ButtonStyle {
             .background(configuration.isPressed ? Palette.actionHover : Palette.ink, in: .capsule)
     }
 }
+
+/// The site's Lucide icons (same artwork as the web), as template images.
+public enum SiteIcon: String {
+    case chefHat = "chef-hat"
+    case printer
+
+    public var image: Image { Image(rawValue, bundle: .module) }
+}
+
+/// The site's round action on the plum band (RecipeIconAction, tone on-dark).
+public struct RoundIconAction: View {
+    let icon: SiteIcon
+    let label: String
+    let action: () -> Void
+    public init(_ icon: SiteIcon, label: String, action: @escaping () -> Void) {
+        self.icon = icon
+        self.label = label
+        self.action = action
+    }
+    public var body: some View {
+        Button(action: action) {
+            icon.image
+                .resizable()
+                .frame(width: 20, height: 20)
+                .foregroundStyle(.white)
+                .frame(width: 44, height: 44)
+                .background(.white.opacity(0.15), in: .circle)
+        }
+        .accessibilityLabel(label)
+    }
+}

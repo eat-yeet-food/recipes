@@ -80,10 +80,23 @@ components:
         methods: { type: array, items: { type: string } }
         searchText: { type: string }
         order: { type: number }
+    Heading:
+      type: object
+      required: [title, intro]
+      properties:
+        title: { type: string }
+        intro: { type: string }
+    Fact:
+      type: object
+      required: [label, value]
+      properties:
+        label: { type: string }
+        value: { type: string }
     RecipeIndex:
       type: object
-      required: [recipes, images]
+      required: [heading, recipes, images]
       properties:
+        heading: { $ref: '#/components/schemas/Heading' }
         recipes: { type: array, items: { $ref: '#/components/schemas/RecipeSummary' } }
         images: { type: object, additionalProperties: { $ref: '#/components/schemas/Image' } }
     Item:
@@ -151,7 +164,7 @@ components:
         tips: { type: array, items: { type: string } }
     Recipe:
       type: object
-      required: [slug, title, description, category, image, totalLabel, prepLabel, cookLabel, timeLabel, yieldLabel, courses, methods, searchText, order, blocks]
+      required: [slug, title, description, category, image, totalLabel, prepLabel, cookLabel, timeLabel, yieldLabel, courses, methods, searchText, order, facts, blocks]
       properties:
         slug: { type: string }
         title: { type: string }
@@ -167,6 +180,7 @@ components:
         methods: { type: array, items: { type: string } }
         searchText: { type: string }
         order: { type: number }
+        facts: { type: array, items: { $ref: '#/components/schemas/Fact' } }
         blocks: { type: array, items: { $ref: '#/components/schemas/RecipeBlock' } }
     Batch:
       type: object

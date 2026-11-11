@@ -1,4 +1,17 @@
-# Intentional native differences from the site, each with a reason.
-# - screen: recipe
-#   note: Zoom transition from catalog card (native improvement)
-exceptions: []
+# Intentional native differences from eatyeet.com, approved by the owner on 2026-11-11.
+# Anything not listed here must match the site; a difference that is not listed is a bug.
+# Add an entry only after the owner approves it.
+exceptions:
+  - id: navigation-bar
+    screens: [all]
+    note: iOS navigation bar with a back button replaces the site header (logo, search, menu); breadcrumbs are dropped because back does their job.
+  - id: search-field
+    screens: [catalog]
+    note: The system search field at the bottom of the list replaces the header's search button.
+  - id: zoom-transition
+    screens: [catalog, recipe]
+    note: A recipe card zooms into its recipe page, and swiping back returns it to the card.
+  - id: stepper-haptics
+    screens: [recipe]
+    note: The count stepper gives a light selection haptic on each change.
+# Kept the same as the site at the owner's request: the Print and chef-hat Cooking view buttons on the recipe band (print uses the site's print layout).

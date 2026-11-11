@@ -1,4 +1,7 @@
 import Catalog
+import EatYeetAPI
+import FeatureSupport
+import Recipe
 import DevTools
 import EatYeetCore
 import EatYeetUI
@@ -10,9 +13,13 @@ struct EatYeetApp: App {
     @State private var flags = FeatureFlags()
     @State private var overrides = DevOverrides()
     @State private var router = AppRouter()
+    @State private var store: RecipeStore
 
     init() {
         MetricsStore.shared.start()
+        let environment = AppEnvironment()
+        _environment = State(initialValue: environment)
+        _store = State(initialValue: RecipeStore(backend: environment.backend))
     }
 
     var body: some Scene {
@@ -34,6 +41,8 @@ struct EatYeetApp: App {
                 .environment(flags)
                 .environment(overrides)
                 .environment(router)
+                .environment(store)
+                .onChange(of: environment.backend) { _, backend in store.use(backend) }
         }
     }
 }
@@ -47,13 +56,13 @@ private struct DynamicTypeOverride: ViewModifier {
 
 struct RootView: View {
     @Environment(AppRouter.self) private var router
+    @Namespace private var zoom
 
     var body: some View {
         @Bindable var router = router
         NavigationStack(path: $router.path) {
-            CatalogScreen(build: .current)
+            CatalogScreen(zoom: zoom) { router.path.append(.recipe(slug: $0)) }
                 .navigationDestination(for: AppRouter.Route.self, destination: destination)
-                .onAppear { Perf.signposter.emitEvent(Perf.launchContent) }
         }
         .background(ThreeFingerLongPress { router.showDevMenu = true })
         .sheet(isPresented: $router.showDevMenu) { DevMenu(build: .current) }
@@ -63,7 +72,8 @@ struct RootView: View {
     private func destination(_ route: AppRouter.Route) -> some View {
         switch route {
         case .recipe(let slug):
-            PendingScreen(title: "Recipe", detail: "\(slug) — milestone 2")
+            RecipeScreen(slug: slug) { step in router.path.append(.cook(slug: slug, step: step)) }
+                .navigationTransition(.zoom(sourceID: slug, in: zoom))
         case .cook(let slug, let step):
             PendingScreen(title: "Cook mode", detail: "\(slug), step \(step) — milestone 3")
         case .remix(let id):
