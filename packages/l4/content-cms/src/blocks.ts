@@ -20,7 +20,13 @@ const choice = (name: string, options: string[]): Field => ({
 const sectionFields: Field[] = [
   text('sectionId', true),
   text('title'),
-  list('items', [text('itemId', true), html()]),
+  list('items', [
+    text('itemId', true),
+    html(),
+    // Ingredients: a short name steps reference. Steps: the ingredients they use, [{ id, amount?, label? }].
+    text('ref'),
+    { name: 'uses', type: 'json' },
+  ]),
 ]
 /** The same blocks back Learn articles, recipes and recipe method variants. */
 export function contentBlocks(name = 'blocks', depth = 0): Field {

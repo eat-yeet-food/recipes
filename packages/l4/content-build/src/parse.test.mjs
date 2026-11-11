@@ -396,3 +396,60 @@ it('rejects duplicate fixture identities with directory context', () => {
     assert.throws(() => loadRecipes(dir), (error) => error.message.includes(dir) && /duplicate slug/.test(error.message))
   } finally { rmSync(dir, { recursive: true, force: true }) }
 })
+
+describe('step uses', () => {
+  const recipe = (steps, ingredients = `
+      - id: dough
+        items:
+          - id: dough-flour
+            ref: flour
+            text: 500g bread flour
+          - id: water
+            text: 685g + 20g cool water (divided)`) => parseRecipe(`
+title: Bread
+blocks:
+  - type: recipe
+    ingredients:${ingredients}
+    steps:
+      - id: method
+        items:${steps}
+`, 'bread')
+  const block = (parsed) => parsed.blocks.find((b) => b.type === 'recipe')
+
+  it('resolves refs to ingredient IDs and keeps divided amounts', () => {
+    const steps = block(recipe(`
+          - id: mix
+            text: Mix.
+            uses: [flour, { id: water, amount: 685g }]
+          - id: bassinage
+            text: Add the rest of the water.
+            uses: [{ id: water, amount: 20g }]
+          - id: bake
+            text: Bake.`)).steps[0]
+    assert.deepEqual(steps.itemUses, [[{ id: 'dough-flour' }, { id: 'water', amount: '685g' }], [{ id: 'water', amount: '20g' }], []])
+  })
+
+  it('rejects unknown ingredients', () => {
+    assert.throws(() => recipe(`
+          - id: mix
+            text: Mix.
+            uses: [salt]`), /unknown ingredient "salt"/)
+  })
+
+  it('requires divided amounts to add up and to be given on every use', () => {
+    assert.throws(() => recipe(`
+          - id: mix
+            text: Mix.
+            uses: [{ id: water, amount: 680g }]
+          - id: bassinage
+            text: Add.
+            uses: [{ id: water, amount: 20g }]`), /lists 705g but its steps use 700g/)
+    assert.throws(() => recipe(`
+          - id: mix
+            text: Mix.
+            uses: [water]
+          - id: bassinage
+            text: Add.
+            uses: [{ id: water, amount: 20g }]`), /needs an amount/)
+  })
+})

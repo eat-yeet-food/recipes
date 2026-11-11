@@ -1,4 +1,4 @@
-import type { Section } from '@eat-yeet/l4-content-model/blocks'
+import type { Section, StepUse } from '@eat-yeet/l4-content-model/blocks'
 import { HAND_REST_MINUTES, type PizzaMixingMethod, type PizzaProcess } from '@eat-yeet/l2-recipe-domain/pizza-process'
 import { formatDuration, type ScheduleRow } from './sourdough-process.ts'
 
@@ -34,25 +34,34 @@ export function resolvePizzaSteps(steps: Section[], process: PizzaProcess): Sect
   const refrigerate = find(ITEMS.refrigerate)
   if (!dough || !divide || !refrigerate || divide.section !== dough.section || refrigerate.section !== dough.section) return steps
   const text = (id: string) => find(id)?.text ?? ''
+  // A rail step that merges authored steps uses everything they used.
+  const usesOf = (...ids: string[]) => {
+    const seen = new Map<string, StepUse>()
+    for (const id of ids) {
+      const index = dough.section.itemIds.indexOf(id)
+      for (const use of dough.section.itemUses?.[index] ?? []) if (!seen.has(use.id)) seen.set(use.id, use)
+    }
+    return [...seen.values()]
+  }
   const temperature = `${process.bulkTemperatureF}°F`
   const bulk = formatDuration(process.bulkMinutes)
   const days = `${process.coldDays} days`
   const fridge = text(ITEMS.refrigerate).replace(/refrigerator for [^.]*\./, `refrigerator for ${days}.`)
 
-  const timed: { id: string; text: string; time: { label: string; minutes: number; emphasis?: boolean; rest?: string } }[] = []
+  const timed: { id: string; text: string; uses?: StepUse[]; time: { label: string; minutes: number; emphasis?: boolean; rest?: string } }[] = []
   if (process.mixingMethod === 'spiral') {
-    timed.push({ id: ITEMS.combine, text: [text(ITEMS.chill), text(ITEMS.combine), text(ITEMS.mix).replace(/\b\d+\s*°?F\b/, temperature), text(ITEMS.ball).replace(/\s*Bulk ferment[^.]*\./, '')].filter(Boolean).join(' '),
+    timed.push({ id: ITEMS.combine, uses: usesOf(ITEMS.chill, ITEMS.combine, ITEMS.mix, ITEMS.ball), text: [text(ITEMS.chill), text(ITEMS.combine), text(ITEMS.mix).replace(/\b\d+\s*°?F\b/, temperature), text(ITEMS.ball).replace(/\s*Bulk ferment[^.]*\./, '')].filter(Boolean).join(' '),
       time: { label: '0m', minutes: 0, emphasis: true, rest: `Bulk ferment at ${temperature} for ${bulk}.` } })
   } else if (process.mixingMethod === 'food-processor') {
-    timed.push({ id: ITEMS.combine, text: `Use ice-cold water with no ice in it. Add the {{mixingIngredients}} to a food processor fitted with the dough blade and run on high until the dough reaches about ${temperature}. ${BALL}`,
+    timed.push({ id: ITEMS.combine, uses: usesOf(ITEMS.chill, ITEMS.combine, ITEMS.mix, ITEMS.ball), text: `Use ice-cold water with no ice in it. Add the {{mixingIngredients}} to a food processor fitted with the dough blade and run on high until the dough reaches about ${temperature}. ${BALL}`,
       time: { label: '0m', minutes: 0, emphasis: true, rest: `Bulk ferment at ${temperature} for ${bulk}.` } })
   } else {
-    timed.push({ id: ITEMS.combine, text: `${CHILL} Stir the {{mixingIngredients}} together in a large bowl until no dry flour remains.`,
+    timed.push({ id: ITEMS.combine, uses: usesOf(ITEMS.chill, ITEMS.combine), text: `${CHILL} Stir the {{mixingIngredients}} together in a large bowl until no dry flour remains.`,
       time: { label: '0m', minutes: 0, emphasis: true, rest: `Cover and rest for ${formatDuration(HAND_REST_MINUTES)}.` } })
-    timed.push({ id: ITEMS.mix, text: `Knead on an unfloured bench for 8–10 minutes, until smooth and about ${temperature}. Form a ball, place it in a bowl and cover with saran wrap.`,
+    timed.push({ id: ITEMS.mix, uses: usesOf(ITEMS.mix, ITEMS.ball), text: `Knead on an unfloured bench for 8–10 minutes, until smooth and about ${temperature}. Form a ball, place it in a bowl and cover with saran wrap.`,
       time: { label: formatDuration(HAND_REST_MINUTES), minutes: HAND_REST_MINUTES, rest: `Bulk ferment at ${temperature} for ${formatDuration(process.bulkMinutes - HAND_REST_MINUTES)}.` } })
   }
-  timed.push({ id: ITEMS.divide, text: `${divide.text} ${fridge}`, time: { label: bulk, minutes: process.bulkMinutes, emphasis: true } })
+  timed.push({ id: ITEMS.divide, uses: usesOf(ITEMS.divide, ITEMS.refrigerate), text: `${divide.text} ${fridge}`, time: { label: bulk, minutes: process.bulkMinutes, emphasis: true } })
 
   const used = new Set([ITEMS.chill, ITEMS.combine, ITEMS.mix, ITEMS.ball, ITEMS.divide, ITEMS.refrigerate])
   // Anything else the author added to the dough section stays, before the rail.
@@ -60,7 +69,7 @@ export function resolvePizzaSteps(steps: Section[], process: PizzaProcess): Sect
   return steps.map((section) => {
     if (section === dough.section) {
       if (extra.length) return section
-      return { ...section, items: timed.map((step) => step.text), itemIds: timed.map((step) => step.id), itemTimes: timed.map((step) => step.time), timeOrigin: 'Time since you start mixing' }
+      return { ...section, items: timed.map((step) => step.text), itemIds: timed.map((step) => step.id), itemUses: dough.section.itemUses ? timed.map((step) => step.uses ?? []) : undefined, itemTimes: timed.map((step) => step.time), timeOrigin: 'Time since you start mixing' }
     }
     const index = section.itemIds.indexOf(ITEMS.warmUp)
     if (index < 0) return section

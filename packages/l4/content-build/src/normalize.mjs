@@ -51,6 +51,8 @@ function normalizeSectioned(value, field) {
           return html ? {
             id: identifier(typeof item === 'string' ? '' : item?.id, `${id}-item-${itemIndex + 1}`),
             html,
+            ref: typeof item === 'object' && item?.ref != null ? String(item.ref).trim() : '',
+            uses: typeof item === 'object' ? list(item?.uses).map(normalizeUse) : [],
           } : null
         })
         .filter(Boolean)
@@ -59,9 +61,78 @@ function normalizeSectioned(value, field) {
         title,
         items: normalizedItems.map((item) => item.html),
         itemIds: normalizedItems.map((item) => item.id),
+        ...(normalizedItems.some((item) => item.ref) ? { itemRefs: normalizedItems.map((item) => item.ref) } : {}),
+        ...(normalizedItems.some((item) => item.uses.length) ? { itemUses: normalizedItems.map((item) => item.uses) } : {}),
       }
     })
     .filter((section) => section.title || section.items.length > 0)
+}
+
+/** `uses: [butter, { id: water, amount: 20g, label: cool water }]` */
+function normalizeUse(use) {
+  if (typeof use === 'string' || typeof use === 'number') return { id: String(use).trim() }
+  const id = String(use?.id ?? '').trim()
+  const amount = use?.amount != null ? String(use.amount).trim() : ''
+  const label = use?.label != null ? String(use.label).trim() : ''
+  return { id, ...(amount ? { amount } : {}), ...(label ? { label } : {}) }
+}
+
+const AMOUNT = /^\s*(\d+(?:\.\d+)?)\s*(g|kg|ml|l|oz|lb)\b/i
+/** Leading amount sum of an ingredient line, e.g. `685g + 20g cool water` → 705 g. */
+function leadingTotal(html) {
+  let rest = stripTags(html), total = 0, unit = ''
+  for (;;) {
+    const match = rest.match(AMOUNT)
+    if (!match || (unit && match[2].toLowerCase() !== unit)) break
+    unit = match[2].toLowerCase(); total += Number(match[1])
+    rest = rest.slice(match[0].length)
+    const plus = rest.match(/^\s*\+/)
+    if (!plus) break
+    rest = rest.slice(plus[0].length)
+  }
+  return unit ? { total, unit } : null
+}
+
+/**
+ * Resolve step `uses` to ingredient item IDs (by ID or `ref`) and check them:
+ * unknown references fail, and a divided ingredient's amounts must add up to
+ * the amount its line lists.
+ */
+export function resolveStepUses(ingredients, steps, path = 'recipe') {
+  const byKey = new Map()
+  const lines = new Map()
+  for (const section of ingredients)
+    section.items.forEach((html, i) => {
+      const id = section.itemIds[i]
+      lines.set(id, html)
+      byKey.set(id, id)
+      const ref = section.itemRefs?.[i]
+      if (ref) {
+        if (byKey.has(ref) && byKey.get(ref) !== id) throw new Error(`${path}: ingredient ref "${ref}" is not unique`)
+        byKey.set(ref, id)
+      }
+    })
+  const shares = new Map()
+  for (const section of steps) {
+    if (!section.itemUses) continue
+    section.itemUses = section.itemUses.map((uses, i) => uses.map((use) => {
+      const id = byKey.get(use.id)
+      if (!id) throw new Error(`${path}: step ${section.itemIds[i]} uses unknown ingredient "${use.id}"`)
+      if (!shares.has(id)) shares.set(id, [])
+      shares.get(id).push(use.amount ?? null)
+      return { ...use, id }
+    }))
+  }
+  for (const [id, amounts] of shares) {
+    if (!amounts.some(Boolean)) continue
+    if (!amounts.every(Boolean)) throw new Error(`${path}: ingredient "${id}" is divided, so every step that uses it needs an amount`)
+    const listed = leadingTotal(lines.get(id))
+    const parts = amounts.map((amount) => leadingTotal(amount))
+    if (listed && parts.every((part) => part?.unit === listed.unit)) {
+      const sum = parts.reduce((total, part) => total + part.total, 0)
+      if (Math.abs(sum - listed.total) > 0.001) throw new Error(`${path}: ingredient "${id}" lists ${listed.total}${listed.unit} but its steps use ${sum}${listed.unit}`)
+    }
+  }
 }
 
 function normalizeFlat(value) {
@@ -72,6 +143,7 @@ function normalizeRecipePayload(value = {}) {
   const sectioned = Object.fromEntries(
     [...SECTIONED].map((field) => [field, normalizeSectioned(value[field], field)]),
   )
+  resolveStepUses(sectioned.ingredients, sectioned.steps)
   return {
     equipment: sectioned.equipment,
     ingredients: sectioned.ingredients,

@@ -1,7 +1,8 @@
 'use client'
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { ArrowLeft, ArrowRight, Check, ChevronDown, Timer, X } from 'lucide-react'
-import type { RecipeBlock, Section } from '@eat-yeet/l4-content-model/blocks'
+import type { RecipeBlock, Section, StepUse } from '@eat-yeet/l4-content-model/blocks'
+import { INGREDIENT_AMOUNT } from './recipe-blocks'
 import { cn } from '@eat-yeet/l0-foundation/utils'
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
 import { haptic } from '@eat-yeet/l5-ui-primitives/primitives/haptics'
@@ -16,7 +17,29 @@ export const FOLD_DELAY_MS = 1000
 /** Set when someone opts out of step-by-step cook mode for the classic Cooking view on this device. */
 export const COOK_MODE_CLASSIC_KEY = 'eatyeet:cook-mode:classic'
 
-type Step = { id: string; html: string; section: string }
+type Step = { id: string; html: string; section: string; needs: Need[] }
+type Need = { key: string; amount: string; name: string }
+
+/**
+ * What a step uses, from its authored `uses`: each ingredient's amount (this
+ * step's share when divided) and its name without the amount.
+ */
+export function stepNeeds(uses: StepUse[], ingredients: Section[]): Need[] {
+  return uses.flatMap((use) => {
+    for (const section of ingredients) {
+      const index = section.itemIds.indexOf(use.id)
+      if (index < 0) continue
+      const html = section.items[index]
+      const amount = html.match(INGREDIENT_AMOUNT)?.[1] ?? ''
+      const name = html.slice(amount.length)
+        .replace(/^\s*(?:\+\s*[\d.]+\s*[a-z]+\s*)+/i, '')
+        .replace(/\s*\(divided\)|,\s*divided(?:\s*\([^)]*\))?/i, '')
+        .trim()
+      return [{ key: use.id, amount: use.amount ?? amount, name: use.label ?? name }]
+    }
+    return []
+  })
+}
 type CookTimer = { id: string; label: string; endsAt: number; done: boolean }
 
 const Html = ({ html, className }: { html: string; className?: string }) => <span className={className} dangerouslySetInnerHTML={{ __html: html }} />
@@ -53,7 +76,7 @@ const reducedMotion = () => typeof window !== 'undefined' && window.matchMedia?.
  */
 export function CookMode({ title, blocks, open, onClose, onFinish, onClassic, media, facts }: { title: string; blocks: RecipeBlock[]; open: boolean; media?: ReactNode; facts?: string; onClose: () => void; onFinish?: () => void; onClassic?: () => void }) {
   const groups = useMemo(() => blocks.flatMap((block) => block.ingredients).filter((section) => section.items.length > 0), [blocks])
-  const steps = useMemo<Step[]>(() => blocks.flatMap((block) => block.steps.flatMap((section) => section.items.map((html, index) => ({ id: `${section.id}:${section.itemIds[index] ?? index}`, html, section: section.title })))), [blocks])
+  const steps = useMemo<Step[]>(() => blocks.flatMap((block) => block.steps.flatMap((section) => section.items.map((html, index) => ({ id: `${section.id}:${section.itemIds[index] ?? index}`, html, section: section.title, needs: stepNeeds(section.itemUses?.[index] ?? [], block.ingredients) })))), [blocks])
   const [stage, setStage] = useState<'intro' | 'gather' | 'cook' | 'done'>('intro')
   const [checked, setChecked] = useState<Set<string>>(() => new Set())
   const [folded, setFolded] = useState<Set<string>>(() => new Set())
@@ -255,6 +278,12 @@ export function CookMode({ title, blocks, open, onClose, onFinish, onClassic, me
         <div className="min-h-0 flex-1 overflow-y-auto">
           {sectionTitle && <Eyebrow as="p" tone="muted" className="mb-2.5">{sectionTitle}</Eyebrow>}
           <Html html={step.html} className="block text-title-sm leading-snug font-semibold md:text-section [&_strong]:font-bold" />
+          {step.needs.length > 0 && <section aria-label="You’ll need" data-cook-needs="" className="mt-6 rounded-surface bg-muted px-5 py-4">
+            <Eyebrow as="h2" tone="muted" className="mb-1">You’ll need</Eyebrow>
+            <ul className="m-0 list-none p-0">{step.needs.map((need) => <li key={need.key} className="border-t border-border py-2 text-base first:border-0 md:text-lg">
+              {need.amount && <strong className="font-bold">{need.amount} </strong>}<Html html={need.name} />
+            </li>)}</ul>
+          </section>}
           {stepTimers(step.html).length > 0 && <div className="mt-6 flex flex-wrap gap-3">
             {stepTimers(step.html).map((timer) => <Button key={timer.label} variant="utility" onClick={() => startTimer(timer.label, timer.minutes)}><Timer />Start {timer.label} timer</Button>)}
           </div>}
@@ -262,7 +291,7 @@ export function CookMode({ title, blocks, open, onClose, onFinish, onClassic, me
         {groups.length > 0 && <aside aria-label="Ingredients" className="hidden min-h-0 w-[34%] shrink-0 overflow-y-auto rounded-surface bg-muted p-6 landscape:md:block">
           {groups.map((section) => <section key={section.id} className="[&+section]:mt-5">
             <Eyebrow as="h2" tone="ink" className="mb-1">{section.title || 'Ingredients'}</Eyebrow>
-            <ul className="m-0 list-none p-0">{section.items.map((item, index) => <li key={index} className="border-b border-border py-2 text-body-sm"><Html html={item} className="[&_strong]:font-bold" /></li>)}</ul>
+            <ul className="m-0 list-none p-0">{section.items.map((item, index) => { const used = step.needs.some((need) => need.key === section.itemIds[index]); return <li key={index} data-used={used ? 'true' : undefined} className={cn('border-b border-border py-2 text-body-sm', used && '-mx-2 rounded-filter border-transparent bg-brand-soft px-2 font-semibold')}><Html html={item} className="[&_strong]:font-bold" /></li> })}</ul>
           </section>)}
         </aside>}
       </div>

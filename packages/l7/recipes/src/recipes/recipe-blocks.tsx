@@ -113,9 +113,9 @@ function NumberedList({ section }: { section: Section }) {
 }
 
 /** A leading amount ("287g", "¼ tsp (0.72g)", "1 can") shown bold pink on the plum card. */
-const AMOUNT = /^([\d¼½¾⅛⅓⅔⅜⅝⅞][\d¼½¾⅛⅓⅔⅜⅝⅞.,/ -]*?(?:\s?(?:g|kg|ml|l|oz|lb|lbs|tsp|tbsp|cups?|cans?|cloves?)\b)?(?:\s*\([^)<]*\))?)(?=\s)/
+export const INGREDIENT_AMOUNT = /^([\d¼½¾⅛⅓⅔⅜⅝⅞][\d¼½¾⅛⅓⅔⅜⅝⅞.,/ -]*?(?:\s?(?:g|kg|ml|l|oz|lb|lbs|tsp|tbsp|cups?|cans?|cloves?)\b)?(?:\s*\([^)<]*\))?)(?=\s)/
 export function emphasizeAmount(html: string) {
-  return html.replace(AMOUNT, '<strong class="font-bold text-brand print:text-ink">$1</strong>')
+  return html.replace(INGREDIENT_AMOUNT, '<strong class="font-bold text-brand print:text-ink">$1</strong>')
 }
 
 export function RecipeList({ sections, ordered = false, tone = 'light' }: { sections: Section[]; ordered?: boolean; tone?: 'light' | 'on-dark' }) {

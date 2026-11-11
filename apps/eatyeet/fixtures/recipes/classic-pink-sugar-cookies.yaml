@@ -78,14 +78,17 @@ blocks:
               In a stand mixer fitted with the paddle attachment, beat the softened butter, powdered sugar and
               granulated sugar on low-medium speed for 1–2 minutes, until smooth and creamy. Avoid whipping excess air
               into the dough.
+            uses: [dough-butter, dough-powdered-sugar, dough-granulated-sugar]
           - id: oil-egg
             text: >-
               Add the canola oil, beaten egg and almond extract. Mix on low until fully combined, scraping the bowl as
               needed.
+            uses: [dough-oil, dough-egg, dough-almond]
           - id: dry
             text: >-
               In a separate bowl, whisk together the flour, salt, baking soda and cream of tartar. Add to the wet
               ingredients in two additions, mixing on low just until no dry flour remains.
+            uses: [dough-flour, dough-salt, dough-baking-soda, dough-cream-of-tartar]
           - id: shape
             text: >-
               Divide the dough into 8 equal portions, about 115g each. Shape into thick disks about 3½ inches wide
@@ -104,14 +107,17 @@ blocks:
               Fit a stand mixer with the paddle attachment and add the butter at 65–68°F. Start on low, then increase
               to medium-high and whip for about 3 minutes until light, smooth and fluffy. Scrape down the sides and
               bottom of the bowl.
+            uses: [frosting-butter]
           - id: add-sugar
             text: >-
               Reduce the mixer to low. Add the sifted powdered sugar in three additions, mixing until incorporated
               after each. Scrape down the bowl each time.
+            uses: [frosting-powdered-sugar]
           - id: flavor
             text: >-
               Add the heavy cream, vanilla, almond extract, salt and a small amount of pink gel coloring. Mix on low
               until combined.
+            uses: [frosting-cream, frosting-vanilla, frosting-almond, frosting-salt, frosting-color]
           - id: final-whip
             text: >-
               Increase to high speed and whip for 1 minute until smooth, fluffy and fully combined. The frosting should

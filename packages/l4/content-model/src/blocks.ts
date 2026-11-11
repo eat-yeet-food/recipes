@@ -18,6 +18,19 @@ export interface Section {
   itemTimes?: SectionItemTime[]
   /** What itemTimes count from, e.g. `Time since mixing in the levain`. */
   timeOrigin?: string
+  /** Ingredient sections: an optional short name per item that steps reference (`ref: butter`); '' when absent. */
+  itemRefs?: string[]
+  /** Step sections: the ingredients each step uses, by ingredient item ID; [] when the step lists none. */
+  itemUses?: StepUse[][]
+}
+
+/** One ingredient a step uses. `amount` is this step's share of a divided ingredient. */
+export interface StepUse {
+  /** The ingredient's item ID in the same recipe block. */
+  id: string
+  amount?: string
+  /** Replaces the name derived from the ingredient text. */
+  label?: string
 }
 
 export interface SectionItemTime {

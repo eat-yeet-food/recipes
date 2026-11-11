@@ -1,0 +1,58 @@
+import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-d1-sqlite'
+
+// Additive nullable columns for ingredient refs and step uses; older Workers ignore them.
+export const onlineCompatible = true
+
+export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
+  await db.run(sql`ALTER TABLE \`recipes_blocks_recipe_equipment_items\` ADD \`ref\` text;`)
+  await db.run(sql`ALTER TABLE \`recipes_blocks_recipe_equipment_items\` ADD \`uses\` text;`)
+  await db.run(sql`ALTER TABLE \`recipes_blocks_recipe_ingredients_items\` ADD \`ref\` text;`)
+  await db.run(sql`ALTER TABLE \`recipes_blocks_recipe_ingredients_items\` ADD \`uses\` text;`)
+  await db.run(sql`ALTER TABLE \`recipes_blocks_recipe_steps_items\` ADD \`ref\` text;`)
+  await db.run(sql`ALTER TABLE \`recipes_blocks_recipe_steps_items\` ADD \`uses\` text;`)
+  await db.run(sql`ALTER TABLE \`_recipes_v_blocks_recipe_equipment_items\` ADD \`ref\` text;`)
+  await db.run(sql`ALTER TABLE \`_recipes_v_blocks_recipe_equipment_items\` ADD \`uses\` text;`)
+  await db.run(sql`ALTER TABLE \`_recipes_v_blocks_recipe_ingredients_items\` ADD \`ref\` text;`)
+  await db.run(sql`ALTER TABLE \`_recipes_v_blocks_recipe_ingredients_items\` ADD \`uses\` text;`)
+  await db.run(sql`ALTER TABLE \`_recipes_v_blocks_recipe_steps_items\` ADD \`ref\` text;`)
+  await db.run(sql`ALTER TABLE \`_recipes_v_blocks_recipe_steps_items\` ADD \`uses\` text;`)
+  await db.run(sql`ALTER TABLE \`articles_blocks_recipe_equipment_items\` ADD \`ref\` text;`)
+  await db.run(sql`ALTER TABLE \`articles_blocks_recipe_equipment_items\` ADD \`uses\` text;`)
+  await db.run(sql`ALTER TABLE \`articles_blocks_recipe_ingredients_items\` ADD \`ref\` text;`)
+  await db.run(sql`ALTER TABLE \`articles_blocks_recipe_ingredients_items\` ADD \`uses\` text;`)
+  await db.run(sql`ALTER TABLE \`articles_blocks_recipe_steps_items\` ADD \`ref\` text;`)
+  await db.run(sql`ALTER TABLE \`articles_blocks_recipe_steps_items\` ADD \`uses\` text;`)
+  await db.run(sql`ALTER TABLE \`_articles_v_blocks_recipe_equipment_items\` ADD \`ref\` text;`)
+  await db.run(sql`ALTER TABLE \`_articles_v_blocks_recipe_equipment_items\` ADD \`uses\` text;`)
+  await db.run(sql`ALTER TABLE \`_articles_v_blocks_recipe_ingredients_items\` ADD \`ref\` text;`)
+  await db.run(sql`ALTER TABLE \`_articles_v_blocks_recipe_ingredients_items\` ADD \`uses\` text;`)
+  await db.run(sql`ALTER TABLE \`_articles_v_blocks_recipe_steps_items\` ADD \`ref\` text;`)
+  await db.run(sql`ALTER TABLE \`_articles_v_blocks_recipe_steps_items\` ADD \`uses\` text;`)
+}
+
+export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {
+  await db.run(sql`ALTER TABLE \`recipes_blocks_recipe_equipment_items\` DROP COLUMN \`ref\`;`)
+  await db.run(sql`ALTER TABLE \`recipes_blocks_recipe_equipment_items\` DROP COLUMN \`uses\`;`)
+  await db.run(sql`ALTER TABLE \`recipes_blocks_recipe_ingredients_items\` DROP COLUMN \`ref\`;`)
+  await db.run(sql`ALTER TABLE \`recipes_blocks_recipe_ingredients_items\` DROP COLUMN \`uses\`;`)
+  await db.run(sql`ALTER TABLE \`recipes_blocks_recipe_steps_items\` DROP COLUMN \`ref\`;`)
+  await db.run(sql`ALTER TABLE \`recipes_blocks_recipe_steps_items\` DROP COLUMN \`uses\`;`)
+  await db.run(sql`ALTER TABLE \`_recipes_v_blocks_recipe_equipment_items\` DROP COLUMN \`ref\`;`)
+  await db.run(sql`ALTER TABLE \`_recipes_v_blocks_recipe_equipment_items\` DROP COLUMN \`uses\`;`)
+  await db.run(sql`ALTER TABLE \`_recipes_v_blocks_recipe_ingredients_items\` DROP COLUMN \`ref\`;`)
+  await db.run(sql`ALTER TABLE \`_recipes_v_blocks_recipe_ingredients_items\` DROP COLUMN \`uses\`;`)
+  await db.run(sql`ALTER TABLE \`_recipes_v_blocks_recipe_steps_items\` DROP COLUMN \`ref\`;`)
+  await db.run(sql`ALTER TABLE \`_recipes_v_blocks_recipe_steps_items\` DROP COLUMN \`uses\`;`)
+  await db.run(sql`ALTER TABLE \`articles_blocks_recipe_equipment_items\` DROP COLUMN \`ref\`;`)
+  await db.run(sql`ALTER TABLE \`articles_blocks_recipe_equipment_items\` DROP COLUMN \`uses\`;`)
+  await db.run(sql`ALTER TABLE \`articles_blocks_recipe_ingredients_items\` DROP COLUMN \`ref\`;`)
+  await db.run(sql`ALTER TABLE \`articles_blocks_recipe_ingredients_items\` DROP COLUMN \`uses\`;`)
+  await db.run(sql`ALTER TABLE \`articles_blocks_recipe_steps_items\` DROP COLUMN \`ref\`;`)
+  await db.run(sql`ALTER TABLE \`articles_blocks_recipe_steps_items\` DROP COLUMN \`uses\`;`)
+  await db.run(sql`ALTER TABLE \`_articles_v_blocks_recipe_equipment_items\` DROP COLUMN \`ref\`;`)
+  await db.run(sql`ALTER TABLE \`_articles_v_blocks_recipe_equipment_items\` DROP COLUMN \`uses\`;`)
+  await db.run(sql`ALTER TABLE \`_articles_v_blocks_recipe_ingredients_items\` DROP COLUMN \`ref\`;`)
+  await db.run(sql`ALTER TABLE \`_articles_v_blocks_recipe_ingredients_items\` DROP COLUMN \`uses\`;`)
+  await db.run(sql`ALTER TABLE \`_articles_v_blocks_recipe_steps_items\` DROP COLUMN \`ref\`;`)
+  await db.run(sql`ALTER TABLE \`_articles_v_blocks_recipe_steps_items\` DROP COLUMN \`uses\`;`)
+}

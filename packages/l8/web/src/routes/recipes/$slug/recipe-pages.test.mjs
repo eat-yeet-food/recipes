@@ -196,6 +196,8 @@ for (const [device, viewport] of [['phone', { width: 390, height: 844 }], ['tabl
   check(`${device}: cook mode fits the screen`, fits)
   await sheet.getByRole('button', { name: /Start cooking/ }).click()
   check(`${device}: Start cooking shows the first step`, await sheet.getAttribute('data-cook-stage') === 'cook' && /Step 1 of/.test(await sheet.locator('header').textContent()))
+  const needs = sheet.locator('[data-cook-needs]')
+  check(`${device}: a step lists the ingredients it uses with amounts`, await needs.count() === 1 && /130g\s*unsalted butter/.test(await needs.textContent()) && /279g\s*powdered sugar/.test(await needs.textContent()))
   await sheet.getByRole('button', { name: 'Next' }).click()
   check(`${device}: Next advances a step`, /Step 2 of/.test(await sheet.locator('header').textContent()))
   check(`${device}: the step label fits without truncation`, await sheet.locator('header p').evaluate((el) => el.scrollWidth <= el.clientWidth) && await sheet.locator('header').getByRole('button', { name: 'Classic view' }).count() === 0)

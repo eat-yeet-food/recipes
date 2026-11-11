@@ -87,7 +87,7 @@ export function resolveSourdoughSteps(sections: Section[], bindings: SourdoughPr
       ...section, items: [`Mix ${levainIngredients}.`, ...section.items.slice(1)],
     }]
     if (section.id === bindings.autolyse) return autolyse ? [{
-      ...section, title: 'Autolyse', itemIds: ['autolyse-water'],
+      ...section, title: 'Autolyse', itemIds: ['autolyse-water'], itemUses: undefined,
       items: [`Mix flour and the first portion of water ({{initialWaterGrams}}) ${initialMix} Cover and rest for ${formatDuration(process.autolyseMinutes)} before mixing in the levain.`],
     }] : []
     if (shapeSection && section.id === shapeSection.id) return []
@@ -96,6 +96,8 @@ export function resolveSourdoughSteps(sections: Section[], bindings: SourdoughPr
       ...section,
       itemIds: steps.map((step) => step.id),
       items: steps.map((step) => step.text),
+      // Generated steps keep the uses of an authored step with the same ID.
+      itemUses: section.itemUses ? steps.map((step) => section.itemUses?.[section.itemIds.indexOf(step.id)] ?? []) : undefined,
       timeOrigin: 'Time since mixing in the levain',
       itemTimes: steps.map((step, index) => {
         const next = steps[index + 1]

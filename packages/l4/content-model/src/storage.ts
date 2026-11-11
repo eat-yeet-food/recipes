@@ -14,12 +14,14 @@ export function encodeBlocks(blocks: PageBlock[]): any[] {
     const { type, ...fields } = block
     if (type === 'recipe')
       for (const key of ['equipment', 'ingredients', 'steps'])
-        fields[key] = fields[key].map(({ id, title, items, itemIds }: any) => ({
+        fields[key] = fields[key].map(({ id, title, items, itemIds, itemRefs, itemUses }: any) => ({
           sectionId: id,
           title,
           items: items.map((html: string, i: number) => ({
             itemId: itemIds[i],
             html,
+            ...(itemRefs?.[i] ? { ref: itemRefs[i] } : {}),
+            ...(itemUses?.[i]?.length ? { uses: itemUses[i] } : {}),
           })),
         }))
     if (type === 'recipe')
@@ -70,6 +72,8 @@ export function decodeBlocks(blocks: any[] = []): PageBlock[] {
           title: section.title ?? '',
           items: (section.items ?? []).map((i: any) => i.html),
           itemIds: (section.items ?? []).map((i: any) => i.itemId),
+          ...((section.items ?? []).some((i: any) => i.ref) ? { itemRefs: section.items.map((i: any) => i.ref ?? '') } : {}),
+          ...((section.items ?? []).some((i: any) => Array.isArray(i.uses) && i.uses.length) ? { itemUses: section.items.map((i: any) => (Array.isArray(i.uses) ? i.uses : []).map(({ id, amount, label }: any) => ({ id, ...(amount ? { amount } : {}), ...(label ? { label } : {}) }))) } : {}),
         }))
       for (const key of ['notes', 'tips'])
         data[key] = (fields[key] ?? []).map((i: any) => i.html)
