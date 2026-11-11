@@ -63,7 +63,9 @@
     "test:remote": "node --test scripts/remote/*.test.mjs packages/l8/web/src/next/remote-policy.test.mjs packages/l8/web/src/next/projection-cache.test.mjs packages/l8/web/src/next/media-delivery.test.mjs packages/l8/web/src/next/worker-media.test.mjs packages/l8/web/src/next/html-cache.test.mjs packages/l8/web/src/next/config-headers.test.mjs",
     "typecheck:infra": "tsc -p infra/cloudflare/tsconfig.json",
     "remote:acceptance": "node scripts/remote-cli.mjs acceptance",
-    "remote:rehearse": "node scripts/remote-cli.mjs rehearse"
+    "remote:rehearse": "node scripts/remote-cli.mjs rehearse",
+    "ios": "node scripts/ios.mjs",
+    "ios:check": "node scripts/ios.mjs gen && node scripts/ios.mjs test"
   },
   "dependencies": {
     "@eat-yeet/l0-foundation": "workspace:*",

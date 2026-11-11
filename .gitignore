@@ -20,3 +20,10 @@ infra/cloudflare/Pulumi.*.yaml
 **/next-env.d.ts
 packages/l8/web/public/
 packages/l8/web/.dev.vars
+
+# iOS app (mobile/ios)
+mobile/ios/*.xcodeproj
+mobile/ios/build/
+mobile/ios/Config/Signing.local.xcconfig
+mobile/ios/Packages/*/.build/
+mobile/ios/Packages/*/.swiftpm/

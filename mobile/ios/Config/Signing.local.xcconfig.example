@@ -1,0 +1,2 @@
+// Copy to Signing.local.xcconfig; `pnpm ios team` fills it from Xcode's Accounts.
+DEVELOPMENT_TEAM = XXXXXXXXXX

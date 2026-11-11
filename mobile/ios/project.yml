@@ -1,0 +1,95 @@
+name: EatYeet
+options:
+  bundleIdPrefix: com.phoganuci
+  deploymentTarget:
+    iOS: "26.0"
+  createIntermediateGroups: true
+configFiles:
+  Debug: Config/Base.xcconfig
+  Release: Config/Base.xcconfig
+packages:
+  EatYeetCore:
+    path: Packages/EatYeetCore
+  EatYeetUI:
+    path: Packages/EatYeetUI
+  DevTools:
+    path: Packages/DevTools
+  Features:
+    path: Packages/Features
+targets:
+  EatYeet:
+    type: application
+    platform: iOS
+    sources:
+      - App
+      - path: build/generated/BuildInfo.swift
+        optional: true
+        type: file
+    info:
+      path: App/Info.plist
+      properties:
+        CFBundleDisplayName: Eat / Yeet
+        CFBundleShortVersionString: "0.1"
+        CFBundleVersion: "1"
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait, UIInterfaceOrientationLandscapeLeft, UIInterfaceOrientationLandscapeRight]
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
+        CFBundleURLTypes:
+          - CFBundleURLName: com.phoganuci.eatyeet
+            CFBundleURLSchemes: [eatyeet]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.phoganuci.eatyeet
+        SWIFT_VERSION: "6.0"
+        SWIFT_STRICT_CONCURRENCY: complete
+        TARGETED_DEVICE_FAMILY: "1"
+        CODE_SIGN_STYLE: Automatic
+        ENABLE_USER_SCRIPT_SANDBOXING: NO
+    preBuildScripts:
+      - name: Build info
+        basedOnDependencyAnalysis: false
+        script: |
+          set -e
+          out="$SRCROOT/build/generated/BuildInfo.swift"
+          mkdir -p "$(dirname "$out")"
+          sha=$(git -C "$SRCROOT" rev-parse --short=12 HEAD 2>/dev/null || echo unknown)
+          dirty=false; git -C "$SRCROOT" diff --quiet HEAD 2>/dev/null || dirty=true
+          now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          printf 'import EatYeetCore\nextension BuildInfo {\n  static let current = BuildInfo(gitSHA: "%s", dirty: %s, builtAt: "%s")\n}\n' "$sha" "$dirty" "$now" > "$out.tmp"
+          cmp -s "$out.tmp" "$out" && rm "$out.tmp" || mv "$out.tmp" "$out"
+        outputFiles:
+          - $(SRCROOT)/build/generated/BuildInfo.swift
+    dependencies:
+      - package: EatYeetCore
+      - package: EatYeetUI
+      - package: DevTools
+      - package: Features
+        product: Catalog
+  EatYeetTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [Tests/Unit]
+    dependencies:
+      - target: EatYeet
+    settings:
+      base:
+        SWIFT_VERSION: "6.0"
+        GENERATE_INFOPLIST_FILE: YES
+  EatYeetUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [UITests]
+    dependencies:
+      - target: EatYeet
+    settings:
+      base:
+        SWIFT_VERSION: "6.0"
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  EatYeet:
+    build:
+      targets:
+        EatYeet: all
+    test:
+      targets: [EatYeetTests, EatYeetUITests]

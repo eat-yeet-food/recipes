@@ -1,0 +1,4 @@
+# Intentional native differences from the site, each with a reason.
+# - screen: recipe
+#   note: Zoom transition from catalog card (native improvement)
+exceptions: []
