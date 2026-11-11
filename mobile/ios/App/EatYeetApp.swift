@@ -62,6 +62,8 @@ private struct DynamicTypeOverride: ViewModifier {
 struct RootView: View {
     @Environment(AppRouter.self) private var router
     @Environment(AccountStore.self) private var account
+    @Environment(AppEnvironment.self) private var environment
+    @Environment(\.openURL) private var openURL
     @Namespace private var zoom
 
     var body: some View {
@@ -75,6 +77,7 @@ struct RootView: View {
                 case .path(let href): router.open(href)
                 case .account: router.path.append(.account)
                 case .signOut: Task { await account.signOut() }
+                case .web(let path): openURL(environment.backend.baseURL.appending(path: path))
                 }
             }
                 .navigationDestination(for: AppRouter.Route.self, destination: destination)

@@ -14,11 +14,14 @@ public enum HomeDestination {
     case path(String)
     case account
     case signOut
+    /// A site page the app doesn't have (Privacy, Terms), opened in the browser.
+    case web(String)
 }
 
 /// The site's home page: the plum hero over the donut photo, What's New and Browse by Category.
 public struct HomeScreen: View {
     @Environment(RecipeStore.self) private var store
+    @State private var menuOpen = false
     private let zoom: Namespace.ID?
     private let go: (HomeDestination) -> Void
 
@@ -36,7 +39,16 @@ public struct HomeScreen: View {
             }
         }
         .background(Palette.background)
-        .toolbar { SiteNavBar(home: store.home.value, go: go) }
+        .toolbar { SiteNavBar(home: store.home.value, menuOpen: $menuOpen, go: go) }
+        .overlay(alignment: .top) {
+            if menuOpen {
+                SiteMenu(links: store.home.value?.navigation ?? []) { destination in
+                    withAnimation(.snappy(duration: 0.2)) { menuOpen = false }
+                    go(destination)
+                }
+                .transition(.move(edge: .top).combined(with: .opacity))
+            }
+        }
         .navigationBarTitleDisplayMode(.inline)
         .task { await store.loadHome() }
     }
@@ -71,6 +83,7 @@ public struct HomeScreen: View {
                 }
                 .padding(.horizontal, 32)
                 .padding(.bottom, 64)
+                SiteFooter(wordmark: home.wordmark, go: go)
             }
         }
         .refreshable { await store.loadHome() }
@@ -82,8 +95,8 @@ public struct HomeScreen: View {
 
 /// The site header as a native bar: the wordmark, then search and the menu.
 struct SiteNavBar: ToolbarContent {
-    @Environment(AccountStore.self) private var account
     let home: Components.Schemas.Home?
+    @Binding var menuOpen: Bool
     let go: (HomeDestination) -> Void
 
     var body: some ToolbarContent {
@@ -92,25 +105,87 @@ struct SiteNavBar: ToolbarContent {
                 .accessibilityLabel("\(home?.wordmark.first ?? "Eat") / \(home?.wordmark.second ?? "Yeet"), home")
         }
         .sharedBackgroundVisibility(.hidden)
-        ToolbarItemGroup(placement: .topBarTrailing) {
+        ToolbarItem(placement: .topBarTrailing) {
             Button { go(.search) } label: { SiteIcon.search.image }
                 .accessibilityLabel("Search")
-            Menu {
-                ForEach(home?.navigation ?? [], id: \.href) { link in
-                    Button(link.label) { go(.path(link.href)) }
-                }
-                // The site's phone menu account rows: Sign in, or Settings and Sign out.
-                Section(account.member?.displayName ?? "") {
-                    if account.member == nil {
-                        Button("Sign in") { go(.account) }
-                    } else {
-                        Button("Settings") { go(.account) }
-                        Button("Sign out") { go(.signOut) }
-                    }
-                }
-            } label: { SiteIcon.menu.image }
-                .accessibilityLabel("Open menu")
         }
+        .sharedBackgroundVisibility(.hidden)
+        ToolbarItem(placement: .topBarTrailing) {
+            Button { withAnimation(.snappy(duration: 0.2)) { menuOpen.toggle() } } label: {
+                SiteIcon.menu.image
+                    .frame(width: 44, height: 44)
+                    .background(menuOpen ? Palette.muted : .clear, in: .circle)
+            }
+            .accessibilityLabel(menuOpen ? "Close menu" : "Open menu")
+        }
+        .sharedBackgroundVisibility(.hidden)
+    }
+}
+
+/// The site's phone menu: a white panel under the header with bold rows, then the account rows.
+struct SiteMenu: View {
+    @Environment(AccountStore.self) private var account
+    let links: [Components.Schemas.NavLink]
+    let go: (HomeDestination) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            ForEach(links, id: \.href) { link in row(link.label) { go(.path(link.href)) } }
+            if let member = account.member {
+                row("Settings") { go(.account) }
+                row("Sign out") { go(.signOut) }
+                HStack(spacing: 8) {
+                    Text(String(member.displayName.first ?? "C").uppercased())
+                        .font(Typeface.body(12, weight: .bold)).frame(width: 32, height: 32)
+                        .background(Palette.brandSoft, in: .circle)
+                    Text(member.displayName).font(Typeface.body(14, weight: .bold)).lineLimit(1)
+                }
+                .padding(.horizontal, 8).frame(minHeight: 44)
+            } else {
+                row("Sign in") { go(.account) }
+            }
+        }
+        .foregroundStyle(Palette.ink)
+        .padding(.horizontal, 16).padding(.vertical, 12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Palette.background)
+        .overlay(alignment: .top) { Rectangle().fill(Palette.border).frame(height: 1) }
+        .overlay(alignment: .bottom) { Rectangle().fill(Palette.border).frame(height: 1) }
+    }
+
+    private func row(_ label: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(label).font(Typeface.body(14, weight: .bold))
+                .padding(.horizontal, 8).frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                .contentShape(.rect)
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+/// The site footer: the wordmark, the links and the copyright line.
+struct SiteFooter: View {
+    let wordmark: Components.Schemas.Home.WordmarkPayload
+    let go: (HomeDestination) -> Void
+    private let links: [(String, HomeDestination)] = [("Home", .path("/")), ("Recipes", .path("/search")), ("Remix", .path("/remix")),
+        ("Privacy", .web("/privacy")), ("Terms", .web("/terms"))]
+
+    var body: some View {
+        VStack(spacing: 16) {
+            Wordmark(first: wordmark.first, second: wordmark.second, size: 30)
+            HStack(spacing: 24) {
+                ForEach(links, id: \.0) { label, destination in
+                    Button(label) { go(destination) }
+                        .font(Typeface.body(14, weight: .bold)).foregroundStyle(Palette.ink)
+                        .frame(minHeight: 44)
+                }
+            }
+            Text("© \(String(Calendar.current.component(.year, from: .now))) \(wordmark.first) / \(wordmark.second). All rights reserved.")
+                .font(Typeface.body(11)).tracking(1.5).foregroundStyle(Palette.mutedForeground)
+        }
+        .padding(.vertical, 36).padding(.horizontal, 32)
+        .frame(maxWidth: .infinity)
+        .overlay(alignment: .top) { Rectangle().fill(Palette.border).frame(height: 1) }
     }
 }
 

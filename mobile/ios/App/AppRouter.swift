@@ -19,6 +19,7 @@ final class AppRouter {
 
     /// A site path from the menu (`/search`, `/remix`), as the matching deep link.
     func open(_ href: String) {
+        if href == "/" { path = []; return }
         if let url = URL(string: "eatyeet://open" + href) { open(url) }
     }
 

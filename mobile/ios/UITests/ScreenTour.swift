@@ -85,4 +85,23 @@ final class ScreenTour: XCTestCase {
         sleep(2)
         save(app, "recipe-ratings")
     }
+
+    @MainActor func testMenuFooterSearch() {
+        let app = launch("eatyeet://open")
+        XCTAssertTrue(app.buttons["Open menu"].waitForExistence(timeout: 15))
+        sleep(2)
+        app.buttons["Open menu"].tap()
+        sleep(1)
+        save(app, "home-menu")
+        app.buttons["Close menu"].tap()
+        for _ in 0..<25 { app.swipeUp(velocity: .fast) }
+        sleep(1)
+        save(app, "home-footer")
+        app.terminate()
+        let search = launch("eatyeet://open")
+        XCTAssertTrue(search.buttons["Search"].waitForExistence(timeout: 15))
+        search.buttons["Search"].tap()
+        sleep(2)
+        save(search, "search-active")
+    }
 }

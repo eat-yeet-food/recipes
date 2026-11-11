@@ -72,6 +72,8 @@ public struct CatalogScreen: View {
         }
         .refreshable { await store.loadIndex() }
         .searchable(text: $query, isPresented: $searching, prompt: "Search recipes")
+        // Keep the bar (and Back) visible while searching.
+        .searchPresentationToolbarBehavior(.avoidHidingContent)
         .onAppear { Perf.signposter.emitEvent(Perf.launchContent) }
     }
 }
