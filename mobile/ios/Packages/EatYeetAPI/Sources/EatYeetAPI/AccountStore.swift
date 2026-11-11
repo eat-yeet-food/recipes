@@ -86,7 +86,7 @@ public final class AccountStore {
     }
     private struct ErrorReply: Decodable { let error: String }
 
-    private func request(_ path: String, method: String = "GET", body: [String: String]? = nil, token: String? = nil) async throws -> (Data, Int) {
+    func request(_ path: String, method: String = "GET", body: [String: String]? = nil, token: String? = nil) async throws -> (Data, Int) {
         var request = URLRequest(url: api.appending(path: path))
         request.httpMethod = method
         request.cachePolicy = .reloadIgnoringLocalCacheData
@@ -100,7 +100,17 @@ public final class AccountStore {
         return (data, (response as? HTTPURLResponse)?.statusCode ?? 0)
     }
 
-    private func message(_ data: Data, fallback: String) -> String {
+    func requestJSON(_ path: String, method: String, json: [String: any Sendable]) async throws -> (Data, Int) {
+        var request = URLRequest(url: api.appending(path: path))
+        request.httpMethod = method
+        if let token = keychain.read() { request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization") }
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONSerialization.data(withJSONObject: json)
+        let (data, response) = try await URLSession(configuration: .ephemeral).data(for: request)
+        return (data, (response as? HTTPURLResponse)?.statusCode ?? 0)
+    }
+
+    func message(_ data: Data, fallback: String) -> String {
         (try? JSONDecoder().decode(ErrorReply.self, from: data))?.error ?? fallback
     }
 

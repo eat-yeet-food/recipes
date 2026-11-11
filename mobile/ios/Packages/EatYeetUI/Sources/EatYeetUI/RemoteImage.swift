@@ -27,6 +27,8 @@ public struct RemoteImage: View {
     let aspectRatio: CGFloat
     let alt: String
     @Environment(\.displayScale) private var scale
+    /// Bumped to retry a failed load (server restarting, flaky network): 1 s, 2 s, 4 s, … up to 30 s.
+    @State private var attempt = 0
 
     public init(variants: [ImageSource], aspectRatio: CGFloat, alt: String) {
         self.variants = variants
@@ -45,8 +47,14 @@ public struct RemoteImage: View {
                                 image.resizable().scaledToFill()
                                     .frame(width: proxy.size.width, height: proxy.size.height)
                                     .clipped()
+                            } else if case .failure = phase {
+                                Color.clear.task {
+                                    try? await Task.sleep(for: .seconds(min(30, pow(2, Double(attempt)))))
+                                    attempt += 1
+                                }
                             }
                         }
+                        .id(attempt)
                     }
                 }
             }

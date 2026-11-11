@@ -75,4 +75,14 @@ final class ScreenTour: XCTestCase {
         save(app, "cook-step-2")
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'STEP 2 OF'")).count > 0)
     }
+
+    @MainActor func testRatings() {
+        let app = launch("eatyeet://open/recipes/pollo-asado")
+        XCTAssertTrue(app.staticTexts["recipe-title"].waitForExistence(timeout: 15))
+        let heading = app.staticTexts["Ratings & Reviews"]
+        for _ in 0..<40 where !heading.isHittable { app.swipeUp(velocity: .fast) }
+        app.swipeUp(velocity: .slow)
+        sleep(2)
+        save(app, "recipe-ratings")
+    }
 }

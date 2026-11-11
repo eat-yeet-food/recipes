@@ -73,6 +73,7 @@ struct RecipeContent: View {
                             if !block.tips.isEmpty { FlatSection(title: "Tips", items: block.tips) }
                         }
                     }
+                    RatingsSection(slug: recipe.slug).padding(.top, 48)
                 }
                 .padding(.horizontal, 18)
                 .padding(.top, 24)
