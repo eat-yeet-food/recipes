@@ -74,7 +74,9 @@ function build({ forDevice = false } = {}) {
     if (!existsSync(join(ios, 'Config/Signing.local.xcconfig'))) {
       finish(false, { error: 'No signing team. Add your Apple ID in Xcode → Settings → Accounts, then run `pnpm ios team`.' })
     }
-    xcodebuild([...common, '-destination', 'generic/platform=iOS', '-allowProvisioningUpdates', 'build'])
+    // Building for the connected phone (not generic iOS) lets Xcode register it in the free team's profile.
+    const udid = process.env.IOS_DEVICE_UDID ?? '00008130-001028661E62001C' // the owner's iPhone 15 Pro
+    xcodebuild([...common, '-destination', `id=${udid}`, '-allowProvisioningUpdates', '-allowProvisioningDeviceRegistration', 'build'])
     return join(derived, 'Build/Products/Debug-iphoneos/EatYeet.app')
   }
   xcodebuild([...common, '-destination', `id=${simulator}`, 'CODE_SIGNING_ALLOWED=NO', 'build'])
