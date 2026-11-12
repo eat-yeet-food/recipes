@@ -13,7 +13,7 @@ struct PillPicker<Value: Hashable>: View {
                     withAnimation(.snappy(duration: 0.2)) { selection = value }
                 } label: {
                     Text(label)
-                        .font(Typeface.body(15, weight: .bold))
+                        .font(Typeface.body(.bodySm, weight: .bold))
                         .foregroundStyle(selection == value ? Palette.ink : .white)
                         .frame(maxWidth: .infinity, minHeight: 40)
                         .background { if selection == value { Capsule().fill(Palette.brand) } }
@@ -23,7 +23,7 @@ struct PillPicker<Value: Hashable>: View {
                 .accessibilityAddTraits(selection == value ? .isSelected : [])
             }
         }
-        .padding(4)
+        .padding(Space.s1)
         .background(Palette.ink, in: .capsule)
         .sensoryFeedback(.selection, trigger: selection)
     }
@@ -45,20 +45,20 @@ struct NumberField: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(label).font(Typeface.body(15, weight: .bold)).lineLimit(1).minimumScaleFactor(0.8)
+        VStack(alignment: .leading, spacing: Space.s2) {
+            Text(label).font(Typeface.body(.bodySm, weight: .bold)).lineLimit(1).minimumScaleFactor(0.8)
             HStack(alignment: .firstTextBaseline) {
                 TextField("", text: $text)
                     .keyboardType(.decimalPad)
                     .focused($focused)
-                    .font(Typeface.body(17))
+                    .font(Typeface.body(.lg))
                     .onChange(of: text) { _, typed in
                         // Only a real edit writes; showing the current value must not.
                         if let number = Double(typed.replacingOccurrences(of: ",", with: ".")), number != value { set(number) }
                     }
-                Text(unit).font(Typeface.body(15)).foregroundStyle(Palette.mutedForeground)
+                Text(unit).font(Typeface.body(.bodySm)).foregroundStyle(Palette.mutedForeground)
             }
-            .padding(.bottom, 8)
+            .padding(.bottom, Space.s2)
             .overlay(alignment: .bottom) {
                 Rectangle().fill(invalid ? Palette.danger : Palette.input).frame(height: focused ? 2 : 1)
             }
@@ -76,9 +76,9 @@ struct RemixSectionTitle: View {
     let title: String
     var detail: String? = nil
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(title).font(Typeface.display(26, relativeTo: .title2)).accessibilityAddTraits(.isHeader)
-            if let detail { Text(detail).font(Typeface.body(15)).foregroundStyle(Palette.mutedForeground) }
+        VStack(alignment: .leading, spacing: Space.s1) {
+            Text(title).font(Typeface.display(.title, relativeTo: .title2)).accessibilityAddTraits(.isHeader)
+            if let detail { Text(detail).font(Typeface.body(.bodySm)).foregroundStyle(Palette.mutedForeground) }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -88,8 +88,8 @@ struct RemixSectionTitle: View {
 struct RemixBand: View {
     let title: String
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(title.uppercased()).font(Typeface.hero(44)).accessibilityAddTraits(.isHeader)
+        VStack(alignment: .leading, spacing: Space.s3) {
+            Text(title.uppercased()).font(Typeface.hero(.display)).accessibilityAddTraits(.isHeader)
             LinearGradient(colors: [Palette.brand, Palette.brandAlt], startPoint: .leading, endPoint: .trailing)
                 .frame(width: 64, height: 4).clipShape(.capsule).accessibilityHidden(true)
         }

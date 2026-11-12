@@ -39,22 +39,21 @@ public struct CatalogScreen: View {
     private func list(_ index: RecipeIndex) -> some View {
         let recipes = CatalogSearch.filter(CatalogSearch.filter(index.recipes, category: category), query: query)
         return ScrollView {
-            LazyVStack(alignment: .leading, spacing: 32) {
-                VStack(alignment: .leading, spacing: 10) {
+            LazyVStack(alignment: .leading, spacing: Space.s8) {
+                VStack(alignment: .leading, spacing: Space.s2_5) {
                     Text(category?.label ?? index.heading.title)
-                        .font(Typeface.display(38, relativeTo: .largeTitle))
-                        .tracking(38 * 0.02)
+                        .font(Typeface.display(.page, relativeTo: .largeTitle))
+                        .tracking(Tracking.title(.page))
                         .foregroundStyle(Palette.ink)
                         .accessibilityAddTraits(.isHeader)
                     if category == nil, !index.heading.intro.isEmpty {
                         Text(index.heading.intro)
-                            .font(Typeface.body(14, relativeTo: .subheadline))
+                            .font(Typeface.body(.sm, relativeTo: .subheadline))
                             .lineSpacing(14 * 0.625 - 3)
                             .foregroundStyle(Palette.mutedForeground)
                     }
                 }
-                .padding(.top, 32)
-            .padding(.bottom, 0)
+                .padding(.top, Space.s8)
                 if recipes.isEmpty {
                     ContentUnavailableView.search(text: query)
                 }
@@ -67,8 +66,8 @@ public struct CatalogScreen: View {
                     .accessibilityIdentifier("recipe-card-\(recipe.slug)")
                 }
             }
-            .padding(.horizontal, 24)
-            .padding(.bottom, 56)
+            .padding(.horizontal, Space.s6)
+            .padding(.bottom, Space.s14)
         }
         .refreshable { await store.loadIndex() }
         .searchable(text: $query, isPresented: $searching, prompt: "Search recipes")
@@ -113,25 +112,25 @@ struct RecipeCard: View {
             if let image {
                 RemoteImage(variants: image.sources, aspectRatio: 1.5, alt: image.alt)
             }
-            VStack(alignment: .leading, spacing: 10) {
+            VStack(alignment: .leading, spacing: Space.s2_5) {
                 // Two title lines and three description lines are reserved, as on the site.
                 Text(recipe.title)
-                    .font(Typeface.display(18, weight: .black, relativeTo: .headline))
+                    .font(Typeface.display(.lg, weight: .extrabold, relativeTo: .headline))
                     .foregroundStyle(Palette.ink)
                     .multilineTextAlignment(.leading)
                     .lineLimit(2, reservesSpace: true)
                 Text(recipe.description)
-                    .font(Typeface.body(14, relativeTo: .subheadline))
+                    .font(Typeface.body(.sm, relativeTo: .subheadline))
                     .foregroundStyle(Palette.mutedForeground)
                     .multilineTextAlignment(.leading)
                     .lineSpacing(14 * 0.625 - 3)
                     .lineLimit(3, reservesSpace: true)
                 if !recipe.timeLabel.isEmpty || !recipe.yieldLabel.isEmpty {
-                    Rectangle().fill(Palette.border).frame(height: 1).padding(.top, 16)
-                    RecipeMeta(time: recipe.timeLabel, yield: recipe.yieldLabel).padding(.top, 6)
+                    Rectangle().fill(Palette.border).frame(height: 1).padding(.top, Space.s4)
+                    RecipeMeta(time: recipe.timeLabel, yield: recipe.yieldLabel).padding(.top, Space.s1_5)
                 }
             }
-            .padding(20)
+            .padding(Space.s5)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Palette.card)

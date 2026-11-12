@@ -24,26 +24,26 @@ public struct RemixLibraryScreen: View {
     public var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: Space.s4) {
                     RemixBand(title: "Remix")
                     Text("Tweak any dough recipe, get the numbers, and save your versions.")
-                        .font(Typeface.body(17)).foregroundStyle(Palette.mutedForeground)
+                        .font(Typeface.body(.lg)).foregroundStyle(Palette.mutedForeground)
                     if account.member == nil {
                         Button("Sign in") { Task { try? await account.signIn() } }
-                            .font(Typeface.body(17, weight: .bold)).underline()
+                            .font(Typeface.body(.lg, weight: .bold)).underline()
                     }
                 }
-                .padding(.horizontal, 16).padding(.top, 24).padding(.bottom, 24)
+                .padding(.horizontal, Space.s4).padding(.top, Space.s6).padding(.bottom, Space.s6)
                 Rectangle().fill(Palette.border).frame(height: 1)
 
-                VStack(alignment: .leading, spacing: 40) {
-                    if let error { Text(error).font(Typeface.body(15)).foregroundStyle(Palette.danger) }
-                    if let notice { Text(notice).font(Typeface.body(15)).foregroundStyle(Palette.mutedForeground) }
+                VStack(alignment: .leading, spacing: Space.s10) {
+                    if let error { Text(error).font(Typeface.body(.bodySm)).foregroundStyle(Palette.danger) }
+                    if let notice { Text(notice).font(Typeface.body(.bodySm)).foregroundStyle(Palette.mutedForeground) }
                     yours
                     start
                     deleted
                 }
-                .padding(.horizontal, 16).padding(.vertical, 32)
+                .padding(.horizontal, Space.s4).padding(.vertical, Space.s8)
             }
             .foregroundStyle(Palette.ink)
         }
@@ -74,20 +74,20 @@ public struct RemixLibraryScreen: View {
     @ViewBuilder
     private var yours: some View {
         if account.member == nil || list?.formulas.isEmpty == true {
-            Text("No remixes yet. Start from a recipe below, change anything, then save it here.").font(Typeface.body(17))
+            Text("No remixes yet. Start from a recipe below, change anything, then save it here.").font(Typeface.body(.lg))
         } else if let list {
-            VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: Space.s5) {
                 heading("Your remixes", count: list.formulas.count)
                 ForEach(list.formulas) { formula in
                     Button { open(formula.recipeSlug, formula.id) } label: {
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text(formula.name).font(Typeface.display(20, weight: .black, relativeTo: .headline))
-                            Text("From \(title(formula.recipeSlug))").font(Typeface.body(14)).foregroundStyle(Palette.mutedForeground)
-                            Text(facts[formula.id] ?? " ").font(Typeface.body(14))
+                        VStack(alignment: .leading, spacing: Space.s1_5) {
+                            Text(formula.name).font(Typeface.display(.xl, weight: .extrabold, relativeTo: .headline))
+                            Text("From \(title(formula.recipeSlug))").font(Typeface.body(.sm)).foregroundStyle(Palette.mutedForeground)
+                            Text(facts[formula.id] ?? " ").font(Typeface.body(.sm))
                             Label("Edited \(Self.ago(formula.updatedAt))", systemImage: "clock")
-                                .font(Typeface.body(12)).foregroundStyle(Palette.mutedForeground).padding(.top, 6)
+                                .font(Typeface.body(.xs)).foregroundStyle(Palette.mutedForeground).padding(.top, Space.s1_5)
                         }
-                        .padding(20).frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(Space.s5).frame(maxWidth: .infinity, alignment: .leading)
                         .background(Palette.card, in: .rect(cornerRadius: Radius.surface))
                         .overlay { RoundedRectangle(cornerRadius: Radius.surface).strokeBorder(Palette.border) }
                     }
@@ -106,9 +106,9 @@ public struct RemixLibraryScreen: View {
     @ViewBuilder
     private var start: some View {
         if let index {
-            VStack(alignment: .leading, spacing: 24) {
-                HStack(spacing: 16) {
-                    Text("Start from a recipe").font(Typeface.display(30, relativeTo: .title)).fixedSize().accessibilityAddTraits(.isHeader)
+            VStack(alignment: .leading, spacing: Space.s6) {
+                HStack(spacing: Space.s4) {
+                    Text("Start from a recipe").font(Typeface.display(.title, relativeTo: .title)).fixedSize().accessibilityAddTraits(.isHeader)
                     Rectangle().fill(Palette.border).frame(height: 1)
                 }
                 ForEach(index.recipes, id: \.slug) { recipe in
@@ -117,16 +117,16 @@ public struct RemixLibraryScreen: View {
                             if let image = index.images.additionalProperties[recipe.image] {
                                 RemoteImage(variants: image.sources, aspectRatio: 1.5, alt: image.alt)
                             }
-                            VStack(alignment: .leading, spacing: 12) {
-                                Text(recipe.title).font(Typeface.display(20, weight: .black, relativeTo: .headline))
-                                Text(recipe.facts).font(Typeface.body(15)).foregroundStyle(Palette.mutedForeground)
-                                HStack(spacing: 6) {
+                            VStack(alignment: .leading, spacing: Space.s3) {
+                                Text(recipe.title).font(Typeface.display(.xl, weight: .extrabold, relativeTo: .headline))
+                                Text(recipe.facts).font(Typeface.body(.bodySm)).foregroundStyle(Palette.mutedForeground)
+                                HStack(spacing: Space.s1_5) {
                                     Text("Start from this recipe").underline()
                                     SiteIcon.arrowRight.image.resizable().frame(width: 16, height: 16)
                                 }
-                                .font(Typeface.body(15, weight: .bold)).padding(.top, 12)
+                                .font(Typeface.body(.bodySm, weight: .bold)).padding(.top, Space.s3)
                             }
-                            .padding(20)
+                            .padding(Space.s5)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .background(Palette.card)
@@ -143,14 +143,14 @@ public struct RemixLibraryScreen: View {
     private var deleted: some View {
         if let list, !list.deleted.isEmpty {
             VStack(alignment: .leading, spacing: 0) {
-                heading("Recently deleted", count: list.deleted.count).padding(.bottom, 8)
+                heading("Recently deleted", count: list.deleted.count).padding(.bottom, Space.s2)
                 ForEach(list.deleted) { formula in
                     let confirming = confirmingPurge == formula.id
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(confirming ? "Delete \(formula.name)?" : formula.name).font(Typeface.body(16, weight: .bold))
+                    VStack(alignment: .leading, spacing: Space.s0_5) {
+                        Text(confirming ? "Delete \(formula.name)?" : formula.name).font(Typeface.body(.base, weight: .bold))
                         Text(confirming ? "This can’t be undone." : "\(title(formula.recipeSlug)) · \(Self.ago(formula.deletedAt ?? formula.updatedAt))")
-                            .font(Typeface.body(14)).foregroundStyle(Palette.mutedForeground)
-                        HStack(spacing: 24) {
+                            .font(Typeface.body(.sm)).foregroundStyle(Palette.mutedForeground)
+                        HStack(spacing: Space.s6) {
                             if confirming {
                                 Button("Cancel") { confirmingPurge = nil }
                                 Button("Delete") { Task { await run { try await account.purgeRemix(formula.id); confirmingPurge = nil } } }.foregroundStyle(Palette.danger)
@@ -159,24 +159,24 @@ public struct RemixLibraryScreen: View {
                                 Button("Delete") { confirmingPurge = formula.id }.foregroundStyle(Palette.danger)
                             }
                         }
-                        .font(Typeface.body(14, weight: .bold)).underline()
+                        .font(Typeface.body(.sm, weight: .bold)).underline()
                         .frame(minHeight: 44)
                     }
-                    .padding(.horizontal, 12).padding(.vertical, 8)
+                    .padding(.horizontal, Space.s3).padding(.vertical, Space.s2)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(confirming ? Palette.brandSoft.opacity(0.5) : .clear)
+                    .background(confirming ? Palette.tint : .clear)
                     .overlay(alignment: .bottom) { Rectangle().fill(Palette.border).frame(height: 1) }
                 }
             }
-            .padding(.top, 24)
+            .padding(.top, Space.s6)
             .overlay(alignment: .top) { Rectangle().fill(Palette.border).frame(height: 1) }
         }
     }
 
     private func heading(_ text: String, count: Int) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 8) {
-            Text(text).font(Typeface.display(26, relativeTo: .title2)).accessibilityAddTraits(.isHeader)
-            Text("\(count)").font(Typeface.body(15)).foregroundStyle(Palette.mutedForeground)
+        HStack(alignment: .firstTextBaseline, spacing: Space.s2) {
+            Text(text).font(Typeface.display(.title, relativeTo: .title2)).accessibilityAddTraits(.isHeader)
+            Text("\(count)").font(Typeface.body(.bodySm)).foregroundStyle(Palette.mutedForeground)
         }
     }
 

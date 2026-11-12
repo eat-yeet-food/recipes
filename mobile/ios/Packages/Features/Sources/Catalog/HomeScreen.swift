@@ -62,8 +62,8 @@ public struct HomeScreen: View {
             VStack(spacing: 0) {
                 HomeHero(hero: home.hero, image: home.images.additionalProperties[home.hero.image], go: go)
 
-                SectionHeading(eyebrow: home.latest.eyebrow, title: home.latest.title).padding(.top, 80)
-                LazyVStack(spacing: 32) {
+                SectionHeading(eyebrow: home.latest.eyebrow, title: home.latest.title).padding(.top, Space.s20)
+                LazyVStack(spacing: Space.s8) {
                     ForEach(home.latest.recipes, id: \.slug) { recipe in
                         Button { go(.recipe(recipe.slug)) } label: {
                             RecipeCard(recipe: recipe, image: home.images.additionalProperties[recipe.image])
@@ -73,11 +73,11 @@ public struct HomeScreen: View {
                         .accessibilityIdentifier("recipe-card-\(recipe.slug)")
                     }
                 }
-                .padding(.horizontal, 32)
-                ViewAllLink(label: "View all recipes") { go(.catalog(nil)) }.padding(.top, 40)
+                .padding(.horizontal, Space.s8)
+                ViewAllLink(label: "View all recipes") { go(.catalog(nil)) }.padding(.top, Space.s10)
 
-                SectionHeading(eyebrow: home.browse.eyebrow, title: home.browse.title).padding(.top, 32 + 32)
-                LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
+                SectionHeading(eyebrow: home.browse.eyebrow, title: home.browse.title).padding(.top, Space.s16)
+                LazyVGrid(columns: [GridItem(.flexible(), spacing: Space.s3), GridItem(.flexible(), spacing: Space.s3)], spacing: Space.s3) {
                     ForEach(home.browse.categories, id: \.slug) { category in
                         Button { go(.catalog(category)) } label: {
                             BrowseTile(category: category, image: home.images.additionalProperties[category.image])
@@ -85,8 +85,8 @@ public struct HomeScreen: View {
                         .buttonStyle(CardPressStyle())
                     }
                 }
-                .padding(.horizontal, 32)
-                .padding(.bottom, 64)
+                .padding(.horizontal, Space.s8)
+                .padding(.bottom, Space.s16)
                 SiteFooter(wordmark: home.wordmark, go: go)
             }
         }
@@ -133,24 +133,24 @@ struct SiteMenu: View {
     let go: (HomeDestination) -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: Space.s1) {
             ForEach(links, id: \.href) { link in row(link.label) { go(.path(link.href)) } }
             if let member = account.member {
                 row("Settings") { go(.account) }
                 row("Sign out") { go(.signOut) }
-                HStack(spacing: 8) {
+                HStack(spacing: Space.s2) {
                     Text(String(member.displayName.first ?? "C").uppercased())
-                        .font(Typeface.body(12, weight: .bold)).frame(width: 32, height: 32)
+                        .font(Typeface.body(.xs, weight: .bold)).frame(width: 32, height: 32)
                         .background(Palette.brandSoft, in: .circle)
-                    Text(member.displayName).font(Typeface.body(14, weight: .bold)).lineLimit(1)
+                    Text(member.displayName).font(Typeface.body(.sm, weight: .bold)).lineLimit(1)
                 }
-                .padding(.horizontal, 8).frame(minHeight: 44)
+                .padding(.horizontal, Space.s2).frame(minHeight: 44)
             } else {
                 row("Sign in") { go(.account) }
             }
         }
         .foregroundStyle(Palette.ink)
-        .padding(.horizontal, 16).padding(.vertical, 12)
+        .padding(.horizontal, Space.s4).padding(.vertical, Space.s3)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Palette.background)
         .overlay(alignment: .top) { Rectangle().fill(Palette.border).frame(height: 1) }
@@ -159,8 +159,8 @@ struct SiteMenu: View {
 
     private func row(_ label: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Text(label).font(Typeface.body(14, weight: .bold))
-                .padding(.horizontal, 8).frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+            Text(label).font(Typeface.body(.sm, weight: .bold))
+                .padding(.horizontal, Space.s2).frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                 .contentShape(.rect)
         }
         .buttonStyle(.plain)
@@ -175,19 +175,19 @@ struct SiteFooter: View {
         ("Privacy", .web("/privacy")), ("Terms", .web("/terms"))]
 
     var body: some View {
-        VStack(spacing: 16) {
-            Wordmark(first: wordmark.first, second: wordmark.second, size: 30)
-            HStack(spacing: 24) {
+        VStack(spacing: Space.s4) {
+            Wordmark(first: wordmark.first, second: wordmark.second, size: .title)
+            HStack(spacing: Space.s6) {
                 ForEach(links, id: \.0) { label, destination in
                     Button(label) { go(destination) }
-                        .font(Typeface.body(14, weight: .bold)).foregroundStyle(Palette.ink)
+                        .font(Typeface.body(.sm, weight: .bold)).foregroundStyle(Palette.ink)
                         .frame(minHeight: 44)
                 }
             }
             Text("© \(String(Calendar.current.component(.year, from: .now))) \(wordmark.first) / \(wordmark.second). All rights reserved.")
-                .font(Typeface.body(11)).tracking(1.5).foregroundStyle(Palette.mutedForeground)
+                .font(Typeface.body(.micro)).tracking(Tracking.eyebrow(.micro)).foregroundStyle(Palette.mutedForeground)
         }
-        .padding(.vertical, 36).padding(.horizontal, 32)
+        .padding(.vertical, Space.s9).padding(.horizontal, Space.s8)
         .frame(maxWidth: .infinity)
         .overlay(alignment: .top) { Rectangle().fill(Palette.border).frame(height: 1) }
     }
@@ -197,17 +197,17 @@ struct SiteFooter: View {
 public struct Wordmark: View {
     let first: String
     let second: String
-    var size: CGFloat = 18
-    public init(first: String, second: String, size: CGFloat = 18) { self.first = first; self.second = second; self.size = size }
+    var size: TextSize = .lg
+    public init(first: String, second: String, size: TextSize = .lg) { self.first = first; self.second = second; self.size = size }
     public var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: Space.s2) {
             Text(first.uppercased()).foregroundStyle(Palette.ink)
             Circle().fill(Palette.mutedForeground).frame(width: 4, height: 4)
             Text(second.uppercased())
                 .foregroundStyle(LinearGradient(colors: [Palette.brand, Palette.brandAlt], startPoint: .leading, endPoint: .trailing))
-                .padding(.horizontal, 7).padding(.vertical, 5)
+                .padding(.horizontal, Space.s2).padding(.vertical, Space.s1)
                 .background(StickerShape().fill(Palette.ink))
-                .background(StickerShape().fill(Palette.brandAlt).offset(x: size * 0.07, y: size * 0.09))
+                .background(StickerShape().fill(Palette.brandAlt).offset(x: size.rawValue * 0.07, y: size.rawValue * 0.09))
                 .rotationEffect(.degrees(-4))
         }
         .font(Typeface.hero(size, relativeTo: .title3))
@@ -242,13 +242,9 @@ struct HomeHero: View {
     let image: RecipeImage?
     let go: (HomeDestination) -> Void
 
-    private static let plum950 = Color(red: 0x1c / 255, green: 0x08 / 255, blue: 0x19 / 255)
-    private static let plum800 = Color(red: 0x3a / 255, green: 0x16 / 255, blue: 0x38 / 255)
-    private static let plum600 = Color(red: 0x5a / 255, green: 0x24 / 255, blue: 0x56 / 255)
-    private static let plum400 = Color(red: 0x9a / 255, green: 0x45 / 255, blue: 0x90 / 255)
     static let gradient = LinearGradient(stops: [
-        .init(color: plum950, location: 0), .init(color: Palette.ink, location: 0.45), .init(color: plum800, location: 0.65),
-        .init(color: plum600, location: 0.85), .init(color: plum400, location: 1),
+        .init(color: Palette.plum950, location: 0), .init(color: Palette.ink, location: 0.45), .init(color: Palette.plum800, location: 0.65),
+        .init(color: Palette.plum600, location: 0.85), .init(color: Palette.plum400, location: 1),
     ], startPoint: .leading, endPoint: .trailing)
 
     var body: some View {
@@ -268,7 +264,7 @@ struct HomeHero: View {
                     } else { Palette.muted }
                 }
                 .clipped()
-            card.padding(.horizontal, 14).padding(.top, -64)
+            card.padding(.horizontal, Space.s3_5).padding(.top, -Space.s16)
         }
         .overlay(alignment: .topTrailing) {
             RemixSticker { go(.path("/remix")) }.offset(x: -4, y: 206)
@@ -277,36 +273,36 @@ struct HomeHero: View {
 
     private var card: some View {
         VStack(alignment: .leading, spacing: 0) {
-            if !hero.kicker.isEmpty { Eyebrow(hero.kicker, color: Palette.brand).padding(.bottom, 14) }
+            if !hero.kicker.isEmpty { Eyebrow(hero.kicker, color: Palette.brand).padding(.bottom, Space.s3_5) }
             headline
-                .font(Typeface.hero(42))
-                .foregroundStyle(.white)
+                .font(Typeface.hero(.hero))
+                .foregroundStyle(Palette.white)
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(hero.headline.replacingOccurrences(of: "\n", with: " "))
                 .accessibilityAddTraits(.isHeader)
-            if !hero.motto.isEmpty { Text(hero.motto).font(Typeface.body(16)).foregroundStyle(.white).padding(.top, 16) }
+            if !hero.motto.isEmpty { Text(hero.motto).font(Typeface.body(.base)).foregroundStyle(Palette.white).padding(.top, Space.s4) }
             Button { go(.search) } label: {
-                HStack(spacing: 8) {
+                HStack(spacing: Space.s2) {
                     Text(hero.cta)
                     SiteIcon.arrowRight.image.resizable().frame(width: 24, height: 24).rotationEffect(.degrees(-45))
                 }
-                .font(Typeface.body(17, weight: .bold))
+                .font(Typeface.body(.lg, weight: .bold))
                 .foregroundStyle(Palette.ink)
-                .padding(.horizontal, 32).frame(minHeight: 52)
+                .padding(.horizontal, Space.s8).frame(minHeight: 52)
                 .background(Palette.brand, in: .capsule)
             }
             .buttonStyle(CardPressStyle())
-            .padding(.top, 20)
+            .padding(.top, Space.s5)
             .accessibilityIdentifier("hero-cta")
         }
-        .padding(.horizontal, 22).padding(.top, 28).padding(.bottom, 26)
+        .padding(.horizontal, Space.s6).padding(.top, Space.s7).padding(.bottom, Space.s6)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(alignment: .bottomTrailing) {
             Ellipse().fill(Palette.brandAlt).frame(width: 320, height: 288).rotationEffect(.degrees(-12)).offset(x: 170, y: 170)
         }
         .background(Self.gradient)
         .clipShape(UnevenRoundedRectangle(topLeadingRadius: 28, bottomLeadingRadius: 8, bottomTrailingRadius: 28, topTrailingRadius: 28))
-        .shadow(color: Palette.brand.opacity(0.25), radius: 20, y: 16)
+        .elevation(.glow)
     }
 
     /// Lines as written; the sticker word (default: the last word) sits on a tilted pink blob.
@@ -321,11 +317,11 @@ struct HomeHero: View {
                         Text(String(line[..<range.lowerBound]))
                         Text(word)
                             .foregroundStyle(Palette.ink)
-                            .padding(.horizontal, 42 * 0.2)
+                            .padding(.horizontal, TextSize.hero.rawValue * 0.2)
                             // Bowlby's line box is much taller than its capitals; hug the capitals.
-                            .background(StickerShape().fill(Palette.brand).padding(.top, 5).padding(.bottom, 3))
+                            .background(StickerShape().fill(Palette.brand).padding(.top, Space.s1).padding(.bottom, Space.s0_5))
                             .rotationEffect(.degrees(-3))
-                            .padding(.leading, -42 * 0.04)
+                            .padding(.leading, -TextSize.hero.rawValue * 0.04)
                         Text(String(line[range.upperBound...]))
                     }
                 } else {
@@ -334,8 +330,8 @@ struct HomeHero: View {
             }
             .frame(height: 42, alignment: .leading) // leading-none
         }
-        .padding(.vertical, 4)
-        .tracking(-1)
+        .padding(.vertical, Space.s1)
+        .tracking(Tracking.tight(.hero))
         .lineSpacing(0)
     }
 }
@@ -346,14 +342,14 @@ struct RemixSticker: View {
     var body: some View {
         Button(action: action) {
             ZStack {
-                Starburst().fill(Color(red: 1, green: 0xe1 / 255, blue: 0x4d / 255)).shadow(color: .black.opacity(0.2), radius: 3, y: 2)
-                VStack(spacing: 2) {
-                    Text("NEW").font(Typeface.body(12, weight: .bold)).tracking(2)
-                    Text("REMIX").font(Typeface.hero(18))
-                    Text("recipes").font(Typeface.body(12, weight: .bold))
+                Starburst().fill(Palette.sticker).elevation(.sticker)
+                VStack(spacing: Space.s0_5) {
+                    Text("NEW").font(Typeface.body(.xs, weight: .bold)).tracking(Tracking.eyebrow(.xs))
+                    Text("REMIX").font(Typeface.hero(.lg))
+                    Text("recipes").font(Typeface.body(.xs, weight: .bold))
                 }
                 .foregroundStyle(Palette.ink)
-                .padding(.top, -2)
+                .padding(.top, -Space.s0_5)
             }
             .frame(width: 116, height: 116)
             .rotationEffect(.degrees(12))
@@ -385,19 +381,19 @@ struct SectionHeading: View {
     let title: String
     var body: some View {
         VStack(spacing: 0) {
-            Eyebrow(eyebrow).padding(.bottom, 8)
+            Eyebrow(eyebrow).padding(.bottom, Space.s2)
             Text(title)
-                .font(Typeface.display(38, weight: .black, relativeTo: .largeTitle))
+                .font(Typeface.display(.page, weight: .extrabold, relativeTo: .largeTitle))
                 .foregroundStyle(Palette.ink)
                 .multilineTextAlignment(.center)
                 .accessibilityAddTraits(.isHeader)
             LinearGradient(colors: [Palette.brand, Palette.brandAlt], startPoint: .leading, endPoint: .trailing)
                 .frame(width: 60, height: 3).clipShape(.capsule)
-                .padding(.top, 16).padding(.bottom, 40)
+                .padding(.top, Space.s4).padding(.bottom, Space.s10)
                 .accessibilityHidden(true)
         }
         .frame(maxWidth: .infinity)
-        .padding(.horizontal, 32)
+        .padding(.horizontal, Space.s8)
     }
 }
 
@@ -406,11 +402,11 @@ struct ViewAllLink: View {
     let action: () -> Void
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 8) {
+            HStack(spacing: Space.s2) {
                 Text(label)
                 SiteIcon.arrowRight.image.resizable().frame(width: 16, height: 16)
             }
-            .font(Typeface.body(14, weight: .bold))
+            .font(Typeface.body(.sm, weight: .bold))
             .foregroundStyle(Palette.ink)
             .frame(minHeight: 44)
         }
@@ -431,13 +427,13 @@ struct BrowseTile: View {
             }
             .overlay(alignment: .bottom) {
                 Text(category.label)
-                    .font(Typeface.body(12, weight: .bold))
+                    .font(Typeface.body(.xs, weight: .bold))
                     .foregroundStyle(Palette.onDarkLabel)
                     .lineLimit(1).minimumScaleFactor(0.8)
-                    .padding(.horizontal, 8).padding(.vertical, 4)
+                    .padding(.horizontal, Space.s2).padding(.vertical, Space.s1)
                     .frame(maxWidth: .infinity)
                     .background(Palette.ink, in: .rect(cornerRadius: Radius.field))
-                    .padding(8)
+                    .padding(Space.s2)
             }
             .clipShape(.rect(cornerRadius: Radius.surface))
             .accessibilityElement(children: .ignore)

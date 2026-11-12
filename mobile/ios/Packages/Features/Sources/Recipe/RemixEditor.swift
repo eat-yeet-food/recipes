@@ -103,25 +103,25 @@ public struct RemixEditorScreen: View {
     private func editor(_ recipe: RemixRecipe) -> some View {
         let pizza = recipe.family == "pizza"
         return ScrollView {
-            VStack(alignment: .leading, spacing: 36) {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Name").font(Typeface.body(15, weight: .bold)).foregroundStyle(Palette.mutedForeground)
+            VStack(alignment: .leading, spacing: Space.s9) {
+                VStack(alignment: .leading, spacing: Space.s2) {
+                    Text("Name").font(Typeface.body(.bodySm, weight: .bold)).foregroundStyle(Palette.mutedForeground)
                     TextField("Name", text: $name)
-                        .font(Typeface.display(34, relativeTo: .largeTitle))
-                        .padding(.bottom, 6)
+                        .font(Typeface.display(.section, relativeTo: .largeTitle))
+                        .padding(.bottom, Space.s1_5)
                         .overlay(alignment: .bottom) { Rectangle().fill(Palette.ink).frame(height: 2) }
                         .onSubmit { if formula != nil { Task { await save() } } }
-                    Text("From \(recipe.title)").font(Typeface.body(16))
+                    Text("From \(recipe.title)").font(Typeface.body(.base))
                 }
 
                 if recipe.methods.count > 1 {
-                    VStack(alignment: .leading, spacing: 16) {
+                    VStack(alignment: .leading, spacing: Space.s4) {
                         RemixSectionTitle(title: pizza ? "Oven" : "Method")
                         PillPicker(options: recipe.methods.map { ($0.id, $0.label) }, selection: string("methodId"))
                     }
                 }
 
-                VStack(alignment: .leading, spacing: 20) {
+                VStack(alignment: .leading, spacing: Space.s5) {
                     RemixSectionTitle(title: "Size", detail: "Choose how many to make on the bake sheet.")
                     Grid(horizontalSpacing: 24, verticalSpacing: 20) {
                         GridRow {
@@ -132,8 +132,8 @@ public struct RemixEditorScreen: View {
                         }
                     }
                     if pizza, !recipe.pizzaSizes.isEmpty {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Pizza size").font(Typeface.body(15, weight: .bold))
+                        VStack(alignment: .leading, spacing: Space.s2) {
+                            Text("Pizza size").font(Typeface.body(.bodySm, weight: .bold))
                             PillPicker(options: recipe.pizzaSizes.map { ($0.inches, "\(Int($0.inches))″") }, selection: Binding(
                                 get: { number("batch", "diameterInches") ?? 0 },
                                 set: { inches in
@@ -144,7 +144,7 @@ public struct RemixEditorScreen: View {
                     }
                 }
 
-                VStack(alignment: .leading, spacing: 20) {
+                VStack(alignment: .leading, spacing: Space.s5) {
                     RemixSectionTitle(title: "Formula", detail: "Baker’s percentages of the total flour.")
                     flours
                     Grid(horizontalSpacing: 24, verticalSpacing: 20) {
@@ -167,26 +167,26 @@ public struct RemixEditorScreen: View {
                 if !pizza, state[path: "formula", "process"] != nil { sourdoughProcess }
 
                 if let resolution, !resolution.valid {
-                    Text(resolution.errors.joined(separator: " ")).font(Typeface.body(14)).foregroundStyle(Palette.danger)
+                    Text(resolution.errors.joined(separator: " ")).font(Typeface.body(.sm)).foregroundStyle(Palette.danger)
                 }
             }
-            .padding(.horizontal, 20).padding(.top, 16).padding(.bottom, 120)
+            .padding(.horizontal, Space.s5).padding(.top, Space.s2).padding(.bottom, Space.s8)
         }
         .scrollDismissesKeyboard(.interactively)
         .safeAreaInset(edge: .bottom) { footer }
     }
 
     private var flours: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: Space.s3) {
             let list = state[path: "formula", "flour"]?.array ?? []
             ForEach(Array(list.indices), id: \.self) { index in
-                HStack(alignment: .bottom, spacing: 16) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Flour").font(Typeface.body(15, weight: .bold))
+                HStack(alignment: .bottom, spacing: Space.s4) {
+                    VStack(alignment: .leading, spacing: Space.s2) {
+                        Text("Flour").font(Typeface.body(.bodySm, weight: .bold))
                         TextField("Flour", text: Binding(
                             get: { list[safe: index]?["name"]?.string ?? "" },
                             set: { setFlour(index, "name", .string(String($0.prefix(80)))) }))
-                            .font(Typeface.body(17)).padding(.bottom, 8)
+                            .font(Typeface.body(.lg)).padding(.bottom, Space.s2)
                             .overlay(alignment: .bottom) { Rectangle().fill(Palette.input).frame(height: 1) }
                     }
                     NumberField(label: "Share", unit: "%", value: list[safe: index]?["percent"]?.number) { setFlour(index, "percent", .number($0)) }
@@ -202,13 +202,13 @@ public struct RemixEditorScreen: View {
                     var flour = state[path: "formula", "flour"]?.array ?? []
                     flour.append(.object(["id": .string("flour-\(UUID().uuidString.prefix(8).lowercased())"), "name": .string("Flour"), "percent": .number(0)]))
                     set(.array(flour), "formula", "flour")
-                } label: { Label("Add flour", systemImage: "plus").font(Typeface.body(15, weight: .bold)).underline() }
+                } label: { Label("Add flour", systemImage: "plus").font(Typeface.body(.bodySm, weight: .bold)).underline() }
             }
         }
     }
 
     private var pizzaProcess: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        VStack(alignment: .leading, spacing: Space.s5) {
             RemixSectionTitle(title: "Mixing and fermentation", detail: "Times count from when you start mixing.")
             PillPicker(options: [("spiral", "Mixer"), ("food-processor", "Processor"), ("hand", "By hand")], selection: string("formula", "pizzaProcess", "mixingMethod"))
             Grid(horizontalSpacing: 24, verticalSpacing: 20) {
@@ -217,8 +217,8 @@ public struct RemixEditorScreen: View {
                     NumberField(label: "Divide and ball at", unit: "h", value: number("formula", "pizzaProcess", "bulkMinutes").map { $0 / 60 }) { set(.number(($0 * 60).rounded()), "formula", "pizzaProcess", "bulkMinutes") }
                 }
             }
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Cold ferment").font(Typeface.body(15, weight: .bold))
+            VStack(alignment: .leading, spacing: Space.s2) {
+                Text("Cold ferment").font(Typeface.body(.bodySm, weight: .bold))
                 PillPicker(options: [(2.0, "2 days"), (3.0, "3 days"), (4.0, "4 days")], selection: Binding(
                     get: { number("formula", "pizzaProcess", "coldDays") ?? 2 },
                     set: { days in
@@ -227,13 +227,13 @@ public struct RemixEditorScreen: View {
                         set(.number(days <= 2 ? 240 : days == 3 ? 180 : 120), "formula", "pizzaProcess", "warmUpMinutes")
                     }))
                 Text("Warm-up follows the cold ferment: 4h after 2 days, 3h after 3, 2h after 4.")
-                    .font(Typeface.body(14)).foregroundStyle(Palette.mutedForeground)
+                    .font(Typeface.body(.sm)).foregroundStyle(Palette.mutedForeground)
             }
         }
     }
 
     private var sourdoughProcess: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        VStack(alignment: .leading, spacing: Space.s5) {
             RemixSectionTitle(title: "Mixing and fermentation", detail: "Times count from when you start mixing.")
             PillPicker(options: [("spiral", "Mixer"), ("hand", "By hand")], selection: string("formula", "process", "mixingMethod"))
             Grid(horizontalSpacing: 24, verticalSpacing: 20) {
@@ -247,31 +247,36 @@ public struct RemixEditorScreen: View {
                 }
             }
             Text("Folds and shaping follow the recipe; edit them on eatyeet.com.")
-                .font(Typeface.body(14)).foregroundStyle(Palette.mutedForeground)
+                .font(Typeface.body(.sm)).foregroundStyle(Palette.mutedForeground)
         }
     }
 
     private var footer: some View {
-        HStack(spacing: 12) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(resolution?.total ?? " ").lineLimit(1).fixedSize().font(Typeface.body(17, weight: .bold)).monospacedDigit()
-                Text(formula == nil ? (resolution?.facts ?? "") : saveStatus).font(Typeface.body(12)).foregroundStyle(Palette.mutedForeground).lineLimit(1)
+        VStack(alignment: .leading, spacing: Space.s3) {
+            HStack(alignment: .firstTextBaseline, spacing: Space.s2) {
+                Text(resolution?.total ?? " ").font(Typeface.body(.lg, weight: .bold)).monospacedDigit().fixedSize()
+                Text(formula == nil ? (resolution?.facts ?? "") : saveStatus)
+                    .font(Typeface.body(.sm)).foregroundStyle(Palette.mutedForeground).lineLimit(1).truncationMode(.tail)
             }
-            Spacer()
-            if formula == nil {
-                Button(account.member == nil ? "Sign in to save" : "Save") { Task { await saveNew() } }
+            HStack(spacing: Space.s3) {
+                if formula == nil {
+                    Button { Task { await saveNew() } } label: {
+                        Text(account.member == nil ? "Sign in to save" : "Save").lineLimit(1).frame(maxWidth: .infinity)
+                    }
                     .buttonStyle(OutlinePill())
-                    .lineLimit(1).fixedSize()
                     .disabled(resolution?.valid != true)
-            }
-            Button { reviewing = true } label: { Label("Review", systemImage: "chevron.up").labelStyle(TrailingIcon()) }
+                }
+                Button { reviewing = true } label: {
+                    Label("Review", systemImage: "chevron.up").labelStyle(TrailingIcon()).lineLimit(1).frame(maxWidth: .infinity)
+                }
                 .buttonStyle(PrimaryButtonStyle())
-                .lineLimit(1).fixedSize()
                 .disabled(resolution?.valid != true)
                 .accessibilityIdentifier("remix-review")
+            }
         }
-        .padding(.horizontal, 20).padding(.vertical, 12)
-        .background(.bar)
+        .padding(.horizontal, Space.s5).padding(.top, Space.s3).padding(.bottom, Space.s2)
+        .background(Palette.background)
+        .overlay(alignment: .top) { Rectangle().fill(Palette.border).frame(height: 1) }
     }
 
     // MARK: State access
@@ -313,7 +318,7 @@ struct RemixBakeSheet: View {
             ScrollView {
                 content
                 .foregroundStyle(Palette.ink)
-                .padding(.horizontal, 18).padding(.vertical, 24)
+                .padding(.horizontal, Space.s4).padding(.vertical, Space.s6)
             }
             .background(Palette.background)
             .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Done") { dismiss() } } }
@@ -321,28 +326,28 @@ struct RemixBakeSheet: View {
     }
 
     private var content: some View {
-                VStack(alignment: .leading, spacing: 32) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(title).font(Typeface.display(34, relativeTo: .largeTitle))
-                        Text(resolution.facts).font(Typeface.body(15)).foregroundStyle(Palette.mutedForeground)
-                        HStack(alignment: .firstTextBaseline, spacing: 8) {
-                            Text(resolution.total).font(Typeface.body(28, weight: .bold)).monospacedDigit()
-                            Text(resolution.totalDetail).font(Typeface.body(14)).foregroundStyle(Palette.mutedForeground)
+                VStack(alignment: .leading, spacing: Space.s8) {
+                    VStack(alignment: .leading, spacing: Space.s2) {
+                        Text(title).font(Typeface.display(.section, relativeTo: .largeTitle))
+                        Text(resolution.facts).font(Typeface.body(.bodySm)).foregroundStyle(Palette.mutedForeground)
+                        HStack(alignment: .firstTextBaseline, spacing: Space.s2) {
+                            Text(resolution.total).font(Typeface.body(.title, weight: .bold)).monospacedDigit()
+                            Text(resolution.totalDetail).font(Typeface.body(.sm)).foregroundStyle(Palette.mutedForeground)
                         }
                     }
                     if !resolution.changes.isEmpty {
-                        VStack(alignment: .leading, spacing: 8) {
+                        VStack(alignment: .leading, spacing: Space.s2) {
                             Eyebrow("Changed from the recipe")
                             ForEach(Array(resolution.changes.enumerated()), id: \.offset) { _, change in
                                 ChangeLine(label: change.label, from: change.from, to: change.to)
                             }
                         }
-                        .padding(16).frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(Space.s4).frame(maxWidth: .infinity, alignment: .leading)
                         .background(Palette.brandSoft, in: .rect(cornerRadius: Radius.field))
                     }
                     if let recipe = resolution.recipe {
                         ForEach(Array(recipe.blocks.enumerated()), id: \.offset) { _, block in
-                            VStack(alignment: .leading, spacing: 40) {
+                            VStack(alignment: .leading, spacing: Space.s10) {
                                 if !block.ingredients.isEmpty { IngredientsCard(sections: block.ingredients) }
                                 if !block.steps.isEmpty { StepsView(sections: block.steps) }
                             }
@@ -355,8 +360,8 @@ struct RemixBakeSheet: View {
 struct OutlinePill: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.headline).foregroundStyle(Palette.ink)
-            .padding(.horizontal, 20).frame(minHeight: 48)
+            .font(Typeface.body(.base, weight: .semibold)).foregroundStyle(Palette.ink)
+            .padding(.horizontal, Space.s5).frame(minHeight: 48)
             .background(configuration.isPressed ? Palette.tint : Palette.background, in: .capsule)
             .overlay { Capsule().strokeBorder(Palette.ink, lineWidth: 1.5) }
     }
@@ -364,7 +369,7 @@ struct OutlinePill: ButtonStyle {
 
 struct TrailingIcon: LabelStyle {
     func makeBody(configuration: Configuration) -> some View {
-        HStack(spacing: 8) { configuration.title; configuration.icon }
+        HStack(spacing: Space.s2) { configuration.title; configuration.icon }
     }
 }
 
@@ -380,6 +385,6 @@ private struct ChangeLine: View {
         let head: Text = Text(label + ": ").bold()
         let tail: Text = Text(from + " → ")
         let value: Text = Text(to).bold()
-        return (head + tail + value).font(Typeface.body(15))
+        return (head + tail + value).font(Typeface.body(.bodySm))
     }
 }

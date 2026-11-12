@@ -95,11 +95,11 @@ struct CookMode: View {
             .accessibilityLabel("Exit cook mode")
             .accessibilityIdentifier("cook-exit")
         }
-        .padding(.leading, 20).padding(.trailing, 8).padding(.top, 8)
+        .padding(.leading, Space.s5).padding(.trailing, Space.s2).padding(.top, Space.s2)
     }
 
     private var progress: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: Space.s1_5) {
             if session.stage == .gather {
                 GeometryReader { proxy in
                     Capsule().fill(Palette.muted).overlay(alignment: .leading) {
@@ -115,7 +115,7 @@ struct CookMode: View {
             }
         }
         .frame(height: 4)
-        .padding(.horizontal, 20).padding(.top, 8)
+        .padding(.horizontal, Space.s5).padding(.top, Space.s2)
         .accessibilityHidden(true)
     }
 
@@ -136,44 +136,44 @@ struct CookMode: View {
                         .aspectRatio(contentMode: .fill)
                         .frame(height: 240).frame(maxWidth: .infinity).clipped()
                         .clipShape(.rect(cornerRadius: Radius.surface))
-                        .padding(.bottom, 24)
+                        .padding(.bottom, Space.s6)
                         .accessibilityHidden(true)
                 }
                 Eyebrow("\(recipe.title) · Cook mode", color: Palette.mutedForeground)
                 Text("Let’s get cooking")
-                    .font(Typeface.display(44, relativeTo: .largeTitle))
-                    .padding(.top, 8).padding(.bottom, 24)
+                    .font(Typeface.display(.display, relativeTo: .largeTitle))
+                    .padding(.top, Space.s2).padding(.bottom, Space.s6)
                     .accessibilityAddTraits(.isHeader)
-                VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: Space.s4) {
                     let items = (groups.isEmpty ? [] : [("Gather", "Lay out and measure every ingredient, checking each one off.")])
                         + [("Cook", "Follow one step at a time, with timers when you need them.")]
                     ForEach(Array(items.enumerated()), id: \.offset) { index, item in
-                        HStack(alignment: .top, spacing: 16) {
-                            Text("\(index + 1)").font(Typeface.body(16, weight: .bold))
+                        HStack(alignment: .top, spacing: Space.s4) {
+                            Text("\(index + 1)").font(Typeface.body(.base, weight: .bold))
                                 .frame(width: 32, height: 32).background(Palette.brandSoft, in: .circle)
                                 .accessibilityHidden(true)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(item.0).font(Typeface.body(18, weight: .bold))
-                                Text(item.1).font(Typeface.body(16)).foregroundStyle(Palette.mutedForeground)
+                            VStack(alignment: .leading, spacing: Space.s0_5) {
+                                Text(item.0).font(Typeface.body(.lg, weight: .bold))
+                                Text(item.1).font(Typeface.body(.base)).foregroundStyle(Palette.mutedForeground)
                             }
                         }
                         .accessibilityElement(children: .combine)
                     }
                 }
             }
-            .padding(.horizontal, 20).padding(.top, 16)
+            .padding(.horizontal, Space.s5).padding(.top, Space.s4)
         }
         .safeAreaInset(edge: .bottom) {
-            VStack(spacing: 16) {
+            VStack(spacing: Space.s4) {
                 Rectangle().fill(Palette.border).frame(height: 1)
-                Text(introFacts).font(Typeface.body(15, relativeTo: .subheadline))
+                Text(introFacts).font(Typeface.body(.bodySm, relativeTo: .subheadline))
                     .foregroundStyle(Palette.mutedForeground)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 primary(groups.isEmpty ? "Start cooking" : "Gather ingredients", id: "cook-begin") {
                     session.stage = groups.isEmpty ? .cook : .gather
                 }
             }
-            .padding(.horizontal, 20).padding(.bottom, 12).background(Palette.background)
+            .padding(.horizontal, Space.s5).padding(.bottom, Space.s3).background(Palette.background)
         }
     }
 
@@ -184,25 +184,25 @@ struct CookMode: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
                     Text("Gather your ingredients")
-                        .font(Typeface.display(30, relativeTo: .title))
+                        .font(Typeface.display(.title, relativeTo: .title))
                         .accessibilityAddTraits(.isHeader)
                         .id("top")
                     Text("Measure everything out before you start. Check each item as it’s ready.")
-                        .font(Typeface.body(17)).foregroundStyle(Palette.mutedForeground)
-                        .padding(.top, 8).padding(.bottom, 24)
-                    VStack(alignment: .leading, spacing: 16) {
+                        .font(Typeface.body(.lg)).foregroundStyle(Palette.mutedForeground)
+                        .padding(.top, Space.s2).padding(.bottom, Space.s6)
+                    VStack(alignment: .leading, spacing: Space.s4) {
                         ForEach(groups, id: \.id) { section in group(section, reader: reader) }
                     }
                     if groups.allSatisfy({ session.folded.contains($0.id) }) {
-                        Text("Everything’s ready.").font(Typeface.body(18, weight: .semibold)).padding(.top, 24)
+                        Text("Everything’s ready.").font(Typeface.body(.lg, weight: .semibold)).padding(.top, Space.s6)
                     }
                 }
-                .padding(.horizontal, 20).padding(.top, 16).padding(.bottom, 24)
+                .padding(.horizontal, Space.s5).padding(.top, Space.s4).padding(.bottom, Space.s6)
             }
         }
         .safeAreaInset(edge: .bottom) {
             primary("Start cooking", id: "cook-start") { session.stage = .cook }
-                .padding(.horizontal, 20).padding(.top, 12).padding(.bottom, 12)
+                .padding(.horizontal, Space.s5).padding(.top, Space.s3).padding(.bottom, Space.s3)
                 .background(Palette.background)
         }
     }
@@ -222,13 +222,13 @@ struct CookMode: View {
                     Spacer()
                     if done {
                         Label("\(section.items.count) of \(section.items.count)", systemImage: "checkmark")
-                            .font(Typeface.body(13, weight: .semibold)).monospacedDigit()
+                            .font(Typeface.body(.caption, weight: .semibold)).monospacedDigit()
                     }
                     Image(systemName: "chevron.down").font(.system(size: 16, weight: .medium))
                         .rotationEffect(.degrees(isFolded ? 0 : 180))
                 }
                 .frame(minHeight: 44)
-                .padding(.horizontal, isFolded ? 16 : 0)
+                .padding(.horizontal, isFolded ? Space.s4 : 0)
                 .background(isFolded ? Palette.brandSoft : .clear, in: .rect(cornerRadius: Radius.field))
                 .contentShape(.rect)
             }
@@ -240,19 +240,19 @@ struct CookMode: View {
                     let itemKey = key(section, item)
                     let on = session.checked.contains(itemKey)
                     Button { toggle(section, item, reader: reader) } label: {
-                        HStack(spacing: 16) {
+                        HStack(spacing: Space.s4) {
                             RoundedRectangle(cornerRadius: 8)
                                 .strokeBorder(on ? Palette.brand : Palette.ink, lineWidth: 2)
                                 .background(on ? Palette.brand : .clear, in: .rect(cornerRadius: 8))
                                 .overlay { if on { Image(systemName: "checkmark").font(.system(size: 14, weight: .heavy)) } }
                                 .frame(width: 28, height: 28)
                             ingredientText(item)
-                                .font(Typeface.body(17))
+                                .font(Typeface.body(.lg))
                                 .strikethrough(on, color: Palette.ink)
                                 .foregroundStyle(on ? Palette.mutedForeground : Palette.ink)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
-                        .padding(.vertical, 10).frame(minHeight: 48).contentShape(.rect)
+                        .padding(.vertical, Space.s2_5).frame(minHeight: 48).contentShape(.rect)
                     }
                     .buttonStyle(.plain)
                     .id(itemKey)
@@ -298,20 +298,20 @@ struct CookMode: View {
     private var cook: some View {
         if session.stepIndex < steps.count {
             let current = steps[session.stepIndex]
-            HStack(alignment: .top, spacing: 40) {
+            HStack(alignment: .top, spacing: Space.s10) {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
                         if !current.section.isEmpty {
-                            Eyebrow(current.section, color: Palette.mutedForeground).padding(.bottom, 10)
+                            Eyebrow(current.section, color: Palette.mutedForeground).padding(.bottom, Space.s2_5)
                         }
                         Text(InlineHTML.attributed(current.step.html))
-                            .font(Typeface.body(22, weight: .semibold, relativeTo: .title2))
+                            .font(Typeface.body(.titleSm, weight: .semibold, relativeTo: .title2))
                             .lineSpacing(4)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .accessibilityIdentifier("cook-step")
                         if !current.step.needs.isEmpty { needs(current.step.needs) }
                         if !current.step.timers.isEmpty {
-                            FlowRow(spacing: 12) {
+                            FlowRow(spacing: Space.s3) {
                                 ForEach(current.step.timers, id: \.label) { timer in
                                     Button { startTimer(timer) } label: {
                                         Label("Start \(timer.label) timer", systemImage: "timer")
@@ -319,16 +319,16 @@ struct CookMode: View {
                                     .buttonStyle(UtilityButtonStyle())
                                 }
                             }
-                            .padding(.top, 24)
+                            .padding(.top, Space.s6)
                         }
                     }
-                    .padding(.top, 24)
+                    .padding(.top, Space.s6)
                 }
                 .id(current.id)
                 .transition(.opacity)
                 if verticalSize == .compact, !groups.isEmpty { ingredientAside(current) }
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, Space.s5)
             .contentShape(.rect)
             .gesture(DragGesture(minimumDistance: 30).onEnded { value in
                 let dx = value.translation.width
@@ -341,53 +341,53 @@ struct CookMode: View {
 
     private func needs(_ needs: [Components.Schemas.Need]) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            Eyebrow("You’ll need", color: Palette.mutedForeground).padding(.bottom, 4)
+            Eyebrow("You’ll need", color: Palette.mutedForeground).padding(.bottom, Space.s1)
             ForEach(Array(needs.enumerated()), id: \.element.key) { index, need in
                 ((need.amount.isEmpty ? Text("") : Text(need.amount + " ").bold()) + Text(InlineHTML.attributed(need.name)))
-                    .font(Typeface.body(17))
+                    .font(Typeface.body(.lg))
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.vertical, 8)
+                    .padding(.vertical, Space.s2)
                     .overlay(alignment: .top) { if index > 0 { Rectangle().fill(Palette.border).frame(height: 1) } }
             }
         }
-        .padding(.horizontal, 20).padding(.vertical, 16)
+        .padding(.horizontal, Space.s5).padding(.vertical, Space.s4)
         .background(Palette.muted, in: .rect(cornerRadius: Radius.surface))
-        .padding(.top, 24)
+        .padding(.top, Space.s6)
         .accessibilityElement(children: .contain)
         .accessibilityLabel("You’ll need")
     }
 
     private func ingredientAside(_ current: CookStep) -> some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: Space.s5) {
                 ForEach(groups, id: \.id) { section in
                     VStack(alignment: .leading, spacing: 0) {
-                        Eyebrow(section.title.isEmpty ? "Ingredients" : section.title).padding(.bottom, 4)
+                        Eyebrow(section.title.isEmpty ? "Ingredients" : section.title).padding(.bottom, Space.s1)
                         ForEach(section.items, id: \.id) { item in
                             let used = current.step.needs.contains { $0.key == item.id }
                             ingredientText(item)
-                                .font(Typeface.body(15, weight: used ? .semibold : .regular))
+                                .font(Typeface.body(.bodySm, weight: used ? .semibold : .regular))
                                 .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.vertical, 8).padding(.horizontal, used ? 8 : 0)
+                                .padding(.vertical, Space.s2).padding(.horizontal, used ? 8 : 0)
                                 .background(used ? Palette.brandSoft : .clear, in: .rect(cornerRadius: 8))
-                                .padding(.horizontal, used ? -8 : 0)
+                                .padding(.horizontal, used ? -Space.s2 : 0)
                         }
                     }
                 }
             }
-            .padding(24)
+            .padding(Space.s6)
         }
         .frame(maxWidth: 280)
         .background(Palette.muted, in: .rect(cornerRadius: Radius.surface))
-        .padding(.top, 24)
+        .padding(.top, Space.s6)
         .accessibilityLabel("Ingredients")
     }
 
     private var cookFooter: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: Space.s3) {
             if !session.timers.isEmpty {
                 TimelineView(.periodic(from: .now, by: 1)) { context in
-                    FlowRow(spacing: 8) {
+                    FlowRow(spacing: Space.s2) {
                         ForEach(session.timers) { timer in timerChip(timer, now: context.date) }
                     }
                     .onChange(of: context.date) { _, now in finishTimers(at: now) }
@@ -401,22 +401,22 @@ struct CookMode: View {
                 primary(session.stepIndex == steps.count - 1 ? "Finish" : "Next", id: "cook-next", expand: false, action: next)
             }
         }
-        .padding(.horizontal, 20).padding(.top, 12).padding(.bottom, 12)
+        .padding(.horizontal, Space.s5).padding(.top, Space.s3).padding(.bottom, Space.s3)
         .background(Palette.background)
     }
 
     private func timerChip(_ timer: CookSession.Timer, now: Date) -> some View {
         let left = Self.clock(timer.endsAt.timeIntervalSince(now))
         return Button { session.timers.removeAll { $0.id == timer.id } } label: {
-            HStack(spacing: 6) {
+            HStack(spacing: Space.s1_5) {
                 Image(systemName: "timer")
                 Text(timer.label)
                 Text(timer.done ? "Done!" : left).monospacedDigit()
                 Image(systemName: "xmark")
             }
-            .font(Typeface.body(15, weight: .semibold))
+            .font(Typeface.body(.bodySm, weight: .semibold))
             .foregroundStyle(timer.done ? Palette.ink : Palette.onDarkLabel)
-            .padding(.horizontal, 16).frame(minHeight: 40)
+            .padding(.horizontal, Space.s4).frame(minHeight: 40)
             .background(timer.done ? Palette.brand : Palette.ink, in: .capsule)
             .symbolEffect(.pulse, isActive: timer.done && !reduceMotion)
         }
@@ -461,10 +461,10 @@ struct CookMode: View {
     // MARK: Done
 
     private var done: some View {
-        VStack(spacing: 24) {
-            Text("That’s a wrap.").font(Typeface.display(44, relativeTo: .largeTitle))
-            Text("Enjoy your \(recipe.title).").font(Typeface.body(18))
-            HStack(spacing: 12) {
+        VStack(spacing: Space.s6) {
+            Text("That’s a wrap.").font(Typeface.display(.display, relativeTo: .largeTitle))
+            Text("Enjoy your \(recipe.title).").font(Typeface.body(.lg))
+            HStack(spacing: Space.s3) {
                 Button(action: previous) { Label("Back", systemImage: "arrow.left") }
                     .buttonStyle(UtilityButtonStyle(large: true))
                 Button("Back to recipe") { session.resetAll(); close() }
@@ -473,7 +473,7 @@ struct CookMode: View {
             }
         }
         .multilineTextAlignment(.center)
-        .padding(.horizontal, 20)
+        .padding(.horizontal, Space.s5)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
@@ -481,7 +481,7 @@ struct CookMode: View {
 
     private func primary(_ title: String, id: String, expand: Bool = true, action: @escaping () -> Void) -> some View {
         Button { tap += 1; action() } label: {
-            HStack(spacing: 8) { Text(title); Image(systemName: "arrow.right") }
+            HStack(spacing: Space.s2) { Text(title); Image(systemName: "arrow.right") }
                 .frame(maxWidth: expand ? .infinity : nil)
         }
         .buttonStyle(PrimaryButtonStyle(large: true))
@@ -494,9 +494,9 @@ struct UtilityButtonStyle: ButtonStyle {
     var large = false
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(Typeface.body(large ? 17 : 15, weight: .semibold))
+            .font(Typeface.action(large ? .lg : .bodySm))
             .foregroundStyle(Palette.ink)
-            .padding(.horizontal, large ? 24 : 18)
+            .padding(.horizontal, large ? Space.s6 : Space.s4)
             .frame(minHeight: large ? 52 : 44)
             .background(configuration.isPressed ? Palette.tint : Palette.background, in: .capsule)
             .overlay { Capsule().strokeBorder(Palette.ink, lineWidth: 1.5) }

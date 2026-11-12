@@ -21,6 +21,61 @@ public enum Palette {
     public static let border = hex(0xDDCFD8)
     public static let input = hex(0x86697F)
     public static let danger = hex(0xAD2939)
+    public static let dangerSoft = hex(0xFFF0F2)
+    public static let sticker = hex(0xFFE14D)
+    public static let white = Color.white
+    /// Hairlines on plum: on-dark-label mixed 30% into ink.
+    public static let borderOnDark = hex(0x6A4F67)
+    /// The plum ramp, for the hero's gradient only (components use roles).
+    public static let plum950 = hex(0x1C0819)
+    public static let plum800 = hex(0x3A1638)
+    public static let plum600 = hex(0x5A2456)
+    public static let plum400 = hex(0x9A4590)
+}
+
+/// The site's spacing scale (Tailwind steps, 4pt each): `Space.s4` is `p-4`, 16pt.
+public enum Space {
+    public static let s0_5: CGFloat = 2
+    public static let s1: CGFloat = 4
+    public static let s1_5: CGFloat = 6
+    public static let s2: CGFloat = 8
+    public static let s2_5: CGFloat = 10
+    public static let s3: CGFloat = 12
+    public static let s3_5: CGFloat = 14
+    public static let s4: CGFloat = 16
+    public static let s5: CGFloat = 20
+    public static let s6: CGFloat = 24
+    public static let s7: CGFloat = 28
+    public static let s8: CGFloat = 32
+    public static let s9: CGFloat = 36
+    public static let s10: CGFloat = 40
+    public static let s12: CGFloat = 48
+    public static let s14: CGFloat = 56
+    public static let s16: CGFloat = 64
+    public static let s20: CGFloat = 80
+    /// `--spacing-page-x-mobile`
+    public static let pageX: CGFloat = 16
+    /// `--spacing-choice-inset`
+    public static let choiceInset: CGFloat = 6
+    /// Minimum touch target.
+    public static let target: CGFloat = 44
+}
+
+/// The site's elevation scale (`--shadow-*`).
+public enum Elevation {
+    case card, raised, glow, overlay, sticker
+}
+
+public extension View {
+    func elevation(_ level: Elevation) -> some View {
+        switch level {
+        case .card: shadow(color: Palette.ink.opacity(0.08), radius: 0, y: 1)
+        case .raised: shadow(color: Palette.ink.opacity(0.12), radius: 12, y: 8)
+        case .glow: shadow(color: Palette.brand.opacity(0.25), radius: 20, y: 16)
+        case .overlay: shadow(color: Palette.ink.opacity(0.22), radius: 28, y: 24)
+        case .sticker: shadow(color: Palette.ink.opacity(0.2), radius: 3, y: 2)
+        }
+    }
 }
 
 public enum Radius {
@@ -28,6 +83,8 @@ public enum Radius {
     public static let field: CGFloat = 18
     public static let surface: CGFloat = 28
     public static let choice: CGFloat = 24
+    public static let choiceItem: CGFloat = choice - Space.choiceInset
+    public static let filter: CGFloat = 4
 }
 
 /// The pink→orange stripe that tops one white action card or dialog per view.
@@ -46,9 +103,9 @@ public struct PrimaryButtonStyle: ButtonStyle {
     public init(large: Bool = false) { self.large = large }
     public func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(large ? Typeface.body(17, weight: .semibold) : .headline)
+            .font(Typeface.action(large ? .lg : .base))
             .foregroundStyle(Palette.onDarkLabel)
-            .padding(.horizontal, 24)
+            .padding(.horizontal, Space.s6)
             .frame(minHeight: large ? 52 : 48)
             .background(configuration.isPressed ? Palette.actionHover : Palette.ink, in: .capsule)
     }
@@ -82,9 +139,9 @@ public struct RoundIconAction: View {
             icon.image
                 .resizable()
                 .frame(width: 20, height: 20)
-                .foregroundStyle(.white)
+                .foregroundStyle(Palette.white)
                 .frame(width: 44, height: 44)
-                .background(.white.opacity(0.15), in: .circle)
+                .background(Palette.borderOnDark, in: .circle)
         }
         .accessibilityLabel(label)
     }

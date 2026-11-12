@@ -62,10 +62,10 @@ struct RecipeContent: View {
                 VStack(alignment: .leading, spacing: 0) {
                     if let batch = detail.batch {
                         BatchCard(count: $count, noun: batch.noun, plural: batch.plural)
-                            .padding(.bottom, 24)
+                            .padding(.bottom, Space.s6)
                     }
                     ForEach(Array(recipe.blocks.enumerated()), id: \.offset) { _, block in
-                        VStack(alignment: .leading, spacing: 40) {
+                        VStack(alignment: .leading, spacing: Space.s10) {
                             if !block.ingredients.isEmpty { IngredientsCard(sections: block.ingredients) }
                             if !block.steps.isEmpty { StepsView(sections: block.steps) }
                             if !block.equipment.isEmpty { ListSection(title: "Equipment", sections: block.equipment) }
@@ -73,11 +73,11 @@ struct RecipeContent: View {
                             if !block.tips.isEmpty { FlatSection(title: "Tips", items: block.tips) }
                         }
                     }
-                    RatingsSection(slug: recipe.slug).padding(.top, 48)
+                    RatingsSection(slug: recipe.slug).padding(.top, Space.s12)
                 }
-                .padding(.horizontal, 18)
-                .padding(.top, 24)
-                .padding(.bottom, 30)
+                .padding(.horizontal, Space.s4)
+                .padding(.top, Space.s6)
+                .padding(.bottom, Space.s8)
             }
         }
         .background(Palette.background)
@@ -96,44 +96,44 @@ struct RecipeHeader: View {
         VStack(alignment: .leading, spacing: 0) {
             VStack(alignment: .leading, spacing: 0) {
                 Text(recipe.title)
-                    .font(Typeface.display(38, relativeTo: .largeTitle))
-                    .tracking(38 * 0.02)
+                    .font(Typeface.display(.page, relativeTo: .largeTitle))
+                    .tracking(Tracking.title(.page))
                     .lineSpacing(-4)
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Palette.white)
                     .accessibilityAddTraits(.isHeader)
                     .accessibilityIdentifier("recipe-title")
                 HStack(alignment: .center) {
                     Text("BY PATRICK HOGAN")
-                        .font(Typeface.body(11, weight: .bold, relativeTo: .caption2))
-                        .tracking(11 * 0.16)
+                        .font(Typeface.body(.micro, weight: .bold, relativeTo: .caption2))
+                        .tracking(Tracking.eyebrow(.micro))
                         .foregroundStyle(Palette.brand)
                     Spacer()
-                    HStack(spacing: 8) {
+                    HStack(spacing: Space.s2) {
                         RoundIconAction(.printer, label: "Print Recipe", action: print)
                             .accessibilityIdentifier("print-recipe")
                         RoundIconAction(.chefHat, label: "Cooking view", action: cook)
                             .accessibilityIdentifier("start-cooking")
                     }
                 }
-                .padding(.top, 6)
-                .padding(.bottom, 24)
+                .padding(.top, Space.s1_5)
+                .padding(.bottom, Space.s6)
                 if !recipe.description.isEmpty {
                     Text(recipe.description)
-                        .font(Typeface.body(16))
+                        .font(Typeface.body(.base))
                         .lineSpacing(16 * 0.625 - 4)
                         .foregroundStyle(Palette.onDarkLabel)
                 }
-                RecipeFactsGrid(facts: facts).padding(.top, 24)
+                RecipeFactsGrid(facts: facts).padding(.top, Space.s6)
             }
-            .padding(.horizontal, 18)
-            .padding(.top, 24)
-            .padding(.bottom, image == nil ? 32 : 24)
+            .padding(.horizontal, Space.s4)
+            .padding(.top, Space.s6)
+            .padding(.bottom, image == nil ? Space.s8 : Space.s6)
 
             if let image {
                 RemoteImage(variants: image.sources, aspectRatio: image.aspectRatio, alt: image.alt)
                     .clipShape(.rect(cornerRadius: Radius.surface))
-                    .shadow(color: Palette.ink.opacity(0.22), radius: 28, y: 24)
-                    .padding(.horizontal, 18)
+                    .elevation(.overlay)
+                    .padding(.horizontal, Space.s4)
             }
         }
         // Plum stops min(32vw, 300) above the photo's bottom edge, as on the site.
@@ -154,17 +154,17 @@ struct RecipeFactsGrid: View {
     let facts: [(String, String)]
 
     var body: some View {
-        LazyVGrid(columns: [GridItem(.flexible(), spacing: 24, alignment: .leading), GridItem(.flexible(), alignment: .leading)], alignment: .leading, spacing: 12) {
+        LazyVGrid(columns: [GridItem(.flexible(), spacing: Space.s6, alignment: .leading), GridItem(.flexible(), alignment: .leading)], alignment: .leading, spacing: Space.s3) {
             ForEach(facts, id: \.0) { label, value in
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: Space.s0_5) {
                     Text(label.uppercased())
-                        .font(Typeface.body(11, weight: .bold, relativeTo: .caption2))
-                        .tracking(11 * 0.16)
+                        .font(Typeface.body(.micro, weight: .bold, relativeTo: .caption2))
+                        .tracking(Tracking.eyebrow(.micro))
                         .foregroundStyle(Palette.brand)
                     Text(value)
-                        .font(Typeface.body(18, weight: .semibold, relativeTo: .headline))
+                        .font(Typeface.body(.lg, weight: .semibold, relativeTo: .headline))
                         .monospacedDigit()
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Palette.white)
                 }
                 .accessibilityElement(children: .combine)
             }
@@ -179,9 +179,9 @@ struct BatchCard: View {
     let plural: String
 
     var body: some View {
-        HStack(spacing: 16) {
+        HStack(spacing: Space.s4) {
             Text("Makes \(count) \(noun)")
-                .font(Typeface.body(15, weight: .bold, relativeTo: .subheadline))
+                .font(Typeface.body(.bodySm, weight: .bold, relativeTo: .subheadline))
                 .foregroundStyle(Palette.ink)
                 .contentTransition(.numericText(value: Double(count)))
             Spacer(minLength: 0)
@@ -189,7 +189,7 @@ struct BatchCard: View {
                 segment("minus", label: "Fewer \(plural)", enabled: count > 1) { count -= 1 }
                 Rectangle().fill(Palette.border).frame(width: 1, height: 22)
                 Text("\(count)")
-                    .font(Typeface.body(16, weight: .bold))
+                    .font(Typeface.body(.base, weight: .bold))
                     .monospacedDigit()
                     .foregroundStyle(Palette.ink)
                     .frame(minWidth: 40)
@@ -200,8 +200,8 @@ struct BatchCard: View {
             }
             .overlay { Capsule().stroke(Palette.ink, lineWidth: 1) }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
+        .padding(.horizontal, Space.s4)
+        .padding(.vertical, Space.s3)
         .background(Palette.card, in: .rect(cornerRadius: Radius.field))
         .overlay { RoundedRectangle(cornerRadius: Radius.field).stroke(Palette.border) }
         .sensoryFeedback(.selection, trigger: count)
@@ -236,30 +236,30 @@ struct IngredientsCard: View {
     let sections: [Components.Schemas.IngredientSection]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: Space.s1) {
             Text("Ingredients")
-                .font(Typeface.display(34, relativeTo: .title))
-                .foregroundStyle(.white)
+                .font(Typeface.display(.section, relativeTo: .title))
+                .foregroundStyle(Palette.white)
                 .accessibilityAddTraits(.isHeader)
-                .padding(.bottom, 8)
+                .padding(.bottom, Space.s2)
             ForEach(sections, id: \.id) { section in
                 if !section.title.isEmpty {
-                    SectionLabel(section.title, color: Palette.brand).padding(.top, 16).padding(.bottom, 4)
+                    SectionLabel(section.title, color: Palette.brand).padding(.top, Space.s4).padding(.bottom, Space.s1)
                 }
                 ForEach(section.items, id: \.id) { item in
                     VStack(spacing: 0) {
-                        Rectangle().fill(.white.opacity(0.15)).frame(height: 1)
+                        Rectangle().fill(Palette.borderOnDark).frame(height: 1)
                         (Text(item.amount.isEmpty ? "" : item.amount + " ").bold().foregroundColor(Palette.brand)
                             + Text(InlineHTML.attributed(item.html, linkColor: Palette.onDarkLabel)))
-                            .font(Typeface.body(16))
-                            .foregroundStyle(.white)
+                            .font(Typeface.body(.base))
+                            .foregroundStyle(Palette.white)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.vertical, 9)
+                            .padding(.vertical, Space.s2)
                     }
                 }
             }
         }
-        .padding(24)
+        .padding(Space.s6)
         .background(Palette.ink, in: .rect(cornerRadius: Radius.surface))
     }
 }
@@ -268,16 +268,16 @@ struct StepsView: View {
     let sections: [Components.Schemas.StepSection]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: Space.s2) {
             Text("Instructions")
-                .font(Typeface.display(34, relativeTo: .title))
+                .font(Typeface.display(.section, relativeTo: .title))
                 .foregroundStyle(Palette.ink)
                 .accessibilityAddTraits(.isHeader)
             ForEach(sections, id: \.id) { section in
-                VStack(alignment: .leading, spacing: 12) {
-                    if !section.title.isEmpty { SectionLabel(section.title).padding(.top, 22) }
+                VStack(alignment: .leading, spacing: Space.s3) {
+                    if !section.title.isEmpty { SectionLabel(section.title).padding(.top, Space.s6) }
                     if let origin = section.timeOrigin {
-                        Text(origin).font(Typeface.body(13, relativeTo: .caption)).foregroundStyle(Palette.mutedForeground)
+                        Text(origin).font(Typeface.body(.caption, relativeTo: .caption)).foregroundStyle(Palette.mutedForeground)
                     }
                     if section.timed { TimedRail(steps: section.items) } else { NumberedSteps(steps: section.items) }
                 }
@@ -293,29 +293,29 @@ struct TimedRail: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             ForEach(Array(steps.enumerated()), id: \.element.id) { index, step in
-                HStack(alignment: .top, spacing: 14) {
+                HStack(alignment: .top, spacing: Space.s3_5) {
                     Text(step.time ?? "")
-                        .font(Typeface.body(12, weight: .bold, relativeTo: .caption))
+                        .font(Typeface.body(.xs, weight: .bold, relativeTo: .caption))
                         .monospacedDigit()
                         .foregroundStyle(Palette.brand)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
                         .frame(minWidth: 40, minHeight: 40)
-                        .padding(.horizontal, 2)
+                        .padding(.horizontal, Space.s0_5)
                         .background(Palette.ink, in: .capsule)
                         .accessibilityLabel(step.time.map { "At \($0)" } ?? "")
-                    VStack(alignment: .leading, spacing: 2) {
-                        HTMLText(step.html).font(Typeface.body(16)).foregroundStyle(Palette.ink).lineSpacing(16 * 0.72 - 4)
+                    VStack(alignment: .leading, spacing: Space.s0_5) {
+                        HTMLText(step.html).font(Typeface.body(.base)).foregroundStyle(Palette.ink).lineSpacing(16 * 0.72 - 4)
                         if let rest = step.rest {
-                            Text(rest).font(Typeface.body(14, relativeTo: .subheadline)).foregroundStyle(Palette.mutedForeground)
+                            Text(rest).font(Typeface.body(.sm, relativeTo: .subheadline)).foregroundStyle(Palette.mutedForeground)
                         }
                     }
-                    .padding(.top, 8)
-                    .padding(.bottom, 18)
+                    .padding(.top, Space.s2)
+                    .padding(.bottom, Space.s4)
                 }
                 .background(alignment: .topLeading) {
                     if index < steps.count - 1 {
-                        Rectangle().fill(Palette.ink).frame(width: 2).padding(.top, 20).offset(x: 21)
+                        Rectangle().fill(Palette.ink).frame(width: 2).padding(.top, Space.s5).offset(x: 21)
                     }
                 }
                 .accessibilityElement(children: .combine)
@@ -329,14 +329,14 @@ struct NumberedSteps: View {
     let steps: [Components.Schemas.Step]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 18) {
+        VStack(alignment: .leading, spacing: Space.s4) {
             ForEach(Array(steps.enumerated()), id: \.element.id) { index, step in
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: Space.s1) {
                     Text("STEP \(index + 1)")
-                        .font(Typeface.body(14, weight: .bold, relativeTo: .subheadline))
-                        .tracking(14 * 0.16)
+                        .font(Typeface.body(.sm, weight: .bold, relativeTo: .subheadline))
+                        .tracking(Tracking.eyebrow(.sm))
                         .foregroundStyle(Palette.ink)
-                    HTMLText(step.html).font(Typeface.body(16)).foregroundStyle(Palette.ink).lineSpacing(16 * 0.72 - 4)
+                    HTMLText(step.html).font(Typeface.body(.base)).foregroundStyle(Palette.ink).lineSpacing(16 * 0.72 - 4)
                 }
                 .accessibilityElement(children: .combine)
             }
@@ -349,10 +349,10 @@ struct ListSection: View {
     let sections: [Components.Schemas.Section]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text(title).font(Typeface.display(34, relativeTo: .title)).foregroundStyle(Palette.ink).accessibilityAddTraits(.isHeader)
+        VStack(alignment: .leading, spacing: Space.s2_5) {
+            Text(title).font(Typeface.display(.section, relativeTo: .title)).foregroundStyle(Palette.ink).accessibilityAddTraits(.isHeader)
             ForEach(sections, id: \.id) { section in
-                if !section.title.isEmpty { SectionLabel(section.title).padding(.top, 8) }
+                if !section.title.isEmpty { SectionLabel(section.title).padding(.top, Space.s2) }
                 ForEach(section.items, id: \.id) { item in
                     Bullet(html: item.html)
                 }
@@ -366,8 +366,8 @@ struct FlatSection: View {
     let items: [String]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text(title).font(Typeface.display(34, relativeTo: .title)).foregroundStyle(Palette.ink).accessibilityAddTraits(.isHeader)
+        VStack(alignment: .leading, spacing: Space.s2_5) {
+            Text(title).font(Typeface.display(.section, relativeTo: .title)).foregroundStyle(Palette.ink).accessibilityAddTraits(.isHeader)
             ForEach(Array(items.enumerated()), id: \.offset) { _, html in Bullet(html: html) }
         }
     }
@@ -376,9 +376,9 @@ struct FlatSection: View {
 struct Bullet: View {
     let html: String
     var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 10) {
-            Text("•").font(Typeface.body(16, weight: .heavy)).foregroundStyle(Palette.ink).accessibilityHidden(true)
-            HTMLText(html).font(Typeface.body(16)).foregroundStyle(Palette.ink).lineSpacing(16 * 0.72 - 4)
+        HStack(alignment: .firstTextBaseline, spacing: Space.s2_5) {
+            Text("•").font(Typeface.body(.base, weight: .bold)).foregroundStyle(Palette.ink).accessibilityHidden(true)
+            HTMLText(html).font(Typeface.body(.base)).foregroundStyle(Palette.ink).lineSpacing(16 * 0.72 - 4)
         }
     }
 }
@@ -390,7 +390,7 @@ struct SectionLabel: View {
     init(_ text: String, color: Color = Palette.ink) { self.text = text; self.color = color }
     var body: some View {
         Text(text.uppercased())
-            .font(Typeface.display(13, relativeTo: .caption))
+            .font(Typeface.display(.caption, relativeTo: .caption))
             .foregroundStyle(color)
             .accessibilityAddTraits(.isHeader)
     }

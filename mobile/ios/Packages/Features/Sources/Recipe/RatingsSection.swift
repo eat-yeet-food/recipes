@@ -20,17 +20,17 @@ struct RatingsSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack(spacing: 16) {
+            HStack(spacing: Space.s4) {
                 Text("Ratings & Reviews")
-                    .font(Typeface.display(30, relativeTo: .title))
+                    .font(Typeface.display(.title, relativeTo: .title))
                     .accessibilityAddTraits(.isHeader)
                     .fixedSize()
                 LinearGradient(colors: [Palette.brand, Palette.brandAlt], startPoint: .leading, endPoint: .trailing)
                     .frame(height: 3).clipShape(.capsule).accessibilityHidden(true)
             }
-            .padding(.bottom, 24)
+            .padding(.bottom, Space.s6)
 
-            rateCard.padding(.bottom, 32)
+            rateCard.padding(.bottom, Space.s8)
             if let summary { reviews(summary) }
         }
         .foregroundStyle(Palette.ink)
@@ -55,21 +55,21 @@ struct RatingsSection: View {
     // MARK: Rate
 
     private var rateCard: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        VStack(alignment: .leading, spacing: Space.s5) {
             Text(rated ? "Update your rating" : "Rate this recipe")
-                .font(Typeface.display(30, weight: .black, relativeTo: .title))
+                .font(Typeface.display(.title, weight: .extrabold, relativeTo: .title))
                 .accessibilityAddTraits(.isHeader)
             if account.status != .unknown && !signedIn {
-                Text("Sign in to rate this recipe, write a review, or reply to other cooks.").font(Typeface.body(14))
+                Text("Sign in to rate this recipe, write a review, or reply to other cooks.").font(Typeface.body(.sm))
                 Button {
                     Task { try? await account.signIn() }
                 } label: { Text("Sign in to rate").frame(maxWidth: .infinity) }
                 .buttonStyle(PrimaryButtonStyle())
                 if !error.isEmpty { callout(error) }
             } else {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Star rating").font(Typeface.body(14, weight: .medium)).foregroundStyle(Palette.mutedForeground)
-                    HStack(spacing: 4) {
+                VStack(alignment: .leading, spacing: Space.s2) {
+                    Text("Star rating").font(Typeface.body(.sm, weight: .medium)).foregroundStyle(Palette.mutedForeground)
+                    HStack(spacing: Space.s1) {
                         ForEach(1...5, id: \.self) { star in
                             Button { score = star; error = ""; message = "" } label: {
                                 Image(systemName: star <= (score ?? 0) ? "star.fill" : "star")
@@ -83,17 +83,17 @@ struct RatingsSection: View {
                     .sensoryFeedback(.selection, trigger: score)
                     .disabled(saving)
                 }
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Review (optional)").font(Typeface.body(14, weight: .medium)).foregroundStyle(Palette.mutedForeground)
+                VStack(alignment: .leading, spacing: Space.s2) {
+                    Text("Review (optional)").font(Typeface.body(.sm, weight: .medium)).foregroundStyle(Palette.mutedForeground)
                     TextField("Share your experience...", text: $reviewText, axis: .vertical)
                         .lineLimit(4...10)
-                        .font(Typeface.body(16))
-                        .padding(14)
+                        .font(Typeface.body(.base))
+                        .padding(Space.s3_5)
                         .overlay { RoundedRectangle(cornerRadius: Radius.field).strokeBorder(Palette.input) }
                         .onChange(of: reviewText) { _, value in if value.count > 2000 { reviewText = String(value.prefix(2000)) } }
                         .disabled(saving)
                     if let member = account.member {
-                        Text("Posting as \(member.displayName).").font(Typeface.body(12)).foregroundStyle(Palette.mutedForeground)
+                        Text("Posting as \(member.displayName).").font(Typeface.body(.xs)).foregroundStyle(Palette.mutedForeground)
                     }
                 }
                 if !error.isEmpty { callout(error) }
@@ -105,16 +105,16 @@ struct RatingsSection: View {
                 .opacity(score == nil || summary == nil ? 0.5 : 1)
                 if rated {
                     Button("Delete my rating") { Task { await remove() } }
-                        .font(Typeface.body(14, weight: .bold)).underline()
+                        .font(Typeface.body(.sm, weight: .bold)).underline()
                         .disabled(saving)
                 }
                 if !message.isEmpty {
-                    Text(message).font(Typeface.body(14)).foregroundStyle(Palette.mutedForeground)
+                    Text(message).font(Typeface.body(.sm)).foregroundStyle(Palette.mutedForeground)
                         .accessibilityAddTraits(.updatesFrequently)
                 }
             }
         }
-        .padding(24)
+        .padding(Space.s6)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Palette.card)
         .overlay(alignment: .top) { BrandStripe() }
@@ -123,9 +123,9 @@ struct RatingsSection: View {
     }
 
     private func callout(_ text: String) -> some View {
-        Text(text).font(Typeface.body(14)).foregroundStyle(Palette.danger)
-            .padding(12).frame(maxWidth: .infinity, alignment: .leading)
-            .background(Palette.danger.opacity(0.08), in: .rect(cornerRadius: Radius.field))
+        Text(text).font(Typeface.body(.sm)).foregroundStyle(Palette.danger)
+            .padding(Space.s3).frame(maxWidth: .infinity, alignment: .leading)
+            .background(Palette.dangerSoft, in: .rect(cornerRadius: Radius.field))
     }
 
     private func submit() async {
@@ -150,27 +150,27 @@ struct RatingsSection: View {
     @ViewBuilder
     private func reviews(_ summary: RatingSummary) -> some View {
         if summary.count == 0 {
-            Text("No reviews yet. Be the first!").font(Typeface.body(14)).foregroundStyle(Palette.mutedForeground)
+            Text("No reviews yet. Be the first!").font(Typeface.body(.sm)).foregroundStyle(Palette.mutedForeground)
         } else if let average = summary.average {
-            VStack(alignment: .leading, spacing: 20) {
-                HStack(spacing: 20) {
+            VStack(alignment: .leading, spacing: Space.s5) {
+                HStack(spacing: Space.s5) {
                     Text(String(format: "%.1f", average))
-                        .font(Typeface.body(34, weight: .bold)).monospacedDigit()
+                        .font(Typeface.body(.section, weight: .bold)).monospacedDigit()
                         .foregroundStyle(Palette.brand)
-                    VStack(alignment: .leading, spacing: 4) {
+                    VStack(alignment: .leading, spacing: Space.s1) {
                         Stars(value: average, filled: Palette.brand, empty: Palette.onDarkLabel)
-                        HStack(spacing: 8) {
-                            Text("\(summary.count) \(summary.count == 1 ? "rating" : "ratings")").font(Typeface.body(14))
+                        HStack(spacing: Space.s2) {
+                            Text("\(summary.count) \(summary.count == 1 ? "rating" : "ratings")").font(Typeface.body(.sm))
                             let eat = summary.eatPercentage ?? 0
                             Text(eat >= 50 ? "\(eat)% EAT" : "\(100 - eat)% YEET")
-                                .font(Typeface.body(12, weight: .bold)).foregroundStyle(Palette.ink)
-                                .padding(.horizontal, 10).padding(.vertical, 2)
+                                .font(Typeface.body(.xs, weight: .bold)).foregroundStyle(Palette.ink)
+                                .padding(.horizontal, Space.s2_5).padding(.vertical, Space.s0_5)
                                 .background(Palette.brand, in: .capsule)
                         }
                     }
                 }
                 .foregroundStyle(Palette.onDarkLabel)
-                .padding(20).frame(maxWidth: .infinity, alignment: .leading)
+                .padding(Space.s5).frame(maxWidth: .infinity, alignment: .leading)
                 .background(Palette.ink, in: .rect(cornerRadius: Radius.surface))
 
                 ForEach(summary.reviews) { review in reviewRow(review) }
@@ -179,38 +179,38 @@ struct RatingsSection: View {
     }
 
     private func reviewRow(_ review: RatingSummary.Review) -> some View {
-        HStack(alignment: .top, spacing: 16) {
+        HStack(alignment: .top, spacing: Space.s4) {
             Initial(name: review.name, size: 40)
             VStack(alignment: .leading, spacing: 0) {
-                HStack(spacing: 8) {
-                    Text(review.name).font(Typeface.body(14, weight: .bold))
-                    Text(review.score >= 4 ? "EAT" : "YEET").font(Typeface.body(12, weight: .bold))
-                        .padding(.horizontal, 10).padding(.vertical, 2).background(Palette.brandSoft, in: .capsule)
-                    if review.own { Text("Your review").font(Typeface.body(12)).foregroundStyle(Palette.mutedForeground) }
+                HStack(spacing: Space.s2) {
+                    Text(review.name).font(Typeface.body(.sm, weight: .bold))
+                    Text(review.score >= 4 ? "EAT" : "YEET").font(Typeface.body(.xs, weight: .bold))
+                        .padding(.horizontal, Space.s2_5).padding(.vertical, Space.s0_5).background(Palette.brandSoft, in: .capsule)
+                    if review.own { Text("Your review").font(Typeface.body(.xs)).foregroundStyle(Palette.mutedForeground) }
                 }
-                .padding(.bottom, 4)
-                Stars(value: Double(review.score), filled: Palette.ink, empty: Palette.mutedForeground).padding(.bottom, 8)
-                if !review.reviewText.isEmpty { Text(review.reviewText).font(Typeface.body(14)) }
+                .padding(.bottom, Space.s1)
+                Stars(value: Double(review.score), filled: Palette.ink, empty: Palette.mutedForeground).padding(.bottom, Space.s2)
+                if !review.reviewText.isEmpty { Text(review.reviewText).font(Typeface.body(.sm)) }
 
                 if !review.replies.isEmpty {
-                    VStack(alignment: .leading, spacing: 16) {
+                    VStack(alignment: .leading, spacing: Space.s4) {
                         ForEach(review.replies) { reply in
-                            HStack(alignment: .top, spacing: 12) {
+                            HStack(alignment: .top, spacing: Space.s3) {
                                 Initial(name: reply.name, size: 32)
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text(reply.name).font(Typeface.body(12, weight: .bold))
-                                    Text(reply.body).font(Typeface.body(14))
+                                VStack(alignment: .leading, spacing: Space.s1) {
+                                    Text(reply.name).font(Typeface.body(.xs, weight: .bold))
+                                    Text(reply.body).font(Typeface.body(.sm))
                                     if reply.own {
                                         Button("Delete") { Task { await deleteReply(reply.id) } }
-                                            .font(Typeface.body(12, weight: .bold)).underline()
+                                            .font(Typeface.body(.xs, weight: .bold)).underline()
                                             .accessibilityLabel("Delete your reply to \(review.name)")
                                     }
                                 }
                             }
                         }
                     }
-                    .padding(.leading, 16).padding(.top, 16)
-                    .overlay(alignment: .leading) { Rectangle().fill(Palette.brand).frame(width: 2).padding(.top, 16) }
+                    .padding(.leading, Space.s4).padding(.top, Space.s4)
+                    .overlay(alignment: .leading) { Rectangle().fill(Palette.brand).frame(width: 2).padding(.top, Space.s4) }
                 }
 
                 if signedIn {
@@ -218,30 +218,30 @@ struct RatingsSection: View {
                         replyingTo = replyingTo == review.id ? nil : review.id
                         replyBody = ""; replyError = ""
                     }
-                    .font(Typeface.body(14, weight: .bold)).underline()
-                    .padding(.top, 12)
+                    .font(Typeface.body(.sm, weight: .bold)).underline()
+                    .padding(.top, Space.s3)
                 } else {
                     Button("Sign in to reply") { Task { try? await account.signIn() } }
-                        .font(Typeface.body(14, weight: .bold)).underline()
-                        .padding(.top, 12)
+                        .font(Typeface.body(.sm, weight: .bold)).underline()
+                        .padding(.top, Space.s3)
                 }
 
                 if replyingTo == review.id {
-                    VStack(alignment: .leading, spacing: 16) {
+                    VStack(alignment: .leading, spacing: Space.s4) {
                         TextField("Reply to \(review.name)...", text: $replyBody, axis: .vertical)
-                            .lineLimit(3...8).font(Typeface.body(16)).padding(14)
+                            .lineLimit(3...8).font(Typeface.body(.base)).padding(Space.s3_5)
                             .overlay { RoundedRectangle(cornerRadius: Radius.field).strokeBorder(Palette.input) }
                             .onChange(of: replyBody) { _, value in if value.count > 1000 { replyBody = String(value.prefix(1000)) } }
-                        if !replyError.isEmpty { Text(replyError).font(Typeface.body(14)).foregroundStyle(Palette.danger) }
+                        if !replyError.isEmpty { Text(replyError).font(Typeface.body(.sm)).foregroundStyle(Palette.danger) }
                         Button(saving ? "Posting..." : "Post Reply") { Task { await postReply(review.id) } }
                             .buttonStyle(PrimaryButtonStyle())
                             .disabled(saving || replyBody.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     }
-                    .padding(.top, 16)
+                    .padding(.top, Space.s4)
                 }
             }
         }
-        .padding(.bottom, 20)
+        .padding(.bottom, Space.s5)
         .overlay(alignment: .bottom) { Rectangle().fill(Palette.border).frame(height: 1) }
         .accessibilityElement(children: .contain)
     }
@@ -264,7 +264,7 @@ private struct Stars: View {
     let filled: Color
     let empty: Color
     var body: some View {
-        HStack(spacing: 2) {
+        HStack(spacing: Space.s0_5) {
             ForEach(1...5, id: \.self) { star in
                 Image(systemName: Double(star) <= value.rounded() ? "star.fill" : "star")
                     .font(.system(size: 16, weight: .light))
@@ -281,7 +281,7 @@ private struct Initial: View {
     let size: CGFloat
     var body: some View {
         Text(String(name.first ?? "C").uppercased())
-            .font(Typeface.body(size > 36 ? 14 : 12, weight: .bold))
+            .font(Typeface.body(size > 36 ? .sm : .xs, weight: .bold))
             .frame(width: size, height: size)
             .background(Palette.brandSoft, in: .circle)
             .accessibilityHidden(true)

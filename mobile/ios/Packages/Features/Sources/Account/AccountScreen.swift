@@ -19,13 +19,13 @@ public struct AccountScreen: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
                 switch account.status {
-                case .unknown: ProgressView().frame(maxWidth: .infinity).padding(.top, 48)
+                case .unknown: ProgressView().frame(maxWidth: .infinity).padding(.top, Space.s12)
                 case .signedOut: signIn
                 case .signedIn(let member): settings(member)
                 }
             }
             .foregroundStyle(Palette.ink)
-            .padding(.horizontal, 16).padding(.vertical, 48)
+            .padding(.horizontal, Space.s4).padding(.vertical, Space.s12)
             .frame(maxWidth: 440, alignment: .leading)
             .frame(maxWidth: .infinity)
         }
@@ -41,9 +41,9 @@ public struct AccountScreen: View {
         VStack(alignment: .leading, spacing: 0) {
             PageTitle("Sign in")
             Text("Rate and review recipes, and keep your remixes and their history on every device.")
-                .font(Typeface.body(14, relativeTo: .subheadline)).foregroundStyle(Palette.mutedForeground)
-                .padding(.top, 8)
-            VStack(alignment: .leading, spacing: 20) {
+                .font(Typeface.body(.sm, relativeTo: .subheadline)).foregroundStyle(Palette.mutedForeground)
+                .padding(.top, Space.s2)
+            VStack(alignment: .leading, spacing: Space.s5) {
                 if let error { AlertBox(error) }
                 if !account.googleAvailable { AlertBox("Sign-in is unavailable right now. Please try again later.") }
                 if account.googleAvailable {
@@ -57,10 +57,10 @@ public struct AccountScreen: View {
                     .accessibilityIdentifier("continue-with-google")
                 }
                 Text("New here? Continuing creates your account. By signing in you agree to the [Terms of Use](https://eatyeet.com/terms) and [Privacy Policy](https://eatyeet.com/privacy).")
-                    .font(Typeface.body(12, relativeTo: .caption)).foregroundStyle(Palette.mutedForeground)
+                    .font(Typeface.body(.xs, relativeTo: .caption)).foregroundStyle(Palette.mutedForeground)
                     .tint(Palette.mutedForeground)
             }
-            .padding(.top, 24)
+            .padding(.top, Space.s6)
         }
     }
 
@@ -70,20 +70,20 @@ public struct AccountScreen: View {
         VStack(alignment: .leading, spacing: 0) {
             PageTitle("Account settings")
             (Text("Signed in as ") + Text(member.email).bold().foregroundColor(Palette.ink) + Text(" with Google."))
-                .font(Typeface.body(14, relativeTo: .subheadline)).foregroundStyle(Palette.mutedForeground)
-                .padding(.top, 8).padding(.bottom, 32)
-            if let error { AlertBox(error).padding(.bottom, 16) }
+                .font(Typeface.body(.sm, relativeTo: .subheadline)).foregroundStyle(Palette.mutedForeground)
+                .padding(.top, Space.s2).padding(.bottom, Space.s8)
+            if let error { AlertBox(error).padding(.bottom, Space.s4) }
 
             SettingsSection("Public name", "Shown on your reviews and replies.") {
                 TextField("Public name", text: $name)
                     .textContentType(.nickname)
-                    .font(Typeface.body(16))
-                    .padding(.horizontal, 14).frame(minHeight: 48)
+                    .font(Typeface.body(.base))
+                    .padding(.horizontal, Space.s3_5).frame(minHeight: 48)
                     .background(Palette.background, in: .rect(cornerRadius: Radius.field))
                     .overlay { RoundedRectangle(cornerRadius: Radius.field).strokeBorder(Palette.input, lineWidth: 1) }
                     .onChange(of: name) { nameResult = nil }
                 if let nameResult {
-                    Text(nameResult.text).font(Typeface.body(14))
+                    Text(nameResult.text).font(Typeface.body(.sm))
                         .foregroundStyle(nameResult.ok ? Palette.ink : Palette.danger)
                 }
                 Button(working ? "Saving..." : "Save name") {
@@ -138,8 +138,8 @@ struct PageTitle: View {
     init(_ text: String) { self.text = text }
     var body: some View {
         Text(text)
-            .font(Typeface.display(38, relativeTo: .largeTitle))
-            .tracking(38 * 0.02)
+            .font(Typeface.display(.page, relativeTo: .largeTitle))
+            .tracking(Tracking.title(.page))
             .accessibilityAddTraits(.isHeader)
     }
 }
@@ -155,14 +155,14 @@ struct SettingsSection<Content: View>: View {
         self.content = content()
     }
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(title).font(Typeface.body(18, weight: .semibold)).accessibilityAddTraits(.isHeader)
-                Text(description).font(Typeface.body(14, relativeTo: .subheadline)).foregroundStyle(Palette.mutedForeground)
+        VStack(alignment: .leading, spacing: Space.s4) {
+            VStack(alignment: .leading, spacing: Space.s1) {
+                Text(title).font(Typeface.body(.lg, weight: .semibold)).accessibilityAddTraits(.isHeader)
+                Text(description).font(Typeface.body(.sm, relativeTo: .subheadline)).foregroundStyle(Palette.mutedForeground)
             }
-            VStack(alignment: .leading, spacing: 16) { content }
+            VStack(alignment: .leading, spacing: Space.s4) { content }
         }
-        .padding(.vertical, 32)
+        .padding(.vertical, Space.s8)
         .frame(maxWidth: .infinity, alignment: .leading)
         .overlay(alignment: .top) { Rectangle().fill(Palette.border).frame(height: 1) }
     }
@@ -172,8 +172,8 @@ struct AlertBox: View {
     let text: String
     init(_ text: String) { self.text = text }
     var body: some View {
-        Text(text).font(Typeface.body(14))
-            .padding(12).frame(maxWidth: .infinity, alignment: .leading)
+        Text(text).font(Typeface.body(.sm))
+            .padding(Space.s3).frame(maxWidth: .infinity, alignment: .leading)
             .background(Palette.tint, in: .rect(cornerRadius: Radius.field))
             .overlay { RoundedRectangle(cornerRadius: Radius.field).strokeBorder(Palette.border) }
             .accessibilityAddTraits(.isStaticText)
@@ -184,8 +184,8 @@ struct AlertBox: View {
 struct OutlineButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.headline).foregroundStyle(Palette.ink)
-            .padding(.horizontal, 24).frame(minHeight: 48)
+            .font(Typeface.body(.base, weight: .semibold)).foregroundStyle(Palette.ink)
+            .padding(.horizontal, Space.s6).frame(minHeight: 48)
             .background(configuration.isPressed ? Palette.tint : Palette.background, in: .capsule)
             .overlay { Capsule().strokeBorder(Palette.ink, lineWidth: 1.5) }
     }
@@ -194,8 +194,8 @@ struct OutlineButtonStyle: ButtonStyle {
 struct DangerButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.headline).foregroundStyle(.white)
-            .padding(.horizontal, 24).frame(minHeight: 48)
-            .background(Palette.danger.opacity(configuration.isPressed ? 0.85 : 1), in: .capsule)
+            .font(Typeface.body(.base, weight: .semibold)).foregroundStyle(Palette.white)
+            .padding(.horizontal, Space.s6).frame(minHeight: 48)
+            .background(configuration.isPressed ? Palette.danger.opacity(0.85) : Palette.danger, in: .capsule)
     }
 }

@@ -31,16 +31,16 @@ public struct RecipeMeta: View {
     let yield: String
     public init(time: String, yield: String) { self.time = time; self.yield = yield }
     public var body: some View {
-        HStack(spacing: 16) {
+        HStack(spacing: Space.s4) {
             if !time.isEmpty { item(time, icon: .clock) }
             if !yield.isEmpty { item(yield, icon: .utensilsCrossed) }
         }
-        .font(Typeface.body(12, relativeTo: .caption))
+        .font(Typeface.body(.xs, relativeTo: .caption))
         .foregroundStyle(Palette.mutedForeground)
     }
 
     private func item(_ text: String, icon: SiteIcon) -> some View {
-        HStack(spacing: 6) {
+        HStack(spacing: Space.s1_5) {
             icon.image.resizable().frame(width: 14, height: 14).accessibilityHidden(true)
             Text(text)
         }
