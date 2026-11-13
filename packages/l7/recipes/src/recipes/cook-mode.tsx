@@ -4,6 +4,8 @@ import { ArrowLeft, ArrowRight, Check, ChevronDown, Timer, X } from 'lucide-reac
 import type { RecipeBlock, Section } from '@eat-yeet/l4-content-model/blocks'
 import { stepNeeds, type Need } from './step-needs'
 import { stepTimers } from './step-timers'
+import { removeKitchenTimer, startKitchenTimer, timerClock, useKitchenTimers } from '@eat-yeet/l5-ui-primitives/primitives/kitchen-timers'
+import { primeTimerAlarm } from '@eat-yeet/l6-ui-shell/shell/timer-nav'
 export { stepTimers }
 import { cn } from '@eat-yeet/l0-foundation/utils'
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
@@ -20,15 +22,9 @@ export const FOLD_DELAY_MS = 1000
 export const COOK_MODE_CLASSIC_KEY = 'eatyeet:cook-mode:classic'
 
 type Step = { id: string; html: string; section: string; needs: Need[] }
-type CookTimer = { id: string; label: string; endsAt: number; done: boolean }
 
 const Html = ({ html, className }: { html: string; className?: string }) => <span className={className} dangerouslySetInnerHTML={{ __html: html }} />
 
-function clock(ms: number) {
-  const total = Math.max(0, Math.ceil(ms / 1000))
-  const h = Math.floor(total / 3600), m = Math.floor((total % 3600) / 60), s = total % 60
-  return h ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}` : `${m}:${String(s).padStart(2, '0')}`
-}
 
 const reducedMotion = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
 
@@ -39,14 +35,15 @@ const reducedMotion = () => typeof window !== 'undefined' && window.matchMedia?.
  * then cook one step at a time with tap-to-start timers. Exit keeps your
  * place for this visit; finishing (Back to recipe) resets it. The page keeps the screen awake meanwhile.
  */
-export function CookMode({ title, blocks, open, onClose, onFinish, onClassic, media, facts }: { title: string; blocks: RecipeBlock[]; open: boolean; media?: ReactNode; facts?: string; onClose: () => void; onFinish?: () => void; onClassic?: () => void }) {
+export function CookMode({ title, href, blocks, open, onClose, onFinish, onClassic, media, facts }: { title: string; /** The recipe page, linked from the app bar's timers. */ href?: string; blocks: RecipeBlock[]; open: boolean; media?: ReactNode; facts?: string; onClose: () => void; onFinish?: () => void; onClassic?: () => void }) {
   const groups = useMemo(() => blocks.flatMap((block) => block.ingredients).filter((section) => section.items.length > 0), [blocks])
   const steps = useMemo<Step[]>(() => blocks.flatMap((block) => block.steps.flatMap((section) => section.items.map((html, index) => ({ id: `${section.id}:${section.itemIds[index] ?? index}`, html, section: section.title, needs: stepNeeds(section.itemUses?.[index] ?? [], block.ingredients) })))), [blocks])
   const [stage, setStage] = useState<'intro' | 'gather' | 'cook' | 'done'>('intro')
   const [checked, setChecked] = useState<Set<string>>(() => new Set())
   const [folded, setFolded] = useState<Set<string>>(() => new Set())
   const [stepIndex, setStepIndex] = useState(0)
-  const [timers, setTimers] = useState<CookTimer[]>([])
+  // Timers outlive cook mode and the page: the app bar lists and rings them.
+  const timers = useKitchenTimers()
   const [now, setNow] = useState(() => Date.now())
   const dialog = useRef<HTMLDivElement>(null)
   const list = useRef<HTMLDivElement>(null)
@@ -66,20 +63,12 @@ export function CookMode({ title, blocks, open, onClose, onFinish, onClassic, me
     return () => { document.documentElement.style.overflow = overflow; previous?.focus?.() }
   }, [open])
 
-  // Timers tick once a second; finished ones buzz once and pulse until dismissed.
+  // Count down while any timer runs; the app bar's TimerNav does the ringing.
   useEffect(() => {
-    if (!timers.some((timer) => !timer.done)) return
-    const tick = setInterval(() => {
-      const at = Date.now()
-      setNow(at)
-      setTimers((current) => current.map((timer) => {
-        if (timer.done || timer.endsAt > at) return timer
-        try { navigator.vibrate?.([200, 100, 200]) } catch { /* unsupported */ }
-        return { ...timer, done: true }
-      }))
-    }, 1000)
+    if (!timers.length) return
+    const tick = setInterval(() => setNow(Date.now()), 1000)
     return () => clearInterval(tick)
-  }, [timers])
+  }, [timers.length])
 
   useEffect(() => () => { foldTimers.current.forEach(clearTimeout) }, [])
 
@@ -134,11 +123,12 @@ export function CookMode({ title, blocks, open, onClose, onFinish, onClassic, me
     setFolded(set)
   }
 
-  function startTimer(label: string, minutes: number) {
+  function startTimer(html: string, label: string, minutes: number) {
     haptic()
-    const at = Date.now()
-    setNow(at)
-    setTimers((current) => [...current, { id: `${at}`, label, endsAt: at + minutes * 60_000, done: false }])
+    primeTimerAlarm()
+    setNow(Date.now())
+    const lead = /^\s*<(?:strong|b)>([^<]+?):?<\/(?:strong|b)>/i.exec(html)?.[1]?.replace(/:$/, '').trim()
+    startKitchenTimer({ label: lead ? `${lead} · ${label}` : label, minutes, recipe: href ? { title, href } : undefined })
   }
 
   // Swipe left/right between steps; a tap on the right or left edge does the same.
@@ -242,7 +232,7 @@ export function CookMode({ title, blocks, open, onClose, onFinish, onClassic, me
       <div className="flex min-h-0 flex-1 gap-10 px-5 pt-6 md:px-10 landscape:md:pt-8" onPointerDown={onPointerDown} onPointerUp={onPointerUp} data-cook-step={step.id}>
         <div className="min-h-0 flex-1 overflow-y-auto">
           {sectionTitle && <Eyebrow as="p" tone="muted" className="mb-2.5">{sectionTitle}</Eyebrow>}
-          <Html html={step.html} className="block text-title-sm leading-snug font-semibold md:text-section [&_strong]:font-bold" />
+          <Html html={step.html} className="block text-title-sm leading-snug font-medium md:text-section [&_strong]:font-bold" />
           {step.needs.length > 0 && <section aria-label="You’ll need" data-cook-needs="" className="mt-6 rounded-surface bg-muted px-5 py-4">
             <Eyebrow as="h2" tone="muted" className="mb-1">You’ll need</Eyebrow>
             <ul className="m-0 list-none p-0">{step.needs.map((need) => <li key={need.key} className="border-t border-border py-2 text-base first:border-0 md:text-lg">
@@ -250,25 +240,25 @@ export function CookMode({ title, blocks, open, onClose, onFinish, onClassic, me
             </li>)}</ul>
           </section>}
           {stepTimers(step.html).length > 0 && <div className="mt-6 flex flex-wrap gap-3">
-            {stepTimers(step.html).map((timer) => <Button key={timer.label} variant="utility" onClick={() => startTimer(timer.label, timer.minutes)}><Timer />Start {timer.label} timer</Button>)}
+            {stepTimers(step.html).map((timer) => <Button key={timer.label} variant="utility" onClick={() => startTimer(step.html, timer.label, timer.minutes)}><Timer />Start {timer.label} timer</Button>)}
           </div>}
         </div>
         {groups.length > 0 && <aside aria-label="Ingredients" className="hidden min-h-0 w-[34%] shrink-0 overflow-y-auto rounded-surface bg-muted p-6 landscape:md:block">
           {groups.map((section) => <section key={section.id} className="[&+section]:mt-5">
             <Eyebrow as="h2" tone="ink" className="mb-1">{section.title || 'Ingredients'}</Eyebrow>
-            <ul className="m-0 list-none p-0">{section.items.map((item, index) => { const used = step.needs.some((need) => need.key === section.itemIds[index]); return <li key={index} data-used={used ? 'true' : undefined} className={cn('border-b border-border py-2 text-body-sm', used && '-mx-2 rounded-filter border-transparent bg-brand-soft px-2 font-semibold')}><Html html={item} className="[&_strong]:font-bold" /></li> })}</ul>
+            <ul className="m-0 list-none p-0">{section.items.map((item, index) => { const used = step.needs.some((need) => need.key === section.itemIds[index]); return <li key={index} data-used={used ? 'true' : undefined} className={cn('border-b border-border py-2 text-body-sm', used && '-mx-2 rounded-filter border-transparent bg-brand-soft px-2 font-medium')}><Html html={item} className="[&_strong]:font-bold" /></li> })}</ul>
           </section>)}
         </aside>}
       </div>
       <footer className="px-5 pt-3 pb-[max(env(safe-area-inset-bottom),20px)] md:px-10">
         {timers.length > 0 && <ul aria-label="Timers" aria-live="polite" className="m-0 mb-3 flex list-none flex-wrap gap-2 p-0">
-          {timers.map((timer) => <li key={timer.id}>
-            <Button variant={timer.done ? 'on-dark' : 'default'} size="sm" className={cn('tabular-nums', timer.done && 'motion-safe:animate-pulse')}
-              aria-label={timer.done ? `${timer.label} timer done, dismiss` : `${timer.label} timer, ${clock(timer.endsAt - now)} left, cancel`}
-              onClick={() => setTimers((current) => current.filter((t) => t.id !== timer.id))}>
-              <Timer />{timer.label}<span>{timer.done ? 'Done!' : clock(timer.endsAt - now)}</span><X />
+          {timers.map((timer) => { const done = timer.endsAt <= now; return <li key={timer.id}>
+            <Button variant={done ? 'on-dark' : 'default'} size="sm" className={cn('tabular-nums', done && 'motion-safe:animate-pulse')}
+              aria-label={done ? `${timer.label} timer done, dismiss` : `${timer.label} timer, ${timerClock(timer.endsAt - now)} left, cancel`}
+              onClick={() => removeKitchenTimer(timer.id)}>
+              <Timer />{timer.label}<span>{done ? 'Done!' : timerClock(timer.endsAt - now)}</span><X />
             </Button>
-          </li>)}
+          </li> })}
         </ul>}
         <div className="flex items-center justify-between gap-3">
           <Button variant="utility" size="lg" onClick={previous} aria-label={stepIndex === 0 && groups.length ? 'Back to ingredients' : 'Previous step'}><ArrowLeft />Back</Button>

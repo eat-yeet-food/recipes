@@ -13,6 +13,8 @@ public enum Palette {
     public static let brandAlt = hex(0xFF8A3D)         // orange
     public static let brandSoft = hex(0xFFE0EF)
     public static let onDarkLabel = hex(0xFFE3F1)
+    /// Secondary text on plum (`text-on-dark-label/70`).
+    public static let onDarkMuted = onDarkLabel.opacity(0.7)
     public static let tint = hex(0xFFF0F7)
     public static let background = Color.white
     public static let card = Color.white
@@ -22,6 +24,8 @@ public enum Palette {
     public static let input = hex(0x86697F)
     public static let danger = hex(0xAD2939)
     public static let dangerSoft = hex(0xFFF0F2)
+    /// Danger fill while pressed.
+    public static let dangerPressed = hex(0xB94957)
     public static let sticker = hex(0xFFE14D)
     public static let white = Color.white
     /// Hairlines on plum: on-dark-label mixed 30% into ink.
@@ -61,19 +65,147 @@ public enum Space {
     public static let target: CGFloat = 44
 }
 
+/// Control heights (`min-h-*` on the site's buttons and fields).
+public enum Control {
+    /// Compact pills and segmented items (`min-h-10`).
+    public static let compact: CGFloat = Space.s10
+    /// Buttons, fields and rows (`min-h-12`).
+    public static let regular: CGFloat = Space.s12
+    /// Large buttons (`min-h-13`).
+    public static let large: CGFloat = 52
+    /// The app bar row.
+    public static let bar: CGFloat = Space.s14
+}
+
+/// Line and outline widths.
+public enum Stroke {
+    /// Dividers and field outlines.
+    public static let hairline: CGFloat = 1
+    /// Outlined buttons.
+    public static let control: CGFloat = 1.5
+    /// Underlines, rails, checkboxes and selected rules.
+    public static let rule: CGFloat = 2
+    /// Short accent rules under headings.
+    public static let accent: CGFloat = 3
+    /// Progress bars and the dock grabber.
+    public static let bar: CGFloat = 4
+    /// The brand stripe on cards and dialogs.
+    public static let stripe: CGFloat = 6
+}
+
+/// Glyph sizes for icons, on the type scale so icons sit with their text.
+public enum IconSize {
+    public static let xs: CGFloat = TextSize.sm.rawValue      // 14: inline meta icons, checkmarks
+    public static let sm: CGFloat = TextSize.base.rawValue    // 16: link arrows, chevrons, small stars
+    public static let md: CGFloat = TextSize.lg.rawValue      // 18: bar buttons (Back, Close)
+    public static let lg: CGFloat = TextSize.xl.rawValue      // 20: action circles
+    public static let xl: CGFloat = TextSize.xxl.rawValue     // 24: hero arrow, rating stars
+}
+
+/// Timing for UI motion. Every animation uses one of these.
+public enum Motion {
+    public static let quick: Double = 0.18     // pill handoffs
+    public static let standard: Double = 0.2   // selections, image fades, step moves
+    public static let gentle: Double = 0.25   // bars, presses
+    public static let slow: Double = 0.3       // progress
+    public static let sheet: Double = 0.35     // waiting for a sheet to close
+    /// The card → recipe hand-off: a little longer and springy, so the lift reads.
+    public static let hero: Double = 0.55
+    public static let heroBounce: Double = 0.12
+}
+
+/// Minimum travel before a drag counts as a swipe.
+public enum Travel {
+    public static let swipe: CGFloat = Space.s4
+    public static let page: CGFloat = 30
+    /// Scroll offset counted as "at the top", and travel that hides or shows the home bar.
+    public static let scrollTop: CGFloat = Space.s2
+    public static let scrollHide: CGFloat = Space.s1_5
+    /// Speed (pt/s) that counts as a flick.
+    public static let flick: CGFloat = 800
+    /// How much more horizontal than vertical a drag must be to count as a swipe back.
+    public static let horizontalBias: CGFloat = 1.5
+    /// Horizontal travel that turns a page swipe into a step change.
+    public static let pageCommit: CGFloat = 50
+}
+
+/// Line spacing added to a face's natural line height, matching the site's `leading-*`.
+public enum Leading {
+    /// Body prose (`leading-relaxed` on 16px).
+    public static func prose(_ size: TextSize) -> CGFloat { size.rawValue * 0.72 - 4 }
+    /// Short descriptions (`leading-relaxed` on smaller text).
+    public static func snug(_ size: TextSize) -> CGFloat { size.rawValue * 0.625 - 3 }
+    /// Large step text in cook mode.
+    public static let step: CGFloat = Space.s1
+    /// Display type set solid (`leading-none`).
+    public static let solid: CGFloat = -Space.s1
+}
+
+/// Fixed measures for particular layouts.
+public enum Measure {
+    /// Account and sign-in forms (`max-w-md`).
+    public static let formWidth: CGFloat = 440
+    /// Cook mode's landscape ingredient panel.
+    public static let sidePanel: CGFloat = 280
+    /// Cook mode's intro photo.
+    public static let cookPhoto: CGFloat = 240
+    /// Home hero photo, the card overlapping it and its decorations.
+    public static let heroPhoto: CGFloat = 330
+    public static let heroStickerOffset = CGSize(width: -4, height: 206)
+    public static let heroBlob = CGSize(width: 320, height: 288)
+    public static let heroBlobOffset = CGSize(width: 170, height: 170)
+    public static let heroBlobTilt: Double = -12
+    public static let heroHeadlineLine: CGFloat = TextSize.hero.rawValue
+    /// Where the hero photo is anchored vertically (the site's object-position 30%).
+    public static let heroFocusY: CGFloat = 0.3
+    public static let sticker: CGFloat = 116
+    /// Hand-off without a known card: grows from the screen inset by this fraction.
+    public static let heroFallbackInset: CGFloat = 0.1
+    /// Darkness behind an opening recipe at full open.
+    public static let heroScrim: Double = 0.35
+    /// Divider between the batch stepper's segments.
+    public static let stepperDivider: CGFloat = TextSize.titleSm.rawValue
+    /// Recipe card photos (3:2).
+    public static let cardImage: CGFloat = 1.5
+    /// Short accent rule under section headings.
+    public static let accentRule: CGFloat = 60
+    /// Ingredient-row checkbox and the gather counter dot.
+    public static let checkbox: CGFloat = Space.s7
+    public static let badge: CGFloat = Space.s8
+    /// Reviewer and replier avatars.
+    public static let avatar: CGFloat = Space.s10
+    public static let avatarSmall: CGFloat = Space.s8
+    /// Remix: flour amount field and the schedule's time column.
+    public static let amountField: CGFloat = 96
+    public static let timeColumn: CGFloat = 52
+    /// Distance the Review pill drops when it hands off to the drawer.
+    public static let pillDrop: CGFloat = 120
+    /// Tilts: the wordmark sticker, the hero highlight and the Remix starburst.
+    public static let tiltWordmark: Double = -4
+    public static let tiltHighlight: Double = -3
+    public static let tiltSticker: Double = 12
+    /// Cook-mode progress grabber and remix dock grabber widths.
+    public static let grabber: CGFloat = Space.s16
+    /// Meta-row bullet.
+    public static let dot: CGFloat = Space.s1
+    /// Step rail inset (centred on the 44pt marker).
+    public static let railInset: CGFloat = Space.target / 2 - Stroke.rule / 2
+}
+
 /// The site's elevation scale (`--shadow-*`).
 public enum Elevation {
     case card, raised, glow, overlay, sticker
 }
 
 public extension View {
-    func elevation(_ level: Elevation) -> some View {
+    /// `amount` (0…1) scales the shadow in and out, for elements that gain or lose elevation as they move.
+    func elevation(_ level: Elevation, amount: Double = 1) -> some View {
         switch level {
-        case .card: shadow(color: Palette.ink.opacity(0.08), radius: 0, y: 1)
-        case .raised: shadow(color: Palette.ink.opacity(0.12), radius: 12, y: 8)
-        case .glow: shadow(color: Palette.brand.opacity(0.25), radius: 20, y: 16)
-        case .overlay: shadow(color: Palette.ink.opacity(0.22), radius: 28, y: 24)
-        case .sticker: shadow(color: Palette.ink.opacity(0.2), radius: 3, y: 2)
+        case .card: shadow(color: Palette.ink.opacity(0.08 * amount), radius: 0, y: 1 * amount)
+        case .raised: shadow(color: Palette.ink.opacity(0.12 * amount), radius: 12 * amount, y: 8 * amount)
+        case .glow: shadow(color: Palette.brand.opacity(0.25 * amount), radius: 20 * amount, y: 16 * amount)
+        case .overlay: shadow(color: Palette.ink.opacity(0.22 * amount), radius: 28 * amount, y: 24 * amount)
+        case .sticker: shadow(color: Palette.ink.opacity(0.2 * amount), radius: 3 * amount, y: 2 * amount)
         }
     }
 }
@@ -85,6 +217,8 @@ public enum Radius {
     public static let choice: CGFloat = 24
     public static let choiceItem: CGFloat = choice - Space.choiceInset
     public static let filter: CGFloat = 4
+    /// Checkboxes and used-ingredient rows (`rounded-lg`).
+    public static let check: CGFloat = Space.s2
 }
 
 /// The pink→orange stripe that tops one white action card or dialog per view.
@@ -92,7 +226,7 @@ public struct BrandStripe: View {
     public init() {}
     public var body: some View {
         LinearGradient(colors: [Palette.brand, Palette.brandAlt], startPoint: .leading, endPoint: .trailing)
-            .frame(height: 6)
+            .frame(height: Stroke.stripe)
             .accessibilityHidden(true)
     }
 }
@@ -106,7 +240,7 @@ public struct PrimaryButtonStyle: ButtonStyle {
             .font(Typeface.action(large ? .lg : .base))
             .foregroundStyle(Palette.onDarkLabel)
             .padding(.horizontal, Space.s6)
-            .frame(minHeight: large ? 52 : 48)
+            .frame(minHeight: large ? Control.large : Control.regular)
             .background(configuration.isPressed ? Palette.actionHover : Palette.ink, in: .capsule)
     }
 }
@@ -120,6 +254,7 @@ public enum SiteIcon: String {
     case menu
     case search
     case arrowRight = "arrow-right"
+    case arrowLeft = "arrow-left"
 
     public var image: Image { Image(rawValue, bundle: .module) }
 }
@@ -138,9 +273,9 @@ public struct RoundIconAction: View {
         Button(action: action) {
             icon.image
                 .resizable()
-                .frame(width: 20, height: 20)
+                .frame(width: IconSize.lg, height: IconSize.lg)
                 .foregroundStyle(Palette.white)
-                .frame(width: 44, height: 44)
+                .frame(width: Space.target, height: Space.target)
                 .background(Palette.borderOnDark, in: .circle)
         }
         .accessibilityLabel(label)

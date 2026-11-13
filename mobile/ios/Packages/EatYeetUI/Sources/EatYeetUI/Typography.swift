@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Site type: Geller headline for display (`--font-display`), Avenir Next for body (`--font-body`).
+/// Site type: Geller headline for display (`--font-display`), Avenir for body (`--font-body`).
 /// Sizes scale with Dynamic Type relative to the matching text style.
 /// The site's type scale (Tailwind xs–2xl plus the named `--text-*` tokens, phone sizes).
 public enum TextSize: CGFloat {
@@ -31,16 +31,21 @@ public enum Typeface {
         .custom("BowlbyOneSC-Regular", size: size.rawValue, relativeTo: style)
     }
 
-    /// Avenir (`--font-body`).
+    /// Avenir (`--font-body`), with the faces browsers pick by OS/2 weight class: 400 is Roman (the
+    /// family's default, slightly heavier than Book), 500 Medium, and 600/700 Black (Black is class 800,
+    /// Heavy is 900, so a 700 request takes Black). Not Avenir Next.
     public static func body(_ size: TextSize = .base, weight: BodyWeight = .regular, relativeTo style: Font.TextStyle = .body) -> Font {
         let name = switch weight {
-        case .bold: "AvenirNext-Bold"
-        case .semibold: "AvenirNext-DemiBold"
-        case .medium: "AvenirNext-Medium"
-        case .regular: "AvenirNext-Regular"
+        case .bold: "Avenir-Black"
+        case .semibold: "Avenir-Black"
+        case .medium: "Avenir-Medium"
+        case .regular: "Avenir-Roman"
         }
         return .custom(name, size: size.rawValue, relativeTo: style)
     }
+
+    /// SF Symbols glyphs at an `IconSize`.
+    public static func icon(_ size: CGFloat, weight: Font.Weight = .regular) -> Font { .system(size: size, weight: weight) }
 
     /// `--font-action`: filled and outlined button labels.
     public static func action(_ size: TextSize = .base) -> Font { body(size, weight: .bold, relativeTo: .headline) }

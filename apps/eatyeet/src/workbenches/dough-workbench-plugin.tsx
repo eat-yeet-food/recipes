@@ -4,6 +4,8 @@ import type { KitchenPlugin } from '@eat-yeet/l7-kitchen/kitchen/kitchen-plugin'
 import { DoughFormulaEditor } from './dough-formula-editor'
 import { batchNoun, doughRows, formulaChanges, formulaFacts, withBatchCount } from './dough-kitchen-model'
 import { DoughResults } from './dough-results'
+import { sourdoughSchedule } from './sourdough-process'
+import { pizzaSchedule } from './pizza-process'
 import { clone, completeFormula, decodeDoughState, isDoughConfig, resolveWorkbenchRecipe, type DoughWorkbenchState } from './dough-workbench-model'
 
 const methodLabel = (recipe: RecipeContent) => (id: string) => recipe.methodOptions.find((method) => method.id === id)?.label ?? id
@@ -40,6 +42,16 @@ function createDoughWorkbenchPlugin(id: string, family: DoughFormula['family'], 
       ? <DoughFormulaEditor recipe={recipe} config={config} state={dough(state)} onChange={onChange} onErrorsChange={onErrorsChange} resetKey={resetKey} />
       : null,
     Results: ({ state, docked }) => <DoughResults state={dough(state)} docked={docked} />,
+    summary: (_recipe, _config, state) => {
+      const { formula } = dough(state)
+      const { rows, levainBuild } = doughRows(dough(state))
+      const schedule = formula.process ? sourdoughSchedule(formula.process) : formula.pizzaProcess ? pizzaSchedule(formula.pizzaProcess) : []
+      return {
+        rows: rows.map((row) => ({ label: row.label, amount: row.amount, ...(row.detail ? { detail: row.detail } : {}) })),
+        schedule: schedule.map((row) => ({ time: row.time, label: row.label, ...(row.problem ? { problem: row.problem } : {}) })),
+        ...(levainBuild ? { note: `Levain build: ${levainBuild}` } : {}),
+      }
+    },
   }
 }
 

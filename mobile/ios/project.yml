@@ -44,6 +44,8 @@ targets:
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait, UIInterfaceOrientationLandscapeLeft, UIInterfaceOrientationLandscapeRight]
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
+        NSAlarmKitUsageDescription: Kitchen timers you start in cook mode ring like Clock timers, even when your phone is locked.
+        NSSupportsLiveActivities: true
         CFBundleURLTypes:
           - CFBundleURLName: com.phoganuci.eatyeet
             CFBundleURLSchemes: [eatyeet]
@@ -83,6 +85,29 @@ targets:
         product: FeatureSupport
       - package: Features
         product: Account
+      - target: EatYeetTimers
+  EatYeetTimers:
+    type: app-extension
+    platform: iOS
+    sources: [Widgets]
+    info:
+      path: Widgets/Info.plist
+      properties:
+        CFBundleDisplayName: Eat / Yeet Timers
+        CFBundleShortVersionString: "0.1"
+        CFBundleVersion: "1"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.phoganuci.eatyeet.timers
+        SWIFT_VERSION: "6.0"
+        SWIFT_STRICT_CONCURRENCY: complete
+        TARGETED_DEVICE_FAMILY: "1"
+        CODE_SIGN_STYLE: Automatic
+    dependencies:
+      - package: EatYeetCore
+      - package: EatYeetUI
   EatYeetTests:
     type: bundle.unit-test
     platform: iOS

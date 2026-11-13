@@ -15,12 +15,32 @@ final class AppRouter {
         case remix(slug: String, formulaId: String? = nil)
     }
 
-    var path: [Route] = []
+    /// The tab bar: each tab keeps its own back stack.
+    enum Tab: Hashable { case home, recipes, remix, account, search }
+
+    var tab: Tab = .home
+    var paths: [Tab: [Route]] = [:]
     var showDevMenu = false
+
+    /// The selected tab's stack.
+    var path: [Route] {
+        get { paths[tab] ?? [] }
+        set { paths[tab] = newValue }
+    }
+
+    func binding(_ tab: Tab) -> Binding<[Route]> {
+        Binding(get: { self.paths[tab] ?? [] }, set: { self.paths[tab] = $0 })
+    }
+
+    /// Shows a tab at its root (or pushes onto it with `then`).
+    func show(_ tab: Tab, _ routes: [Route] = []) {
+        self.tab = tab
+        paths[tab] = routes
+    }
 
     /// A site path from the menu (`/search`, `/remix`), as the matching deep link.
     func open(_ href: String) {
-        if href == "/" { path = []; return }
+        if href == "/" { show(.home); return }
         if let url = URL(string: "eatyeet://open" + href) { open(url) }
     }
 
@@ -28,13 +48,13 @@ final class AppRouter {
         guard let link = DeepLink(url: url) else { return }
         showDevMenu = false
         switch link {
-        case .home: path = []
-        case .catalog: path = [.catalog()]
-        case .account: path = [.account]
-        case .dev: path = []; showDevMenu = true
-        case .recipe(let slug): path = [.recipe(slug: slug)]
-        case .cook(let slug, _): path = [.recipe(slug: slug, cooking: true)]
-        case .remix(let id): path = id.isEmpty ? [.remixLibrary] : [.remixLibrary, .remix(slug: id)]
+        case .home: show(.home)
+        case .catalog: show(.recipes)
+        case .account: show(.account)
+        case .dev: showDevMenu = true
+        case .recipe(let slug): show(.recipes, [.recipe(slug: slug)])
+        case .cook(let slug, _): show(.recipes, [.recipe(slug: slug, cooking: true)])
+        case .remix(let id): show(.remix, id.isEmpty ? [] : [.remix(slug: id)])
         }
     }
 }

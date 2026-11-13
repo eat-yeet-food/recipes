@@ -225,6 +225,21 @@ export interface components {
             batchNoun: string;
             /** @description The projected recipe; absent when the state is invalid. */
             recipe?: components["schemas"]["Recipe"];
+            summary?: components["schemas"]["RemixSummary"];
+        };
+        /** @description The dough results panel as data. Absent when invalid or the plugin has none. */
+        RemixSummary: {
+            rows: {
+                label: string;
+                detail?: string;
+                amount: string;
+            }[];
+            schedule: {
+                time: string;
+                label: string;
+                problem?: string;
+            }[];
+            note?: string;
         };
         Category: {
             slug: string;

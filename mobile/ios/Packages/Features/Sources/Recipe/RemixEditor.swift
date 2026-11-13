@@ -22,6 +22,8 @@ public struct RemixEditorScreen: View {
     @State private var saveStatus = ""
     @State private var conflict: String?
     @State private var reviewing = false
+    @State private var pillAway = false
+    @State private var baking = false
 
     public init(slug: String, formulaId: String? = nil) {
         self.slug = slug
@@ -54,7 +56,13 @@ public struct RemixEditorScreen: View {
         .alert("Remix changed elsewhere", isPresented: .constant(conflict != nil)) {
             Button("Reload") { conflict = nil; Task { await load() } }
         } message: { Text(conflict ?? "") }
-        .sheet(isPresented: $reviewing) {
+        .sheet(isPresented: $reviewing, onDismiss: { pillAway = false }) {
+            if let resolution {
+                DoughDrawer(resolution: resolution, status: formula == nil ? "" : saveStatus,
+                            onReset: { if let recipe { state = recipe.defaultState } }) { dockAction }
+            }
+        }
+        .sheet(isPresented: $baking) {
             if let resolution, let recipe { RemixBakeSheet(title: name.isEmpty ? recipe.title : name, resolution: resolution, images: recipe.images) }
         }
     }
@@ -109,7 +117,7 @@ public struct RemixEditorScreen: View {
                     TextField("Name", text: $name)
                         .font(Typeface.display(.section, relativeTo: .largeTitle))
                         .padding(.bottom, Space.s1_5)
-                        .overlay(alignment: .bottom) { Rectangle().fill(Palette.ink).frame(height: 2) }
+                        .overlay(alignment: .bottom) { Rectangle().fill(Palette.ink).frame(height: Stroke.rule) }
                         .onSubmit { if formula != nil { Task { await save() } } }
                     Text("From \(recipe.title)").font(Typeface.body(.base))
                 }
@@ -123,7 +131,7 @@ public struct RemixEditorScreen: View {
 
                 VStack(alignment: .leading, spacing: Space.s5) {
                     RemixSectionTitle(title: "Size", detail: "Choose how many to make on the bake sheet.")
-                    Grid(horizontalSpacing: 24, verticalSpacing: 20) {
+                    Grid(horizontalSpacing: Space.s6, verticalSpacing: Space.s5) {
                         GridRow {
                             NumberField(label: pizza ? "Pizzas" : "Loaves", unit: "", value: number("batch", "count")) { set(.number(max(1, $0.rounded())), "batch", "count") }
                             NumberField(label: pizza ? "Ball weight" : "Loaf weight", unit: "g", value: number("batch", "pieceWeightGrams")) {
@@ -147,7 +155,7 @@ public struct RemixEditorScreen: View {
                 VStack(alignment: .leading, spacing: Space.s5) {
                     RemixSectionTitle(title: "Formula", detail: "Baker’s percentages of the total flour.")
                     flours
-                    Grid(horizontalSpacing: 24, verticalSpacing: 20) {
+                    Grid(horizontalSpacing: Space.s6, verticalSpacing: Space.s5) {
                         GridRow {
                             percent("Hydration", "hydrationPercent")
                             percent("Salt", "saltPercent")
@@ -170,10 +178,10 @@ public struct RemixEditorScreen: View {
                     Text(resolution.errors.joined(separator: " ")).font(Typeface.body(.sm)).foregroundStyle(Palette.danger)
                 }
             }
-            .padding(.horizontal, Space.s5).padding(.top, Space.s2).padding(.bottom, Space.s8)
+            .padding(.horizontal, Space.s5).padding(.top, Space.s2).padding(.bottom, Space.s20)
         }
         .scrollDismissesKeyboard(.interactively)
-        .safeAreaInset(edge: .bottom) { footer }
+        .overlay(alignment: .bottom) { reviewPill }
     }
 
     private var flours: some View {
@@ -187,12 +195,12 @@ public struct RemixEditorScreen: View {
                             get: { list[safe: index]?["name"]?.string ?? "" },
                             set: { setFlour(index, "name", .string(String($0.prefix(80)))) }))
                             .font(Typeface.body(.lg)).padding(.bottom, Space.s2)
-                            .overlay(alignment: .bottom) { Rectangle().fill(Palette.input).frame(height: 1) }
+                            .overlay(alignment: .bottom) { Rectangle().fill(Palette.input).frame(height: Stroke.hairline) }
                     }
                     NumberField(label: "Share", unit: "%", value: list[safe: index]?["percent"]?.number) { setFlour(index, "percent", .number($0)) }
-                        .frame(width: 96)
+                        .frame(width: Measure.amountField)
                     if list.count > 1 {
-                        Button { removeFlour(index) } label: { Image(systemName: "trash").frame(width: 44, height: 44).background(Palette.muted, in: .circle) }
+                        Button { removeFlour(index) } label: { Image(systemName: "trash").frame(width: Space.target, height: Space.target).background(Palette.muted, in: .circle) }
                             .accessibilityLabel("Remove flour")
                     }
                 }
@@ -211,7 +219,7 @@ public struct RemixEditorScreen: View {
         VStack(alignment: .leading, spacing: Space.s5) {
             RemixSectionTitle(title: "Mixing and fermentation", detail: "Times count from when you start mixing.")
             PillPicker(options: [("spiral", "Mixer"), ("food-processor", "Processor"), ("hand", "By hand")], selection: string("formula", "pizzaProcess", "mixingMethod"))
-            Grid(horizontalSpacing: 24, verticalSpacing: 20) {
+            Grid(horizontalSpacing: Space.s6, verticalSpacing: Space.s5) {
                 GridRow {
                     NumberField(label: "Dough temperature", unit: "°F", value: number("formula", "pizzaProcess", "bulkTemperatureF")) { set(.number($0), "formula", "pizzaProcess", "bulkTemperatureF") }
                     NumberField(label: "Divide and ball at", unit: "h", value: number("formula", "pizzaProcess", "bulkMinutes").map { $0 / 60 }) { set(.number(($0 * 60).rounded()), "formula", "pizzaProcess", "bulkMinutes") }
@@ -236,7 +244,7 @@ public struct RemixEditorScreen: View {
         VStack(alignment: .leading, spacing: Space.s5) {
             RemixSectionTitle(title: "Mixing and fermentation", detail: "Times count from when you start mixing.")
             PillPicker(options: [("spiral", "Mixer"), ("hand", "By hand")], selection: string("formula", "process", "mixingMethod"))
-            Grid(horizontalSpacing: 24, verticalSpacing: 20) {
+            Grid(horizontalSpacing: Space.s6, verticalSpacing: Space.s5) {
                 GridRow {
                     NumberField(label: "Autolyse", unit: "min", value: number("formula", "process", "autolyseMinutes")) { set(.number($0.rounded()), "formula", "process", "autolyseMinutes") }
                     NumberField(label: "Bulk", unit: "h", value: number("formula", "process", "bulkMinutes").map { $0 / 60 }) { set(.number(($0 * 60).rounded()), "formula", "process", "bulkMinutes") }
@@ -251,32 +259,54 @@ public struct RemixEditorScreen: View {
         }
     }
 
-    private var footer: some View {
-        VStack(alignment: .leading, spacing: Space.s3) {
-            HStack(alignment: .firstTextBaseline, spacing: Space.s2) {
-                Text(resolution?.total ?? " ").font(Typeface.body(.lg, weight: .bold)).monospacedDigit().fixedSize()
-                Text(formula == nil ? (resolution?.facts ?? "") : saveStatus)
-                    .font(Typeface.body(.sm)).foregroundStyle(Palette.mutedForeground).lineLimit(1).truncationMode(.tail)
+    /// The site's phone dock: a small ink Review pill at the bottom right; tapping or swiping it up
+    /// drops it away and raises the Your dough drawer.
+    private var reviewPill: some View {
+        Button(action: presentReview) {
+            HStack(spacing: Space.s2) {
+                Text("Review")
+                Image(systemName: "chevron.up").font(Typeface.icon(IconSize.xs, weight: .bold))
             }
-            HStack(spacing: Space.s3) {
-                if formula == nil {
-                    Button { Task { await saveNew() } } label: {
-                        Text(account.member == nil ? "Sign in to save" : "Save").lineLimit(1).frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(OutlinePill())
-                    .disabled(resolution?.valid != true)
-                }
-                Button { reviewing = true } label: {
-                    Label("Review", systemImage: "chevron.up").labelStyle(TrailingIcon()).lineLimit(1).frame(maxWidth: .infinity)
-                }
-                .buttonStyle(PrimaryButtonStyle())
-                .disabled(resolution?.valid != true)
-                .accessibilityIdentifier("remix-review")
-            }
+            .font(Typeface.action(.base)).foregroundStyle(Palette.white)
+            .padding(.horizontal, Space.s5).frame(minHeight: Control.regular)
+            .background(Palette.ink, in: .capsule)
+            .elevation(.overlay)
         }
-        .padding(.horizontal, Space.s5).padding(.top, Space.s3).padding(.bottom, Space.s2)
-        .background(Palette.background)
-        .overlay(alignment: .top) { Rectangle().fill(Palette.border).frame(height: 1) }
+        .buttonStyle(.plain)
+        .simultaneousGesture(DragGesture(minimumDistance: Travel.swipe).onEnded { if $0.translation.height < -Travel.swipe { presentReview() } })
+        .offset(y: pillAway ? Measure.pillDrop : 0)
+        .animation(.easeOut(duration: Motion.quick), value: pillAway)
+        .disabled(resolution?.valid != true)
+        .accessibilityLabel("Review your dough: \(resolution?.total ?? ""), \(resolution?.totalDetail ?? "")\(changeSuffix)")
+        .accessibilityIdentifier("remix-review")
+        .padding(.horizontal, Space.s4).padding(.bottom, Space.s4)
+        .frame(maxWidth: .infinity, alignment: .trailing)
+    }
+
+    private var changeSuffix: String {
+        let count = resolution?.changes.count ?? 0
+        return count == 0 ? "" : " · \(count) \(count == 1 ? "change" : "changes")"
+    }
+
+    private func presentReview() {
+        guard !pillAway, resolution?.valid == true else { return }
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        pillAway = true
+        Task { try? await Task.sleep(for: .seconds(Motion.quick)); reviewing = true }
+    }
+
+    /// The drawer's action, as on the site: Save on an unsaved remix, Apply (the bake sheet) on a saved one.
+    @ViewBuilder private var dockAction: some View {
+        if formula == nil {
+            Button(account.member == nil ? "Sign in to save" : "Save") { reviewing = false; Task { await saveNew() } }
+                .buttonStyle(OnDarkPill())
+        } else {
+            Button("Apply") {
+                reviewing = false
+                Task { try? await Task.sleep(for: .seconds(Motion.sheet)); baking = true }
+            }
+            .buttonStyle(OnDarkPill())
+        }
     }
 
     // MARK: State access
@@ -357,13 +387,139 @@ struct RemixBakeSheet: View {
     }
 }
 
+/// The site's DoughDock drawer: ink, "Your dough" with the pink total and the action, then the
+/// weights, the schedule and what changed from the recipe.
+struct DoughDrawer<Action: View>: View {
+    let resolution: RemixResolution
+    let status: String
+    let onReset: () -> Void
+    @ViewBuilder let action: () -> Action
+
+    private var detail: String {
+        let count = resolution.changes.count
+        let changes = count == 0 ? "" : " · \(count) \(count == 1 ? "change" : "changes")"
+        return resolution.totalDetail + changes + (status.isEmpty ? "" : " · \(status)")
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(alignment: .center, spacing: Space.s3) {
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("Your dough").font(Typeface.action(.xs)).textCase(.uppercase)
+                        .tracking(Tracking.eyebrow(.xs)).foregroundStyle(Palette.brand)
+                    HStack(alignment: .firstTextBaseline, spacing: Space.s2) {
+                        Text(resolution.total).font(Typeface.action(.xxl)).monospacedDigit().foregroundStyle(Palette.brand).fixedSize()
+                        Text(detail).font(Typeface.body(.caption)).lineLimit(1).truncationMode(.tail)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                action()
+            }
+            .padding(.horizontal, Space.s4).padding(.top, Space.s6).padding(.bottom, Space.s4)
+            ScrollView {
+                VStack(alignment: .leading, spacing: Space.s4) {
+                    if let summary = resolution.summary { results(summary) }
+                    changes
+                }
+                .padding(.horizontal, Space.s4).padding(.bottom, Space.s4)
+            }
+        }
+        .foregroundStyle(Palette.onDarkLabel)
+        .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.visible)
+        .presentationBackground(Palette.ink)
+        .presentationCornerRadius(Radius.surface)
+    }
+
+    private func results(_ summary: Components.Schemas.RemixSummary) -> some View {
+        VStack(alignment: .leading, spacing: Space.s4) {
+            VStack(spacing: 0) {
+                ForEach(Array(summary.rows.enumerated()), id: \.offset) { _, row in
+                    HStack(alignment: .firstTextBaseline, spacing: Space.s4) {
+                        Text(row.label).frame(maxWidth: .infinity, alignment: .leading)
+                        HStack(alignment: .firstTextBaseline, spacing: Space.s1_5) {
+                            if let detail = row.detail { Text(detail).font(Typeface.body(.caption)) }
+                            Text(row.amount).font(Typeface.action(.bodySm)).monospacedDigit()
+                        }
+                    }
+                    .font(Typeface.body(.bodySm))
+                    .padding(.vertical, Space.s2_5)
+                    .overlay(alignment: .top) { Rectangle().fill(Palette.borderOnDark).frame(height: Stroke.hairline) }
+                }
+            }
+            if !summary.schedule.isEmpty {
+                VStack(alignment: .leading, spacing: Space.s1) {
+                    Text("Schedule").font(Typeface.action(.xs)).textCase(.uppercase).tracking(Tracking.eyebrow(.xs)).padding(.top, Space.s2)
+                    ForEach(Array(summary.schedule.enumerated()), id: \.offset) { _, row in
+                        HStack(alignment: .firstTextBaseline, spacing: Space.s3) {
+                            Text(row.time).font(Typeface.action(.sm)).monospacedDigit()
+                                .foregroundStyle(row.problem == nil ? Palette.brand : Palette.danger).frame(width: Measure.timeColumn, alignment: .leading)
+                            Text(row.problem.map { "\(row.label). \($0)" } ?? row.label).font(Typeface.body(.sm))
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                        .padding(row.problem == nil ? 0 : Space.s2)
+                        .padding(.vertical, row.problem == nil ? Space.s2 : 0)
+                        .foregroundStyle(row.problem == nil ? Palette.onDarkLabel : Palette.ink)
+                        .background(row.problem == nil ? Color.clear : Palette.dangerSoft, in: .rect(cornerRadius: Radius.filter))
+                        .overlay(alignment: .top) { if row.problem == nil { Rectangle().fill(Palette.borderOnDark).frame(height: Stroke.hairline) } }
+                    }
+                }
+            }
+            if let note = summary.note {
+                Text(note).font(Typeface.body(.caption)).padding(.top, Space.s3)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .overlay(alignment: .top) { Rectangle().fill(Palette.borderOnDark).frame(height: Stroke.hairline) }
+            }
+        }
+    }
+
+    /// The site's ChangeStrip in its ink tone.
+    private var changes: some View {
+        let count = resolution.changes.count
+        return VStack(alignment: .leading, spacing: Space.s1) {
+            Text(count == 1 ? "1 change from the recipe" : count > 0 ? "\(count) changes from the recipe" : "Changed from the recipe")
+                .font(Typeface.action(.xs)).textCase(.uppercase).tracking(Tracking.eyebrow(.xs)).foregroundStyle(Palette.brand)
+            if count == 0 {
+                Text("Nothing yet. This matches the recipe.").font(Typeface.body(.sm))
+            } else {
+                ForEach(Array(resolution.changes.enumerated()), id: \.offset) { index, change in
+                    VStack(alignment: .leading, spacing: Space.s0_5) {
+                        HStack(alignment: .firstTextBaseline, spacing: Space.s3) {
+                            Text(change.label).font(Typeface.body(.bodySm)).frame(maxWidth: .infinity, alignment: .leading)
+                            Text(change.to).font(Typeface.action(.bodySm)).foregroundStyle(Palette.white).multilineTextAlignment(.trailing)
+                        }
+                        Text("was \(change.from)").font(Typeface.body(.caption)).foregroundStyle(Palette.onDarkMuted).lineLimit(1)
+                    }
+                    .padding(.vertical, Space.s3)
+                    .overlay(alignment: .bottom) { if index < count - 1 { Rectangle().fill(Palette.borderOnDark).frame(height: Stroke.hairline) } }
+                }
+                Button(action: onReset) {
+                    Label("Reset to recipe", systemImage: "arrow.uturn.backward").font(Typeface.action(.sm))
+                }
+                .buttonStyle(.plain).padding(.top, Space.s2)
+            }
+        }
+        .padding(.top, Space.s2)
+    }
+}
+
+/// The site's on-dark button: pink fill, ink label.
+struct OnDarkPill: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(Typeface.action(.sm)).foregroundStyle(Palette.ink).lineLimit(1)
+            .padding(.horizontal, Space.s4).frame(minHeight: Space.target)
+            .background(configuration.isPressed ? Palette.brandSoft : Palette.brand, in: .capsule)
+    }
+}
+
 struct OutlinePill: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(Typeface.body(.base, weight: .semibold)).foregroundStyle(Palette.ink)
-            .padding(.horizontal, Space.s5).frame(minHeight: 48)
+            .padding(.horizontal, Space.s5).frame(minHeight: Control.regular)
             .background(configuration.isPressed ? Palette.tint : Palette.background, in: .capsule)
-            .overlay { Capsule().strokeBorder(Palette.ink, lineWidth: 1.5) }
+            .overlay { Capsule().strokeBorder(Palette.ink, lineWidth: Stroke.control) }
     }
 }
 
@@ -382,9 +538,9 @@ private struct ChangeLine: View {
     let from: String
     let to: String
     var body: some View {
-        let head: Text = Text(label + ": ").bold()
+        let head: Text = Text(label + ": ").fontWeight(.black)
         let tail: Text = Text(from + " → ")
-        let value: Text = Text(to).bold()
+        let value: Text = Text(to).fontWeight(.black)
         return (head + tail + value).font(Typeface.body(.bodySm))
     }
 }

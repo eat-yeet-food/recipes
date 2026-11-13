@@ -41,7 +41,7 @@ public struct RecipeMeta: View {
 
     private func item(_ text: String, icon: SiteIcon) -> some View {
         HStack(spacing: Space.s1_5) {
-            icon.image.resizable().frame(width: 14, height: 14).accessibilityHidden(true)
+            icon.image.resizable().frame(width: IconSize.xs, height: IconSize.xs).accessibilityHidden(true)
             Text(text)
         }
     }

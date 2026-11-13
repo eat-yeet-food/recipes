@@ -18,8 +18,10 @@ enum RecipePrinter {
     }
 
     final class Loader: NSObject, WKNavigationDelegate {
+        /// Offscreen render size for the print page (US Letter at 96 dpi, roughly).
+        static let printPage = CGSize(width: 800, height: 1100)
         let title: String
-        let webView = WKWebView(frame: CGRect(x: 0, y: 0, width: 800, height: 1100))
+        let webView = WKWebView(frame: CGRect(origin: .zero, size: Loader.printPage))
         var done: (() -> Void)?
 
         init(title: String) { self.title = title }

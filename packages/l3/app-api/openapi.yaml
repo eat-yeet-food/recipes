@@ -238,6 +238,19 @@ components:
         changes: { type: array, items: { $ref: '#/components/schemas/RemixChange' } }
         batchNoun: { type: string }
         recipe: { $ref: '#/components/schemas/Recipe', description: "The projected recipe; absent when the state is invalid." }
+        summary: { $ref: '#/components/schemas/RemixSummary' }
+    RemixSummary:
+      type: object
+      description: The dough results panel as data. Absent when invalid or the plugin has none.
+      required: [rows, schedule]
+      properties:
+        rows:
+          type: array
+          items: { type: object, required: [label, amount], properties: { label: { type: string }, detail: { type: string }, amount: { type: string } } }
+        schedule:
+          type: array
+          items: { type: object, required: [time, label], properties: { time: { type: string }, label: { type: string }, problem: { type: string } } }
+        note: { type: string }
     Category:
       type: object
       required: [slug, label, facet, value, image]

@@ -79,6 +79,12 @@ public final class RecipeStore {
         }
     }
 
+    /// Loads a recipe once ahead of opening it (cards call this as they appear); no-op if present.
+    public func prefetchRecipe(_ slug: String) async {
+        guard details[Self.key(slug, 1)]?.value == nil else { return }
+        await loadRecipe(slug)
+    }
+
     public func recipe(_ slug: String, count: Int = 1) -> Loadable<RecipeDetail> {
         details[Self.key(slug, count)] ?? .loading
     }

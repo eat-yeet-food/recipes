@@ -34,7 +34,9 @@ public struct RecipeScreen: View {
             }
         }
         .background(Palette.background)
-        .navigationBarTitleDisplayMode(.inline)
+        // No navigation bar: Back is part of the plum header, so the page is one piece that hands
+        // back to its card (RecipeHero) or pops.
+        .toolbar(.hidden, for: .navigationBar)
         .task(id: count) {
             let state = Perf.signposter.beginInterval(Perf.recipeInteractive)
             await store.loadRecipe(slug, count: count)
@@ -47,15 +49,20 @@ public struct RecipeScreen: View {
 struct RecipeContent: View {
     @Environment(AppEnvironment.self) private var environment
     let detail: RecipeDetail
+    @Environment(\.dismiss) private var dismiss
+    @Environment(RecipeHero.self) private var hero: RecipeHero?
     @Binding var count: Int
     let cook: () -> Void
 
     private var recipe: Components.Schemas.Recipe { detail.recipe }
 
     var body: some View {
+        // The scroll view runs up under the status and nav bars and the header pads itself back down,
+        // so the plum band fills the top as part of the page (and shrinks back into its card with it).
+        GeometryReader { outer in
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                RecipeHeader(recipe: recipe, image: detail.images.additionalProperties[recipe.image], cook: cook) {
+                RecipeHeader(recipe: recipe, image: detail.images.additionalProperties[recipe.image], topInset: outer.safeAreaInsets.top, back: { if hero?.opening != nil { hero?.close() } else { dismiss() } }, cook: cook) {
                     RecipePrinter.print(slug: recipe.slug, title: recipe.title, count: detail.batch?.count, base: environment.backend.baseURL)
                 }
 
@@ -80,7 +87,9 @@ struct RecipeContent: View {
                 .padding(.bottom, Space.s8)
             }
         }
+        .ignoresSafeArea(edges: .top)
         .background(Palette.background)
+        }
     }
 }
 
@@ -89,16 +98,22 @@ struct RecipeContent: View {
 struct RecipeHeader: View {
     let recipe: Components.Schemas.Recipe
     let image: RecipeImage?
+    /// The status bar's height: the band starts under it, its content below it.
+    var topInset: CGFloat = 0
+    let back: () -> Void
     let cook: () -> Void
     let print: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             VStack(alignment: .leading, spacing: 0) {
+                RoundIconAction(.arrowLeft, label: "Back", action: back)
+                    .padding(.top, topInset)
+                    .padding(.bottom, Space.s6)
                 Text(recipe.title)
                     .font(Typeface.display(.page, relativeTo: .largeTitle))
                     .tracking(Tracking.title(.page))
-                    .lineSpacing(-4)
+                    .lineSpacing(Leading.solid)
                     .foregroundStyle(Palette.white)
                     .accessibilityAddTraits(.isHeader)
                     .accessibilityIdentifier("recipe-title")
@@ -120,7 +135,7 @@ struct RecipeHeader: View {
                 if !recipe.description.isEmpty {
                     Text(recipe.description)
                         .font(Typeface.body(.base))
-                        .lineSpacing(16 * 0.625 - 4)
+                        .lineSpacing(Leading.snug(.base))
                         .foregroundStyle(Palette.onDarkLabel)
                 }
                 RecipeFactsGrid(facts: facts).padding(.top, Space.s6)
@@ -132,6 +147,7 @@ struct RecipeHeader: View {
             if let image {
                 RemoteImage(variants: image.sources, aspectRatio: image.aspectRatio, alt: image.alt)
                     .clipShape(.rect(cornerRadius: Radius.surface))
+                    .recipeHeroDestination()
                     .elevation(.overlay)
                     .padding(.horizontal, Space.s4)
             }
@@ -187,18 +203,18 @@ struct BatchCard: View {
             Spacer(minLength: 0)
             HStack(spacing: 0) {
                 segment("minus", label: "Fewer \(plural)", enabled: count > 1) { count -= 1 }
-                Rectangle().fill(Palette.border).frame(width: 1, height: 22)
+                Rectangle().fill(Palette.border).frame(width: Stroke.hairline, height: Measure.stepperDivider)
                 Text("\(count)")
                     .font(Typeface.body(.base, weight: .bold))
                     .monospacedDigit()
                     .foregroundStyle(Palette.ink)
-                    .frame(minWidth: 40)
+                    .frame(minWidth: Control.compact)
                     .contentTransition(.numericText(value: Double(count)))
                     .accessibilityHidden(true)
-                Rectangle().fill(Palette.border).frame(width: 1, height: 22)
+                Rectangle().fill(Palette.border).frame(width: Stroke.hairline, height: Measure.stepperDivider)
                 segment("plus", label: "More \(plural)", enabled: count < 99) { count += 1 }
             }
-            .overlay { Capsule().stroke(Palette.ink, lineWidth: 1) }
+            .overlay { Capsule().stroke(Palette.ink, lineWidth: Stroke.hairline) }
         }
         .padding(.horizontal, Space.s4)
         .padding(.vertical, Space.s3)
@@ -221,8 +237,8 @@ struct BatchCard: View {
     private func segment(_ icon: String, label: String, enabled: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: icon)
-                .font(.system(size: 15, weight: .regular))
-                .frame(width: 44, height: 40)
+                .font(Typeface.icon(IconSize.sm, weight: .regular))
+                .frame(width: Space.target, height: Control.compact)
                 .background(enabled ? .clear : Palette.muted, in: .capsule)
         }
         .foregroundStyle(enabled ? Palette.ink : Palette.mutedForeground)
@@ -248,9 +264,9 @@ struct IngredientsCard: View {
                 }
                 ForEach(section.items, id: \.id) { item in
                     VStack(spacing: 0) {
-                        Rectangle().fill(Palette.borderOnDark).frame(height: 1)
-                        (Text(item.amount.isEmpty ? "" : item.amount + " ").bold().foregroundColor(Palette.brand)
-                            + Text(InlineHTML.attributed(item.html, linkColor: Palette.onDarkLabel)))
+                        Rectangle().fill(Palette.borderOnDark).frame(height: Stroke.hairline)
+                        (Text(item.amount.isEmpty ? "" : item.amount + " ").font(Typeface.body(.base, weight: .bold)).foregroundColor(Palette.brand)
+                            + Text(InlineHTML.attributed(item.html, linkColor: Palette.onDarkLabel, boldFont: Typeface.body(.base, weight: .bold))))
                             .font(Typeface.body(.base))
                             .foregroundStyle(Palette.white)
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -300,12 +316,12 @@ struct TimedRail: View {
                         .foregroundStyle(Palette.brand)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
-                        .frame(minWidth: 40, minHeight: 40)
+                        .frame(minWidth: Control.compact, minHeight: Control.compact)
                         .padding(.horizontal, Space.s0_5)
                         .background(Palette.ink, in: .capsule)
                         .accessibilityLabel(step.time.map { "At \($0)" } ?? "")
                     VStack(alignment: .leading, spacing: Space.s0_5) {
-                        HTMLText(step.html).font(Typeface.body(.base)).foregroundStyle(Palette.ink).lineSpacing(16 * 0.72 - 4)
+                        HTMLText(step.html, size: .base).foregroundStyle(Palette.ink).lineSpacing(Leading.prose(.base))
                         if let rest = step.rest {
                             Text(rest).font(Typeface.body(.sm, relativeTo: .subheadline)).foregroundStyle(Palette.mutedForeground)
                         }
@@ -315,7 +331,7 @@ struct TimedRail: View {
                 }
                 .background(alignment: .topLeading) {
                     if index < steps.count - 1 {
-                        Rectangle().fill(Palette.ink).frame(width: 2).padding(.top, Space.s5).offset(x: 21)
+                        Rectangle().fill(Palette.ink).frame(width: Stroke.rule).padding(.top, Space.s5).offset(x: Measure.railInset)
                     }
                 }
                 .accessibilityElement(children: .combine)
@@ -336,7 +352,7 @@ struct NumberedSteps: View {
                         .font(Typeface.body(.sm, weight: .bold, relativeTo: .subheadline))
                         .tracking(Tracking.eyebrow(.sm))
                         .foregroundStyle(Palette.ink)
-                    HTMLText(step.html).font(Typeface.body(.base)).foregroundStyle(Palette.ink).lineSpacing(16 * 0.72 - 4)
+                    HTMLText(step.html, size: .base).foregroundStyle(Palette.ink).lineSpacing(Leading.prose(.base))
                 }
                 .accessibilityElement(children: .combine)
             }
@@ -378,7 +394,7 @@ struct Bullet: View {
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: Space.s2_5) {
             Text("•").font(Typeface.body(.base, weight: .bold)).foregroundStyle(Palette.ink).accessibilityHidden(true)
-            HTMLText(html).font(Typeface.body(.base)).foregroundStyle(Palette.ink).lineSpacing(16 * 0.72 - 4)
+            HTMLText(html, size: .base).foregroundStyle(Palette.ink).lineSpacing(Leading.prose(.base))
         }
     }
 }

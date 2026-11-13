@@ -10,15 +10,14 @@ import UIKit
 @Observable
 final class CookSession {
     enum Stage { case intro, gather, cook, done }
-    struct Timer: Identifiable { let id = UUID(); let label: String; let endsAt: Date; var done = false }
 
     var stage: Stage = .intro
     var checked: Set<String> = []
     var folded: Set<String> = []
     var stepIndex = 0
-    var timers: [Timer] = []
 
-    func resetAll() { stage = .intro; checked = []; folded = []; stepIndex = 0; timers = [] }
+    /// Timers are system timers (KitchenTimers): finishing cook mode leaves them running.
+    func resetAll() { stage = .intro; checked = []; folded = []; stepIndex = 0 }
 }
 
 struct CookStep: Identifiable {
@@ -33,6 +32,7 @@ struct CookMode: View {
     let recipe: Components.Schemas.Recipe
     let image: RecipeImage?
     @Bindable var session: CookSession
+    private let timers = KitchenTimers.shared
     let close: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -68,7 +68,7 @@ struct CookMode: View {
         .background(Palette.background)
         .foregroundStyle(Palette.ink)
         .sensoryFeedback(.selection, trigger: tap)
-        .onAppear { UIApplication.shared.isIdleTimerDisabled = true }
+        .onAppear { UIApplication.shared.isIdleTimerDisabled = true; timers.watch() }
         .onDisappear { UIApplication.shared.isIdleTimerDisabled = false; foldTasks.values.forEach { $0.cancel() } }
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Cook mode: \(recipe.title)")
@@ -90,7 +90,7 @@ struct CookMode: View {
             Eyebrow(stageLabel).lineLimit(1).monospacedDigit()
             Spacer()
             Button(action: close) {
-                Image(systemName: "xmark").font(.system(size: 18, weight: .medium)).frame(width: 44, height: 44)
+                Image(systemName: "xmark").font(Typeface.icon(IconSize.md, weight: .medium)).frame(width: Space.target, height: Space.target)
             }
             .accessibilityLabel("Exit cook mode")
             .accessibilityIdentifier("cook-exit")
@@ -107,14 +107,14 @@ struct CookMode: View {
                             .frame(width: total == 0 ? 0 : proxy.size.width * CGFloat(session.checked.count) / CGFloat(total))
                     }
                 }
-                .animation(.easeOut(duration: 0.3), value: session.checked.count)
+                .animation(.easeOut(duration: Motion.slow), value: session.checked.count)
             } else {
                 ForEach(Array(steps.indices), id: \.self) { index in
                     Capsule().fill(session.stage == .done || index <= session.stepIndex ? Palette.brand : Palette.muted)
                 }
             }
         }
-        .frame(height: 4)
+        .frame(height: Stroke.bar)
         .padding(.horizontal, Space.s5).padding(.top, Space.s2)
         .accessibilityHidden(true)
     }
@@ -134,7 +134,7 @@ struct CookMode: View {
                 if let image {
                     RemoteImage(variants: image.sources, aspectRatio: image.aspectRatio, alt: "")
                         .aspectRatio(contentMode: .fill)
-                        .frame(height: 240).frame(maxWidth: .infinity).clipped()
+                        .frame(height: Measure.cookPhoto).frame(maxWidth: .infinity).clipped()
                         .clipShape(.rect(cornerRadius: Radius.surface))
                         .padding(.bottom, Space.s6)
                         .accessibilityHidden(true)
@@ -150,7 +150,7 @@ struct CookMode: View {
                     ForEach(Array(items.enumerated()), id: \.offset) { index, item in
                         HStack(alignment: .top, spacing: Space.s4) {
                             Text("\(index + 1)").font(Typeface.body(.base, weight: .bold))
-                                .frame(width: 32, height: 32).background(Palette.brandSoft, in: .circle)
+                                .frame(width: Measure.badge, height: Measure.badge).background(Palette.brandSoft, in: .circle)
                                 .accessibilityHidden(true)
                             VStack(alignment: .leading, spacing: Space.s0_5) {
                                 Text(item.0).font(Typeface.body(.lg, weight: .bold))
@@ -165,7 +165,7 @@ struct CookMode: View {
         }
         .safeAreaInset(edge: .bottom) {
             VStack(spacing: Space.s4) {
-                Rectangle().fill(Palette.border).frame(height: 1)
+                Rectangle().fill(Palette.border).frame(height: Stroke.hairline)
                 Text(introFacts).font(Typeface.body(.bodySm, relativeTo: .subheadline))
                     .foregroundStyle(Palette.mutedForeground)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -224,10 +224,10 @@ struct CookMode: View {
                         Label("\(section.items.count) of \(section.items.count)", systemImage: "checkmark")
                             .font(Typeface.body(.caption, weight: .semibold)).monospacedDigit()
                     }
-                    Image(systemName: "chevron.down").font(.system(size: 16, weight: .medium))
+                    Image(systemName: "chevron.down").font(Typeface.icon(IconSize.sm, weight: .medium))
                         .rotationEffect(.degrees(isFolded ? 0 : 180))
                 }
-                .frame(minHeight: 44)
+                .frame(minHeight: Space.target)
                 .padding(.horizontal, isFolded ? Space.s4 : 0)
                 .background(isFolded ? Palette.brandSoft : .clear, in: .rect(cornerRadius: Radius.field))
                 .contentShape(.rect)
@@ -241,32 +241,32 @@ struct CookMode: View {
                     let on = session.checked.contains(itemKey)
                     Button { toggle(section, item, reader: reader) } label: {
                         HStack(spacing: Space.s4) {
-                            RoundedRectangle(cornerRadius: 8)
-                                .strokeBorder(on ? Palette.brand : Palette.ink, lineWidth: 2)
-                                .background(on ? Palette.brand : .clear, in: .rect(cornerRadius: 8))
-                                .overlay { if on { Image(systemName: "checkmark").font(.system(size: 14, weight: .heavy)) } }
-                                .frame(width: 28, height: 28)
+                            RoundedRectangle(cornerRadius: Radius.check)
+                                .strokeBorder(on ? Palette.brand : Palette.ink, lineWidth: Stroke.rule)
+                                .background(on ? Palette.brand : .clear, in: .rect(cornerRadius: Radius.check))
+                                .overlay { if on { Image(systemName: "checkmark").font(Typeface.icon(IconSize.xs, weight: .heavy)) } }
+                                .frame(width: Measure.checkbox, height: Measure.checkbox)
                             ingredientText(item)
                                 .font(Typeface.body(.lg))
                                 .strikethrough(on, color: Palette.ink)
                                 .foregroundStyle(on ? Palette.mutedForeground : Palette.ink)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
-                        .padding(.vertical, Space.s2_5).frame(minHeight: 48).contentShape(.rect)
+                        .padding(.vertical, Space.s2_5).frame(minHeight: Control.regular).contentShape(.rect)
                     }
                     .buttonStyle(.plain)
                     .id(itemKey)
                     .accessibilityIdentifier("cook-item-\(itemKey)")
                     .accessibilityAddTraits(on ? [.isSelected] : [])
                     .accessibilityHint("Checks this ingredient off")
-                    .overlay(alignment: .bottom) { Rectangle().fill(Palette.border).frame(height: 1) }
+                    .overlay(alignment: .bottom) { Rectangle().fill(Palette.border).frame(height: Stroke.hairline) }
                 }
             }
         }
     }
 
     private func ingredientText(_ item: Components.Schemas.Ingredient) -> Text {
-        (item.amount.isEmpty ? Text("") : Text(item.amount + " ").bold()) + Text(InlineHTML.attributed(item.html))
+        (item.amount.isEmpty ? Text("") : Text(item.amount + " ").fontWeight(.black)) + Text(InlineHTML.attributed(item.html))
     }
 
     private func toggle(_ section: Components.Schemas.IngredientSection, _ item: Components.Schemas.Ingredient, reader: ScrollViewProxy) {
@@ -304,22 +304,25 @@ struct CookMode: View {
                         if !current.section.isEmpty {
                             Eyebrow(current.section, color: Palette.mutedForeground).padding(.bottom, Space.s2_5)
                         }
-                        Text(InlineHTML.attributed(current.step.html))
-                            .font(Typeface.body(.titleSm, weight: .semibold, relativeTo: .title2))
-                            .lineSpacing(4)
+                        Text(InlineHTML.attributed(current.step.html, boldFont: Typeface.body(.titleSm, weight: .bold, relativeTo: .title2)))
+                            .font(Typeface.body(.titleSm, weight: .medium, relativeTo: .title2))
+                            .lineSpacing(Leading.step)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .accessibilityIdentifier("cook-step")
                         if !current.step.needs.isEmpty { needs(current.step.needs) }
                         if !current.step.timers.isEmpty {
                             FlowRow(spacing: Space.s3) {
                                 ForEach(current.step.timers, id: \.label) { timer in
-                                    Button { startTimer(timer) } label: {
+                                    Button { startTimer(timer, step: current.step.html) } label: {
                                         Label("Start \(timer.label) timer", systemImage: "timer")
                                     }
                                     .buttonStyle(UtilityButtonStyle())
                                 }
                             }
                             .padding(.top, Space.s6)
+                            if let problem = timers.problem {
+                                Text(problem).font(Typeface.body(.sm)).foregroundStyle(Palette.danger).padding(.top, Space.s2)
+                            }
                         }
                     }
                     .padding(.top, Space.s6)
@@ -330,9 +333,9 @@ struct CookMode: View {
             }
             .padding(.horizontal, Space.s5)
             .contentShape(.rect)
-            .gesture(DragGesture(minimumDistance: 30).onEnded { value in
+            .gesture(DragGesture(minimumDistance: Travel.page).onEnded { value in
                 let dx = value.translation.width
-                guard abs(dx) > 50, abs(dx) > abs(value.translation.height) else { return }
+                guard abs(dx) > Travel.pageCommit, abs(dx) > abs(value.translation.height) else { return }
                 if dx < 0 { next() } else { previous() }
             })
             .safeAreaInset(edge: .bottom) { cookFooter }
@@ -343,11 +346,11 @@ struct CookMode: View {
         VStack(alignment: .leading, spacing: 0) {
             Eyebrow("You’ll need", color: Palette.mutedForeground).padding(.bottom, Space.s1)
             ForEach(Array(needs.enumerated()), id: \.element.key) { index, need in
-                ((need.amount.isEmpty ? Text("") : Text(need.amount + " ").bold()) + Text(InlineHTML.attributed(need.name)))
+                ((need.amount.isEmpty ? Text("") : Text(need.amount + " ").font(Typeface.body(.lg, weight: .bold))) + Text(InlineHTML.attributed(need.name, boldFont: Typeface.body(.lg, weight: .bold))))
                     .font(Typeface.body(.lg))
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.vertical, Space.s2)
-                    .overlay(alignment: .top) { if index > 0 { Rectangle().fill(Palette.border).frame(height: 1) } }
+                    .overlay(alignment: .top) { if index > 0 { Rectangle().fill(Palette.border).frame(height: Stroke.hairline) } }
             }
         }
         .padding(.horizontal, Space.s5).padding(.vertical, Space.s4)
@@ -366,10 +369,10 @@ struct CookMode: View {
                         ForEach(section.items, id: \.id) { item in
                             let used = current.step.needs.contains { $0.key == item.id }
                             ingredientText(item)
-                                .font(Typeface.body(.bodySm, weight: used ? .semibold : .regular))
+                                .font(Typeface.body(.bodySm, weight: used ? .medium : .regular))
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding(.vertical, Space.s2).padding(.horizontal, used ? 8 : 0)
-                                .background(used ? Palette.brandSoft : .clear, in: .rect(cornerRadius: 8))
+                                .background(used ? Palette.brandSoft : .clear, in: .rect(cornerRadius: Radius.check))
                                 .padding(.horizontal, used ? -Space.s2 : 0)
                         }
                     }
@@ -377,7 +380,7 @@ struct CookMode: View {
             }
             .padding(Space.s6)
         }
-        .frame(maxWidth: 280)
+        .frame(maxWidth: Measure.sidePanel)
         .background(Palette.muted, in: .rect(cornerRadius: Radius.surface))
         .padding(.top, Space.s6)
         .accessibilityLabel("Ingredients")
@@ -385,12 +388,11 @@ struct CookMode: View {
 
     private var cookFooter: some View {
         VStack(spacing: Space.s3) {
-            if !session.timers.isEmpty {
+            if !timers.entries.isEmpty {
                 TimelineView(.periodic(from: .now, by: 1)) { context in
                     FlowRow(spacing: Space.s2) {
-                        ForEach(session.timers) { timer in timerChip(timer, now: context.date) }
+                        ForEach(timers.entries) { timer in timerChip(timer, now: context.date) }
                     }
-                    .onChange(of: context.date) { _, now in finishTimers(at: now) }
                 }
             }
             HStack {
@@ -405,35 +407,31 @@ struct CookMode: View {
         .background(Palette.background)
     }
 
-    private func timerChip(_ timer: CookSession.Timer, now: Date) -> some View {
+    private func timerChip(_ timer: KitchenTimers.Entry, now: Date) -> some View {
+        let done = timer.alerting || timer.endsAt <= now
         let left = Self.clock(timer.endsAt.timeIntervalSince(now))
-        return Button { session.timers.removeAll { $0.id == timer.id } } label: {
+        return Button { timers.remove(timer.id) } label: {
             HStack(spacing: Space.s1_5) {
                 Image(systemName: "timer")
                 Text(timer.label)
-                Text(timer.done ? "Done!" : left).monospacedDigit()
+                Text(done ? "Done!" : left).monospacedDigit()
                 Image(systemName: "xmark")
             }
             .font(Typeface.body(.bodySm, weight: .semibold))
-            .foregroundStyle(timer.done ? Palette.ink : Palette.onDarkLabel)
-            .padding(.horizontal, Space.s4).frame(minHeight: 40)
-            .background(timer.done ? Palette.brand : Palette.ink, in: .capsule)
-            .symbolEffect(.pulse, isActive: timer.done && !reduceMotion)
+            .foregroundStyle(done ? Palette.ink : Palette.onDarkLabel)
+            .padding(.horizontal, Space.s4).frame(minHeight: Control.compact)
+            .background(done ? Palette.brand : Palette.ink, in: .capsule)
+            .symbolEffect(.pulse, isActive: done && !reduceMotion)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(timer.done ? "\(timer.label) timer done, dismiss" : "\(timer.label) timer, \(left) left, cancel")
+        .accessibilityLabel(done ? "\(timer.label) timer done, dismiss" : "\(timer.label) timer, \(left) left, cancel")
     }
 
-    private func startTimer(_ timer: Components.Schemas.StepTimer) {
+    /// Starts a system timer labeled with the step's bold lead ("Simmer · 20 min") and the recipe.
+    private func startTimer(_ timer: Components.Schemas.StepTimer, step html: String) {
         tap += 1
-        session.timers.append(.init(label: timer.label, endsAt: .now.addingTimeInterval(timer.minutes * 60)))
-    }
-
-    private func finishTimers(at now: Date) {
-        for index in session.timers.indices where !session.timers[index].done && session.timers[index].endsAt <= now {
-            session.timers[index].done = true
-            UINotificationFeedbackGenerator().notificationOccurred(.warning)
-        }
+        let lead = InlineHTML.leadingBold(html)
+        Task { await timers.start(label: lead.map { "\($0) · \(timer.label)" } ?? timer.label, minutes: timer.minutes, recipeTitle: recipe.title, recipeSlug: recipe.slug) }
     }
 
     static func clock(_ interval: TimeInterval) -> String {
@@ -445,7 +443,7 @@ struct CookMode: View {
     private func next() {
         guard session.stage == .cook else { return }
         tap += 1
-        withAnimation(reduceMotion ? nil : .easeOut(duration: 0.2)) {
+        withAnimation(reduceMotion ? nil : .easeOut(duration: Motion.standard)) {
             if session.stepIndex < steps.count - 1 { session.stepIndex += 1 } else { session.stage = .done }
         }
     }
@@ -453,7 +451,7 @@ struct CookMode: View {
     private func previous() {
         if session.stage == .done { session.stage = .cook; return }
         guard session.stage == .cook else { return }
-        withAnimation(reduceMotion ? nil : .easeOut(duration: 0.2)) {
+        withAnimation(reduceMotion ? nil : .easeOut(duration: Motion.standard)) {
             if session.stepIndex > 0 { tap += 1; session.stepIndex -= 1 } else if !groups.isEmpty { session.stage = .gather }
         }
     }
@@ -497,15 +495,15 @@ struct UtilityButtonStyle: ButtonStyle {
             .font(Typeface.action(large ? .lg : .bodySm))
             .foregroundStyle(Palette.ink)
             .padding(.horizontal, large ? Space.s6 : Space.s4)
-            .frame(minHeight: large ? 52 : 44)
+            .frame(minHeight: large ? Control.large : Space.target)
             .background(configuration.isPressed ? Palette.tint : Palette.background, in: .capsule)
-            .overlay { Capsule().strokeBorder(Palette.ink, lineWidth: 1.5) }
+            .overlay { Capsule().strokeBorder(Palette.ink, lineWidth: Stroke.control) }
     }
 }
 
 /// Wraps children onto new lines (timer buttons and chips).
 struct FlowRow: Layout {
-    var spacing: CGFloat = 8
+    var spacing: CGFloat = Space.s2
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
         let rows = arrange(width: proposal.width ?? .infinity, subviews: subviews)
         return CGSize(width: proposal.width ?? rows.width, height: rows.height)

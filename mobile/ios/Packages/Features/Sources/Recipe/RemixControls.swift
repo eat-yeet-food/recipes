@@ -10,12 +10,12 @@ struct PillPicker<Value: Hashable>: View {
         HStack(spacing: 0) {
             ForEach(options, id: \.0) { value, label in
                 Button {
-                    withAnimation(.snappy(duration: 0.2)) { selection = value }
+                    withAnimation(.snappy(duration: Motion.standard)) { selection = value }
                 } label: {
                     Text(label)
                         .font(Typeface.body(.bodySm, weight: .bold))
                         .foregroundStyle(selection == value ? Palette.ink : .white)
-                        .frame(maxWidth: .infinity, minHeight: 40)
+                        .frame(maxWidth: .infinity, minHeight: Control.compact)
                         .background { if selection == value { Capsule().fill(Palette.brand) } }
                         .contentShape(.capsule)
                 }
@@ -91,7 +91,7 @@ struct RemixBand: View {
         VStack(alignment: .leading, spacing: Space.s3) {
             Text(title.uppercased()).font(Typeface.hero(.display)).accessibilityAddTraits(.isHeader)
             LinearGradient(colors: [Palette.brand, Palette.brandAlt], startPoint: .leading, endPoint: .trailing)
-                .frame(width: 64, height: 4).clipShape(.capsule).accessibilityHidden(true)
+                .frame(width: Measure.grabber, height: Stroke.bar).clipShape(.capsule).accessibilityHidden(true)
         }
     }
 }

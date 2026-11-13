@@ -35,6 +35,15 @@ export interface KitchenPlugin extends RecipeWorkbenchPlugin {
   withBatchCount: (state: unknown, count: number) => unknown
   Editor: ComponentType<KitchenEditorProps>
   Results: ComponentType<KitchenResultsProps>
+  /** The Results panel as plain data, for clients that draw it themselves (the iPhone app). */
+  summary?: (recipe: RecipeContent, config: unknown, state: unknown) => KitchenSummary
+}
+
+/** What Results shows: ingredient weights, an optional schedule (a problem marks a row) and a closing note. */
+export type KitchenSummary = {
+  rows: { label: string; detail?: string; amount: string }[]
+  schedule: { time: string; label: string; problem?: string }[]
+  note?: string
 }
 
 export type KitchenRegistry = RecipeWorkbenchRegistry<KitchenPlugin>

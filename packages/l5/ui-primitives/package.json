@@ -5,6 +5,7 @@
   "exports": {
     "./primitives/number-field-format": "./src/primitives/number-field-format.ts",
     "./primitives/haptics": "./src/primitives/haptics.ts",
+    "./primitives/kitchen-timers": "./src/primitives/kitchen-timers.ts",
     "./primitives/*": "./src/primitives/*.tsx"
   },
   "dependencies": {

@@ -16,17 +16,17 @@ public enum HomeDestination {
     case signOut
     /// A site page the app doesn't have (Privacy, Terms), opened in the browser.
     case web(String)
+    /// The wordmark: back to the home page.
+    case home
 }
 
 /// The site's home page: the plum hero over the donut photo, What's New and Browse by Category.
 public struct HomeScreen: View {
     @Environment(RecipeStore.self) private var store
-    @State private var menuOpen = false
-    private let zoom: Namespace.ID?
+    @State private var headerShown = true
     private let go: (HomeDestination) -> Void
 
-    public init(zoom: Namespace.ID? = nil, go: @escaping (HomeDestination) -> Void) {
-        self.zoom = zoom
+    public init(go: @escaping (HomeDestination) -> Void) {
         self.go = go
     }
 
@@ -39,22 +39,28 @@ public struct HomeScreen: View {
             }
         }
         .background(Palette.background)
-        .toolbar { SiteNavBar(home: store.home.value, menuOpen: $menuOpen, go: go) }
-        .overlay(alignment: .top) {
-            // Clipped to the content area, so the panel slides out from under the bar and back.
-            VStack(spacing: 0) {
-                if menuOpen {
-                    SiteMenu(links: store.home.value?.navigation ?? []) { destination in
-                        withAnimation(.snappy(duration: 0.2)) { menuOpen = false }
-                        go(destination)
-                    }
-                    .transition(.move(edge: .top))
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .top)
-            .clipped()
-        }
+        // No app bar on iPhone: the tab bar carries the site's navigation.
+        .toolbar(.hidden, for: .navigationBar)
         .task { await store.loadHome() }
+    }
+
+    /// The site's white app bar with the logo. The status bar area stays white, so the clock stays legible.
+    private func header(_ home: Components.Schemas.Home) -> some View {
+        VStack(spacing: 0) {
+            if headerShown {
+                HStack {
+                    Wordmark(first: home.wordmark.first, second: home.wordmark.second)
+                        .accessibilityLabel("\(home.wordmark.first) / \(home.wordmark.second)")
+                        .accessibilityAddTraits(.isHeader)
+                    Spacer()
+                }
+                .padding(.horizontal, Space.s5).frame(height: Control.bar)
+                .transition(.move(edge: .top).combined(with: .opacity))
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .clipped()
+        .background(Palette.background.ignoresSafeArea(edges: .top))
     }
 
     private func content(_ home: Components.Schemas.Home) -> some View {
@@ -69,7 +75,6 @@ public struct HomeScreen: View {
                             RecipeCard(recipe: recipe, image: home.images.additionalProperties[recipe.image])
                         }
                         .buttonStyle(CardPressStyle())
-                        .modifier(ZoomSource(id: recipe.slug, namespace: zoom))
                         .accessibilityIdentifier("recipe-card-\(recipe.slug)")
                     }
                 }
@@ -90,80 +95,14 @@ public struct HomeScreen: View {
                 SiteFooter(wordmark: home.wordmark, go: go)
             }
         }
+        // Scrolling down tucks the logo bar away; scrolling up (or reaching the top) brings it back.
+        .onScrollGeometryChange(for: CGFloat.self, of: { $0.contentOffset.y + $0.contentInsets.top }) { old, new in
+            let next = new <= Travel.scrollTop ? true : new > old + Travel.scrollHide ? false : new < old - Travel.scrollHide ? true : headerShown
+            if next != headerShown { withAnimation(.snappy(duration: Motion.gentle)) { headerShown = next } }
+        }
+        .safeAreaInset(edge: .top, spacing: 0) { header(home) }
         .refreshable { await store.loadHome() }
         .onAppear { Perf.signposter.emitEvent(Perf.launchContent) }
-    }
-}
-
-// MARK: Nav bar
-
-/// The site header as a native bar: the wordmark, then search and the menu.
-struct SiteNavBar: ToolbarContent {
-    let home: Components.Schemas.Home?
-    @Binding var menuOpen: Bool
-    let go: (HomeDestination) -> Void
-
-    var body: some ToolbarContent {
-        ToolbarItem(placement: .topBarLeading) {
-            Wordmark(first: home?.wordmark.first ?? "Eat", second: home?.wordmark.second ?? "Yeet")
-                .accessibilityLabel("\(home?.wordmark.first ?? "Eat") / \(home?.wordmark.second ?? "Yeet"), home")
-        }
-        .sharedBackgroundVisibility(.hidden)
-        ToolbarItem(placement: .topBarTrailing) {
-            Button { go(.search) } label: { SiteIcon.search.image }
-                .accessibilityLabel("Search")
-        }
-        .sharedBackgroundVisibility(.hidden)
-        ToolbarItem(placement: .topBarTrailing) {
-            Button { withAnimation(.snappy(duration: 0.2)) { menuOpen.toggle() } } label: {
-                SiteIcon.menu.image
-                    .frame(width: 44, height: 44)
-                    .background(menuOpen ? Palette.muted : .clear, in: .circle)
-            }
-            .accessibilityLabel(menuOpen ? "Close menu" : "Open menu")
-        }
-        .sharedBackgroundVisibility(.hidden)
-    }
-}
-
-/// The site's phone menu: a white panel under the header with bold rows, then the account rows.
-struct SiteMenu: View {
-    @Environment(AccountStore.self) private var account
-    let links: [Components.Schemas.NavLink]
-    let go: (HomeDestination) -> Void
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: Space.s1) {
-            ForEach(links, id: \.href) { link in row(link.label) { go(.path(link.href)) } }
-            if let member = account.member {
-                row("Settings") { go(.account) }
-                row("Sign out") { go(.signOut) }
-                HStack(spacing: Space.s2) {
-                    Text(String(member.displayName.first ?? "C").uppercased())
-                        .font(Typeface.body(.xs, weight: .bold)).frame(width: 32, height: 32)
-                        .background(Palette.brandSoft, in: .circle)
-                    Text(member.displayName).font(Typeface.body(.sm, weight: .bold)).lineLimit(1)
-                }
-                .padding(.horizontal, Space.s2).frame(minHeight: 44)
-            } else {
-                row("Sign in") { go(.account) }
-            }
-        }
-        .foregroundStyle(Palette.ink)
-        .padding(.horizontal, Space.s4).padding(.vertical, Space.s3)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Palette.background)
-        .overlay(alignment: .top) { Rectangle().fill(Palette.border).frame(height: 1) }
-        .overlay(alignment: .bottom) { Rectangle().fill(Palette.border).frame(height: 1) }
-    }
-
-    private func row(_ label: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Text(label).font(Typeface.body(.sm, weight: .bold))
-                .padding(.horizontal, Space.s2).frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                .contentShape(.rect)
-        }
-        .buttonStyle(.plain)
     }
 }
 
@@ -181,7 +120,7 @@ struct SiteFooter: View {
                 ForEach(links, id: \.0) { label, destination in
                     Button(label) { go(destination) }
                         .font(Typeface.body(.sm, weight: .bold)).foregroundStyle(Palette.ink)
-                        .frame(minHeight: 44)
+                        .frame(minHeight: Space.target)
                 }
             }
             Text("© \(String(Calendar.current.component(.year, from: .now))) \(wordmark.first) / \(wordmark.second). All rights reserved.")
@@ -189,7 +128,7 @@ struct SiteFooter: View {
         }
         .padding(.vertical, Space.s9).padding(.horizontal, Space.s8)
         .frame(maxWidth: .infinity)
-        .overlay(alignment: .top) { Rectangle().fill(Palette.border).frame(height: 1) }
+        .overlay(alignment: .top) { Rectangle().fill(Palette.border).frame(height: Stroke.hairline) }
     }
 }
 
@@ -202,13 +141,13 @@ public struct Wordmark: View {
     public var body: some View {
         HStack(spacing: Space.s2) {
             Text(first.uppercased()).foregroundStyle(Palette.ink)
-            Circle().fill(Palette.mutedForeground).frame(width: 4, height: 4)
+            Circle().fill(Palette.mutedForeground).frame(width: Measure.dot, height: Measure.dot)
             Text(second.uppercased())
                 .foregroundStyle(LinearGradient(colors: [Palette.brand, Palette.brandAlt], startPoint: .leading, endPoint: .trailing))
                 .padding(.horizontal, Space.s2).padding(.vertical, Space.s1)
                 .background(StickerShape().fill(Palette.ink))
                 .background(StickerShape().fill(Palette.brandAlt).offset(x: size.rawValue * 0.07, y: size.rawValue * 0.09))
-                .rotationEffect(.degrees(-4))
+                .rotationEffect(.degrees(Measure.tiltWordmark))
         }
         .font(Typeface.hero(size, relativeTo: .title3))
         .fixedSize()
@@ -251,15 +190,15 @@ struct HomeHero: View {
         VStack(spacing: 0) {
             // A fixed 330-point band, filled and cropped at 50% 30% like the site's object-position.
             Color.clear
-                .frame(height: 330).frame(maxWidth: .infinity)
+                .frame(height: Measure.heroPhoto).frame(maxWidth: .infinity)
                 .overlay {
                     if let image {
                         GeometryReader { proxy in
-                            let width = max(proxy.size.width, 330 * image.aspectRatio)
+                            let width = max(proxy.size.width, Measure.heroPhoto * image.aspectRatio)
                             let height = width / image.aspectRatio
                             RemoteImage(variants: image.sources, aspectRatio: image.aspectRatio, alt: hero.imageAlt)
                                 .frame(width: width, height: height)
-                                .position(x: proxy.size.width / 2, y: 165 - (height - 330) * (0.3 - 0.5))
+                                .position(x: proxy.size.width / 2, y: Measure.heroPhoto / 2 - (height - Measure.heroPhoto) * (Measure.heroFocusY - 0.5))
                         }
                     } else { Palette.muted }
                 }
@@ -267,7 +206,7 @@ struct HomeHero: View {
             card.padding(.horizontal, Space.s3_5).padding(.top, -Space.s16)
         }
         .overlay(alignment: .topTrailing) {
-            RemixSticker { go(.path("/remix")) }.offset(x: -4, y: 206)
+            RemixSticker { go(.path("/remix")) }.offset(Measure.heroStickerOffset)
         }
     }
 
@@ -284,11 +223,11 @@ struct HomeHero: View {
             Button { go(.search) } label: {
                 HStack(spacing: Space.s2) {
                     Text(hero.cta)
-                    SiteIcon.arrowRight.image.resizable().frame(width: 24, height: 24).rotationEffect(.degrees(-45))
+                    SiteIcon.arrowRight.image.resizable().frame(width: IconSize.xl, height: IconSize.xl).rotationEffect(.degrees(-45))
                 }
                 .font(Typeface.body(.lg, weight: .bold))
                 .foregroundStyle(Palette.ink)
-                .padding(.horizontal, Space.s8).frame(minHeight: 52)
+                .padding(.horizontal, Space.s8).frame(minHeight: Control.large)
                 .background(Palette.brand, in: .capsule)
             }
             .buttonStyle(CardPressStyle())
@@ -298,10 +237,10 @@ struct HomeHero: View {
         .padding(.horizontal, Space.s6).padding(.top, Space.s7).padding(.bottom, Space.s6)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(alignment: .bottomTrailing) {
-            Ellipse().fill(Palette.brandAlt).frame(width: 320, height: 288).rotationEffect(.degrees(-12)).offset(x: 170, y: 170)
+            Ellipse().fill(Palette.brandAlt).frame(width: Measure.heroBlob.width, height: Measure.heroBlob.height).rotationEffect(.degrees(Measure.heroBlobTilt)).offset(Measure.heroBlobOffset)
         }
         .background(Self.gradient)
-        .clipShape(UnevenRoundedRectangle(topLeadingRadius: 28, bottomLeadingRadius: 8, bottomTrailingRadius: 28, topTrailingRadius: 28))
+        .clipShape(UnevenRoundedRectangle(topLeadingRadius: Radius.surface, bottomLeadingRadius: Radius.check, bottomTrailingRadius: Radius.surface, topTrailingRadius: Radius.surface))
         .elevation(.glow)
     }
 
@@ -320,7 +259,7 @@ struct HomeHero: View {
                             .padding(.horizontal, TextSize.hero.rawValue * 0.2)
                             // Bowlby's line box is much taller than its capitals; hug the capitals.
                             .background(StickerShape().fill(Palette.brand).padding(.top, Space.s1).padding(.bottom, Space.s0_5))
-                            .rotationEffect(.degrees(-3))
+                            .rotationEffect(.degrees(Measure.tiltHighlight))
                             .padding(.leading, -TextSize.hero.rawValue * 0.04)
                         Text(String(line[range.upperBound...]))
                     }
@@ -328,7 +267,7 @@ struct HomeHero: View {
                     Text(line)
                 }
             }
-            .frame(height: 42, alignment: .leading) // leading-none
+            .frame(height: Measure.heroHeadlineLine, alignment: .leading) // leading-none
         }
         .padding(.vertical, Space.s1)
         .tracking(Tracking.tight(.hero))
@@ -351,8 +290,8 @@ struct RemixSticker: View {
                 .foregroundStyle(Palette.ink)
                 .padding(.top, -Space.s0_5)
             }
-            .frame(width: 116, height: 116)
-            .rotationEffect(.degrees(12))
+            .frame(width: Measure.sticker, height: Measure.sticker)
+            .rotationEffect(.degrees(Measure.tiltSticker))
         }
         .buttonStyle(CardPressStyle())
         .accessibilityLabel("New: Remix recipes")
@@ -388,7 +327,7 @@ struct SectionHeading: View {
                 .multilineTextAlignment(.center)
                 .accessibilityAddTraits(.isHeader)
             LinearGradient(colors: [Palette.brand, Palette.brandAlt], startPoint: .leading, endPoint: .trailing)
-                .frame(width: 60, height: 3).clipShape(.capsule)
+                .frame(width: Measure.accentRule, height: Stroke.accent).clipShape(.capsule)
                 .padding(.top, Space.s4).padding(.bottom, Space.s10)
                 .accessibilityHidden(true)
         }
@@ -404,11 +343,11 @@ struct ViewAllLink: View {
         Button(action: action) {
             HStack(spacing: Space.s2) {
                 Text(label)
-                SiteIcon.arrowRight.image.resizable().frame(width: 16, height: 16)
+                SiteIcon.arrowRight.image.resizable().frame(width: IconSize.sm, height: IconSize.sm)
             }
             .font(Typeface.body(.sm, weight: .bold))
             .foregroundStyle(Palette.ink)
-            .frame(minHeight: 44)
+            .frame(minHeight: Space.target)
         }
     }
 }
@@ -419,7 +358,7 @@ struct BrowseTile: View {
     let image: RecipeImage?
     var body: some View {
         Color.clear
-            .aspectRatio(1.5, contentMode: .fit)
+            .aspectRatio(Measure.cardImage, contentMode: .fit)
             .background {
                 if let image {
                     RemoteImage(variants: image.sources, aspectRatio: image.aspectRatio, alt: "").aspectRatio(contentMode: .fill)

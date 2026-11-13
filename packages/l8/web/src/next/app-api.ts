@@ -195,5 +195,6 @@ export async function appRemixResolve(slug: string, state: unknown): Promise<App
     changes: plugin.changes(source, config, defaultState, decoded),
     batchNoun: plugin.batchNoun(decoded, plugin.batchCount(decoded)),
     recipe: recipeView(plugin.resolveRecipe(source, config, decoded)),
+    ...(plugin.summary ? { summary: plugin.summary(source, config, decoded) } : {}),
   }
 }

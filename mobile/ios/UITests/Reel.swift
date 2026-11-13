@@ -1,8 +1,9 @@
 import XCTest
 
-/// Drives short, smooth scenes for the promo reel (`scratch: record while each test runs`).
-/// Each scene writes `<name>.start` (epoch seconds) once its content is on screen, so the
-/// recording can be trimmed to the moment the scene is ready. Not part of the regular suites.
+/// Captures stills for the promo reel: page screenshots taken a fixed drag apart (stitched into
+/// one tall page afterwards) and one screenshot per tap state. All motion in the reel is then
+/// animated from these stills, so nothing depends on the Simulator's recording frame rate.
+/// Not part of the regular suites.
 final class Reel: XCTestCase {
     private var directory: URL {
         let path = ProcessInfo.processInfo.environment["SHOTS_DIR"] ?? NSTemporaryDirectory()
@@ -20,53 +21,64 @@ final class Reel: XCTestCase {
         return app
     }
 
-    private func mark(_ name: String) {
-        try? String(Date().timeIntervalSince1970).write(to: directory.appending(path: "\(name).start"), atomically: true, encoding: .utf8)
+    @MainActor private func shot(_ app: XCUIApplication, _ name: String) {
+        try? app.screenshot().pngRepresentation.write(to: directory.appending(path: "\(name).png"))
     }
 
-    /// A slow, natural finger scroll.
-    @MainActor private func glide(_ app: XCUIApplication, by fraction: CGFloat = 0.45, velocity: XCUIGestureVelocity = 600) {
-        let start = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.78))
-        let end = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.78 - fraction))
-        start.press(forDuration: 0.05, thenDragTo: end, withVelocity: velocity, thenHoldForDuration: 0.15)
+    /// Screenshots down a page: drag 40% of the screen, hold before lifting so there is no fling.
+    @MainActor private func page(_ app: XCUIApplication, _ name: String, count: Int) {
+        shot(app, "\(name)-00")
+        for index in 1...count {
+            let start = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.7))
+            let end = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.3))
+            start.press(forDuration: 0.1, thenDragTo: end, withVelocity: 300, thenHoldForDuration: 0.6)
+            sleep(2)  // images settle
+            shot(app, String(format: "\(name)-%02d", index))
+        }
     }
 
     @MainActor func testHome() {
         let app = launch("eatyeet://open")
         XCTAssertTrue(app.buttons["Open menu"].waitForExistence(timeout: 20))
-        sleep(3)
-        mark("home")
-        sleep(2)
-        for _ in 0..<4 { glide(app, by: 0.4, velocity: 500); usleep(500_000) }
-        sleep(1)
+        sleep(4)
+        page(app, "home", count: 8)
     }
 
     @MainActor func testRecipe() {
         let app = launch("eatyeet://open/recipes/new-york-style-pizza")
         XCTAssertTrue(app.staticTexts["recipe-title"].waitForExistence(timeout: 20))
-        sleep(3)
-        mark("recipe")
-        sleep(2)
-        for _ in 0..<4 { glide(app, by: 0.4, velocity: 450); usleep(500_000) }
-        sleep(1)
+        sleep(4)
+        page(app, "recipe", count: 8)
+    }
+
+    @MainActor func testCatalog() {
+        let app = launch("eatyeet://open/recipes")
+        XCTAssertTrue(app.buttons["recipe-card-pollo-asado"].waitForExistence(timeout: 20))
+        sleep(4)
+        page(app, "catalog", count: 8)
     }
 
     @MainActor func testCook() {
-        let app = launch("eatyeet://open/recipes/new-york-style-pizza/cook/1")
+        let app = launch("eatyeet://open/recipes/classic-baked-mac-and-cheese/cook/1")
         let begin = app.buttons["cook-begin"]
         XCTAssertTrue(begin.waitForExistence(timeout: 20))
         sleep(3)
-        mark("cook")
-        sleep(1)
-        begin.tap()
-        sleep(1)
+        shot(app, "cook-intro")
+        begin.tap(); sleep(1)
+        shot(app, "cook-gather-0")
         let boxes = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'cook-item-'"))
-        for index in 0..<min(boxes.count, 4) { boxes.element(boundBy: index).tap(); usleep(450_000) }
+        for index in 0..<min(boxes.count, 4) {
+            boxes.element(boundBy: index).tap(); usleep(400_000)
+            shot(app, "cook-gather-\(index + 1)")
+        }
         sleep(2)
-        app.buttons["cook-start"].tap()
-        sleep(2)
-        app.buttons["cook-next"].tap()
-        sleep(2)
+        shot(app, "cook-gather-folded")
+        app.buttons["cook-start"].tap(); sleep(2)
+        for step in 1...12 {
+            shot(app, String(format: "cook-step-%02d", step))
+            guard app.buttons["cook-next"].exists else { break }
+            app.buttons["cook-next"].tap(); sleep(1)
+        }
     }
 
     @MainActor func testRemix() {
@@ -76,25 +88,13 @@ final class Reel: XCTestCase {
         start.tap()
         XCTAssertTrue(app.buttons["remix-review"].waitForExistence(timeout: 20))
         sleep(3)
-        mark("remix")
-        sleep(1)
-        for size in ["12″", "14″", "10″"] where app.buttons[size].exists { app.buttons[size].tap(); usleep(900_000) }
-        if app.buttons["Indoor Steel"].exists { app.buttons["Indoor Steel"].tap(); usleep(900_000) }
-        glide(app, by: 0.35, velocity: 450)
-        sleep(1)
-        app.buttons["remix-review"].tap()
-        sleep(2)
-        glide(app, by: 0.4, velocity: 450)
-        sleep(2)
-    }
-
-    @MainActor func testCatalog() {
-        let app = launch("eatyeet://open/recipes")
-        XCTAssertTrue(app.buttons["recipe-card-pollo-asado"].waitForExistence(timeout: 20))
-        sleep(3)
-        mark("catalog")
-        sleep(1)
-        for _ in 0..<4 { glide(app, by: 0.5, velocity: 700); usleep(400_000) }
-        sleep(1)
+        shot(app, "remix-0")
+        for (index, size) in ["12″", "14″", "10″"].enumerated() where app.buttons[size].exists {
+            app.buttons[size].tap(); sleep(1)
+            shot(app, "remix-size-\(index + 1)")
+        }
+        if app.buttons["Indoor Steel"].exists { app.buttons["Indoor Steel"].tap(); sleep(1); shot(app, "remix-steel") }
+        app.buttons["remix-review"].tap(); sleep(3)
+        page(app, "bake", count: 3)
     }
 }

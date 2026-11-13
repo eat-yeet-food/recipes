@@ -10,14 +10,12 @@ public struct CatalogScreen: View {
     @State private var query = ""
     @State private var searching: Bool
     private let category: HomeCategory?
-    private let zoom: Namespace.ID?
     private let open: (String) -> Void
 
     /// `category` narrows the list to a home Browse tile; `search` opens with the search field focused.
-    public init(category: HomeCategory? = nil, search: Bool = false, zoom: Namespace.ID? = nil, open: @escaping (String) -> Void) {
+    public init(category: HomeCategory? = nil, search: Bool = false, open: @escaping (String) -> Void) {
         self.category = category
         _searching = State(initialValue: search)
-        self.zoom = zoom
         self.open = open
     }
 
@@ -49,11 +47,11 @@ public struct CatalogScreen: View {
                     if category == nil, !index.heading.intro.isEmpty {
                         Text(index.heading.intro)
                             .font(Typeface.body(.sm, relativeTo: .subheadline))
-                            .lineSpacing(14 * 0.625 - 3)
+                            .lineSpacing(Leading.snug(.sm))
                             .foregroundStyle(Palette.mutedForeground)
                     }
                 }
-                .padding(.top, Space.s8)
+                .padding(.top, Space.s4)
                 if recipes.isEmpty {
                     ContentUnavailableView.search(text: query)
                 }
@@ -62,7 +60,6 @@ public struct CatalogScreen: View {
                         RecipeCard(recipe: recipe, image: index.images.additionalProperties[recipe.image])
                     }
                     .buttonStyle(CardPressStyle())
-                    .modifier(ZoomSource(id: recipe.slug, namespace: zoom))
                     .accessibilityIdentifier("recipe-card-\(recipe.slug)")
                 }
             }
@@ -104,13 +101,15 @@ public enum CatalogSearch {
 }
 
 struct RecipeCard: View {
+    @Environment(RecipeStore.self) private var store
     let recipe: RecipeSummary
     let image: RecipeImage?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             if let image {
-                RemoteImage(variants: image.sources, aspectRatio: 1.5, alt: image.alt)
+                RemoteImage(variants: image.sources, aspectRatio: Measure.cardImage, alt: image.alt)
+                    .recipeHeroPhoto(recipe.slug, image: image)
             }
             VStack(alignment: .leading, spacing: Space.s2_5) {
                 // Two title lines and three description lines are reserved, as on the site.
@@ -123,10 +122,10 @@ struct RecipeCard: View {
                     .font(Typeface.body(.sm, relativeTo: .subheadline))
                     .foregroundStyle(Palette.mutedForeground)
                     .multilineTextAlignment(.leading)
-                    .lineSpacing(14 * 0.625 - 3)
+                    .lineSpacing(Leading.snug(.sm))
                     .lineLimit(3, reservesSpace: true)
                 if !recipe.timeLabel.isEmpty || !recipe.yieldLabel.isEmpty {
-                    Rectangle().fill(Palette.border).frame(height: 1).padding(.top, Space.s4)
+                    Rectangle().fill(Palette.border).frame(height: Stroke.hairline).padding(.top, Space.s4)
                     RecipeMeta(time: recipe.timeLabel, yield: recipe.yieldLabel).padding(.top, Space.s1_5)
                 }
             }
@@ -136,6 +135,9 @@ struct RecipeCard: View {
         .background(Palette.card)
         .clipShape(.rect(cornerRadius: Radius.surface))
         .contentShape(.rect)
+        .recipeHeroSource(recipe.slug)
+        // Load the recipe as its card shows, so opening it hands off to a ready page.
+        .task { await store.prefetchRecipe(recipe.slug) }
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isButton)
     }
@@ -145,16 +147,7 @@ struct CardPressStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .scaleEffect(configuration.isPressed ? 0.98 : 1)
-            .animation(.spring(duration: 0.25), value: configuration.isPressed)
+            .animation(.spring(duration: Motion.gentle), value: configuration.isPressed)
     }
 }
 
-/// Marks a card as the source of the zoom transition into its recipe.
-public struct ZoomSource: ViewModifier {
-    let id: String
-    let namespace: Namespace.ID?
-    public init(id: String, namespace: Namespace.ID?) { self.id = id; self.namespace = namespace }
-    public func body(content: Content) -> some View {
-        if let namespace { content.matchedTransitionSource(id: id, in: namespace) } else { content }
-    }
-}

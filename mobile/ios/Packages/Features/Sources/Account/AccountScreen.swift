@@ -26,7 +26,7 @@ public struct AccountScreen: View {
             }
             .foregroundStyle(Palette.ink)
             .padding(.horizontal, Space.s4).padding(.vertical, Space.s12)
-            .frame(maxWidth: 440, alignment: .leading)
+            .frame(maxWidth: Measure.formWidth, alignment: .leading)
             .frame(maxWidth: .infinity)
         }
         .background(Palette.background)
@@ -69,7 +69,7 @@ public struct AccountScreen: View {
     private func settings(_ member: Member) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             PageTitle("Account settings")
-            (Text("Signed in as ") + Text(member.email).bold().foregroundColor(Palette.ink) + Text(" with Google."))
+            (Text("Signed in as ") + Text(member.email).fontWeight(.black).foregroundColor(Palette.ink) + Text(" with Google."))
                 .font(Typeface.body(.sm, relativeTo: .subheadline)).foregroundStyle(Palette.mutedForeground)
                 .padding(.top, Space.s2).padding(.bottom, Space.s8)
             if let error { AlertBox(error).padding(.bottom, Space.s4) }
@@ -78,9 +78,9 @@ public struct AccountScreen: View {
                 TextField("Public name", text: $name)
                     .textContentType(.nickname)
                     .font(Typeface.body(.base))
-                    .padding(.horizontal, Space.s3_5).frame(minHeight: 48)
+                    .padding(.horizontal, Space.s3_5).frame(minHeight: Control.regular)
                     .background(Palette.background, in: .rect(cornerRadius: Radius.field))
-                    .overlay { RoundedRectangle(cornerRadius: Radius.field).strokeBorder(Palette.input, lineWidth: 1) }
+                    .overlay { RoundedRectangle(cornerRadius: Radius.field).strokeBorder(Palette.input, lineWidth: Stroke.hairline) }
                     .onChange(of: name) { nameResult = nil }
                 if let nameResult {
                     Text(nameResult.text).font(Typeface.body(.sm))
@@ -98,6 +98,12 @@ public struct AccountScreen: View {
                 }
                 .buttonStyle(PrimaryButtonStyle())
                 .disabled(working || name.trimmingCharacters(in: .whitespacesAndNewlines) == member.displayName)
+            }
+
+            SettingsSection("Sign out", "Signs out of the app on this iPhone.") {
+                Button("Sign out") { Task { await account.signOut() } }
+                    .buttonStyle(OutlineButtonStyle())
+                    .disabled(working)
             }
 
             SettingsSection("Sign out everywhere", "Ends every session, including this one.") {
@@ -164,7 +170,7 @@ struct SettingsSection<Content: View>: View {
         }
         .padding(.vertical, Space.s8)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .overlay(alignment: .top) { Rectangle().fill(Palette.border).frame(height: 1) }
+        .overlay(alignment: .top) { Rectangle().fill(Palette.border).frame(height: Stroke.hairline) }
     }
 }
 
@@ -185,9 +191,9 @@ struct OutlineButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(Typeface.body(.base, weight: .semibold)).foregroundStyle(Palette.ink)
-            .padding(.horizontal, Space.s6).frame(minHeight: 48)
+            .padding(.horizontal, Space.s6).frame(minHeight: Control.regular)
             .background(configuration.isPressed ? Palette.tint : Palette.background, in: .capsule)
-            .overlay { Capsule().strokeBorder(Palette.ink, lineWidth: 1.5) }
+            .overlay { Capsule().strokeBorder(Palette.ink, lineWidth: Stroke.control) }
     }
 }
 
@@ -195,7 +201,7 @@ struct DangerButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(Typeface.body(.base, weight: .semibold)).foregroundStyle(Palette.white)
-            .padding(.horizontal, Space.s6).frame(minHeight: 48)
-            .background(configuration.isPressed ? Palette.danger.opacity(0.85) : Palette.danger, in: .capsule)
+            .padding(.horizontal, Space.s6).frame(minHeight: Control.regular)
+            .background(configuration.isPressed ? Palette.dangerPressed : Palette.danger, in: .capsule)
     }
 }

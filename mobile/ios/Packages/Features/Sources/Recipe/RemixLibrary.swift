@@ -34,7 +34,7 @@ public struct RemixLibraryScreen: View {
                     }
                 }
                 .padding(.horizontal, Space.s4).padding(.top, Space.s6).padding(.bottom, Space.s6)
-                Rectangle().fill(Palette.border).frame(height: 1)
+                Rectangle().fill(Palette.border).frame(height: Stroke.hairline)
 
                 VStack(alignment: .leading, spacing: Space.s10) {
                     if let error { Text(error).font(Typeface.body(.bodySm)).foregroundStyle(Palette.danger) }
@@ -109,20 +109,20 @@ public struct RemixLibraryScreen: View {
             VStack(alignment: .leading, spacing: Space.s6) {
                 HStack(spacing: Space.s4) {
                     Text("Start from a recipe").font(Typeface.display(.title, relativeTo: .title)).fixedSize().accessibilityAddTraits(.isHeader)
-                    Rectangle().fill(Palette.border).frame(height: 1)
+                    Rectangle().fill(Palette.border).frame(height: Stroke.hairline)
                 }
                 ForEach(index.recipes, id: \.slug) { recipe in
                     Button { open(recipe.slug, nil) } label: {
                         VStack(alignment: .leading, spacing: 0) {
                             if let image = index.images.additionalProperties[recipe.image] {
-                                RemoteImage(variants: image.sources, aspectRatio: 1.5, alt: image.alt)
+                                RemoteImage(variants: image.sources, aspectRatio: Measure.cardImage, alt: image.alt)
                             }
                             VStack(alignment: .leading, spacing: Space.s3) {
                                 Text(recipe.title).font(Typeface.display(.xl, weight: .extrabold, relativeTo: .headline))
                                 Text(recipe.facts).font(Typeface.body(.bodySm)).foregroundStyle(Palette.mutedForeground)
                                 HStack(spacing: Space.s1_5) {
                                     Text("Start from this recipe").underline()
-                                    SiteIcon.arrowRight.image.resizable().frame(width: 16, height: 16)
+                                    SiteIcon.arrowRight.image.resizable().frame(width: IconSize.sm, height: IconSize.sm)
                                 }
                                 .font(Typeface.body(.bodySm, weight: .bold)).padding(.top, Space.s3)
                             }
@@ -160,16 +160,16 @@ public struct RemixLibraryScreen: View {
                             }
                         }
                         .font(Typeface.body(.sm, weight: .bold)).underline()
-                        .frame(minHeight: 44)
+                        .frame(minHeight: Space.target)
                     }
                     .padding(.horizontal, Space.s3).padding(.vertical, Space.s2)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(confirming ? Palette.tint : .clear)
-                    .overlay(alignment: .bottom) { Rectangle().fill(Palette.border).frame(height: 1) }
+                    .overlay(alignment: .bottom) { Rectangle().fill(Palette.border).frame(height: Stroke.hairline) }
                 }
             }
             .padding(.top, Space.s6)
-            .overlay(alignment: .top) { Rectangle().fill(Palette.border).frame(height: 1) }
+            .overlay(alignment: .top) { Rectangle().fill(Palette.border).frame(height: Stroke.hairline) }
         }
     }
 

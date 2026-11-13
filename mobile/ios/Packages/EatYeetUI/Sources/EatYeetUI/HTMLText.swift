@@ -4,7 +4,9 @@ import SwiftUI
 /// Renders the small HTML subset authored content uses (strong/b, em/i, a, br, entities)
 /// as an AttributedString. Other tags are dropped, keeping their text.
 public enum InlineHTML {
-    public static func attributed(_ html: String, linkColor: Color = Palette.ink) -> AttributedString {
+    /// `boldFont` sets `<strong>` runs explicitly: a bold trait on a custom font can land on the
+    /// same face as the surrounding text (Avenir has no Bold; 600 and 700 are both Heavy).
+    public static func attributed(_ html: String, linkColor: Color = Palette.ink, boldFont: Font? = nil) -> AttributedString {
         var result = AttributedString()
         var bold = 0, italic = 0
         var link: URL?
@@ -18,6 +20,7 @@ public enum InlineHTML {
             if bold > 0 { intent.insert(.stronglyEmphasized) }
             if italic > 0 { intent.insert(.emphasized) }
             if !intent.isEmpty { run.inlinePresentationIntent = intent }
+            if bold > 0, let boldFont { run.font = boldFont }
             if let link {
                 run.link = link
                 run.underlineStyle = .single
@@ -56,6 +59,13 @@ public enum InlineHTML {
         return result
     }
 
+    /// A step's bold lead without its colon: "<strong>Simmer:</strong> Cover…" → "Simmer".
+    public static func leadingBold(_ html: String) -> String? {
+        guard let match = html.firstMatch(of: /^\s*<(?:strong|b)>([^<]+?):?\s*<\/(?:strong|b)>/) else { return nil }
+        let lead = decodeEntities(String(match.1)).trimmingCharacters(in: .whitespaces)
+        return lead.isEmpty ? nil : lead
+    }
+
     public static func plain(_ html: String) -> String { String(attributed(html).characters) }
 
     static func decodeEntities(_ value: String) -> String {
@@ -73,8 +83,12 @@ public enum InlineHTML {
     }
 }
 
+/// Authored HTML in the body face at one size, with `<strong>` in the site's bold face.
 public struct HTMLText: View {
     let html: String
-    public init(_ html: String) { self.html = html }
-    public var body: some View { Text(InlineHTML.attributed(html)) }
+    let size: TextSize
+    public init(_ html: String, size: TextSize = .base) { self.html = html; self.size = size }
+    public var body: some View {
+        Text(InlineHTML.attributed(html, boldFont: Typeface.body(size, weight: .bold))).font(Typeface.body(size))
+    }
 }

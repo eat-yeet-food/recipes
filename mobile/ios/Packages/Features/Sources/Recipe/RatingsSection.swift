@@ -26,7 +26,7 @@ struct RatingsSection: View {
                     .accessibilityAddTraits(.isHeader)
                     .fixedSize()
                 LinearGradient(colors: [Palette.brand, Palette.brandAlt], startPoint: .leading, endPoint: .trailing)
-                    .frame(height: 3).clipShape(.capsule).accessibilityHidden(true)
+                    .frame(height: Stroke.accent).clipShape(.capsule).accessibilityHidden(true)
             }
             .padding(.bottom, Space.s6)
 
@@ -73,8 +73,8 @@ struct RatingsSection: View {
                         ForEach(1...5, id: \.self) { star in
                             Button { score = star; error = ""; message = "" } label: {
                                 Image(systemName: star <= (score ?? 0) ? "star.fill" : "star")
-                                    .font(.system(size: 24, weight: .light))
-                                    .frame(width: 44, height: 44)
+                                    .font(Typeface.icon(IconSize.xl, weight: .light))
+                                    .frame(width: Space.target, height: Space.target)
                             }
                             .accessibilityLabel("\(star) \(star == 1 ? "star" : "stars")")
                             .accessibilityAddTraits(score == star ? .isSelected : [])
@@ -180,7 +180,7 @@ struct RatingsSection: View {
 
     private func reviewRow(_ review: RatingSummary.Review) -> some View {
         HStack(alignment: .top, spacing: Space.s4) {
-            Initial(name: review.name, size: 40)
+            Initial(name: review.name, size: Measure.avatar)
             VStack(alignment: .leading, spacing: 0) {
                 HStack(spacing: Space.s2) {
                     Text(review.name).font(Typeface.body(.sm, weight: .bold))
@@ -196,7 +196,7 @@ struct RatingsSection: View {
                     VStack(alignment: .leading, spacing: Space.s4) {
                         ForEach(review.replies) { reply in
                             HStack(alignment: .top, spacing: Space.s3) {
-                                Initial(name: reply.name, size: 32)
+                                Initial(name: reply.name, size: Measure.avatarSmall)
                                 VStack(alignment: .leading, spacing: Space.s1) {
                                     Text(reply.name).font(Typeface.body(.xs, weight: .bold))
                                     Text(reply.body).font(Typeface.body(.sm))
@@ -210,7 +210,7 @@ struct RatingsSection: View {
                         }
                     }
                     .padding(.leading, Space.s4).padding(.top, Space.s4)
-                    .overlay(alignment: .leading) { Rectangle().fill(Palette.brand).frame(width: 2).padding(.top, Space.s4) }
+                    .overlay(alignment: .leading) { Rectangle().fill(Palette.brand).frame(width: Stroke.rule).padding(.top, Space.s4) }
                 }
 
                 if signedIn {
@@ -242,7 +242,7 @@ struct RatingsSection: View {
             }
         }
         .padding(.bottom, Space.s5)
-        .overlay(alignment: .bottom) { Rectangle().fill(Palette.border).frame(height: 1) }
+        .overlay(alignment: .bottom) { Rectangle().fill(Palette.border).frame(height: Stroke.hairline) }
         .accessibilityElement(children: .contain)
     }
 
@@ -267,7 +267,7 @@ private struct Stars: View {
         HStack(spacing: Space.s0_5) {
             ForEach(1...5, id: \.self) { star in
                 Image(systemName: Double(star) <= value.rounded() ? "star.fill" : "star")
-                    .font(.system(size: 16, weight: .light))
+                    .font(Typeface.icon(IconSize.sm, weight: .light))
                     .foregroundStyle(Double(star) <= value.rounded() ? filled : empty)
             }
         }
@@ -281,7 +281,7 @@ private struct Initial: View {
     let size: CGFloat
     var body: some View {
         Text(String(name.first ?? "C").uppercased())
-            .font(Typeface.body(size > 36 ? .sm : .xs, weight: .bold))
+            .font(Typeface.body(size > Measure.avatarSmall ? .sm : .xs, weight: .bold))
             .frame(width: size, height: size)
             .background(Palette.brandSoft, in: .circle)
             .accessibilityHidden(true)

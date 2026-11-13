@@ -223,7 +223,7 @@ export function RecipeArticle({
         'mt-0 max-w-none bg-transparent pt-0 pb-[38px] max-[640px]:pb-[30px]',
       )}
     />
-    {cookSheet !== 'closed' && <CookMode title={page.title} blocks={recipeBlocks} open={cookSheet === 'open'} onClose={closeCookSheet} onFinish={finishCookSheet} onClassic={chooseClassic}
+    {cookSheet !== 'closed' && <CookMode title={page.title} href={`/recipes/${page.slug}`} blocks={recipeBlocks} open={cookSheet === 'open'} onClose={closeCookSheet} onFinish={finishCookSheet} onClassic={chooseClassic}
       media={photo ? <ResponsiveImage src={photo} sizes="(max-width: 1024px) 100vw, 45vw" loading="lazy" alt="" /> : undefined}
       facts={recipeFactItems(page).filter(([label]) => label !== 'Yield' && label !== 'Cook Time').map(([label, value]) => `${label.replace(' Time', '')} ${value}`).join(' · ')} />}
     {rating && <div className="mx-auto -mt-8 max-w-[1120px] px-7 pb-12 max-[640px]:px-[18px] print:hidden"><div className="max-w-[var(--layout-recipe-copy)]">{rating}</div></div>}

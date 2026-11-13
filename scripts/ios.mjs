@@ -10,6 +10,7 @@
 //   pnpm ios device [url]            build, install and launch on the phone (USB or same Wi-Fi)
 //   pnpm ios record <seconds> [url]  record a Simulator video
 //   pnpm ios resign [--force]        reinstall on the phone when the free profile has < 2 days left
+//   pnpm ios tokens                  check that views use EatYeetUI tokens only (also runs before builds)
 //   pnpm ios team                    write Config/Signing.local.xcconfig from Xcode's Personal Team
 import { execFileSync, spawn, spawnSync } from 'node:child_process'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
@@ -67,6 +68,8 @@ function ensureProject() {
 }
 
 function build({ forDevice = false } = {}) {
+  // Views use EatYeetUI tokens only; a raw size, color or duration fails the build.
+  run(process.execPath, [join(root, 'scripts/ios-tokens.mjs')], { quiet: true })
   ensureProject()
   // The OpenAPI generator is a build plugin; trust it non-interactively.
   const common = ['-project', 'EatYeet.xcodeproj', '-scheme', 'EatYeet', '-derivedDataPath', derived, '-skipPackagePluginValidation']
@@ -214,6 +217,10 @@ switch (command) {
     finish(true, { artifact: rebuilt, daysLeft: profileDaysLeft(rebuilt) })
     break
   }
+  case 'tokens':
+    run(process.execPath, [join(root, 'scripts/ios-tokens.mjs')])
+    finish(true, {})
+    break
   case 'team': {
     const raw = run('defaults', ['read', 'com.apple.dt.Xcode', 'IDEProvisioningTeamByIdentifier'], { quiet: true, allowFail: true }).stdout ?? ''
     const team = raw.match(/teamID = ([A-Z0-9]{10});/)?.[1]

@@ -11,6 +11,7 @@ import { Wordmark, type WordmarkCopy } from './wordmark'
 import { Button } from '@eat-yeet/l5-ui-primitives/primitives/button'
 import { cn } from '@eat-yeet/l0-foundation/utils'
 import { AccountMenuRow, AccountNav } from '../account/account-nav'
+import { TimerNav } from './timer-nav'
 
 /** Routes with a hero, where the nav starts transparent. */
 function routeHasHero(pathname: string): boolean {
@@ -94,6 +95,7 @@ export function Nav({
           </Link>
         </div>
         <div className="ml-auto flex items-center gap-3">
+          <TimerNav tone={heroVisible ? 'hero' : 'page'} />
           <div className="hidden md:flex items-center gap-6">
             {navigation.filter(item=>item.desktop!==false).map(item=><Link key={item.href} to={item.href} className={linkClass}>{item.label}</Link>)}
           </div>
