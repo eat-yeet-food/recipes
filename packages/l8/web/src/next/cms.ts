@@ -48,6 +48,7 @@ export function mcpSettings() {
     ownerEmail: String(vars.OWNER_EMAIL ?? '').trim().toLowerCase(),
     pexelsKey: vars.PEXELS_API_KEY ? String(vars.PEXELS_API_KEY) : '',
     unsplashKey: vars.UNSPLASH_ACCESS_KEY ? String(vars.UNSPLASH_ACCESS_KEY) : '',
+    openaiChallenge: vars.OPENAI_APPS_CHALLENGE ? String(vars.OPENAI_APPS_CHALLENGE).trim() : '',
     images: env.IMAGES ?? null,
     media: env.R2 ?? null,
     operations: env.OPERATIONS ?? null,

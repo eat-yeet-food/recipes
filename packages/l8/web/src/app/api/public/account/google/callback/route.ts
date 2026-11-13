@@ -2,7 +2,7 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { createNativeGrant, purgeExpiredNativeGrants, upsertGoogleMember } from '@eat-yeet/l4-content-cms/members'
 import { createMcpCode } from '@eat-yeet/l4-content-cms/mcp-auth'
-import { cms, mcpSettings, runtimeSettings } from '../../../../../../next/cms'
+import { cms, runtimeSettings } from '../../../../../../next/cms'
 import { clearOAuthCookie, googleProfile, nativeRedirect, readOAuthCookie, redirectTo, startSession } from '../../../../../../next/account'
 
 export const dynamic = 'force-dynamic'
@@ -25,9 +25,7 @@ export async function GET(request: NextRequest) {
     const member = profile && await upsertGoogleMember(await cms(), profile)
     if (!member) return failed()
     if (saved.mcp) {
-      // Only the site owner may connect a chat client.
-      const owner = mcpSettings().ownerEmail
-      if (!owner || member.email.toLowerCase() !== owner) return toClient({ error: 'access_denied', error_description: 'Only the site owner can connect.' })
+      // Any member may connect; the MCP endpoint decides which tools they get.
       return toClient({ code: await createMcpCode(await cms(), { ...saved.mcp, memberId: member.id }) })
     }
     if (saved.native) {

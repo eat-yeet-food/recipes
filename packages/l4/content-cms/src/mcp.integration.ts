@@ -6,7 +6,8 @@ import { allowedRedirect, createMcpCode, mcpTokenMember, redeemMcpCode, refreshM
 import { createTrialRecipe, deleteTrialRecipe, readTrialRecipe } from './trial'
 
 /**
- * The MCP connector's OAuth service and trial content against the isolated app.
+ * The MCP connector's OAuth service, member/owner tool scoping and trial content
+ * against the isolated app.
  * Google is outside the test; the code is issued the way the callback issues it.
  * `sync` re-runs Git content sync so trial rows are shown to survive it.
  */
@@ -39,10 +40,18 @@ export async function verifyMcp(payload: Payload, origin: string, sync: () => Pr
   assert.equal(issued.body.token_type, 'Bearer')
   assert.equal((await mcpTokenMember(payload, issued.body.access_token))?.email, 'mcp-owner@local.example')
 
-  // A member who isn't the owner holds a valid token but the endpoint refuses it.
+  // Any member can connect; only the owner's server includes the recipe-writing tools.
   const tools = await fetch(`${origin}/api/public/mcp`, { method: 'POST', headers: { Authorization: `Bearer ${issued.body.access_token}`,
     'Content-Type': 'application/json', Accept: 'application/json, text/event-stream' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/list' }) })
-  assert.equal(tools.status, process.env.OWNER_EMAIL?.toLowerCase() === 'mcp-owner@local.example' ? 200 : 401)
+  assert.equal(tools.status, 200)
+  const names = ((await tools.json()) as any).result.tools.map((tool: any) => tool.name)
+  for (const name of ['search_recipes', 'get_recipe', 'rate_recipe', 'create_remix']) assert.ok(names.includes(name), name)
+  for (const name of ['create_recipe', 'update_recipe', 'delete_recipe', 'upload_image', 'import_stock_photo', 'get_style_guide'])
+    assert.ok(!names.includes(name), `members don't get ${name}`)
+  const forbidden = await fetch(`${origin}/api/public/mcp`, { method: 'POST', headers: { Authorization: `Bearer ${issued.body.access_token}`,
+    'Content-Type': 'application/json', Accept: 'application/json, text/event-stream' },
+    body: JSON.stringify({ jsonrpc: '2.0', id: 2, method: 'tools/call', params: { name: 'delete_recipe', arguments: { slug: 'anything' } } }) })
+  assert.match(JSON.stringify(await forbidden.json()), /not found|isError|-32602/i, 'calling an owner tool as a member fails')
 
   // Refresh rotates: the old refresh token stops working, the old access token is revoked.
   const refreshed = await token({ grant_type: 'refresh_token', refresh_token: issued.body.refresh_token, client_id: client.clientId })

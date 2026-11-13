@@ -4,9 +4,10 @@ import { mcpTokenMember } from '@eat-yeet/l4-content-cms/mcp-auth'
 import { cms, mcpSettings, runtimeSettings } from '../cms'
 
 /**
- * OAuth discovery and bearer checks for the owner's MCP connector. The site is
- * its own authorization server: chat clients register, the owner signs in with
- * Google, and the client receives tokens it sends to `/api/public/mcp`.
+ * OAuth discovery and bearer checks for the MCP connector (the Eat / Yeet ChatGPT
+ * app). The site is its own authorization server: chat clients register, the
+ * member signs in with Google, and the client receives tokens it sends to
+ * `/api/public/mcp`.
  */
 export const MCP_PATH = '/api/public/mcp'
 export const OAUTH_PATH = '/api/public/oauth'
@@ -54,15 +55,17 @@ export function unauthorized(description = 'Sign in to Eat / Yeet to use this co
     'WWW-Authenticate': `Bearer resource_metadata="${resourceMetadata}", error="invalid_token", error_description="${description}"` })
 }
 
-export type McpOwner = { id: string; email: string; displayName: string }
+/** A signed-in member using the connector. `owner` (OWNER_EMAIL) also gets the recipe-writing tools. */
+export type McpMember = { id: string; email: string; displayName: string; owner: boolean }
 
-/** The owner behind a bearer token, or null. Tokens issued to anyone else never work. */
-export async function mcpOwner(request: NextRequest | Request): Promise<McpOwner | null> {
+/** The member behind a bearer token, or null. */
+export async function mcpMember(request: NextRequest | Request): Promise<McpMember | null> {
   const match = request.headers.get('authorization')?.match(/^Bearer ([A-Za-z0-9_-]{43})$/)
   if (!match) return null
   const member = await mcpTokenMember(await cms(), match[1])
+  if (!member) return null
   const owner = mcpSettings().ownerEmail
-  return member && owner && member.email === owner ? member : null
+  return { ...member, owner: Boolean(owner) && member.email === owner }
 }
 
 /** Token and register endpoints accept form or JSON bodies, small. */

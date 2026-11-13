@@ -36,7 +36,7 @@ const authorize = (params) => fetch(`${as.authorization_endpoint}?${new URLSearc
 const base = { response_type: 'code', client_id: client.client_id, redirect_uri: 'https://chatgpt.com/connector_platform_oauth_redirect', code_challenge: 'a'.repeat(43), code_challenge_method: 'S256', state: 'xyz' }
 assert.equal((await authorize({ ...base, redirect_uri: 'https://chatgpt.com/other' })).status, 400)
 const plain = await authorize({ ...base, code_challenge_method: 'plain' })
-assert.match(plain.headers.get('location'), /^https:\/\/chatgpt\.com\/connector_platform_oauth_redirect\?error=invalid_request/)
+assert.match(plain.headers.get('location'), /^https:\/\/chatgpt\.com\/connector_platform_oauth_redirect\?error=invalid_request.*&iss=/)
 const started = await authorize(base)
 assert.ok([302, 303, 307].includes(started.status), `redirect, got ${started.status}`)
 if (started.headers.get('location').includes('error=temporarily_unavailable')) console.log('  (Google sign-in isn’t configured here; the client is told so)')
@@ -144,6 +144,8 @@ const start = await call('get_remix_recipe', { recipeSlug: remixable[0].slug })
 assert.equal((await call('preview_remix', { recipeSlug: start.slug, state: start.defaultState })).valid, true)
 const remix = (await call('create_remix', { recipeSlug: start.slug, name: `MCP test ${slug}`, state: start.defaultState })).remix
 assert.ok((await call('list_remixes')).remixes.some((r) => r.id === remix.id))
+assert.equal(remix.url, `${origin}/remix/${start.slug}/${remix.id}/bake`)
+assert.equal((await fetch(remix.url)).status, 200, 'remix link opens')
 const saved = (await call('save_remix', { id: remix.id, baseRevision: remix.revision, name: `MCP test ${slug} renamed`, state: start.defaultState, notes: 'note' })).remix
 assert.equal(saved.name, `MCP test ${slug} renamed`)
 assert.match(await refused('save_remix', { id: remix.id, baseRevision: remix.revision, name: 'x', state: start.defaultState }), /changed since/)

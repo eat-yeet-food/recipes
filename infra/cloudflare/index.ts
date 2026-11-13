@@ -100,7 +100,7 @@ if (environment === 'bootstrap') {
   const content = release ? readFileSync(release.bundleFile) : Buffer.from('export default { fetch() { return new Response("Not initialized", {status:503,headers:{"Cache-Control":"no-store"}}) } }')
   if (release && hash(content) !== release.bundleHash) throw new Error('Release bundle checksum differs')
   if (release) assertDeploymentManifest(release.assetsDirectory, release.deploymentManifest)
-  const accountSecretNames = ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'PEXELS_API_KEY', 'UNSPLASH_ACCESS_KEY']
+  const accountSecretNames = ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'PEXELS_API_KEY', 'UNSPLASH_ACCESS_KEY', 'OPENAI_APPS_CHALLENGE']
   const variables = { DEPLOY_ENV: environment, SITE_URL: settings.origin, MEDIA_ORIGIN: settings.mediaOrigin,
     OWNER_EMAIL: settings.ownerEmail, ACCESS_TEAM_DOMAIN: settings.accessTeamDomain,
     ...(deployToken ? { ACCESS_SERVICE_CLIENT_ID: settings.accessServiceClientId } : {}),

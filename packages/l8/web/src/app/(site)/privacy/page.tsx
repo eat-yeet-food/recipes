@@ -8,7 +8,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function Page() {
-  return <LegalPage title="Privacy Policy" updated="September 27, 2026"
+  return <LegalPage title="Privacy Policy" updated="November 13, 2026"
     intro={<p>Eat / Yeet is a personal recipe site. This policy explains what we collect when you use it, why, and the choices you have. Reading recipes requires no account and we don’t track you across the web.</p>}
     sections={[
       { heading: 'What we collect', body: <>
@@ -19,6 +19,7 @@ export default function Page() {
           <li>The public name you choose.</li>
           <li>What you create: ratings, reviews, replies, and remixes with their change history.</li>
           <li>Security records: when your sign-in sessions were created or ended.</li>
+          <li>If you connect Eat / Yeet to ChatGPT or another AI assistant: which assistant you connected and when, and access tokens for that connection (stored only in scrambled, hashed form).</li>
         </ul>
         <p><strong>In your browser:</strong> one essential sign-in cookie, used only by our account service, and local storage that remembers whether you’ve signed in. These are needed for the features you use, so we don’t ask for cookie consent.</p>
       </> },
@@ -28,6 +29,10 @@ export default function Page() {
         <li>To keep your remixes and their history so they’re available on your devices.</li>
         <li>To prevent abuse, such as limiting repeated sign-in attempts.</li>
       </ul> },
+      { heading: 'Using Eat / Yeet in ChatGPT and other assistants', body: <>
+        <p>You can connect Eat / Yeet to ChatGPT or another AI assistant. You sign in with Google on our site, and the assistant then acts for you through our app: it can search and read recipes, show and change your ratings, reviews, replies and remixes, and nothing else.</p>
+        <p>What you ask the assistant, and what we send back to it (recipes and your own account data you asked for), is handled by that assistant under its own privacy policy. We don’t receive your conversations, only the requests the assistant makes to our app. You can disconnect in the assistant’s settings at any time; connection tokens expire within 30 days, and deleting your account removes them immediately.</p>
+      </> },
       { heading: 'What we never do', body: <p>We don’t sell or rent your personal information, share it for advertising, or send you email.</p> },
       { heading: 'Who processes data for us', body: <>
         <p>We rely on a few service providers, who process data on our behalf only to provide their service:</p>
@@ -37,7 +42,7 @@ export default function Page() {
         </ul>
         <p>We may disclose information if required by law or to protect the safety of our users or the site.</p>
       </> },
-      { heading: 'How long we keep it', body: <p>We keep your account data until you delete your account. Sign-in sessions expire after 30 days. When you delete your account, we delete your profile, ratings, reviews, replies and remixes right away; copies may remain in encrypted backups for up to 30 days before they’re overwritten.</p> },
+      { heading: 'How long we keep it', body: <p>We keep your account data until you delete your account. Sign-in sessions and assistant connections expire after 30 days. When you delete your account, we delete your profile, ratings, reviews, replies and remixes right away; copies may remain in encrypted backups for up to 30 days before they’re overwritten.</p> },
       { heading: 'Your choices and rights', body: <>
         <ul>
           <li>Change your public name or sign out everywhere in <a href="/account/settings">Account settings</a>.</li>

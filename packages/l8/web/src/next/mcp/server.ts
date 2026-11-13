@@ -16,14 +16,15 @@ import { cms, runtimeSettings, siteData } from '../cms'
 import { appRemixIndex, appRemixRecipe, appRemixResolve } from '../app-api'
 import { refreshPublicCaches } from './freshness'
 import { ImageError, imageFromBase64, imageFromUrl, imageRef, importStockPhoto, searchStockPhotos, stockProviders } from './images'
-import type { McpOwner } from './oauth'
+import type { McpMember } from './oauth'
 import { STYLE_GUIDE, styleExamples } from './style-guide'
 
 /**
- * The owner's MCP tools. Git recipes are read-only here; trial recipes (this
- * connector's own) can be created, edited, published and deleted. Remix and
- * reviews act as the owner's member account, through the same services the
- * site uses. Every tool is a thin adapter: validation lives in those services.
+ * The Eat / Yeet MCP tools. Every signed-in member can read recipes, rate and
+ * review, and keep their own Remix formulas, through the same services the site
+ * uses. Only the owner's server also registers the recipe-writing tools: trial
+ * recipes (this connector's own) can be created, edited, published and deleted;
+ * Git recipes stay read-only. Every tool is a thin adapter: validation lives in those services.
  */
 type Result = { content: { type: 'text'; text: string }[]; structuredContent?: Record<string, unknown>; isError?: boolean }
 const ok = (summary: string, data: Record<string, unknown>): Result => ({ content: [{ type: 'text', text: `${summary}\n\n${JSON.stringify(data, null, 2)}` }], structuredContent: data })
@@ -134,23 +135,30 @@ const kitchenMessage: Record<KitchenFailure['error'], string> = {
   limit: 'You’ve reached the remix limit.',
 }
 
-export function createMcpServer(owner: McpOwner) {
+export function createMcpServer(member: McpMember) {
   const server = new McpServer({ name: 'eat-yeet', title: 'Eat / Yeet', version: '1.0.0' }, {
     instructions: [
-      'Eat / Yeet is a recipe site (eatyeet.com). Git-authored recipes are read-only here.',
-      'Recipes you create with this connector are "trial" recipes: public when published, marked Trial, never indexed by search engines.',
-      'Before writing or editing a recipe, call get_style_guide and follow it: recipes must read like the published ones.',
-      'Photos: ask the owner for their own photo of the finished dish first. Offer to clean up the background for an elegant food-blog look while keeping the food exactly as photographed, show the original and the edit side by side, and upload (upload_image) only after the owner approves. Stock photos (search_stock_photos → import_stock_photo) are a fallback for when the owner has no photo.',
-      'To post: get_style_guide → photo (upload_image, or stock as fallback) → create_recipe with the returned `image` and publish: true.',
-      'Write ingredients with the amount first, and give each ingredient an id so steps can list the ingredients they use.',
-      'The description is the only intro text (it sits under the title). Don’t add text above the recipe; put a genuine story, if there is one, in extraBlocks after it.',
-      'Use list_categories to pick course/cuisine values the site already uses.',
+      'Eat / Yeet (eatyeet.com) is a recipe site: practical, tested recipes for home cooks, plus Remix, a calculator for changing dough formulas.',
+      'Use search_recipes and get_recipe to find and read recipes; link people to the recipe url.',
+      'Signed-in people can rate and review recipes and save their own Remix formulas (list_remix_recipes → get_remix_recipe → preview_remix → create_remix).',
+      ...(member.owner ? [
+        'You are working for the site owner, who can also write recipes. Recipes created here are "trial" recipes: public when published, marked Trial, never indexed by search engines. Git-authored recipes are read-only.',
+        'Before writing or editing a recipe, call get_style_guide and follow it: recipes must read like the published ones.',
+        'Photos: ask the owner for their own photo of the finished dish first. Offer to clean up the background for an elegant food-blog look while keeping the food exactly as photographed, show the original and the edit side by side, and upload (upload_image) only after the owner approves. Stock photos (search_stock_photos → import_stock_photo) are a fallback for when the owner has no photo.',
+        'To post: get_style_guide → photo (upload_image, or stock as fallback) → create_recipe with the returned `image` and publish: true.',
+        'The description is the only intro text (it sits under the title). Don’t add text above the recipe; put a genuine story, if there is one, in extraBlocks after it.',
+        'Use list_categories to pick course/cuisine values the site already uses.',
+      ] : []),
     ].join('\n'),
   })
 
+  // Recipe writing and photos are the owner's alone: other members' servers never register these tools.
+  const ownerTool = (member.owner ? server.registerTool.bind(server) : () => undefined) as typeof server.registerTool
+  const ownerPrompt = (member.owner ? server.registerPrompt.bind(server) : () => undefined) as typeof server.registerPrompt
+
   // --- Discover -------------------------------------------------------------------
 
-  server.registerTool('get_style_guide', {
+  ownerTool('get_style_guide', {
     title: 'Get the recipe style guide',
     description: 'How Eat / Yeet recipes are written (voice, ingredient and step format, photos), with two published recipes as examples in create_recipe’s shape. Read it before writing or editing a recipe.',
     inputSchema: {},
@@ -159,7 +167,7 @@ export function createMcpServer(owner: McpOwner) {
     content: [{ type: 'text', text: STYLE_GUIDE }, { type: 'text', text: `Examples (published recipes, in create_recipe's shape):\n${JSON.stringify(await styleExamples(), null, 2)}` }],
   }))
 
-  server.registerPrompt('write_recipe', {
+  ownerPrompt('write_recipe', {
     title: 'Write a recipe for Eat / Yeet',
     description: 'Turn a dish (and your photo) into a recipe in the site’s style.',
     argsSchema: { dish: z.string().describe('What to make, or your notes for it.') },
@@ -210,7 +218,7 @@ export function createMcpServer(owner: McpOwner) {
     return ok('Categories and the values recipes use.', { categories, facets, recipeCategories: ['savory', 'sweet'] })
   })
 
-  server.registerTool('list_trial_recipes', {
+  ownerTool('list_trial_recipes', {
     title: 'List my trial recipes',
     description: 'Every recipe written through this connector, drafts included, newest first.',
     inputSchema: {},
@@ -222,7 +230,7 @@ export function createMcpServer(owner: McpOwner) {
 
   // --- Write recipes ----------------------------------------------------------------
 
-  server.registerTool('create_recipe', {
+  ownerTool('create_recipe', {
     title: 'Create a recipe',
     description: 'Create a trial recipe written to the site’s style (call get_style_guide first). Needs a hero image from upload_image (the owner’s own photo, preferred) or import_stock_photo. Set publish: true to make it public now.',
     inputSchema: { ...recipeShape, slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).optional().describe('URL slug; defaults to one made from the title.'), publish: z.boolean().default(false) },
@@ -242,7 +250,7 @@ export function createMcpServer(owner: McpOwner) {
     return published(publish ? 'Published' : 'Saved a draft of', result.ok)
   })
 
-  server.registerTool('update_recipe', {
+  ownerTool('update_recipe', {
     title: 'Update a recipe',
     description: 'Replace a trial recipe with a full new version. Pass the revision from get_recipe; if someone saved since, nothing is overwritten. The slug stays the same.',
     inputSchema: { ...recipeShape, slug: z.string(), expectedRevision: z.number().int().min(1) },
@@ -262,7 +270,7 @@ export function createMcpServer(owner: McpOwner) {
   })
 
   for (const [name, status, title] of [['publish_recipe', 'published', 'Publish a recipe'], ['unpublish_recipe', 'draft', 'Unpublish a recipe']] as const)
-    server.registerTool(name, {
+    ownerTool(name, {
       title,
       description: status === 'published' ? 'Make a trial recipe public on the site and in the app.' : 'Take a trial recipe off the site (it stays as a draft).',
       inputSchema: { slug: z.string() },
@@ -273,7 +281,7 @@ export function createMcpServer(owner: McpOwner) {
       return published(status === 'published' ? 'Published' : 'Unpublished', result.ok)
     })
 
-  server.registerTool('delete_recipe', {
+  ownerTool('delete_recipe', {
     title: 'Delete a recipe',
     description: 'Delete a trial recipe permanently. Git recipes can’t be deleted here.',
     inputSchema: { slug: z.string() },
@@ -297,7 +305,7 @@ export function createMcpServer(owner: McpOwner) {
     return fail('The image couldn’t be processed. Try another photo.')
   }
 
-  server.registerTool('search_stock_photos', {
+  ownerTool('search_stock_photos', {
     title: 'Search stock photos',
     description: `Fallback only: find free stock food photos (${stockProviders().join(' and ') || 'no provider configured'}) when the owner has no photo of their own. Ask for their photo first. Pass a result’s provider and id to import_stock_photo.`,
     inputSchema: { query: z.string().min(1).max(100), provider: z.enum(['pexels', 'unsplash']).optional(), page: z.number().int().min(1).default(1), perPage: z.number().int().min(1).max(30).default(10) },
@@ -309,7 +317,7 @@ export function createMcpServer(owner: McpOwner) {
     } catch (error) { return imageFailure(error) }
   })
 
-  server.registerTool('import_stock_photo', {
+  ownerTool('import_stock_photo', {
     title: 'Import a stock photo',
     description: 'Fallback only (the owner has no photo): copy a Pexels or Unsplash photo onto the site (all sizes) and return its `image` reference for create_recipe or update_recipe. Importing the same photo again returns the same reference.',
     inputSchema: { provider: z.enum(['pexels', 'unsplash']), id: z.string(), alt: z.string().max(300).default('').describe('What the photo shows, for people who can’t see it. Defaults to the provider’s description.') },
@@ -319,7 +327,7 @@ export function createMcpServer(owner: McpOwner) {
     catch (error) { return imageFailure(error) }
   })
 
-  server.registerTool('upload_image', {
+  ownerTool('upload_image', {
     title: 'Upload an image',
     description: 'Put the owner’s own photo on the site (all sizes) and return its `image` reference. The preferred hero. If you cleaned up the background, upload only the version the owner approved after seeing it next to the original, with the food unchanged. Pass the chat file as `photo`, or an https `url`, or `base64` (JPEG, PNG, WebP, AVIF or HEIC, at least 640px wide, up to 20 MB).',
     inputSchema: {
@@ -337,7 +345,8 @@ export function createMcpServer(owner: McpOwner) {
 
   // --- Remix ------------------------------------------------------------------------
 
-  const formulaUrl = (id: string) => url(`/remix/${id}/bake`)
+  // The bake sheet, like the site's kitchenPath(slug, id, true).
+  const formulaUrl = (recipeSlug: string, id: string) => url(`/remix/${recipeSlug}/${id}/bake`)
 
   server.registerTool('list_remix_recipes', {
     title: 'List Remix recipes',
@@ -378,8 +387,8 @@ export function createMcpServer(owner: McpOwner) {
     inputSchema: {},
     annotations: read,
   }, async () => {
-    const { formulas, deleted } = await listKitchenFormulas(await cms(), owner.id)
-    const view = (f: any) => ({ id: f.id, name: f.name, recipeSlug: f.recipeSlug, revision: f.revision, updatedAt: f.updatedAt, deletedAt: f.deletedAt, url: formulaUrl(f.id) })
+    const { formulas, deleted } = await listKitchenFormulas(await cms(), member.id)
+    const view = (f: any) => ({ id: f.id, name: f.name, recipeSlug: f.recipeSlug, revision: f.revision, updatedAt: f.updatedAt, deletedAt: f.deletedAt, url: formulaUrl(f.recipeSlug, f.id) })
     return ok(`${formulas.length} remix${formulas.length === 1 ? '' : 'es'}${deleted.length ? `, ${deleted.length} recently deleted` : ''}.`, { remixes: formulas.map(view), recentlyDeleted: deleted.map(view) })
   })
 
@@ -387,43 +396,43 @@ export function createMcpServer(owner: McpOwner) {
     const result = await run()
     if ('error' in result) return fail(kitchenMessage[result.error as KitchenFailure['error']])
     const formula = result.ok
-    return ok(summary(formula), { remix: { ...formula, url: formula.id ? formulaUrl(formula.id) : undefined } })
+    return ok(summary(formula), { remix: { ...formula, url: formula.id ? formulaUrl(formula.recipeSlug, formula.id) : undefined } })
   }
 
   server.registerTool('get_remix', {
     title: 'Get a remix', description: 'A remix with its state, notes, revision and History.',
     inputSchema: { id: z.string() }, annotations: read,
-  }, ({ id }) => kitchen((f) => `“${f.name}”, revision ${f.revision}.`, async () => readKitchenFormula(await cms(), owner.id, id)))
+  }, ({ id }) => kitchen((f) => `“${f.name}”, revision ${f.revision}.`, async () => readKitchenFormula(await cms(), member.id, id)))
 
   server.registerTool('create_remix', {
     title: 'Save a remix', description: 'Save a new remix of a recipe from a state (start from get_remix_recipe’s defaultState).',
     inputSchema: { recipeSlug: z.string(), name: z.string().min(1).max(80), state: z.record(z.string(), z.unknown()), notes: z.string().max(2000).default('') }, annotations: write,
-  }, ({ recipeSlug, name, state, notes }) => kitchen((f) => `Saved “${f.name}”.`, async () => createKitchenFormula(await cms(), owner.id, { recipeSlug, name, state, notes })))
+  }, ({ recipeSlug, name, state, notes }) => kitchen((f) => `Saved “${f.name}”.`, async () => createKitchenFormula(await cms(), member.id, { recipeSlug, name, state, notes })))
 
   server.registerTool('save_remix', {
     title: 'Update a remix', description: 'Save new values, name or notes. Pass the revision from get_remix; a newer revision means it changed elsewhere and nothing is overwritten.',
     inputSchema: { id: z.string(), baseRevision: z.number().int(), name: z.string().min(1).max(80), state: z.record(z.string(), z.unknown()), notes: z.string().max(2000).default('') }, annotations: write,
-  }, ({ id, baseRevision, name, state, notes }) => kitchen((f) => `Saved “${f.name}” (revision ${f.revision}).`, async () => saveKitchenFormula(await cms(), owner.id, id, { baseRevision, name, state, notes })))
+  }, ({ id, baseRevision, name, state, notes }) => kitchen((f) => `Saved “${f.name}” (revision ${f.revision}).`, async () => saveKitchenFormula(await cms(), member.id, id, { baseRevision, name, state, notes })))
 
   server.registerTool('duplicate_remix', {
     title: 'Duplicate a remix', description: 'Copy a remix under a new name (or “<name> copy”).',
     inputSchema: { id: z.string(), name: z.string().max(80).optional() }, annotations: write,
-  }, ({ id, name }) => kitchen((f) => `Duplicated as “${f.name}”.`, async () => duplicateKitchenFormula(await cms(), owner.id, id, name)))
+  }, ({ id, name }) => kitchen((f) => `Duplicated as “${f.name}”.`, async () => duplicateKitchenFormula(await cms(), member.id, id, name)))
 
   server.registerTool('restore_remix_revision', {
     title: 'Restore a remix version', description: 'Restore a version from the remix’s History (as a new version).',
     inputSchema: { id: z.string(), revisionId: z.string() }, annotations: write,
-  }, ({ id, revisionId }) => kitchen((f) => `Restored “${f.name}”.`, async () => restoreKitchenRevision(await cms(), owner.id, id, revisionId)))
+  }, ({ id, revisionId }) => kitchen((f) => `Restored “${f.name}”.`, async () => restoreKitchenRevision(await cms(), member.id, id, revisionId)))
 
   server.registerTool('delete_remix', {
     title: 'Delete a remix', description: 'Move a remix to Recently deleted (kept 30 days; undelete_remix brings it back).',
     inputSchema: { id: z.string() }, annotations: destroy,
-  }, ({ id }) => kitchen((f) => `Deleted “${f.name}”. It can be restored for 30 days.`, async () => deleteKitchenFormula(await cms(), owner.id, id)))
+  }, ({ id }) => kitchen((f) => `Deleted “${f.name}”. It can be restored for 30 days.`, async () => deleteKitchenFormula(await cms(), member.id, id)))
 
   server.registerTool('undelete_remix', {
     title: 'Undelete a remix', description: 'Bring back a recently deleted remix.',
     inputSchema: { id: z.string() }, annotations: write,
-  }, ({ id }) => kitchen((f) => `Restored “${f.name}”.`, async () => undeleteKitchenFormula(await cms(), owner.id, id)))
+  }, ({ id }) => kitchen((f) => `Restored “${f.name}”.`, async () => undeleteKitchenFormula(await cms(), member.id, id)))
 
   // --- Reviews ------------------------------------------------------------------------
 
@@ -438,27 +447,27 @@ export function createMcpServer(owner: McpOwner) {
   server.registerTool('get_ratings', {
     title: 'Get ratings and reviews', description: 'A recipe’s ratings, reviews and replies. `own` marks yours.',
     inputSchema: { slug: z.string() }, annotations: read,
-  }, ({ slug }) => ratings(slug, '', async () => recipeRatings(await cms(), slug, owner.id)))
+  }, ({ slug }) => ratings(slug, '', async () => recipeRatings(await cms(), slug, member.id)))
 
   server.registerTool('rate_recipe', {
     title: 'Rate a recipe', description: 'Rate 1–5 with an optional review (one per recipe; rating again replaces it).',
     inputSchema: { slug: z.string(), score: z.number().int().min(1).max(5), review: z.string().max(2000).default('') }, annotations: write,
-  }, ({ slug, score, review }) => ratings(slug, 'Saved your rating.', async () => saveRecipeRating(await cms(), slug, owner.id, { score, reviewText: review })))
+  }, ({ slug, score, review }) => ratings(slug, 'Saved your rating.', async () => saveRecipeRating(await cms(), slug, member.id, { score, reviewText: review })))
 
   server.registerTool('delete_rating', {
     title: 'Delete my rating', description: 'Remove your rating and its review thread.',
     inputSchema: { slug: z.string() }, annotations: destroy,
-  }, ({ slug }) => ratings(slug, 'Deleted your rating.', async () => deleteRecipeRating(await cms(), slug, owner.id)))
+  }, ({ slug }) => ratings(slug, 'Deleted your rating.', async () => deleteRecipeRating(await cms(), slug, member.id)))
 
   server.registerTool('reply_to_review', {
     title: 'Reply to a review', description: 'Reply to a review (by its id from get_ratings).',
     inputSchema: { slug: z.string(), reviewId: z.string(), reply: z.string().min(1).max(1000) }, annotations: write,
-  }, ({ slug, reviewId, reply }) => ratings(slug, 'Replied.', async () => replyToRecipeRating(await cms(), slug, owner.id, { reviewId, body: reply })))
+  }, ({ slug, reviewId, reply }) => ratings(slug, 'Replied.', async () => replyToRecipeRating(await cms(), slug, member.id, { reviewId, body: reply })))
 
   server.registerTool('delete_reply', {
     title: 'Delete my reply', description: 'Remove one of your replies.',
     inputSchema: { slug: z.string(), replyId: z.string() }, annotations: destroy,
-  }, ({ slug, replyId }) => ratings(slug, 'Deleted your reply.', async () => deleteRecipeReply(await cms(), slug, owner.id, replyId)))
+  }, ({ slug, replyId }) => ratings(slug, 'Deleted your reply.', async () => deleteRecipeReply(await cms(), slug, member.id, replyId)))
 
   return server
 }

@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { readMcpClient, validChallenge } from '@eat-yeet/l4-content-cms/mcp-auth'
 import { cms } from '../../../../../next/cms'
 import { failure, googleAuthorization, rateLimited } from '../../../../../next/account'
+import { origin } from '../../../../../next/mcp/oauth'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,7 +19,8 @@ export async function GET(request: NextRequest) {
   if (!client || !client.redirectUris.includes(redirectUri)) return failure('Unknown connector or callback. Remove the connector and add it again.', 400)
   const back = (error: string, description: string) => {
     const url = new URL(redirectUri)
-    url.search = new URLSearchParams({ error, error_description: description, ...(params.get('state') ? { state: params.get('state')! } : {}) }).toString()
+    // RFC 9207: every response names the issuer (ChatGPT's stable callback requires it).
+    url.search = new URLSearchParams({ error, error_description: description, ...(params.get('state') ? { state: params.get('state')! } : {}), iss: origin() }).toString()
     return NextResponse.redirect(url, { status: 303, headers: { 'Cache-Control': 'private, no-store' } })
   }
   if (params.get('response_type') !== 'code') return back('unsupported_response_type', 'Only the code flow is supported.')

@@ -33,6 +33,16 @@ Recipes are authored as YAML in Git and reach the site only through `content:syn
 - **An external auth provider** (yeet used WorkOS AuthKit). It adds another vendor; Google sign-in and the member service already exist.
 - **Draft-only trial recipes.** The owner chose public visibility to judge the real experience.
 
+## Update 2026-11-13: public ChatGPT app
+
+The owner chose a public listing in ChatGPT's app directory over a private connector, so anyone can find it and connect with one click. Since then:
+- Any Google-signed-in member can connect. Members get reading, ratings and reviews, and their own Remix formulas. Recipe writing and photos stay owner-only, enforced by never registering those tools on a non-owner's server.
+- Reviewers use a dedicated Google account with a password and no 2-step verification. Email/password sign-in stays forbidden.
+- The privacy policy and terms cover AI-assistant connections. OpenAI's domain check is served from `OPENAI_APPS_CHALLENGE`.
+- The submission kit is [`chatgpt-submission.md`](chatgpt-submission.md).
+
+The "Ending the trial" options below still apply to trial recipes. Removing the connector (option B) would now also mean unpublishing the ChatGPT app.
+
 ## Consequences
 
 - Two sources of truth for recipes during the trial. Search, lists and the app merge them, but reviews only attach to Git recipes.

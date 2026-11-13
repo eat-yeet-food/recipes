@@ -254,7 +254,7 @@ try {
   evidence.push('Notebook formulas: member-only, same-origin writes, validated states for published calculator recipes, stale-revision conflicts, coalesced and capped history, restore, duplicate, soft delete with purge, unreachable through Payload REST')
   await verifyAccounts(p, origin, String(initial.slug), initial.id)
   await verifyMcp(p, origin, async () => { await applyUpserts(p, await planUpserts(p, records)) })
-  evidence.push('MCP connector OAuth: allowlisted callbacks, single-use PKCE codes bound to client and callback, rotating refresh tokens, revocation, owner-only tools; connector and trial tables unreachable through Payload REST; content sync leaves trial recipes alone')
+  evidence.push('MCP connector OAuth: allowlisted callbacks, single-use PKCE codes bound to client and callback, rotating refresh tokens, revocation, members get reading/Remix/review tools and only the owner gets recipe writing; connector and trial tables unreachable through Payload REST; content sync leaves trial recipes alone')
   evidence.push('Google-only member accounts: verified email required, revocable sessions, deletion, and member-owned ratings, replies and Notebook formulas; email/password endpoints are gone and member records are unreachable through Payload REST')
   assert(
     (await (await request('/sitemap.xml')).text()).includes(

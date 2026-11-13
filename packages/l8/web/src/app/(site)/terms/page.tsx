@@ -8,7 +8,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function Page() {
-  return <LegalPage title="Terms of Use" updated="September 27, 2026"
+  return <LegalPage title="Terms of Use" updated="November 13, 2026"
     intro={<p>These terms apply to your use of Eat / Yeet. By using the site or creating an account, you agree to them. If you don’t agree, please don’t use the site.</p>}
     sections={[
       { heading: 'Accounts', body: <ul>
@@ -28,6 +28,7 @@ export default function Page() {
         </ul>
         <p>We may remove content or suspend accounts that break these rules, at our discretion. We aren’t obliged to monitor content, and reviews reflect the views of their authors, not ours.</p>
       </> },
+      { heading: 'AI assistants', body: <p>When you connect Eat / Yeet to ChatGPT or another assistant, it acts for you: ratings, reviews, replies and remixes it saves are yours and follow these terms as if you wrote them. Assistants can make mistakes, so check a recipe or formula before you cook from it. Your use of the assistant itself is governed by its provider’s terms.</p> },
       { heading: 'Recipes and site content', body: <p>Recipes, articles, photos and design on Eat / Yeet belong to us or our licensors. You’re welcome to cook from them and share links. Please don’t republish them in bulk or copy them into other sites or products without permission.</p> },
       { heading: 'Cooking safely', body: <p>Recipes, calculators and formulas are provided for general home-cooking information. Results depend on your ingredients, equipment and technique. Use your judgment about food safety, allergies, hot ovens and sharp tools. Nothing here is professional, medical or nutritional advice.</p> },
       { heading: 'Copyright complaints', body: <p>If you believe content on the site infringes your copyright, email <a href={`mailto:${CONTACT}`}>{CONTACT}</a> with the work, where it appears, your contact details, and a statement that you have a good-faith belief the use isn’t authorized. We’ll review it and remove infringing material.</p> },
