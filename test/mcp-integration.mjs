@@ -86,9 +86,9 @@ const recipe = {
   title: 'MCP Test Chili', description: 'A smoky weeknight chili written through the connector.', category: 'savory',
   prepMinutes: 15, cookMinutes: 45, totalMinutes: 60, yieldAmount: 6, yieldUnit: 'servings', image: image.image,
   courses: ['mains'], cuisines: ['american'], methods: ['stovetop'],
-  intro: 'Made for **testing**.',
+  extraBlocks: [{ type: 'markdown', markdown: 'Made for **testing**.' }],
   equipment: [{ title: '', items: ['Dutch oven'] }],
-  ingredients: [{ title: 'Chili', items: [{ id: 'beef', text: '900g ground beef' }, { id: 'beans', text: '2 cans kidney beans, drained' }, { id: 'spice', text: '3 tbsp chili powder' }] }],
+  ingredients: [{ title: 'Beef & Beans', items: [{ id: 'beef', text: '900g ground beef' }, { id: 'beans', text: '2 cans kidney beans, drained' }, { id: 'spice', text: '3 tbsp chili powder' }] }],
   steps: [{ title: '', items: [{ text: '**Brown:** Brown the beef in the Dutch oven.', uses: ['beef'] }, { text: 'Add the beans and spices; simmer 40 minutes.', uses: ['beans', 'spice'] }] }],
   tips: ['Better the next day.'], notes: [],
 }
@@ -100,6 +100,8 @@ process.on('exit', (code) => { if (code) execFileSync('pnpm', ['-s', 'mcp', 'wip
 const created = await call('create_recipe', { ...recipe, slug, publish: true })
 assert.equal(created.recipe.status, 'published')
 const page = await (await fetch(`${origin}/recipes/${slug}`)).text()
+assert.ok(page.indexOf('Made for <strong>testing</strong>') > page.indexOf('data-ingredients-card'), 'story after the recipe card')
+assert.ok(!page.includes('&amp;amp;') && page.includes('Beef &amp; Beans'), 'section title ampersand renders once')
 for (const text of ['MCP Test Chili', 'Trial recipe', '900g ground beef', 'Brown the beef', 'Better the next day', 'Made for <strong>testing</strong>']) assert.ok(page.includes(text), `page shows ${text}`)
 assert.match(page, /<meta name="robots" content="noindex/)
 assert.ok(!page.includes('"@type":"Recipe"'), 'no structured data for trials')

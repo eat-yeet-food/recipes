@@ -55,7 +55,7 @@ const extraBlock = z.object({
 
 const recipeShape = {
   title: z.string().min(1).max(200),
-  description: z.string().min(1).max(500).describe('One or two sentences for the card and search results.'),
+  description: z.string().min(1).max(500).describe('The recipe’s intro: one or two sentences shown under the title, on cards and in search. There is no other intro.'),
   category: z.enum(['savory', 'sweet']),
   prepMinutes: z.number().int().min(0),
   cookMinutes: z.number().int().min(0),
@@ -72,24 +72,22 @@ const recipeShape = {
   restrictions: z.array(z.string()).default([]),
   occasions: z.array(z.string()).default([]),
   ingredientTypes: z.array(z.string()).default([]),
-  intro: z.string().optional().describe('Optional Markdown shown above the recipe card (a short story or context).'),
   equipment: z.array(section).default([]),
   ingredients: z.array(section).min(1),
   steps: z.array(section).min(1),
   tips: z.array(z.string()).default([]),
   notes: z.array(z.string()).default([]),
-  extraBlocks: z.array(extraBlock).default([]).describe('Optional blocks after the recipe card: markdown, callouts, image galleries, YouTube.'),
+  extraBlocks: z.array(extraBlock).default([]).describe('Optional, shown after the recipe card: callouts, image galleries, YouTube, or a markdown block for a real story or background worth reading. Usually leave empty; never repeat the description.'),
 }
 const recipeInput = z.object(recipeShape)
 type RecipeInput = z.infer<typeof recipeInput>
 
 /** The YAML source shape Git recipes use, so trial recipes can move to Git (or Git to this) unchanged. */
 function sourceFor(slug: string, input: RecipeInput, created: string) {
-  const { intro, equipment, ingredients, steps, tips, notes, extraBlocks, ...facts } = input
+  const { equipment, ingredients, steps, tips, notes, extraBlocks, ...facts } = input
   return {
     slug, ...facts, created,
     blocks: [
-      ...(intro?.trim() ? [{ type: 'markdown', markdown: intro }] : []),
       { type: 'recipe', equipment, ingredients, steps, tips, notes },
       ...extraBlocks,
     ],
@@ -142,6 +140,7 @@ export function createMcpServer(owner: McpOwner) {
       'Recipes you create with this connector are "trial" recipes: public when published, marked Trial, never indexed by search engines.',
       'To post a recipe: search_stock_photos → import_stock_photo (gives an `image` reference) → create_recipe with that image and publish: true.',
       'Write ingredients with the amount first, and give each ingredient an id so steps can list the ingredients they use.',
+      'The description is the only intro text (it sits under the title). Don’t add text above the recipe; put a genuine story, if there is one, in extraBlocks after it.',
       'Use list_categories to pick course/cuisine values the site already uses.',
     ].join('\n'),
   })

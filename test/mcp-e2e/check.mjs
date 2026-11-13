@@ -17,7 +17,7 @@ export function ownerToken() {
 }
 
 export const prompt = (dish) => `Create and publish a complete recipe on Eat / Yeet for ${dish}. Use a stock photo for the hero image with good alt text.
-Include a short intro, equipment, ingredients in at least two named sections (amounts first, each with an id), steps that list the ingredients they use, and at least two tips.
+Include equipment, ingredients in at least two named sections (amounts first, each with an id), steps that list the ingredients they use, and at least two tips.
 When it's published, reply with only its slug on the last line.`
 
 export async function connect() {
@@ -73,7 +73,6 @@ export async function verifyPosted(label, slug, { keep = false } = {}) {
 function sourceInput(source) {
   const { slug: _slug, created: _created, blocks, ...facts } = source
   const card = blocks.find((b) => b.type === 'recipe')
-  const intro = blocks.find((b) => b.type === 'markdown')?.markdown
-  return { ...facts, ...(intro ? { intro } : {}), equipment: card.equipment, ingredients: card.ingredients, steps: card.steps, tips: card.tips, notes: card.notes,
-    extraBlocks: blocks.filter((b) => b.type !== 'recipe' && b !== blocks.find((x) => x.type === 'markdown')) }
+  return { ...facts, equipment: card.equipment, ingredients: card.ingredients, steps: card.steps, tips: card.tips, notes: card.notes,
+    extraBlocks: blocks.slice(blocks.indexOf(card) + 1) }
 }

@@ -41,7 +41,8 @@ function identifier(value, fallback) {
 function normalizeSectioned(value, field) {
   return list(value)
     .map((section, sectionIndex) => {
-      const title = typeof section === 'string' ? '' : renderMarkdown(section?.title)
+      // Section titles render as plain text (eyebrows), so keep the text, not markup or entities.
+      const title = typeof section === 'string' ? '' : stripTags(renderMarkdown(section?.title))
       const id = identifier(typeof section === 'string' ? '' : section?.id, `${field}-${sectionIndex + 1}`)
       const rawItems = typeof section === 'string' ? [section] : list(section?.items)
       const normalizedItems = rawItems
