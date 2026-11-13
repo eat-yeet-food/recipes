@@ -17,6 +17,7 @@ import { appRemixIndex, appRemixRecipe, appRemixResolve } from '../app-api'
 import { refreshPublicCaches } from './freshness'
 import { ImageError, imageFromBase64, imageFromUrl, imageRef, importStockPhoto, searchStockPhotos, stockProviders } from './images'
 import type { McpOwner } from './oauth'
+import { STYLE_GUIDE, styleExamples } from './style-guide'
 
 /**
  * The owner's MCP tools. Git recipes are read-only here; trial recipes (this
@@ -138,7 +139,9 @@ export function createMcpServer(owner: McpOwner) {
     instructions: [
       'Eat / Yeet is a recipe site (eatyeet.com). Git-authored recipes are read-only here.',
       'Recipes you create with this connector are "trial" recipes: public when published, marked Trial, never indexed by search engines.',
-      'To post a recipe: search_stock_photos → import_stock_photo (gives an `image` reference) → create_recipe with that image and publish: true.',
+      'Before writing or editing a recipe, call get_style_guide and follow it: recipes must read like the published ones.',
+      'Photos: ask the owner for their own photo of the finished dish first. Offer to clean up the background for an elegant food-blog look while keeping the food exactly as photographed, show the original and the edit side by side, and upload (upload_image) only after the owner approves. Stock photos (search_stock_photos → import_stock_photo) are a fallback for when the owner has no photo.',
+      'To post: get_style_guide → photo (upload_image, or stock as fallback) → create_recipe with the returned `image` and publish: true.',
       'Write ingredients with the amount first, and give each ingredient an id so steps can list the ingredients they use.',
       'The description is the only intro text (it sits under the title). Don’t add text above the recipe; put a genuine story, if there is one, in extraBlocks after it.',
       'Use list_categories to pick course/cuisine values the site already uses.',
@@ -146,6 +149,23 @@ export function createMcpServer(owner: McpOwner) {
   })
 
   // --- Discover -------------------------------------------------------------------
+
+  server.registerTool('get_style_guide', {
+    title: 'Get the recipe style guide',
+    description: 'How Eat / Yeet recipes are written (voice, ingredient and step format, photos), with two published recipes as examples in create_recipe’s shape. Read it before writing or editing a recipe.',
+    inputSchema: {},
+    annotations: read,
+  }, async () => ({
+    content: [{ type: 'text', text: STYLE_GUIDE }, { type: 'text', text: `Examples (published recipes, in create_recipe's shape):\n${JSON.stringify(await styleExamples(), null, 2)}` }],
+  }))
+
+  server.registerPrompt('write_recipe', {
+    title: 'Write a recipe for Eat / Yeet',
+    description: 'Turn a dish (and your photo) into a recipe in the site’s style.',
+    argsSchema: { dish: z.string().describe('What to make, or your notes for it.') },
+  }, async ({ dish }) => ({
+    messages: [{ role: 'user', content: { type: 'text', text: `${STYLE_GUIDE}\n\nExamples:\n${JSON.stringify(await styleExamples(), null, 2)}\n\nWrite an Eat / Yeet recipe for: ${dish}\nAsk me for my photo first.` } }],
+  }))
 
   server.registerTool('search_recipes', {
     title: 'Search recipes',
@@ -204,7 +224,7 @@ export function createMcpServer(owner: McpOwner) {
 
   server.registerTool('create_recipe', {
     title: 'Create a recipe',
-    description: 'Create a trial recipe. Needs a hero image imported first (import_stock_photo or upload_image). Set publish: true to make it public now.',
+    description: 'Create a trial recipe written to the site’s style (call get_style_guide first). Needs a hero image from upload_image (the owner’s own photo, preferred) or import_stock_photo. Set publish: true to make it public now.',
     inputSchema: { ...recipeShape, slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).optional().describe('URL slug; defaults to one made from the title.'), publish: z.boolean().default(false) },
     annotations: write,
   }, async ({ slug: requested, publish, ...input }) => {
@@ -279,7 +299,7 @@ export function createMcpServer(owner: McpOwner) {
 
   server.registerTool('search_stock_photos', {
     title: 'Search stock photos',
-    description: `Find free landscape food photos (${stockProviders().join(' and ') || 'no provider configured'}). Pass a result’s provider and id to import_stock_photo.`,
+    description: `Fallback only: find free stock food photos (${stockProviders().join(' and ') || 'no provider configured'}) when the owner has no photo of their own. Ask for their photo first. Pass a result’s provider and id to import_stock_photo.`,
     inputSchema: { query: z.string().min(1).max(100), provider: z.enum(['pexels', 'unsplash']).optional(), page: z.number().int().min(1).default(1), perPage: z.number().int().min(1).max(30).default(10) },
     annotations: { ...read, openWorldHint: true },
   }, async ({ query, provider, page, perPage }) => {
@@ -291,7 +311,7 @@ export function createMcpServer(owner: McpOwner) {
 
   server.registerTool('import_stock_photo', {
     title: 'Import a stock photo',
-    description: 'Copy a Pexels or Unsplash photo onto the site (all sizes) and return its `image` reference for create_recipe or update_recipe. Importing the same photo again returns the same reference.',
+    description: 'Fallback only (the owner has no photo): copy a Pexels or Unsplash photo onto the site (all sizes) and return its `image` reference for create_recipe or update_recipe. Importing the same photo again returns the same reference.',
     inputSchema: { provider: z.enum(['pexels', 'unsplash']), id: z.string(), alt: z.string().max(300).default('').describe('What the photo shows, for people who can’t see it. Defaults to the provider’s description.') },
     annotations: { ...write, openWorldHint: true },
   }, async ({ provider, id, alt }) => {
@@ -301,11 +321,16 @@ export function createMcpServer(owner: McpOwner) {
 
   server.registerTool('upload_image', {
     title: 'Upload an image',
-    description: 'Add your own photo from an https URL or base64 data (JPEG, PNG, WebP, AVIF or HEIC, at least 640px wide, up to 20 MB). Returns its `image` reference.',
-    inputSchema: { url: z.string().url().optional(), base64: z.string().optional(), alt: z.string().min(1).max(300) },
+    description: 'Put the owner’s own photo on the site (all sizes) and return its `image` reference. The preferred hero. If you cleaned up the background, upload only the version the owner approved after seeing it next to the original, with the food unchanged. Pass the chat file as `photo`, or an https `url`, or `base64` (JPEG, PNG, WebP, AVIF or HEIC, at least 640px wide, up to 20 MB).',
+    inputSchema: {
+      photo: z.object({ download_url: z.string().url(), file_id: z.string().optional() }).optional().describe('A file from the conversation (the owner’s photo or the approved edit).'),
+      url: z.string().url().optional(), base64: z.string().optional(), alt: z.string().min(1).max(300),
+    },
+    _meta: { 'openai/fileParams': ['photo'] },
     annotations: { ...write, openWorldHint: true },
-  }, async ({ url: from, base64, alt }) => {
-    if (Boolean(from) === Boolean(base64)) return fail('Give either url or base64.')
+  }, async ({ photo, url: link, base64, alt }) => {
+    const from = photo?.download_url ?? link
+    if ([photo, link, base64].filter(Boolean).length !== 1) return fail('Give exactly one of photo, url or base64.')
     try { return imageResult(from ? await imageFromUrl(from, alt) : await imageFromBase64(base64!, alt), 'Uploaded. Use `image` as the recipe’s image.') }
     catch (error) { return imageFailure(error) }
   })
