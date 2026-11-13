@@ -123,6 +123,7 @@ struct RootView: View {
         }
         // Recipes opened from a card grow out of it over this tab (the tab bar stays on top).
         .overlay { RecipeHeroLayer(scope: "\(tab)") { RecipeScreen(slug: $0) } }
+        .recipeHeroScope("\(tab)")
         .tint(Palette.ink)
     }
 

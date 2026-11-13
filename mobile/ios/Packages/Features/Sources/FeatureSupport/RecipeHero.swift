@@ -102,12 +102,20 @@ public extension View {
     func recipeHeroSource(_ slug: String) -> some View { modifier(HeroSource(slug: slug, photo: false, image: nil)) }
     func recipeHeroPhoto(_ slug: String, image: RecipeImage?) -> some View { modifier(HeroSource(slug: slug, photo: true, image: image)) }
 
+    /// Names the tab a view lives in, so a card hides only under its own tab's open recipe.
+    func recipeHeroScope(_ scope: String) -> some View { environment(\.recipeHeroScope, scope) }
+
     /// Marks the recipe page's photo as the hand-off destination.
     func recipeHeroDestination() -> some View { modifier(HeroDestination()) }
 }
 
+extension EnvironmentValues {
+    @Entry var recipeHeroScope: String?
+}
+
 private struct HeroSource: ViewModifier {
     @Environment(RecipeHero.self) private var hero: RecipeHero?
+    @Environment(\.recipeHeroScope) private var scope
     let slug: String
     let photo: Bool
     let image: RecipeImage?
@@ -119,7 +127,7 @@ private struct HeroSource: ViewModifier {
             }
             // The card fades under the growing page and back in as the page shrinks into it, so its
             // text is already there when the photo lands (not popping in after).
-            .opacity(!photo && hero?.opening?.slug == slug ? 1 - (hero?.progress ?? 0) : 1)
+            .opacity(!photo && hero?.opening?.slug == slug && (scope == nil || hero?.opening?.scope == scope) ? 1 - (hero?.progress ?? 0) : 1)
     }
 }
 
