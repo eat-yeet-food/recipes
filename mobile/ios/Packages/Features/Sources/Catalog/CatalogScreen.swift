@@ -9,6 +9,7 @@ public struct CatalogScreen: View {
     @Environment(RecipeStore.self) private var store
     @State private var query = ""
     @State private var searching: Bool
+    private let search: Bool
     private let category: HomeCategory?
     private let open: (String) -> Void
 
@@ -16,6 +17,7 @@ public struct CatalogScreen: View {
     public init(category: HomeCategory? = nil, search: Bool = false, open: @escaping (String) -> Void) {
         self.category = category
         _searching = State(initialValue: search)
+        self.search = search
         self.open = open
     }
 
@@ -56,7 +58,11 @@ public struct CatalogScreen: View {
                     ContentUnavailableView.search(text: query)
                 }
                 ForEach(recipes, id: \.slug) { recipe in
-                    Button { open(recipe.slug) } label: {
+                    Button {
+                        // Put the field away so the tab bar is back under the recipe.
+                        searching = false
+                        open(recipe.slug)
+                    } label: {
                         RecipeCard(recipe: recipe, image: index.images.additionalProperties[recipe.image])
                     }
                     .buttonStyle(CardPressStyle())
@@ -67,10 +73,23 @@ public struct CatalogScreen: View {
             .padding(.bottom, Space.s14)
         }
         .refreshable { await store.loadIndex() }
-        .searchable(text: $query, isPresented: $searching, prompt: "Search recipes")
-        // Keep the bar (and Back) visible while searching.
-        .searchPresentationToolbarBehavior(.avoidHidingContent)
+        // Only the Search tab searches; Recipes is the plain list.
+        .modifier(SearchField(enabled: search, query: $query, searching: $searching))
         .onAppear { Perf.signposter.emitEvent(Perf.launchContent) }
+    }
+}
+
+private struct SearchField: ViewModifier {
+    let enabled: Bool
+    @Binding var query: String
+    @Binding var searching: Bool
+
+    func body(content: Content) -> some View {
+        if enabled {
+            content.searchable(text: $query, isPresented: $searching, prompt: "Search recipes")
+        } else {
+            content
+        }
     }
 }
 

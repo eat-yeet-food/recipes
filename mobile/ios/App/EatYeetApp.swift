@@ -128,6 +128,8 @@ struct RootView: View {
 
     /// From a card: the hand-off over the current tab. (Deep links still push the page.)
     private func openRecipe(_ slug: String) {
+        // Search is only a way in: its results open under Recipes, so the full tab bar is below.
+        if router.tab == .search { router.show(.recipes) }
         hero.open(slug, scope: "\(router.tab)")
     }
 

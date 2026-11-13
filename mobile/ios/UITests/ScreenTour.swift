@@ -37,6 +37,24 @@ final class ScreenTour: XCTestCase {
         save(app, "catalog")
     }
 
+    /// The Search tab: the field in the tab bar's place, results above it, then a result opened.
+    @MainActor func testSearch() {
+        let app = launch("eatyeet://open")
+        XCTAssertTrue(app.tabBars.buttons["Search"].waitForExistence(timeout: 15))
+        app.tabBars.buttons["Search"].tap()
+        sleep(2)
+        save(app, "search-empty")
+        app.typeText("pizza")
+        sleep(2)
+        save(app, "search-typed")
+        app.swipeUp(velocity: .slow)
+        sleep(1)
+        save(app, "search-scrolled")
+        app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'recipe-card-'")).firstMatch.tap()
+        sleep(3)
+        save(app, "search-opened")
+    }
+
     @MainActor func testRecipePages() {
         for slug in ["sourdough-bread", "new-york-style-pizza", "brown-butter-chocolate-chunk-cookies"] {
             let app = launch("eatyeet://open/recipes/\(slug)")
