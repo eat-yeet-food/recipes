@@ -1,4 +1,5 @@
 import 'server-only'
+import { Buffer } from 'node:buffer'
 import { createTrialMedia, findTrialMedia, type TrialMedia } from '@eat-yeet/l4-content-cms/trial'
 import { cms, mcpSettings } from '../cms'
 
@@ -87,11 +88,12 @@ export async function imageFromUrl(url: string, alt: string) {
 }
 
 export function imageFromBase64(data: string, alt: string) {
-  const clean = data.replace(/^data:[^,]*,/, '').replace(/\s+/g, '')
-  if (clean.length > (MAX_BYTES * 4) / 3 + 4) throw new ImageError('The image is over 20 MB.')
-  let bytes: Uint8Array<ArrayBuffer>
-  try { bytes = Uint8Array.from(atob(clean), (c) => c.charCodeAt(0)) } catch { throw new ImageError('That isn’t valid base64 image data.') }
-  return storeImage(bytes, alt)
+  const start = data.startsWith('data:') ? data.indexOf(',') + 1 : 0
+  if (data.length - start > (MAX_BYTES * 4) / 3 + 1024) throw new ImageError('The image is over 20 MB.')
+  // Native decoding: the Worker's CPU budget is milliseconds, so no per-byte JavaScript.
+  const decoded = Buffer.from(start ? data.slice(start) : data, 'base64')
+  if (!decoded.byteLength) throw new ImageError('That isn’t valid base64 image data.')
+  return storeImage(new Uint8Array(decoded.buffer, decoded.byteOffset, decoded.byteLength) as Uint8Array<ArrayBuffer>, alt)
 }
 
 // --- Stock photos -------------------------------------------------------------
