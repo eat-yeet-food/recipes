@@ -61,6 +61,8 @@ struct EatYeetApp: App {
                 .environment(store)
                 .environment(account)
                 .task { await account.refresh() }
+                // Timers are the system's: pick up any still running (or ringing) from before.
+                .task { KitchenTimers.shared.watch() }
                 .onChange(of: environment.backend) { _, backend in store.use(backend); account.use(backend) }
         }
     }
@@ -79,6 +81,8 @@ struct RootView: View {
     @Environment(AppEnvironment.self) private var environment
     @Environment(\.openURL) private var openURL
     @State private var hero = RecipeHero()
+    @State private var showingTimers = false
+    @State private var timers = KitchenTimers.shared
 
     var body: some View {
         @Bindable var router = router
@@ -105,12 +109,17 @@ struct RootView: View {
         .environment(hero)
         .background(ThreeFingerLongPress { router.showDevMenu = true })
         .sheet(isPresented: $router.showDevMenu) { DevMenu(build: .current) }
+        .sheet(isPresented: $showingTimers) { TimersSheet() }
     }
 
     /// One tab's navigation stack, with every app route pushable onto it.
     private func stack(_ tab: AppRouter.Tab, @ViewBuilder root: () -> some View) -> some View {
         NavigationStack(path: router.binding(tab)) {
             root().navigationDestination(for: AppRouter.Route.self) { screen($0) }
+        }
+        // The app-wide timers bar, above the tab bar on every screen of every tab while timers exist.
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if !timers.entries.isEmpty { TimersAccessory { showingTimers = true } }
         }
         // Recipes opened from a card grow out of it over this tab (the tab bar stays on top).
         .overlay { RecipeHeroLayer(scope: "\(tab)") { RecipeScreen(slug: $0) } }
