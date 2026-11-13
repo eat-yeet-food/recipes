@@ -4,6 +4,7 @@ import type { RecipeService } from '@eat-yeet/l3-api-contract/recipes'
 import type { ArticleService } from '@eat-yeet/l3-api-contract/articles'
 import type { RecipeContent } from '@eat-yeet/l4-content-model/recipes'
 import type { ArticleContent } from '@eat-yeet/l4-content-model/articles'
+import { publishedTrialRecipe, publishedTrialRecipes } from './trial'
 
 export function contentServices(payload: Payload) {
   const list = async (collection: 'recipes' | 'articles', limit?: number) => {
@@ -50,9 +51,15 @@ export function contentServices(payload: Payload) {
     })
     return docs[0] ? storedContent(docs[0]) : null
   }
+  const withTrials = async (items: any[], limit?: number) => {
+    const slugs = new Set(items.map((item) => item.slug))
+    const all = [...items, ...(await publishedTrialRecipes(payload)).map((trial) => trial.content).filter((trial) => !slugs.has(trial.slug))]
+    return limit == null ? all : all.slice(0, limit)
+  }
   const recipes: RecipeService<RecipeContent> = {
+    // Trial recipes (written through the MCP connector) follow the Git recipes; Git wins a slug.
     listRecipes: async (request) => ({
-      recipes: (await list('recipes', request?.limit)).map(
+      recipes: (await withTrials(await list('recipes'), request?.limit)).map(
         ({ blocks, learning, workbench, mediaReferences, ...r }) => ({
           ...r,
           // Summaries name the calculator without its configuration.
@@ -61,7 +68,7 @@ export function contentServices(payload: Payload) {
         }),
       ),
     }),
-    getRecipe: async ({ slug }) => ({ recipe: await detail('recipes', slug) }),
+    getRecipe: async ({ slug }) => ({ recipe: (await detail('recipes', slug)) ?? (await publishedTrialRecipe(payload, slug))?.content ?? null }),
   }
   const articles: ArticleService<ArticleContent> = {
     listArticles: async (request) => ({

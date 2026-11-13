@@ -87,8 +87,13 @@ export function safeReturnTo(value: unknown) {
 }
 
 const base64url = (bytes: Buffer) => bytes.toString('base64url')
-/** `native` carries the iPhone app's PKCE challenge; the callback then hands the app a one-time grant instead of a cookie. */
-export function googleAuthorization(returnTo: string, native?: { challenge: string }) {
+/** A chat client's pending MCP authorization (already checked against its registration). */
+export type McpAuthorization = { clientId: string; redirectUri: string; state: string; challenge: string }
+/**
+ * `native` carries the iPhone app's PKCE challenge; the callback then hands the app a one-time grant instead of a cookie.
+ * `mcp` carries a chat client's authorization request; the callback sends the owner back to the client with a one-time code.
+ */
+export function googleAuthorization(returnTo: string, native?: { challenge: string }, mcp?: McpAuthorization) {
   const google = googleSettings()
   if (!google) return null
   const state = base64url(randomBytes(24))
@@ -106,7 +111,7 @@ export function googleAuthorization(returnTo: string, native?: { challenge: stri
     prompt: 'select_account',
   }).toString()
   const response = NextResponse.redirect(url, { headers: { 'Cache-Control': 'private, no-store' } })
-  response.cookies.set(OAUTH_COOKIE, JSON.stringify({ state, verifier, returnTo, ...(native ? { native: native.challenge } : {}) }), { httpOnly: true, secure: secure(),
+  response.cookies.set(OAUTH_COOKIE, JSON.stringify({ state, verifier, returnTo, ...(native ? { native: native.challenge } : {}), ...(mcp ? { mcp } : {}) }), { httpOnly: true, secure: secure(),
     sameSite: 'lax', path: OAUTH_PATH, maxAge: 600 })
   return response
 }
@@ -117,6 +122,7 @@ export function readOAuthCookie(request: NextRequest) {
     if (typeof value.state === 'string' && typeof value.verifier === 'string') return {
       state: value.state as string, verifier: value.verifier as string, returnTo: safeReturnTo(value.returnTo),
       native: typeof value.native === 'string' ? value.native as string : undefined,
+      mcp: value.mcp && ['clientId', 'redirectUri', 'state', 'challenge'].every((key) => typeof value.mcp[key] === 'string') ? value.mcp as McpAuthorization : undefined,
     }
   } catch {}
   return null

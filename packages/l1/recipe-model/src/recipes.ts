@@ -46,6 +46,8 @@ export interface RecipeSummary {
   imageHash: string
   created: string
   searchText: string
+  /** Written through the owner's MCP connector rather than Git: badged, never indexed. */
+  trial?: boolean
 }
 
 /**

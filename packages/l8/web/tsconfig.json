@@ -67,6 +67,9 @@
     },
     {
       "path": "../../l4/content-cms/tsconfig.json"
+    },
+    {
+      "path": "../../l4/content-build/tsconfig.json"
     }
   ],
   "include": [

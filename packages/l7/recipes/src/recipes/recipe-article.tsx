@@ -47,7 +47,7 @@ export function RecipeArticleHeader({
   toggleFocusedCooking,
   stepByStep,
 }: {
-  page: Pick<RecipeContent, 'title' | 'description'> & RecipeFactsSource
+  page: Pick<RecipeContent, 'title' | 'description' | 'trial'> & RecipeFactsSource
   heading?: RecipeArticleHeading
   printPage: () => void
   focusedCooking: boolean
@@ -61,7 +61,7 @@ export function RecipeArticleHeader({
       <Breadcrumbs crumbs={crumbs} className="mb-5 text-brand [&_a]:text-brand [&_a:hover]:text-white" />
       <h1 className={cn('m-0 min-w-0', recipeTitleClass, 'text-white print:text-ink')}>{heading?.title ?? page.title}</h1>
       <div className="mb-6 mt-1.5 flex items-center justify-between gap-4">
-        <Eyebrow as="div" size="small" tone="brand" className="print:text-ink">{heading?.byline ?? 'By Patrick Hogan'}</Eyebrow>
+        <Eyebrow as="div" size="small" tone="brand" className="print:text-ink">{page.trial ? 'Trial recipe · ' : ''}{heading?.byline ?? 'By Patrick Hogan'}</Eyebrow>
         <div className="relative flex shrink-0 gap-2 print:hidden" role="group" aria-label="Page actions">
           <RecipeIconAction label="Print Recipe" tone="on-dark" onClick={printPage}><Printer /></RecipeIconAction>
           <RecipeIconAction label="Cooking view" tone="on-dark" onClick={toggleFocusedCooking} pressed={focusedCooking}><ChefHat /></RecipeIconAction>

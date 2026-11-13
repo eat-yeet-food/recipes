@@ -11,7 +11,9 @@ export async function publicWorkerMedia(request, env, context, edge) {
   const [, hash, file] = match
   // A fresh, indexed, parameterized read enforces publication before every hit.
   // Never cache this result or broaden it to owner/draft access.
-  const record = await env.D1.prepare('SELECT manifest FROM media WHERE source_id = ? AND public = 1 LIMIT 1').bind(hash).first()
+  // Trial images (MCP connector) live in their own table, outside content sync.
+  const record = await env.D1.prepare('SELECT manifest FROM media WHERE source_id = ? AND public = 1 LIMIT 1').bind(hash).first() ??
+    await env.D1.prepare('SELECT manifest FROM trial_media WHERE source_id = ? AND public = 1 LIMIT 1').bind(hash).first()
   if (!record) return url.origin === env.SITE_URL ? null : missing()
   const manifest = JSON.parse(record.manifest)
   const key = `${hash}/${file}`

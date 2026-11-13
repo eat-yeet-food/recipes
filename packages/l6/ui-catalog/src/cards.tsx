@@ -118,7 +118,9 @@ export function RecipeCard({ recipe, headingLevel = 3, priority = false }: { rec
       title={recipe.title}
       headingLevel={headingLevel}
       description={recipe.description}
-      meta={(totalTime || yields) ? <>
+      meta={(totalTime || yields || recipe.trial) ? <>
+        {/* Written through the MCP connector rather than Git. */}
+        {recipe.trial && <Eyebrow as="span" size="small" tone="ink">Trial</Eyebrow>}
         {totalTime && (
           <span className="flex items-center gap-1.5 whitespace-nowrap">
             <Clock aria-hidden="true" className="size-3.5 shrink-0" />

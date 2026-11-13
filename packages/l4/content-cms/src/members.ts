@@ -2,6 +2,7 @@ import { createHash, randomBytes } from 'node:crypto'
 import type { Access, CollectionConfig, Payload } from 'payload'
 import { memberRef } from './member-ref'
 import { deleteMemberKitchen } from './kitchen'
+import { deleteMemberMcp } from './mcp-auth'
 
 // Members are public site accounts created only through Google sign-in. They
 // never reach Payload admin or REST: every collection sets `endpoints: false`,
@@ -228,6 +229,7 @@ export async function deleteMember(payload: Payload, memberId: string) {
   await payload.delete({ collection: 'recipe-review-replies', ...ratingOptions, where: { member: { equals: id } } })
   await payload.delete({ collection: 'recipe-reviews', ...ratingOptions, where: { member: { equals: id } } })
   await deleteMemberKitchen(payload, memberId)
+  await deleteMemberMcp(payload, memberId)
   await payload.delete({ collection: 'member-workbenches', ...options, where: { member: { equals: id } } })
   await payload.delete({ collection: 'member-sessions', ...options, where: { member: { equals: id } } })
   await payload.delete({ collection: 'member-native-grants', ...options, where: { member: { equals: id } } })

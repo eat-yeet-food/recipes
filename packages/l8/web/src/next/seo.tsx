@@ -87,6 +87,8 @@ export function JsonLd({
   content: any
   modified?: string
 }) {
+  // Trial recipes stay out of structured data until they're promoted.
+  if (content?.trial) return null
   const recipe = path.startsWith('/recipes/')
   const c = content
   const data: any = {

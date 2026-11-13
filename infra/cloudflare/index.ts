@@ -100,7 +100,7 @@ if (environment === 'bootstrap') {
   const content = release ? readFileSync(release.bundleFile) : Buffer.from('export default { fetch() { return new Response("Not initialized", {status:503,headers:{"Cache-Control":"no-store"}}) } }')
   if (release && hash(content) !== release.bundleHash) throw new Error('Release bundle checksum differs')
   if (release) assertDeploymentManifest(release.assetsDirectory, release.deploymentManifest)
-  const accountSecretNames = ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET']
+  const accountSecretNames = ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'PEXELS_API_KEY', 'UNSPLASH_ACCESS_KEY']
   const variables = { DEPLOY_ENV: environment, SITE_URL: settings.origin, MEDIA_ORIGIN: settings.mediaOrigin,
     OWNER_EMAIL: settings.ownerEmail, ACCESS_TEAM_DOMAIN: settings.accessTeamDomain,
     ...(deployToken ? { ACCESS_SERVICE_CLIENT_ID: settings.accessServiceClientId } : {}),
@@ -120,9 +120,11 @@ if (environment === 'bootstrap') {
         if (!process.env[name]) throw new Error(`Missing Keychain runtime secret ${name}`)
         return { name, type: 'secret_text', text: pulumi.secret(process.env[name]!) }
       }),
-      // Google sign-in is optional until enrolled with remote:credentials account;
-      // without it the sign-in page reports sign-in as unavailable.
+      // Google sign-in and stock-photo search are optional until enrolled with
+      // remote:credentials account; without them the features report themselves unavailable.
       ...accountSecretNames.filter((name) => process.env[name]).map((name) => ({ name, type: 'secret_text', text: pulumi.secret(process.env[name]!) })),
+      // Resizes images imported through the MCP connector (the Worker has no Sharp).
+      { name: 'IMAGES', type: 'images' },
       // Per-client bound on Google sign-in starts.
       { name: 'ACCOUNT_RATE_LIMIT', type: 'ratelimit', namespaceId: environment === 'production' ? '4101' : '4102', simple: { limit: 20, period: 60 } },
     ],

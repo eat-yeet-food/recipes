@@ -7,7 +7,9 @@
     "./service": "./src/service.ts",
     "./ratings": "./src/ratings.ts",
     "./members": "./src/members.ts",
-    "./kitchen": "./src/kitchen.ts"
+    "./kitchen": "./src/kitchen.ts",
+    "./trial": "./src/trial.ts",
+    "./mcp-auth": "./src/mcp-auth.ts"
   },
   "dependencies": {
     "payload": "3.89.0",

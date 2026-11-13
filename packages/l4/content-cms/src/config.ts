@@ -15,6 +15,8 @@ import { r2Storage, type R2StorageOptions } from '@payloadcms/storage-r2'
 import { ratingRepliesCollection, ratingsCollection, retiredRatingCollections } from './ratings'
 import { memberNativeGrantsCollection, memberSessionsCollection, membersCollection, memberWorkbenchesCollection } from './members'
 import { kitchenFormulasCollection, kitchenRevisionsCollection } from './kitchen'
+import { trialMediaCollection, trialRecipesCollection } from './trial'
+import { mcpClientsCollection, mcpCodesCollection, mcpTokensCollection } from './mcp-auth'
 
 export const deny: Access = () => false
 export const isOwner = (user: any, email = process.env.OWNER_EMAIL) =>
@@ -197,6 +199,11 @@ export function createCMSConfig(
       ...retiredRatingCollections,
       ratingsCollection,
       ratingRepliesCollection,
+      trialRecipesCollection,
+      trialMediaCollection,
+      mcpClientsCollection,
+      mcpCodesCollection,
+      mcpTokensCollection,
       contentCollection('articles'),
       contentCollection('categories'),
       {

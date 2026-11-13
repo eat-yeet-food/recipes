@@ -101,7 +101,10 @@ export async function runRelease(context, { resume, rollback, codeOnly = false }
   }
   try {
     const current = (await operations.read('control.json'))?.value
-    if (!resume && JSON.stringify(current) !== JSON.stringify(previous)) throw new Error('Remote content changed while building; replan the release')
+    // The MCP connector refreshes caches by changing only the generation; that is not a content change.
+    const settled = (state) => { if (!state) return state; const { generation: _generation, ...rest } = state; return rest }
+    if (!resume && JSON.stringify(settled(current)) !== JSON.stringify(settled(previous))) throw new Error('Remote content changed while building; replan the release')
+    if (current) previous = current
     stack = await (context.infrastructure ?? infrastructure)(config, credentials)
     previousRecord = previous?.releaseId ? (await operations.read(`releases/${previous.releaseId}.json`))?.value : null
     if (previous && !rollback && !schemaChanged) {

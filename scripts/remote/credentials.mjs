@@ -63,7 +63,7 @@ export function unseal(envelope, passphrase) {
   decipher.setAuthTag(decode('tag'))
   return JSON.parse(Buffer.concat([decipher.update(decode('ciphertext')), decipher.final()]).toString())
 }
-export const accountCredentialNames = ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET']
+export const accountCredentialNames = ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'PEXELS_API_KEY', 'UNSPLASH_ACCESS_KEY']
 export async function credentialsCommand(environment, action, path, { deriveR2 = false } = {}) {
   if (action === 'export') {
     const password = await hiddenInput('Separate recovery passphrase (9+ characters)')

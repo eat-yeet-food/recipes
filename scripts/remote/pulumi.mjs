@@ -1,3 +1,4 @@
+import { accountCredentialNames } from './credentials.mjs'
 import { LocalWorkspace } from '@pulumi/pulumi/automation/index.js'
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
@@ -27,7 +28,7 @@ export async function infrastructure(config, credentials) {
       AWS_REGION: 'auto', AWS_EC2_METADATA_DISABLED: 'true',
       CLOUDFLARE_API_TOKEN: credentials.CLOUDFLARE_API_TOKEN,
       PAYLOAD_SECRET: credentials.PAYLOAD_SECRET, RELEASE_VERIFY_SECRET: credentials.RELEASE_VERIFY_SECRET,
-      ...Object.fromEntries(['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET'].filter((name) => credentials[name]).map((name) => [name, credentials[name]])),
+      ...Object.fromEntries(accountCredentialNames.filter((name) => credentials[name]).map((name) => [name, credentials[name]])),
     },
     secretsProvider: 'passphrase',
   })

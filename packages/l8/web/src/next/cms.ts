@@ -3,6 +3,7 @@ import { getCloudflareContext } from '@opennextjs/cloudflare'
 import { getPayload } from 'payload'
 import { createCMSConfig } from '@eat-yeet/l4-content-cms/config'
 import { contentServices } from '@eat-yeet/l4-content-cms/service'
+import { publicTrialMedia, publishedTrialRecipe } from '@eat-yeet/l4-content-cms/trial'
 import { cache } from 'react'
 import { headers } from 'next/headers'
 import { unstable_cache } from 'next/cache'
@@ -38,6 +39,20 @@ export function googleSettings() {
   return vars.GOOGLE_CLIENT_ID && vars.GOOGLE_CLIENT_SECRET
     ? { clientId: String(vars.GOOGLE_CLIENT_ID), clientSecret: String(vars.GOOGLE_CLIENT_SECRET) } : null
 }
+/** The MCP connector: owner allowlist, stock-photo keys and the Worker bindings it writes through. */
+export function mcpSettings() {
+  const vars = runtimeVars()
+  let env: Record<string, any> = {}
+  try { env = getCloudflareContext().env as Record<string, any> } catch { /* outside a request */ }
+  return {
+    ownerEmail: String(vars.OWNER_EMAIL ?? '').trim().toLowerCase(),
+    pexelsKey: vars.PEXELS_API_KEY ? String(vars.PEXELS_API_KEY) : '',
+    unsplashKey: vars.UNSPLASH_ACCESS_KEY ? String(vars.UNSPLASH_ACCESS_KEY) : '',
+    images: env.IMAGES ?? null,
+    media: env.R2 ?? null,
+    operations: env.OPERATIONS ?? null,
+  }
+}
 export function accountRateLimiter(): { limit: (options: { key: string }) => Promise<{ success: boolean }> } | null {
   try { return (getCloudflareContext().env as any).ACCOUNT_RATE_LIMIT ?? null } catch { return null }
 }
@@ -59,7 +74,10 @@ export const cms = cache(async () => getPayload({ config: await cmsConfig() }))
 export const publicDocument = cache(async (collection: 'recipes' | 'articles', slug: string) => publicProjection(`document:${collection}:${slug}`, async () => {
   const { docs } = await (await cms()).find({ collection, overrideAccess: false, user: null, depth: 0, limit: 1,
     where: { and: [{ slug: { equals: slug } }, { status: { equals: 'published' } }] } })
-  return docs[0] ? { updatedAt: docs[0].updatedAt as string, content: storedContent(docs[0]), seo: storedSEO(docs[0]) } : null
+  if (docs[0]) return { updatedAt: docs[0].updatedAt as string, content: storedContent(docs[0]), seo: storedSEO(docs[0]) }
+  // Trial recipes (MCP connector) render like any recipe but are never indexed.
+  const trial = collection === 'recipes' ? await publishedTrialRecipe(await cms(), slug) : null
+  return trial ? { ...trial, seo: { noindex: true } } : null
 }))
 export const sitemapDocuments = cache(async () => publicProjection('sitemap', async () => {
   const documents: { path: string; updatedAt: string }[] = []
@@ -118,6 +136,8 @@ export const publicMedia = cache(async () => {
       if (active[name] === m.hash) media['/images/' + name] = m
     }
   }
+  // Trial images (MCP connector) are referenced as `trial/<hash>.webp`; sync never lists them.
+  for (const trial of await publicTrialMedia(await cms())) media[`/images/trial/${trial.hash}.webp`] = { ...trial.manifest, alt: trial.alt }
   const origin = runtimeSettings().mediaOrigin
   if (origin) for (const manifest of Object.values(media)) {
     manifest.url = new URL(manifest.url, origin).href

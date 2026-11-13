@@ -1,5 +1,6 @@
 import { getCloudflareContext } from '@opennextjs/cloudflare'
 import { cms, runtimeSettings } from '../../../next/cms'
+import { findTrialMedia } from '@eat-yeet/l4-content-cms/trial'
 import { deliverMedia } from '../../../next/media-delivery.mjs'
 export const dynamic = 'force-dynamic'
 export async function GET(
@@ -30,15 +31,16 @@ export async function GET(
     limit: 1,
     where: { sourceId: { equals: hash } },
   })
-  if (!docs[0]) return missing()
-  const manifest = docs[0].manifest as any,
+  const trial = docs[0] ? null : await findTrialMedia(payload, { hash })
+  if (!docs[0] && !trial) return missing()
+  const manifest = (docs[0]?.manifest ?? trial!.manifest) as any,
     key = `${hash}/${file}`
   if (![...manifest.variants, manifest.social].some((v) => v.key === key))
     return missing()
   const { env, ctx } = await getCloudflareContext({ async: true })
   // Publication eligibility is deliberately checked before looking in edge cache.
   return deliverMedia(request, {
-    key, isPublic: Boolean(docs[0].public),
+    key, isPublic: Boolean(docs[0]?.public ?? trial),
     generation: request.headers.get('x-eatyeet-generation'),
     bucket: (env as any).R2,
     edge: settings.remote ? (globalThis as any).caches?.default : undefined,

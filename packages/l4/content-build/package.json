@@ -4,7 +4,8 @@
   "type": "module",
   "exports": {
     "./build-content": "./src/build-content.mjs",
-    "./parse": "./src/parse.mjs"
+    "./parse": "./src/parse.mjs",
+    "./authoring.mjs": "./src/authoring.mjs"
   },
   "dependencies": {
     "@eat-yeet/l4-content-model": "workspace:*",

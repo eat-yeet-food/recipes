@@ -14,6 +14,7 @@
     "@eat-yeet/l3-api-contract": "workspace:*",
     "@eat-yeet/l3-api-query": "workspace:*",
     "@eat-yeet/l3-app-api": "workspace:*",
+    "@eat-yeet/l4-content-build": "workspace:*",
     "@eat-yeet/l4-content-cms": "workspace:*",
     "@eat-yeet/l4-content-model": "workspace:*",
     "@eat-yeet/l6-ui-catalog": "workspace:*",
@@ -24,12 +25,14 @@
     "@eat-yeet/l7-learn": "workspace:*",
     "@eat-yeet/l7-recipes": "workspace:*",
     "@eat-yeet/l7-search": "workspace:*",
+    "@modelcontextprotocol/sdk": "1.32.0",
     "@opennextjs/cloudflare": "1.20.6",
     "@payloadcms/next": "3.89.0",
     "@payloadcms/storage-r2": "3.89.0",
     "next": "16.3.5",
     "payload": "3.89.0",
-    "react": "19.2.8"
+    "react": "19.2.8",
+    "zod": "4.6.7"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",

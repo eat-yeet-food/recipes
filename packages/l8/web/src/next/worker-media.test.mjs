@@ -2,11 +2,15 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { publicWorkerMedia } from './worker-media.mjs'
 const hash = 'a'.repeat(64), key = `${hash}/480.avif`
-function fixture() {
+function fixture({ trial = null } = {}) {
   let published = true, reads = 0, hits = 0
   const env = {
     DEPLOY_ENV: 'production', SITE_URL: 'https://eatyeet.com', RELEASE_ID: 'test',
     D1: { prepare: (sql) => {
+      if (sql.includes('trial_media')) {
+        assert.equal(sql, 'SELECT manifest FROM trial_media WHERE source_id = ? AND public = 1 LIMIT 1')
+        return { bind: (value) => { assert.equal(value, hash); return { first: async () => trial } } }
+      }
       assert.equal(sql, 'SELECT manifest FROM media WHERE source_id = ? AND public = 1 LIMIT 1')
       return { bind: (value) => { assert.equal(value, hash); return { first: async () => {
         reads++
@@ -44,4 +48,11 @@ test('local and non-media requests use the ordinary app; database errors never f
   f.env.D1.prepare = () => { throw new Error('Database unavailable') }
   await assert.rejects(publicWorkerMedia(f.request(), f.env, {}, f.edge), /Database unavailable/)
   assert.equal(f.counts().hits, 0)
+})
+
+test('trial images (MCP connector) are served from their own publication-checked table', async () => {
+  const f = fixture({ trial: { manifest: JSON.stringify({ variants: [{ key }], social: { key: `${hash}/social.jpg` } }) } })
+  f.retire()
+  assert.equal(await (await publicWorkerMedia(f.request(), f.env, {}, f.edge)).text(), 'cached')
+  assert.equal((await publicWorkerMedia(f.request(`${hash}/640.avif`), f.env, {}, f.edge)).status, 404)
 })
