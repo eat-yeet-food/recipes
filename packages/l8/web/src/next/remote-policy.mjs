@@ -68,7 +68,7 @@ export function privateResponse(status, message, extra = {}) {
   return new Response(message, { status, headers: { 'Cache-Control': 'private, no-store', 'X-Robots-Tag': 'noindex', 'Content-Type': 'text/plain; charset=utf-8', ...extra } })
 }
 export function staticAsset(path) {
-  return path.startsWith('/_next/static/') || path.startsWith('/fonts/') || path === '/donut-icon.svg'
+  return path.startsWith('/_next/static/') || path.startsWith('/fonts/') || path === '/donut-icon.svg' || path === '/icon-512.png'
 }
 export function assetCacheControl(path, status, headers, ownerOnly) {
   if (![200, 304].includes(status) || headers.has('set-cookie')) return 'private, no-store'

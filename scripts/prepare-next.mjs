@@ -4,7 +4,7 @@ import { ACTIVE_APP } from '#site-config'
 const out = resolve('packages/l8/web/public')
 rmSync(out, { recursive: true, force: true })
 mkdirSync(out, { recursive: true })
-for (const file of ['fonts', 'donut-icon.svg'])
+for (const file of ['fonts', 'donut-icon.svg', 'icon-512.png'])
   cpSync(resolve(ACTIVE_APP.paths.publicDir, file), resolve(out, file), {
     recursive: true,
   })
