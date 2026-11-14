@@ -8,7 +8,7 @@ import 'server-only'
  * textContent, and opens recipes through the host. The URI is a cache key:
  * change the version when the markup changes.
  */
-export const RECIPE_WIDGET_URI = 'ui://eat-yeet/recipe-cards-v3.html'
+export const RECIPE_WIDGET_URI = 'ui://eat-yeet/recipe-cards-v4.html'
 export const RECIPE_WIDGET_MIME = 'text/html;profile=mcp-app'
 
 export type RecipeCard = { title: string; description: string; url: string; meta: string; trial?: boolean; photo?: { url: string; alt: string; width?: number; height?: number } }
@@ -36,6 +36,7 @@ html, body { margin: 0; background: transparent; color: var(--ink); font: 15px/1
 .hero .body { padding: 16px 18px 18px; }
 .hero .title { font-size: 26px; }
 .hero .desc { -webkit-line-clamp: 4; font-size: 16px; }
+.empty { margin: 0; padding: 0 4px 4px; color: var(--muted); }
 .brand { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); padding: 0 4px 8px; }
 .brand b { background: var(--pink); color: #2a0e28; border-radius: 6px; padding: 1px 6px; transform: rotate(-3deg); display: inline-block; }
 @media (max-width: 420px) { .thumb { flex-basis: 104px; } .title { font-size: 17px; } }
@@ -72,10 +73,11 @@ function card(c, hero) {
   return a
 }
 function render(output) {
-  const cards = Array.isArray(output?.cards) ? output.cards : []
-  if (!cards.length) return
+  if (!Array.isArray(output?.cards)) return
+  const cards = output.cards
   root.replaceChildren()
   const brand = el('div', 'brand'); brand.append(document.createTextNode('Eat '), el('b', '', 'Yeet'))
+  if (!cards.length) { root.append(brand, el('p', 'empty', 'No Eat / Yeet recipes match.')); return requestAnimationFrame(size) }
   const list = el('div', 'list')
   const hero = cards.length === 1
   for (const c of cards.slice(0, 6)) list.append(card(c, hero))
@@ -84,11 +86,12 @@ function render(output) {
 }
 const setTheme = (theme) => document.documentElement.classList.toggle('dark', theme === 'dark')
 const size = () => {
-  const height = Math.ceil(document.documentElement.scrollHeight)
+  // The content's own height: the document's scrollHeight never drops below the frame's current height.
+  const height = Math.ceil(root.getBoundingClientRect().height) + 4
   notify('ui/notifications/size-changed', { height })
   window.openai?.notifyIntrinsicHeight?.(height)
 }
-new ResizeObserver(size).observe(document.body)
+new ResizeObserver(size).observe(root)
 window.addEventListener('message', (event) => {
   if (event.source !== window.parent) return
   const message = event.data
