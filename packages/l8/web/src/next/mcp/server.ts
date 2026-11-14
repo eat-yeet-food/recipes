@@ -148,6 +148,8 @@ const cardTool = (invoking: string, invoked: string) => ({
   'openai/toolInvocation/invoking': invoking, 'openai/toolInvocation/invoked': invoked,
 })
 
+const CARD_NOTE = ' The person already sees this as an Eat / Yeet card with the site’s own photo. Write the ingredients and steps as plain Markdown lists; don’t add images, image search results or a recipe card of your own.'
+
 const trialSummary = (recipe: TrialRecipe) => ({ slug: recipe.slug, title: recipe.title, status: recipe.status, revision: recipe.revision, url: recipeUrl(recipe.slug), updatedAt: recipe.updatedAt })
 
 async function published(change: string, recipe: TrialRecipe) {
@@ -172,7 +174,7 @@ export function createMcpServer(member: McpMember) {
     instructions: [
       'Eat / Yeet (eatyeet.com) is a recipe site: practical, tested recipes for home cooks, plus Remix, a calculator for changing dough formulas.',
       'Use search_recipes and get_recipe to find and read recipes; link people to the recipe url.',
-      'search_recipes and get_recipe show recipe cards with the site’s own photos. Don’t add images from the web or redraw the cards; summarize or answer around them.',
+      'search_recipes and get_recipe show recipe cards with the site’s own photos. Never add images (web or image search) or your own recipe card or recipe layout; answer in plain text and Markdown lists around the cards.',
       'Signed-in people can rate and review recipes and save their own Remix formulas (list_remix_recipes → get_remix_recipe → preview_remix → create_remix).',
       ...(member.owner ? [
         'You are working for the site owner, who can also write recipes. Recipes created here are "trial" recipes: public when published, marked Trial, never indexed by search engines. Git-authored recipes are read-only.',
@@ -245,11 +247,11 @@ export function createMcpServer(member: McpMember) {
     const payload = await cms()
     const photos = await recipePhotos()
     const trial = await readTrialRecipe(payload, slug)
-    if (trial) return ok(`Trial recipe “${trial.title}” (${trial.status}, revision ${trial.revision}).`, { source: 'trial', ...trialSummary(trial), photo: photos(trial.source?.image, trial.title),
+    if (trial) return ok(`Trial recipe “${trial.title}” (${trial.status}, revision ${trial.revision}).${CARD_NOTE}`, { source: 'trial', ...trialSummary(trial), photo: photos(trial.source?.image, trial.title),
       cards: [recipeCard({ ...trial.content, slug: trial.slug, trial: true }, photos(trial.source?.image, trial.title))], recipe: trial.source })
     const { recipe } = await contentServices(payload).recipes.getRecipe({ slug })
     if (!recipe) return fail(`No recipe "${slug}". Use search_recipes to find slugs.`)
-    return ok(`Git recipe “${recipe.title}” (read-only).`, { source: 'git', url: recipeUrl(slug), photo: photos((recipe as any).image, recipe.title),
+    return ok(`Git recipe “${recipe.title}” (read-only).${CARD_NOTE}`, { source: 'git', url: recipeUrl(slug), photo: photos((recipe as any).image, recipe.title),
       cards: [recipeCard(recipe, photos((recipe as any).image, recipe.title))], recipe })
   })
 
