@@ -82,6 +82,9 @@ assert.equal(tools.find((t) => t.name === 'search_recipes')._meta?.['openai/outp
 const widget = (await mcp.readResource({ uri: widgetUri })).contents[0]
 assert.equal(widget.mimeType, 'text/html;profile=mcp-app')
 assert.match(widget.text, /ui\/notifications\/tool-result/)
+assert.match(widget.text, /ui\/initialize/, 'widget performs the MCP Apps handshake')
+// The script is built inside a template literal: a lost escape breaks it silently in the host.
+new Function(widget.text.split('<script type="module">')[1].split('</script>')[0])
 assert.ok(widget._meta.ui.csp.resourceDomains.length, 'widget CSP allows the photo host')
 assert.equal(pollo.cards.length, 1)
 assert.equal(pollo.cards[0].photo.url, pollo.photo.url)

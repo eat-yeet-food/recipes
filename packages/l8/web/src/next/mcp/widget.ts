@@ -8,7 +8,7 @@ import 'server-only'
  * textContent, and opens recipes through the host. The URI is a cache key:
  * change the version when the markup changes.
  */
-export const RECIPE_WIDGET_URI = 'ui://eat-yeet/recipe-cards-v1.html'
+export const RECIPE_WIDGET_URI = 'ui://eat-yeet/recipe-cards-v2.html'
 export const RECIPE_WIDGET_MIME = 'text/html;profile=mcp-app'
 
 export type RecipeCard = { title: string; description: string; url: string; meta: string; trial?: boolean; photo?: { url: string; alt: string; width?: number; height?: number } }
@@ -44,17 +44,23 @@ html, body { margin: 0; background: transparent; color: var(--ink); font: 15px/1
 <script type="module">
 const root = document.getElementById('root')
 const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text) n.textContent = text; return n }
+// MCP Apps bridge (JSON-RPC over postMessage): initialize, then the host sends the tool result.
+let nextId = 1
+const pending = new Map()
+const post = (message) => window.parent.postMessage({ jsonrpc: '2.0', ...message }, '*')
+const request = (method, params) => new Promise((resolve, reject) => { const id = nextId++; pending.set(id, { resolve, reject }); post({ id, method, params }) })
+const notify = (method, params) => post({ method, params })
 const open = (href) => {
-  if (!/^https:\\/\\//.test(href)) return
-  if (window.openai?.openExternal) window.openai.openExternal({ href, redirectUrl: false })
-  else window.open(href, '_blank', 'noopener')
+  if (!String(href).startsWith('https://')) return
+  if (window.openai?.openExternal) return window.openai.openExternal({ href, redirectUrl: false })
+  request('ui/open-link', { url: href }).catch(() => window.open(href, '_blank', 'noopener'))
 }
 function card(c, hero) {
   const a = el('a', hero ? 'card hero' : 'card')
   a.href = c.url; a.target = '_blank'; a.rel = 'noopener'
   a.addEventListener('click', (event) => { event.preventDefault(); open(c.url) })
   const thumb = el('div', 'thumb')
-  if (c.photo && /^https:\\/\\//.test(c.photo.url)) { thumb.style.backgroundImage = 'url("' + encodeURI(c.photo.url) + '")'; thumb.setAttribute('role', 'img'); thumb.setAttribute('aria-label', c.photo.alt || c.title) }
+  if (c.photo && String(c.photo.url).startsWith('https://')) { thumb.style.backgroundImage = 'url("' + encodeURI(c.photo.url) + '")'; thumb.setAttribute('role', 'img'); thumb.setAttribute('aria-label', c.photo.alt || c.title) }
   const body = el('div', 'body')
   const title = el('h2', 'title')
   if (c.trial) title.append(el('span', 'badge', 'Trial'))
@@ -74,15 +80,31 @@ function render(output) {
   const hero = cards.length === 1
   for (const c of cards.slice(0, 6)) list.append(card(c, hero))
   root.append(brand, list)
-  requestAnimationFrame(() => window.openai?.notifyIntrinsicHeight?.(document.documentElement.scrollHeight))
+  requestAnimationFrame(size)
 }
-const theme = () => document.documentElement.classList.toggle('dark', window.openai?.theme === 'dark')
-theme(); render(window.openai?.toolOutput)
-window.addEventListener('openai:set_globals', (event) => { theme(); render(event.detail?.globals?.toolOutput ?? window.openai?.toolOutput) })
-// MCP Apps hosts deliver the result over postMessage.
+const setTheme = (theme) => document.documentElement.classList.toggle('dark', theme === 'dark')
+const size = () => {
+  const height = Math.ceil(document.documentElement.scrollHeight)
+  notify('ui/notifications/size-changed', { height })
+  window.openai?.notifyIntrinsicHeight?.(height)
+}
+new ResizeObserver(size).observe(document.body)
 window.addEventListener('message', (event) => {
   if (event.source !== window.parent) return
   const message = event.data
-  if (message?.jsonrpc === '2.0' && message.method === 'ui/notifications/tool-result') render(message.params?.structuredContent)
+  if (message?.jsonrpc !== '2.0') return
+  if (message.id !== undefined && pending.has(message.id) && !message.method) {
+    const { resolve, reject } = pending.get(message.id); pending.delete(message.id)
+    return message.error ? reject(message.error) : resolve(message.result)
+  }
+  if (message.method === 'ui/notifications/tool-result') render(message.params?.structuredContent)
+  if (message.method === 'ui/notifications/host-context-changed' && message.params?.theme) setTheme(message.params.theme)
+  if (message.method === 'ui/resource-teardown' && message.id !== undefined) post({ id: message.id, result: {} })
 })
+// ChatGPT also exposes window.openai; use it when present.
+setTheme(window.openai?.theme); render(window.openai?.toolOutput)
+window.addEventListener('openai:set_globals', (event) => { setTheme(window.openai?.theme); render(event.detail?.globals?.toolOutput ?? window.openai?.toolOutput) })
+request('ui/initialize', { appInfo: { name: 'eat-yeet-recipe-cards', version: '2.0.0' }, appCapabilities: { availableDisplayModes: ['inline'] }, protocolVersion: '2026-01-26' })
+  .then((result) => { if (result?.hostContext?.theme) setTheme(result.hostContext.theme); notify('ui/notifications/initialized', {}); size() })
+  .catch(() => {})
 </script></body></html>`
