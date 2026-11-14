@@ -26,7 +26,7 @@ Everything OpenAI's plugin review asks for, ready to paste. Submit at https://pl
 | Brand color | Plum (`--color-ink`) |
 | Countries | Everywhere ChatGPT apps are available |
 
-Tools a reviewer account sees: `search_recipes`, `get_recipe`, `list_categories`, `list_remix_recipes`, `get_remix_recipe`, `preview_remix`, `list_remixes`, `get_remix`, `create_remix`, `save_remix`, `duplicate_remix`, `restore_remix_revision`, `delete_remix`, `undelete_remix`, `get_ratings`, `rate_recipe`, `delete_rating`, `reply_to_review`, `delete_reply`. Recipe writing (`create_recipe` and the rest) is registered only for the site owner and is out of scope for review. Every tool sets `readOnlyHint`, `destructiveHint` and `openWorldHint`.
+Tools a reviewer account sees: `search_recipes`, `get_recipe`, `list_categories`, `list_remix_recipes`, `get_remix_recipe`, `preview_remix`, `list_remixes`, `get_remix`, `create_remix`, `save_remix`, `duplicate_remix`, `restore_remix_revision`, `delete_remix`, `undelete_remix`, `delete_remix_forever`, `get_ratings`, `rate_recipe`, `delete_rating`, `reply_to_review`, `delete_reply`. Recipe writing (`create_recipe` and the rest) is registered only for the site owner and is out of scope for review. Every tool sets `readOnlyHint`, `destructiveHint` and `openWorldHint`.
 
 ## Reviewer credentials (dashboard form, not the ZIP)
 
@@ -35,13 +35,15 @@ Tools a reviewer account sees: `search_recipes`, `get_recipe`, `list_categories`
 
 ## Positive test cases (5)
 
+Run them in order: P3 and P4 write, and P5 removes what they wrote, so the cases can be repeated on the same account.
+
 | # | Prompt | Expected |
 |---|---|---|
-| P1 | "Find me a pizza dough recipe on Eat / Yeet." | `search_recipes` finds New York–Style Pizza and links https://eatyeet.com/recipes/new-york-style-pizza. |
-| P2 | "Show me the full Pollo Asado recipe." | `get_recipe` returns the ingredients (marinade and chicken sections) and steps; the reply summarizes them and links the page. |
+| P1 | "Find me a pizza dough recipe on Eat / Yeet." | `search_recipes` finds New York–Style Pizza, shows the site's own photo (`photo.url`) and links https://eatyeet.com/recipes/new-york-style-pizza. |
+| P2 | "Show me the full Pollo Asado recipe." | `get_recipe` returns the ingredients (marinade and chicken sections), steps and the site's photo; the reply summarizes them and links the page. |
 | P3 | "Rate the brown butter chocolate chunk cookies 5 stars and say they were perfect." | `rate_recipe` saves a 5-star rating with the review; `get_ratings` shows it as the reviewer's own. |
 | P4 | "Make my pizza dough 70% hydration for 4 pizzas and save it as Reviewer pizza." | `get_remix_recipe` → `preview_remix` (valid) → `create_remix`; the reply links the bake sheet at `/remix/new-york-style-pizza/<id>/bake`. |
-| P5 | "Show my remixes, then delete Reviewer pizza." | `list_remixes` lists it; `delete_remix` moves it to Recently deleted (it can be restored for 30 days). |
+| P5 | "Clean up: delete my cookie rating, then delete Reviewer pizza for good." | `delete_rating` removes the P3 review; `list_remixes` finds Reviewer pizza, `delete_remix` moves it to Recently deleted and `delete_remix_forever` removes it with its History. The account is back where it started. |
 
 ## Negative test cases (3)
 

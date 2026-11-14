@@ -71,6 +71,10 @@ const all = await call('search_recipes')
 assert.ok(all.total >= 10)
 const pollo = await call('get_recipe', { slug: 'pollo-asado' })
 assert.equal(pollo.source, 'git')
+// Chat clients can only show absolute URLs; without one they substitute web images.
+assert.match(pollo.photo?.url ?? '', /^https?:\/\//, 'get_recipe returns an absolute photo URL')
+assert.equal((await fetch(pollo.photo.url)).status, 200, 'recipe photo loads')
+assert.ok(all.recipes.every((r) => /^https?:\/\//.test(r.photo?.url ?? '')), 'every search result has a photo')
 assert.ok((await call('list_categories')).facets.courses.includes('mains'))
 
 step('style guide: tool and prompt, with live examples')
@@ -150,6 +154,8 @@ const saved = (await call('save_remix', { id: remix.id, baseRevision: remix.revi
 assert.equal(saved.name, `MCP test ${slug} renamed`)
 assert.match(await refused('save_remix', { id: remix.id, baseRevision: remix.revision, name: 'x', state: start.defaultState }), /changed since/)
 await call('delete_remix', { id: remix.id })
+await call('delete_remix_forever', { id: remix.id })
+assert.ok(!(await call('list_remixes')).remixes.some((r) => r.id === remix.id), 'gone for good')
 
 step('delete')
 await call('delete_recipe', { slug })

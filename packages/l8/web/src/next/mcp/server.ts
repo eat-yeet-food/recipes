@@ -9,10 +9,10 @@ import {
 } from '@eat-yeet/l4-content-cms/trial'
 import {
   createKitchenFormula, deleteKitchenFormula, duplicateKitchenFormula, listKitchenFormulas, readKitchenFormula,
-  restoreKitchenRevision, saveKitchenFormula, undeleteKitchenFormula, type KitchenFailure,
+  purgeKitchenFormula, restoreKitchenRevision, saveKitchenFormula, undeleteKitchenFormula, type KitchenFailure,
 } from '@eat-yeet/l4-content-cms/kitchen'
 import { deleteRecipeRating, deleteRecipeReply, recipeRatings, replyToRecipeRating, saveRecipeRating } from '@eat-yeet/l4-content-cms/ratings'
-import { cms, runtimeSettings, siteData } from '../cms'
+import { cms, publicMedia, runtimeSettings, siteData } from '../cms'
 import { appRemixIndex, appRemixRecipe, appRemixResolve } from '../app-api'
 import { refreshPublicCaches } from './freshness'
 import { ImageError, imageFromBase64, imageFromUrl, imageRef, importStockPhoto, searchStockPhotos, stockProviders } from './images'
@@ -117,6 +117,15 @@ function author(source: Record<string, unknown>) {
 }
 
 const trialFailure = (failure: TrialFailure) => fail(failure.message)
+/** The site's own photo of a recipe as an absolute URL chat clients can show (never a web image). */
+async function recipePhotos() {
+  const media = await publicMedia()
+  return (image: unknown, title: string) => {
+    const m = typeof image === 'string' && image ? media['/images/' + image] : undefined
+    return m ? { url: url(m.url), width: m.width, height: m.height, alt: m.alt || title } : undefined
+  }
+}
+
 const trialSummary = (recipe: TrialRecipe) => ({ slug: recipe.slug, title: recipe.title, status: recipe.status, revision: recipe.revision, url: recipeUrl(recipe.slug), updatedAt: recipe.updatedAt })
 
 async function published(change: string, recipe: TrialRecipe) {
@@ -136,10 +145,12 @@ const kitchenMessage: Record<KitchenFailure['error'], string> = {
 }
 
 export function createMcpServer(member: McpMember) {
-  const server = new McpServer({ name: 'eat-yeet', title: 'Eat / Yeet', version: '1.0.0' }, {
+  const server = new McpServer({ name: 'eat-yeet', title: 'Eat / Yeet', version: '1.0.0', websiteUrl: url('/'),
+    icons: [{ src: url('/icon-512.png'), mimeType: 'image/png', sizes: ['512x512'] }, { src: url('/donut-icon.svg'), mimeType: 'image/svg+xml', sizes: ['any'] }] }, {
     instructions: [
       'Eat / Yeet (eatyeet.com) is a recipe site: practical, tested recipes for home cooks, plus Remix, a calculator for changing dough formulas.',
       'Use search_recipes and get_recipe to find and read recipes; link people to the recipe url.',
+      'Each recipe has a `photo` (the site’s own picture of the dish). Show that photo.url when you show a picture of a recipe; never substitute an image from the web.',
       'Signed-in people can rate and review recipes and save their own Remix formulas (list_remix_recipes → get_remix_recipe → preview_remix → create_remix).',
       ...(member.owner ? [
         'You are working for the site owner, who can also write recipes. Recipes created here are "trial" recipes: public when published, marked Trial, never indexed by search engines. Git-authored recipes are read-only.',
@@ -184,23 +195,24 @@ export function createMcpServer(member: McpMember) {
     const { recipes } = await contentServices(await cms()).recipes.listRecipes()
     const words = query.toLowerCase().split(/\s+/).filter(Boolean)
     const matches = (recipes as any[]).filter((r) => (!category || r.category === category) && words.every((w) => String(r.searchText ?? r.title).toLowerCase().includes(w)))
+    const photo = await recipePhotos()
     const results = matches.slice(0, limit).map((r) => ({ slug: r.slug, title: r.title, description: stripTags(r.description), category: r.category,
-      totalMinutes: r.totalMinutes, yield: `${r.yieldAmount ?? ''} ${r.yieldUnit ?? ''}`.trim(), source: r.trial ? 'trial' : 'git', url: recipeUrl(r.slug) }))
+      totalMinutes: r.totalMinutes, yield: `${r.yieldAmount ?? ''} ${r.yieldUnit ?? ''}`.trim(), source: r.trial ? 'trial' : 'git', url: recipeUrl(r.slug), photo: photo(r.image, r.title) }))
     return ok(`${matches.length} recipe${matches.length === 1 ? '' : 's'}${query ? ` match “${query}”` : ''}.`, { total: matches.length, recipes: results })
   })
 
   server.registerTool('get_recipe', {
     title: 'Get a recipe',
-    description: 'A recipe in full. Trial recipes also return their editable source and revision (pass both to update_recipe). Git recipes are read-only.',
+    description: 'A recipe in full, with `photo`: the site’s own picture of the dish to show (absolute URL). Trial recipes also return their editable source and revision (pass both to update_recipe). Git recipes are read-only.',
     inputSchema: { slug: z.string() },
     annotations: read,
   }, async ({ slug }) => {
     const payload = await cms()
     const trial = await readTrialRecipe(payload, slug)
-    if (trial) return ok(`Trial recipe “${trial.title}” (${trial.status}, revision ${trial.revision}).`, { source: 'trial', ...trialSummary(trial), recipe: trial.source })
+    if (trial) return ok(`Trial recipe “${trial.title}” (${trial.status}, revision ${trial.revision}).`, { source: 'trial', ...trialSummary(trial), photo: (await recipePhotos())(trial.source?.image, trial.title), recipe: trial.source })
     const { recipe } = await contentServices(payload).recipes.getRecipe({ slug })
     if (!recipe) return fail(`No recipe "${slug}". Use search_recipes to find slugs.`)
-    return ok(`Git recipe “${recipe.title}” (read-only).`, { source: 'git', url: recipeUrl(slug), recipe })
+    return ok(`Git recipe “${recipe.title}” (read-only).`, { source: 'git', url: recipeUrl(slug), photo: (await recipePhotos())((recipe as any).image, recipe.title), recipe })
   })
 
   server.registerTool('list_categories', {
@@ -396,7 +408,7 @@ export function createMcpServer(member: McpMember) {
     const result = await run()
     if ('error' in result) return fail(kitchenMessage[result.error as KitchenFailure['error']])
     const formula = result.ok
-    return ok(summary(formula), { remix: { ...formula, url: formula.id ? formulaUrl(formula.recipeSlug, formula.id) : undefined } })
+    return ok(summary(formula), { remix: { ...formula, url: formula.id && formula.recipeSlug ? formulaUrl(formula.recipeSlug, formula.id) : undefined } })
   }
 
   server.registerTool('get_remix', {
@@ -433,6 +445,12 @@ export function createMcpServer(member: McpMember) {
     title: 'Undelete a remix', description: 'Bring back a recently deleted remix.',
     inputSchema: { id: z.string() }, annotations: write,
   }, ({ id }) => kitchen((f) => `Restored “${f.name}”.`, async () => undeleteKitchenFormula(await cms(), member.id, id)))
+
+  server.registerTool('delete_remix_forever', {
+    title: 'Delete a remix forever',
+    description: 'Permanently remove a remix that is already in Recently deleted, with its History. It can’t be brought back. Only when the person asks to delete it for good.',
+    inputSchema: { id: z.string() }, annotations: destroy,
+  }, ({ id }) => kitchen(() => 'Deleted for good, with its History.', async () => purgeKitchenFormula(await cms(), member.id, id)))
 
   // --- Reviews ------------------------------------------------------------------------
 

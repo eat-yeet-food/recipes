@@ -16,7 +16,7 @@ Decision record: [`docs/changes/mcp-connector/decision.md`](changes/mcp-connecto
 | Owner: style | `get_style_guide` (also the `write_recipe` prompt), `list_trial_recipes` |
 | Owner: trial recipes | `create_recipe` (`publish: true` posts it), `update_recipe` (`expectedRevision`), `publish_recipe`, `unpublish_recipe`, `delete_recipe` |
 | Owner: images | `upload_image` (the owner's photo: a ChatGPT chat file via `openai/fileParams`, an https URL or base64), `search_stock_photos` / `import_stock_photo` (Pexels, then Unsplash; fallback only) |
-| Remix (everyone, their own) | `list_remix_recipes`, `get_remix_recipe`, `preview_remix`, `list_remixes`, `get_remix`, `create_remix`, `save_remix`, `duplicate_remix`, `restore_remix_revision`, `delete_remix`, `undelete_remix` |
+| Remix (everyone, their own) | `list_remix_recipes`, `get_remix_recipe`, `preview_remix`, `list_remixes`, `get_remix`, `create_remix`, `save_remix`, `duplicate_remix`, `restore_remix_revision`, `delete_remix`, `undelete_remix`, `delete_remix_forever` |
 | Reviews (everyone, Git recipes) | `get_ratings`, `rate_recipe`, `delete_rating`, `reply_to_review`, `delete_reply` |
 
 Style: the server instructions send models to `get_style_guide` first. It describes the published recipes' voice and format (amounts first in grams, bold step leads, ingredient ids and `uses`, the description as the only intro, stories after the card) and includes two published recipes, read live, as examples.
