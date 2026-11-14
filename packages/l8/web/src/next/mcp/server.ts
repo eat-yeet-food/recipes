@@ -130,12 +130,14 @@ async function recipePhotos() {
 const duration = (minutes: unknown) => {
   const m = Number(minutes)
   if (!Number.isFinite(m) || m <= 0) return ''
+  if (m >= 1440) { const d = Math.round(m / 1440); return `${d} day${d === 1 ? '' : 's'}` }
   const h = Math.floor(m / 60), rest = Math.round(m % 60)
   return h ? `${h} hr${rest ? ` ${rest} min` : ''}` : `${rest} min`
 }
 /** The widget's view of a recipe (summary or view model): no HTML, absolute URLs only. */
 const recipeCard = (r: any, photo: ReturnType<Awaited<ReturnType<typeof recipePhotos>>>): RecipeCard => {
-  const made = `${r.yieldAmount ?? ''} ${r.yieldUnit ?? ''}`.trim()
+  // "3 × 16-inch pizzas" when the unit starts with a number, else "4 servings".
+  const made = `${r.yieldAmount ?? ''}${/^\d/.test(String(r.yieldUnit ?? '')) ? ' ×' : ''} ${r.yieldUnit ?? ''}`.trim()
   const time = r.totalLabel || duration(r.totalMinutes)
   return { title: String(r.title), description: stripTags(r.description), url: recipeUrl(r.slug), trial: !!r.trial || undefined,
     meta: [made && `Makes ${made}`, time].filter(Boolean).join(' · '), ...(photo ? { photo } : {}) }

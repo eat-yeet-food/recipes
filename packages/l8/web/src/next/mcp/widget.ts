@@ -8,7 +8,7 @@ import 'server-only'
  * textContent, and opens recipes through the host. The URI is a cache key:
  * change the version when the markup changes.
  */
-export const RECIPE_WIDGET_URI = 'ui://eat-yeet/recipe-cards-v2.html'
+export const RECIPE_WIDGET_URI = 'ui://eat-yeet/recipe-cards-v3.html'
 export const RECIPE_WIDGET_MIME = 'text/html;profile=mcp-app'
 
 export type RecipeCard = { title: string; description: string; url: string; meta: string; trial?: boolean; photo?: { url: string; alt: string; width?: number; height?: number } }
@@ -32,7 +32,7 @@ html, body { margin: 0; background: transparent; color: var(--ink); font: 15px/1
 .badge { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; background: var(--ink); color: var(--card); border-radius: 999px; padding: 2px 8px; margin-right: 6px; vertical-align: 1px; }
 .go { align-self: flex-start; margin-top: 8px; font-weight: 700; font-size: 14px; background: var(--ink); color: var(--card); border-radius: 999px; padding: 7px 14px; }
 .hero { flex-direction: column; gap: 0; }
-.hero .thumb { flex: none; width: 100%; aspect-ratio: 16 / 9; min-height: 0; }
+.hero .thumb { flex: none; width: 100%; aspect-ratio: 2 / 1; min-height: 0; }
 .hero .body { padding: 16px 18px 18px; }
 .hero .title { font-size: 26px; }
 .hero .desc { -webkit-line-clamp: 4; font-size: 16px; }
