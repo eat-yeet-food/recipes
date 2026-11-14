@@ -46,3 +46,7 @@ pnpm test:mcp [origin]             # every tool against a running local server (
 ```
 
 Stock photos are optional: without keys, `search_stock_photos` says so and `upload_image` still works. Unsplash's API guidelines prefer hotlinking and visible credit; the site rehosts and keeps the credit with the image (`trial_media.credit`). Prefer Pexels until credits are shown on the page.
+
+## Recipe cards in ChatGPT
+
+`search_recipes` and `get_recipe` link an MCP Apps widget (`ui://eat-yeet/recipe-cards-v1.html`, `packages/l8/web/src/next/mcp/widget.ts`) through `_meta.ui.resourceUri` and ChatGPT's `openai/outputTemplate`. It renders the tools' `cards` (title, plain description, yield and time, the site's own photo as an absolute URL) so ChatGPT shows our photos instead of web image search results. Its CSP allows only the site and media origins. Bump the URI version when the markup changes, then use **Refresh tools** on the app in ChatGPT settings.

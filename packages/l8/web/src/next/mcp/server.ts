@@ -18,6 +18,7 @@ import { refreshPublicCaches } from './freshness'
 import { ImageError, imageFromBase64, imageFromUrl, imageRef, importStockPhoto, searchStockPhotos, stockProviders } from './images'
 import type { McpMember } from './oauth'
 import { STYLE_GUIDE, styleExamples } from './style-guide'
+import { RECIPE_WIDGET_HTML, RECIPE_WIDGET_MIME, RECIPE_WIDGET_URI, type RecipeCard } from './widget'
 
 /**
  * The Eat / Yeet MCP tools. Every signed-in member can read recipes, rate and
@@ -126,6 +127,25 @@ async function recipePhotos() {
   }
 }
 
+const duration = (minutes: unknown) => {
+  const m = Number(minutes)
+  if (!Number.isFinite(m) || m <= 0) return ''
+  const h = Math.floor(m / 60), rest = Math.round(m % 60)
+  return h ? `${h} hr${rest ? ` ${rest} min` : ''}` : `${rest} min`
+}
+/** The widget's view of a recipe (summary or view model): no HTML, absolute URLs only. */
+const recipeCard = (r: any, photo: ReturnType<Awaited<ReturnType<typeof recipePhotos>>>): RecipeCard => {
+  const made = `${r.yieldAmount ?? ''} ${r.yieldUnit ?? ''}`.trim()
+  const time = r.totalLabel || duration(r.totalMinutes)
+  return { title: String(r.title), description: stripTags(r.description), url: recipeUrl(r.slug), trial: !!r.trial || undefined,
+    meta: [made && `Makes ${made}`, time].filter(Boolean).join(' · '), ...(photo ? { photo } : {}) }
+}
+/** Links a read tool to the recipe card widget (MCP Apps key plus ChatGPT's alias). */
+const cardTool = (invoking: string, invoked: string) => ({
+  ui: { resourceUri: RECIPE_WIDGET_URI }, 'openai/outputTemplate': RECIPE_WIDGET_URI,
+  'openai/toolInvocation/invoking': invoking, 'openai/toolInvocation/invoked': invoked,
+})
+
 const trialSummary = (recipe: TrialRecipe) => ({ slug: recipe.slug, title: recipe.title, status: recipe.status, revision: recipe.revision, url: recipeUrl(recipe.slug), updatedAt: recipe.updatedAt })
 
 async function published(change: string, recipe: TrialRecipe) {
@@ -150,7 +170,7 @@ export function createMcpServer(member: McpMember) {
     instructions: [
       'Eat / Yeet (eatyeet.com) is a recipe site: practical, tested recipes for home cooks, plus Remix, a calculator for changing dough formulas.',
       'Use search_recipes and get_recipe to find and read recipes; link people to the recipe url.',
-      'Each recipe has a `photo` (the site’s own picture of the dish). Show that photo.url when you show a picture of a recipe; never substitute an image from the web.',
+      'search_recipes and get_recipe show recipe cards with the site’s own photos. Don’t add images from the web or redraw the cards; summarize or answer around them.',
       'Signed-in people can rate and review recipes and save their own Remix formulas (list_remix_recipes → get_remix_recipe → preview_remix → create_remix).',
       ...(member.owner ? [
         'You are working for the site owner, who can also write recipes. Recipes created here are "trial" recipes: public when published, marked Trial, never indexed by search engines. Git-authored recipes are read-only.',
@@ -166,6 +186,16 @@ export function createMcpServer(member: McpMember) {
   // Recipe writing and photos are the owner's alone: other members' servers never register these tools.
   const ownerTool = (member.owner ? server.registerTool.bind(server) : () => undefined) as typeof server.registerTool
   const ownerPrompt = (member.owner ? server.registerPrompt.bind(server) : () => undefined) as typeof server.registerPrompt
+
+  const { origin, mediaOrigin } = runtimeSettings()
+  const domains = [...new Set([origin, mediaOrigin].filter(Boolean))]
+  server.registerResource('recipe-cards', RECIPE_WIDGET_URI, { title: 'Eat / Yeet recipe cards', mimeType: RECIPE_WIDGET_MIME }, async () => ({
+    contents: [{ uri: RECIPE_WIDGET_URI, mimeType: RECIPE_WIDGET_MIME, text: RECIPE_WIDGET_HTML, _meta: {
+      ui: { prefersBorder: false, domain: origin, csp: { connectDomains: [], resourceDomains: domains } },
+      'openai/widgetCSP': { connect_domains: [], resource_domains: domains, redirect_domains: [origin] },
+      'openai/widgetDescription': 'Shows the matching Eat / Yeet recipes as cards with the site’s own photos, yield and time; each opens the recipe on eatyeet.com. Don’t repeat the cards; add only what helps.',
+    } }],
+  }))
 
   // --- Discover -------------------------------------------------------------------
 
@@ -191,6 +221,7 @@ export function createMcpServer(member: McpMember) {
     description: 'Search every published recipe (Git and trial) by words in the title, description, ingredients and steps. Empty query lists all.',
     inputSchema: { query: z.string().default(''), category: z.enum(['savory', 'sweet']).optional(), limit: z.number().int().min(1).max(100).default(25) },
     annotations: read,
+    _meta: cardTool('Searching Eat / Yeet…', 'Found recipes'),
   }, async ({ query, category, limit }) => {
     const { recipes } = await contentServices(await cms()).recipes.listRecipes()
     const words = query.toLowerCase().split(/\s+/).filter(Boolean)
@@ -198,7 +229,8 @@ export function createMcpServer(member: McpMember) {
     const photo = await recipePhotos()
     const results = matches.slice(0, limit).map((r) => ({ slug: r.slug, title: r.title, description: stripTags(r.description), category: r.category,
       totalMinutes: r.totalMinutes, yield: `${r.yieldAmount ?? ''} ${r.yieldUnit ?? ''}`.trim(), source: r.trial ? 'trial' : 'git', url: recipeUrl(r.slug), photo: photo(r.image, r.title) }))
-    return ok(`${matches.length} recipe${matches.length === 1 ? '' : 's'}${query ? ` match “${query}”` : ''}.`, { total: matches.length, recipes: results })
+    const cards = matches.slice(0, 6).map((r) => recipeCard(r, photo(r.image, r.title)))
+    return ok(`${matches.length} recipe${matches.length === 1 ? '' : 's'}${query ? ` match “${query}”` : ''}.`, { total: matches.length, recipes: results, cards })
   })
 
   server.registerTool('get_recipe', {
@@ -206,13 +238,17 @@ export function createMcpServer(member: McpMember) {
     description: 'A recipe in full, with `photo`: the site’s own picture of the dish to show (absolute URL). Trial recipes also return their editable source and revision (pass both to update_recipe). Git recipes are read-only.',
     inputSchema: { slug: z.string() },
     annotations: read,
+    _meta: cardTool('Opening the recipe…', 'Opened the recipe'),
   }, async ({ slug }) => {
     const payload = await cms()
+    const photos = await recipePhotos()
     const trial = await readTrialRecipe(payload, slug)
-    if (trial) return ok(`Trial recipe “${trial.title}” (${trial.status}, revision ${trial.revision}).`, { source: 'trial', ...trialSummary(trial), photo: (await recipePhotos())(trial.source?.image, trial.title), recipe: trial.source })
+    if (trial) return ok(`Trial recipe “${trial.title}” (${trial.status}, revision ${trial.revision}).`, { source: 'trial', ...trialSummary(trial), photo: photos(trial.source?.image, trial.title),
+      cards: [recipeCard({ ...trial.content, slug: trial.slug, trial: true }, photos(trial.source?.image, trial.title))], recipe: trial.source })
     const { recipe } = await contentServices(payload).recipes.getRecipe({ slug })
     if (!recipe) return fail(`No recipe "${slug}". Use search_recipes to find slugs.`)
-    return ok(`Git recipe “${recipe.title}” (read-only).`, { source: 'git', url: recipeUrl(slug), photo: (await recipePhotos())((recipe as any).image, recipe.title), recipe })
+    return ok(`Git recipe “${recipe.title}” (read-only).`, { source: 'git', url: recipeUrl(slug), photo: photos((recipe as any).image, recipe.title),
+      cards: [recipeCard(recipe, photos((recipe as any).image, recipe.title))], recipe })
   })
 
   server.registerTool('list_categories', {

@@ -75,6 +75,18 @@ assert.equal(pollo.source, 'git')
 assert.match(pollo.photo?.url ?? '', /^https?:\/\//, 'get_recipe returns an absolute photo URL')
 assert.equal((await fetch(pollo.photo.url)).status, 200, 'recipe photo loads')
 assert.ok(all.recipes.every((r) => /^https?:\/\//.test(r.photo?.url ?? '')), 'every search result has a photo')
+// The recipe card widget: linked from both read tools, served as an MCP Apps resource, fed by `cards`.
+const widgetUri = tools.find((t) => t.name === 'get_recipe')._meta?.ui?.resourceUri
+assert.ok(widgetUri?.startsWith('ui://'), 'get_recipe links the card widget')
+assert.equal(tools.find((t) => t.name === 'search_recipes')._meta?.['openai/outputTemplate'], widgetUri)
+const widget = (await mcp.readResource({ uri: widgetUri })).contents[0]
+assert.equal(widget.mimeType, 'text/html;profile=mcp-app')
+assert.match(widget.text, /ui\/notifications\/tool-result/)
+assert.ok(widget._meta.ui.csp.resourceDomains.length, 'widget CSP allows the photo host')
+assert.equal(pollo.cards.length, 1)
+assert.equal(pollo.cards[0].photo.url, pollo.photo.url)
+assert.ok(!/</.test(pollo.cards[0].description), 'card text has no HTML')
+assert.ok(all.cards.length > 0 && all.cards.length <= 6)
 assert.ok((await call('list_categories')).facets.courses.includes('mains'))
 
 step('style guide: tool and prompt, with live examples')
